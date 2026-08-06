@@ -1,0 +1,22 @@
+---
+description: Règles du projet Awura Beauty
+alwaysApply: true
+---
+
+# Projet Awura Beauty
+
+- Stack : Next.js (App Router) + TypeScript + Tailwind + Supabase.
+- Ne jamais coder une couleur en hexadécimal en dur dans un composant :
+  toujours utiliser les tokens Tailwind (bg-primary, text-accent, bg-background-alt...).
+- Le site doit fonctionner en mode clair ET sombre partout, sans exception.
+- Chaque fonctionnalité (diagnostic, blog, boutique, panier, compte client)
+  est un module autonome dans /features, avec ses propres composants,
+  hooks et appels Supabase. Pas de dépendances croisées entre modules.
+- Tous les accès à Supabase, Stripe, PayPal, l'API La Poste et Mondial Relay
+  passent par des fonctions dans /lib/connectors, jamais d'appel direct depuis un composant.
+- Composants réutilisables (boutons, cartes, inputs) dans /components/ui.
+- Toujours prévoir les textes traduisibles via i18next (jamais de texte
+  en dur destiné à l'utilisateur final dans un composant, passer par t("clé")).
+- Respecter l'esthétique de la maquette : typographie serif pour les titres,
+  sans-serif pour le texte courant, beaucoup de blanc/espace, coins arrondis doux,
+  ambiance nature/premium.

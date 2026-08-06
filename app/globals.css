@@ -1,26 +1,45 @@
 @import "tailwindcss";
 
+/* Tokens light (défaut) — source de vérité hex */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --awura-background: #faf3ec;
+  --awura-background-alt: #f3e9df;
+  --awura-primary: #1b3323;
+  --awura-accent: #8c6f59;
+  --awura-accent-light: #b49076;
+  --awura-foreground: #1e1e1e;
+  --awura-muted: #6b6b63;
+  --awura-border: #e5dacc;
 }
 
+/* Tokens dark (next-themes, class strategy) */
+.dark {
+  --awura-background: #14201a;
+  --awura-background-alt: #1b2a22;
+  --awura-primary: #2e5a3e;
+  --awura-accent: #c79a78;
+  --awura-accent-light: #d9b79b;
+  --awura-foreground: #f3e9df;
+  --awura-muted: #a9a79e;
+  --awura-border: #2c3b32;
+}
+
+/* Mapping Tailwind → utilitaires bg-primary, text-accent, etc. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-background: var(--awura-background);
+  --color-background-alt: var(--awura-background-alt);
+  --color-primary: var(--awura-primary);
+  --color-accent: var(--awura-accent);
+  --color-accent-light: var(--awura-accent-light);
+  --color-foreground: var(--awura-foreground);
+  --color-muted: var(--awura-muted);
+  --color-border: var(--awura-border);
+  --font-sans: var(--font-awura-sans);
+  --font-serif: var(--font-awura-serif);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--awura-background);
+  color: var(--awura-foreground);
+  font-family: var(--font-awura-sans), ui-sans-serif, sans-serif;
 }

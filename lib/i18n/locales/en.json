@@ -1,0 +1,48 @@
+{
+  "announcement": {
+    "freeShipping": "Free shipping on orders over €80"
+  },
+  "nav": {
+    "home": "Home",
+    "shop": "Shop",
+    "diagnostic": "Hair Diagnostic",
+    "about": "About",
+    "blog": "Blog",
+    "contact": "Contact",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "header": {
+    "brand": "AWURA BEAUTY",
+    "account": "My account",
+    "search": "Search",
+    "cart": "Cart",
+    "themeToLight": "Switch to light mode",
+    "themeToDark": "Switch to dark mode",
+    "language": "Language",
+    "currency": "Currency"
+  },
+  "footer": {
+    "fastDelivery": {
+      "title": "Fast delivery",
+      "description": "Careful shipping within 24–48 business hours."
+    },
+    "securePayment": {
+      "title": "Secure payment",
+      "description": "Stripe, PayPal and protected checkout."
+    },
+    "naturalProducts": {
+      "title": "Natural products",
+      "description": "Premium formulas inspired by nature."
+    },
+    "customerService": {
+      "title": "Customer care",
+      "description": "A dedicated team, 6 days a week."
+    },
+    "rights": "All rights reserved."
+  },
+  "home": {
+    "title": "Awura Beauty",
+    "subtitle": "Natural, premium care to elevate your beauty."
+  }
+}
