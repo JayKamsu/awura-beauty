@@ -1,0 +1,18 @@
+{
+  "contact": {
+    "eyebrow": "Customer care",
+    "title": "Contact us",
+    "subtitle": "A question about your order, hair advice or a partnership? Write to us — we reply within 24–48h.",
+    "emailLabel": "Customer care email",
+    "hours": "Available 6 days a week — reply within 24 to 48 business hours.",
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "message": "Message"
+    },
+    "submit": "Send message",
+    "success": "Your email client will open with the message ready to send.",
+    "mailSubject": "Awura Beauty contact — {{name}}",
+    "anonymous": "Visitor"
+  }
+}

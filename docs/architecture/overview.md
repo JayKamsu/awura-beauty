@@ -1,28 +1,36 @@
-# Architecture
+# Architecture hexagonale Awura Beauty
 
-## Principes
+## Couches
 
-1. **App Router** : pages et layouts dans `app/`
-2. **Features isolées** : chaque domaine métier vit dans `features/<nom>/` (composants, hooks, appels via connectors)
-3. **Connecteurs** : tout accès externe passe par `lib/connectors/`
-4. **UI partagée** : `components/ui` pour boutons, inputs, etc.
-5. **Layout global** : `components/layout` (annonce, header, footer)
-6. **i18n** : aucun texte utilisateur en dur — toujours `t("clé")`
+| Couche | Rôle | Emplacement |
+| --- | --- | --- |
+| **Domain** | Types métier + règles pures | `lib/domain/` |
+| **Application** | Ports (interfaces) + composition | `lib/application/ports.ts`, `container.ts` |
+| **Infrastructure** | Adapters externes | `lib/infrastructure/` |
+| **Presentation** | UI + routes HTTP minces | `features/`, `app/`, `app/api/` |
 
-## Modules prévus
+```
+UI / API  →  container (ports)  →  adapters  →  Supabase / Stripe / PayPal / La Poste / MR / Firebase
+```
 
-| Feature | Rôle |
-| --- | --- |
-| `boutique` | Catalogue, fiches produit |
-| `diagnostic` | Diagnostic capillaire |
-| `blog` | Articles |
-| `panier` | Panier & checkout |
-| `compte` | Auth / espace client |
+## Adapters
 
-Pas de dépendances croisées entre modules : partager uniquement via `components/ui` et `lib/`.
+| Adapter | Path | Config |
+| --- | --- | --- |
+| Supabase | `infrastructure/supabase/` | plus tard / déjà partiel |
+| Stripe / PayPal | `infrastructure/payments/` | plus tard |
+| La Poste / Mondial Relay | `infrastructure/shipping/` | plus tard |
+| Firebase notifications | `infrastructure/notifications/firebase.ts` | stub prêt |
 
-## Providers
+Les adapters non configurés restent utilisables en mode fallback/démo/stub.
 
-- `ThemeProvider` — next-themes (`attribute="class"`)
-- `I18nProvider` — i18next
-- `PreferencesProvider` — langue + devise (localStorage)
+## Règles
+
+1. `app/api` et `features` appellent le **container** (ou le domaine pour les types), pas les SDK externes.
+2. Un nouvel intégrateur = nouvel adapter qui implémente un port existant (ou un port ajouté dans `ports.ts`).
+3. Pas de dépendances croisées entre `features/*`.
+4. Hygiène : étendre avant de créer ; ~8 fichiers max par dossier feuille ; supprimer les fichiers ponctuels.
+
+## Modules UI
+
+`features/shop`, `diagnostic`, `blog`, `cart`, `checkout`, `account`, `auth`, `admin`, `home`, `about`.

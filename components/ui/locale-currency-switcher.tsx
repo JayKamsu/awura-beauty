@@ -5,6 +5,7 @@ import { usePreferences } from "@/components/providers/preferences-provider";
 import {
   type AppCurrency,
   type AppLocale,
+  localeDisplayNames,
   supportedCurrencies,
   supportedLocales,
 } from "@/lib/i18n/config";
@@ -22,11 +23,11 @@ export function LocaleCurrencySwitcher() {
         id="awura-locale"
         value={locale}
         onChange={(event) => setLocale(event.target.value as AppLocale)}
-        className="cursor-pointer rounded-lg border border-border bg-background px-2 py-1.5 text-foreground outline-none transition hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        className="min-h-11 cursor-pointer rounded-lg border border-border bg-background px-2.5 py-2 text-foreground outline-none transition hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         {supportedLocales.map((code) => (
           <option key={code} value={code}>
-            {code.toUpperCase()}
+            {localeDisplayNames[code]}
           </option>
         ))}
       </select>
@@ -42,7 +43,7 @@ export function LocaleCurrencySwitcher() {
         id="awura-currency"
         value={currency}
         onChange={(event) => setCurrency(event.target.value as AppCurrency)}
-        className="cursor-pointer rounded-lg border border-border bg-background px-2 py-1.5 text-foreground outline-none transition hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        className="min-h-11 cursor-pointer rounded-lg border border-border bg-background px-2.5 py-2 text-foreground outline-none transition hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         {supportedCurrencies.map((code) => (
           <option key={code} value={code}>

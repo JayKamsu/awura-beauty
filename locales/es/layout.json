@@ -1,0 +1,51 @@
+{
+  "announcement": {
+    "freeShipping": "Envío gratis a partir de 80€ de compra"
+  },
+  "common": {
+    "close": "Cerrar"
+  },
+  "nav": {
+    "home": "Inicio",
+    "shop": "Tienda",
+    "diagnostic": "Diagnóstico Capilar",
+    "about": "Sobre nosotros",
+    "blog": "El Blog",
+    "contact": "Contacto",
+    "openMenu": "Abrir el menú",
+    "closeMenu": "Cerrar el menú",
+    "mainLabel": "Navegación principal",
+    "mobileLabel": "Navegación móvil"
+  },
+  "header": {
+    "brand": "AWURA BEAUTY",
+    "account": "Mi cuenta",
+    "search": "Buscar",
+    "cart": "Carrito",
+    "themeToLight": "Cambiar a modo claro",
+    "themeToDark": "Cambiar a modo oscuro",
+    "language": "Idioma",
+    "currency": "Moneda"
+  },
+  "footer": {
+    "brand": "Awura Beauty",
+    "fastDelivery": {
+      "title": "Entrega rápida",
+      "description": "Envío cuidado en 24–48 h laborables."
+    },
+    "securePayment": {
+      "title": "Pago seguro",
+      "description": "Stripe, PayPal y transacciones protegidas."
+    },
+    "naturalProducts": {
+      "title": "Productos naturales",
+      "description": "Fórmulas premium inspiradas en la naturaleza."
+    },
+    "customerService": {
+      "title": "Atención al cliente",
+      "description": "Un equipo a tu disposición, 6 días a la semana — Care@awurabeauty.com"
+    },
+    "contactLink": "Contactar",
+    "rights": "Todos los derechos reservados."
+  }
+}

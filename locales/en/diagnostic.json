@@ -1,0 +1,179 @@
+{
+  "diagnostic": {
+    "eyebrow": "Hair diagnostic",
+    "title": "Finally understand your crown",
+    "subtitle": "Answer a few questions: we'll build your hair profile and recommend 3 matching Awura products.",
+    "progress": "Step {{current}} / {{total}}",
+    "progressLabel": "Diagnostic progress",
+    "back": "Back",
+    "next": "Continue",
+    "seeResult": "See my result",
+    "loading": "Analyzing…",
+    "steps": {
+      "hairType": {
+        "title": "What is your hair type?",
+        "subtitle": "Pick the texture closest to your crown."
+      },
+      "scalp": {
+        "title": "How is your scalp?",
+        "subtitle": "Scalp condition guides daily care choices."
+      },
+      "habits": {
+        "title": "What are your habits?",
+        "subtitle": "Everyday habits shape what your fiber needs."
+      },
+      "goal": {
+        "title": "What is your main goal?",
+        "subtitle": "We'll prioritize a clear routine around your goal."
+      }
+    },
+    "options": {
+      "hairType": {
+        "4a": {
+          "label": "4A — Tight curls",
+          "hint": "Defined coils, soft volume"
+        },
+        "4b": {
+          "label": "4B — Coily",
+          "hint": "Z-angles, marked density"
+        },
+        "4c": {
+          "label": "4C — Very coily",
+          "hint": "Fine to dense fiber, strong shrinkage"
+        },
+        "3abc": {
+          "label": "3A–3C — Curly",
+          "hint": "Soft to tight curls"
+        },
+        "locs": {
+          "label": "Locs / Braids",
+          "hint": "Long-term protective styles"
+        }
+      },
+      "scalp": {
+        "dry": {
+          "label": "Dry",
+          "hint": "Tightness, lack of comfort"
+        },
+        "oily": {
+          "label": "Oily",
+          "hint": "Roots get shiny quickly"
+        },
+        "sensitive": {
+          "label": "Sensitive",
+          "hint": "Reactivity, needs gentleness"
+        },
+        "balanced": {
+          "label": "Balanced",
+          "hint": "Overall daily comfort"
+        },
+        "flaky": {
+          "label": "Flaky",
+          "hint": "Dandruff or visible dryness"
+        }
+      },
+      "habits": {
+        "frequent_wash": {
+          "label": "Frequent washing",
+          "hint": "Several times a week"
+        },
+        "heat_styling": {
+          "label": "Heat / blow-dry",
+          "hint": "Regular heat tools"
+        },
+        "protective": {
+          "label": "Protective styles",
+          "hint": "Braids, wigs, scarves"
+        },
+        "minimal": {
+          "label": "Minimal routine",
+          "hint": "Few products, simple steps"
+        },
+        "hard_detangle": {
+          "label": "Hard to detangle",
+          "hint": "Knots, breakage when combing"
+        }
+      },
+      "goal": {
+        "hydration": {
+          "label": "Hydration",
+          "hint": "Softness and fiber comfort"
+        },
+        "length": {
+          "label": "Length / growth",
+          "hint": "Support and keep growth"
+        },
+        "definition": {
+          "label": "Definition",
+          "hint": "Clean, drawn curls"
+        },
+        "repair": {
+          "label": "Repair",
+          "hint": "Tired fiber, damaged ends"
+        },
+        "volume": {
+          "label": "Volume",
+          "hint": "Density and body"
+        }
+      }
+    },
+    "profiles": {
+      "hydration": {
+        "title": "Deep hydration profile",
+        "summary": "Your crown needs a nutrition-rich routine. Prioritize butters and masks to restore fiber comfort."
+      },
+      "growth": {
+        "title": "Active growth profile",
+        "summary": "Your goal leans toward length. A fortifying lotion and regular scalp care will be your allies."
+      },
+      "repair": {
+        "title": "Intense repair profile",
+        "summary": "Your fiber needs repair. Focus on reconstructing care and sealed hydration to reduce breakage."
+      },
+      "detangle": {
+        "title": "Detangle & definition profile",
+        "summary": "Detangling and definition are central. A nourishing detangler will ease routines without stressing the fiber."
+      },
+      "balance": {
+        "title": "Everyday balance profile",
+        "summary": "Your crown thrives on a balanced routine: gentle cleanse, just-right hydration, and lasting fiber support."
+      }
+    },
+    "tags": {
+      "hydratation": "Hydration",
+      "pousse": "Growth",
+      "réparation": "Repair",
+      "démêlage": "Detangle",
+      "équilibre": "Balance",
+      "4a": "4A",
+      "4b": "4B",
+      "4c": "4C",
+      "3abc": "3A–3C",
+      "locs": "Locs",
+      "dry": "Dry scalp",
+      "oily": "Oily scalp",
+      "sensitive": "Sensitive scalp",
+      "balanced": "Balanced scalp",
+      "flaky": "Flaky",
+      "frequent_wash": "Frequent wash",
+      "heat_styling": "Heat",
+      "protective": "Protective",
+      "minimal": "Minimal",
+      "hard_detangle": "Detangle",
+      "hydration": "Hydration",
+      "length": "Length",
+      "definition": "Definition",
+      "repair": "Repair",
+      "volume": "Volume"
+    },
+    "result": {
+      "eyebrow": "Your result",
+      "productsTitle": "3 products recommended for you",
+      "savedLinked": "Diagnostic saved to your account.",
+      "savedAnonymous": "Diagnostic saved. Sign in to find it in your account.",
+      "saveFallback": "Result computed locally (Supabase unavailable for saving).",
+      "shopCta": "Browse the shop",
+      "restart": "Retake the diagnostic"
+    }
+  }
+}

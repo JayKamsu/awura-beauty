@@ -1,0 +1,136 @@
+{
+  "home": {
+    "hero": {
+      "titleBefore": "Tu ",
+      "titleAccent": "corona",
+      "titleAfter": " merece más que aproximaciones.",
+      "subtitle": "Un diagnóstico capilar personalizado para entender por fin lo que tu cabello realmente necesita.",
+      "ctaDiagnostic": "Reservar mi diagnóstico",
+      "ctaShop": "Descubrir nuestros productos",
+      "socialProof": "+2000 mujeres ya han transformado su corona con Awura Beauty.",
+      "imageAlt": "Retrato de una mujer con cabello natural"
+    },
+    "promises": {
+      "expertise": {
+        "title": "Experiencia y Escucha",
+        "description": "Cada corona es única. Cada consejo también."
+      },
+      "natural": {
+        "title": "Ingredientes Naturales",
+        "description": "Fórmulas puras, eficaces y respetuosas."
+      },
+      "results": {
+        "title": "Resultados Duraderos",
+        "description": "Un método pensado para resultados visibles."
+      },
+      "love": {
+        "title": "Amor y Autenticidad",
+        "description": "Una marca creada por amor a nuestro cabello."
+      }
+    },
+    "bestsellers": {
+      "title": "Nuestros Best-Sellers",
+      "subtitle": "Los esenciales Awura para realzar tu corona cada día.",
+      "seeAll": "Ver toda la tienda",
+      "newBadge": "Nuevo",
+      "openImage": "Ampliar la imagen de {{name}}",
+      "addToCart": "Añadir {{name}} al carrito",
+      "ingredientAlt": "Composición / ingredientes de {{name}}",
+      "lifestyleAlt": "Resultado en el cabello — {{name}}",
+      "products": {
+        "butter": {
+          "name": "Manteca Capilar",
+          "description": "Hidrata en profundidad las texturas secas."
+        },
+        "detangler": {
+          "name": "Desenredante nutritivo",
+          "description": "Desenreda con suavidad y nutre las texturas."
+        },
+        "mask": {
+          "name": "Mascarilla Capilar",
+          "description": "Repara y nutre intensamente la fibra."
+        },
+        "growth": {
+          "name": "Loción Activa Crecimiento",
+          "description": "Hidratante y fortificante para estimular el crecimiento."
+        },
+        "soap": {
+          "name": "Jabón sólido",
+          "description": "Limpia con suavidad, a base de ingredientes naturales."
+        }
+      }
+    },
+    "ingredients": {
+      "eyebrow": "Fórmulas naturales",
+      "title": "Ingredientes elegidos para tu corona",
+      "description": "Cada producto Awura va asociado a su composición: manteca de karité, coco, aceites vegetales y activos botánicos seleccionados por su eficacia.",
+      "pairAlt": "Ingredientes de {{name}}",
+      "pairLabel": "Producto {{number}} · composición"
+    },
+    "feature": {
+      "eyebrow": "Cuidado firma",
+      "title": "Loción Activa Crecimiento",
+      "description": "Hidratante y fortificante — una loción natural para estimular el crecimiento y fortalecer tu corona.",
+      "cta": "Descubrir la loción",
+      "imageAlt": "Cabello largo saludable con loción Awura"
+    },
+    "diagnostic": {
+      "title": "Diagnóstico Capilar Personalizado",
+      "subtitle": "Algunos datos para preparar un consejo realmente adaptado a tu corona.",
+      "submit": "Reservar mi diagnóstico",
+      "success": "¡Gracias! Te contactaremos pronto para confirmar tu cita.",
+      "fields": {
+        "firstName": "Nombre",
+        "lastName": "Apellido",
+        "email": "E-mail",
+        "phone": "Teléfono",
+        "hairType": "Tipo de cabello",
+        "concern": "Problema principal",
+        "goal": "Objetivo capilar",
+        "slot": "Franja deseada",
+        "selectPlaceholder": "Seleccionar…"
+      },
+      "options": {
+        "hairType": [
+          "4A — Rizos apretados",
+          "4B — Crespo",
+          "4C — Muy crespo",
+          "3A–3C — Rizado",
+          "Locs / Trenzas"
+        ],
+        "concern": [
+          "Sequedad",
+          "Rotura",
+          "Falta de densidad",
+          "Crecimiento lento",
+          "Cuero cabelludo sensible"
+        ],
+        "goal": [
+          "Hidratación",
+          "Largo",
+          "Definición",
+          "Reparación",
+          "Volumen"
+        ]
+      }
+    },
+    "testimonials": {
+      "title": "Ellas transformaron su corona",
+      "seeAll": "Ver todas las opiniones",
+      "items": {
+        "sarah": {
+          "name": "Sarah M.",
+          "quote": "Por fin una rutina que entiende de verdad mi cabello. Resultado visible en tres semanas."
+        },
+        "amina": {
+          "name": "Amina K.",
+          "quote": "El diagnóstico me abrió los ojos. Menos rotura, más brillo y una verdadera confianza."
+        },
+        "lea": {
+          "name": "Léa D.",
+          "quote": "Productos nobles, acompañamiento humano. Awura cambió mi relación con mi corona."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "home": {
+    "hero": {
+      "titleBefore": "Your ",
+      "titleAccent": "crown",
+      "titleAfter": " deserves better than guesswork.",
+      "subtitle": "A personalized hair diagnostic to finally understand what your hair truly needs.",
+      "ctaDiagnostic": "Book my diagnostic",
+      "ctaShop": "Discover our products",
+      "socialProof": "+2000 women have already transformed their crown with Awura Beauty.",
+      "imageAlt": "Portrait of a woman with natural hair"
+    },
+    "promises": {
+      "expertise": {
+        "title": "Expertise & Care",
+        "description": "Every crown is unique. So is every recommendation."
+      },
+      "natural": {
+        "title": "Natural Ingredients",
+        "description": "Pure, effective formulas that respect your hair."
+      },
+      "results": {
+        "title": "Lasting Results",
+        "description": "A method designed for visible, lasting change."
+      },
+      "love": {
+        "title": "Love & Authenticity",
+        "description": "A brand created out of love for our hair."
+      }
+    },
+    "bestsellers": {
+      "title": "Our Best-Sellers",
+      "subtitle": "Awura essentials loved for elevating your crown every day.",
+      "seeAll": "See the full shop",
+      "newBadge": "New",
+      "openImage": "Enlarge image of {{name}}",
+      "addToCart": "Add {{name}} to cart",
+      "ingredientAlt": "Composition / ingredients of {{name}}",
+      "lifestyleAlt": "Hair result — {{name}}",
+      "products": {
+        "butter": {
+          "name": "Hair Butter",
+          "description": "Deeply hydrates dry, textured hair."
+        },
+        "detangler": {
+          "name": "Nourishing Detangler",
+          "description": "Gently detangles and nourishes textured hair."
+        },
+        "mask": {
+          "name": "Hair Mask",
+          "description": "Intensely repairs and nourishes the hair fiber."
+        },
+        "growth": {
+          "name": "Active Growth Lotion",
+          "description": "Hydrating and fortifying to support hair growth."
+        },
+        "soap": {
+          "name": "Solid Soap",
+          "description": "Gentle cleanse with natural ingredients."
+        }
+      }
+    },
+    "ingredients": {
+      "eyebrow": "Natural formulas",
+      "title": "Ingredients chosen for your crown",
+      "description": "Each Awura product is paired with its composition: shea butter, coconut, plant oils and botanical actives selected for their efficacy.",
+      "pairAlt": "Ingredients of {{name}}",
+      "pairLabel": "Product {{number}} · composition"
+    },
+    "feature": {
+      "eyebrow": "Signature care",
+      "title": "Active Growth Lotion",
+      "description": "Hydrating and fortifying — a natural lotion to support growth and strengthen your crown.",
+      "cta": "Discover the lotion",
+      "imageAlt": "Healthy long hair with Awura lotion"
+    },
+    "diagnostic": {
+      "title": "Personalized Hair Diagnostic",
+      "subtitle": "A few details so we can prepare advice tailored to your crown.",
+      "submit": "Book my diagnostic",
+      "success": "Thank you! We'll get back to you shortly to confirm your slot.",
+      "fields": {
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "phone": "Phone",
+        "hairType": "Hair type",
+        "concern": "Main concern",
+        "goal": "Hair goal",
+        "slot": "Preferred slot",
+        "selectPlaceholder": "Select…"
+      },
+      "options": {
+        "hairType": [
+          "4A — Tight curls",
+          "4B — Coily",
+          "4C — Very coily",
+          "3A–3C — Curly",
+          "Locs / Braids"
+        ],
+        "concern": [
+          "Dryness",
+          "Breakage",
+          "Low density",
+          "Slow growth",
+          "Sensitive scalp"
+        ],
+        "goal": [
+          "Hydration",
+          "Length",
+          "Definition",
+          "Repair",
+          "Volume"
+        ]
+      }
+    },
+    "testimonials": {
+      "title": "They transformed their crown",
+      "seeAll": "See all reviews",
+      "items": {
+        "sarah": {
+          "name": "Sarah M.",
+          "quote": "Finally a routine that truly understands my hair. Visible results in three weeks."
+        },
+        "amina": {
+          "name": "Amina K.",
+          "quote": "The diagnostic opened my eyes. Less breakage, more shine, and real confidence."
+        },
+        "lea": {
+          "name": "Léa D.",
+          "quote": "Noble products, human guidance. Awura changed how I relate to my crown."
+        }
+      }
+    }
+  }
+}

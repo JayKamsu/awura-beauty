@@ -1,0 +1,36 @@
+{
+  "account": {
+    "title": "Mi cuenta",
+    "welcome": "Conectada como {{email}}",
+    "loading": "Cargando la cuenta…",
+    "loginRequired": "Inicia sesión para ver tus pedidos y el estado del envío.",
+    "logout": "Cerrar sesión",
+    "ordersTitle": "Historial de pedidos",
+    "ordersLoading": "Cargando pedidos…",
+    "noOrders": "Todavía no hay pedidos.",
+    "orderId": "Pedido n.º {{id}}",
+    "paymentStatus": "Pago",
+    "shippingStatus": "Envío",
+    "paymentMethod": "Método",
+    "status": {
+      "payment": {
+        "pending": "Pendiente",
+        "paid": "Pagado",
+        "processing": "En proceso",
+        "cancelled": "Cancelado",
+        "refunded": "Reembolsado"
+      },
+      "shipping": {
+        "preparing": "En preparación",
+        "shipped": "Enviado",
+        "in_transit": "En tránsito",
+        "delivered": "Entregado"
+      }
+    },
+    "carrier": "Transportista",
+    "trackingNumber": "Número de seguimiento",
+    "refreshTracking": "Actualizar seguimiento",
+    "trackingLoading": "Seguimiento…",
+    "openTracking": "Abrir seguimiento"
+  }
+}

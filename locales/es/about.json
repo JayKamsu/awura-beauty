@@ -1,0 +1,57 @@
+{
+  "about": {
+    "story": {
+      "eyebrow": "Nuestra historia",
+      "title": "Awura Beauty, nacida para honrar tu corona",
+      "paragraph1": "Awura Beauty nació de una evidencia sencilla: demasiadas mujeres con cabello texturizado todavía deben conformarse con consejos aproximados y fórmulas que no las entienden de verdad.",
+      "paragraph2": "La marca se creó para ofrecer otro camino — el de la escucha, los ingredientes nobles y un acompañamiento personalizado, para que cada corona reciba el respeto que merece.",
+      "paragraph3": "Del diagnóstico capilar a los cuidados diarios, Awura Beauty construye una experiencia completa: entender tu cabello, elegir los gestos adecuados y recuperar la confianza en tu belleza natural.",
+      "imageAlt": "Cabello texturizado realzado con un cuidado Awura Beauty"
+    },
+    "mission": {
+      "title": "Nuestra misión",
+      "subtitle": "Cuatro pilares que guían cada fórmula, cada consejo y cada intercambio contigo.",
+      "items": {
+        "expertise": {
+          "title": "Experiencia y Escucha",
+          "body": "Cada corona es única. Nos tomamos el tiempo de entender tu tipo de cabello, tu historial y tus objetivos, para ofrecerte consejos realmente adaptados — nunca soluciones genéricas."
+        },
+        "natural": {
+          "title": "Ingredientes Naturales",
+          "body": "Nuestras fórmulas se basan en activos botánicos elegidos por su eficacia: manteca de karité, coco, aceites vegetales y extractos seleccionados. Cuidados puros, respetuosos con la fibra y el cuero cabelludo."
+        },
+        "results": {
+          "title": "Resultados Duraderos",
+          "body": "No buscamos el efecto inmediato artificial. Nuestro método apunta a resultados visibles en el tiempo: hidratación, densidad, suavidad y vitalidad dentro de una rutina realista."
+        },
+        "love": {
+          "title": "Amor y Autenticidad",
+          "body": "Awura Beauty nació por amor a nuestro cabello. Autenticidad, orgullo y cuidado están en el corazón de la marca — para que te sientas vista, comprendida y celebrada."
+        }
+      }
+    },
+    "commitments": {
+      "title": "Nuestros compromisos",
+      "subtitle": "Lo que prometemos, más allá del frasco.",
+      "items": {
+        "naturality": {
+          "title": "Naturalidad",
+          "description": "Fórmulas inspiradas en la naturaleza, pensadas para respetar tu fibra y tu cuero cabelludo cada día."
+        },
+        "crueltyFree": {
+          "title": "Sin crueldad animal",
+          "description": "Nuestros productos no se testean en animales. Belleza responsable, sin compromisos éticos."
+        },
+        "artisanal": {
+          "title": "Fabricación artesanal",
+          "description": "Un enfoque cuidadoso y humano: lotes controlados y atención en cada etapa de la producción."
+        }
+      }
+    },
+    "cta": {
+      "title": "¿Lista para cuidar tu corona?",
+      "description": "Empieza con un diagnóstico capilar personalizado: te ayudamos a entender lo que tu cabello realmente necesita.",
+      "button": "Reservar mi diagnóstico"
+    }
+  }
+}

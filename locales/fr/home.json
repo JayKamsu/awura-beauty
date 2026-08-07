@@ -1,0 +1,136 @@
+{
+  "home": {
+    "hero": {
+      "titleBefore": "Ta ",
+      "titleAccent": "couronne",
+      "titleAfter": " mérite mieux que des approximations.",
+      "subtitle": "Un diagnostic capillaire personnalisé pour comprendre enfin ce dont tes cheveux ont réellement besoin.",
+      "ctaDiagnostic": "Réserver mon diagnostic",
+      "ctaShop": "Découvrir nos produits",
+      "socialProof": "+2000 femmes ont déjà transformé leur couronne avec Awura Beauty.",
+      "imageAlt": "Portrait d'une femme aux cheveux naturels"
+    },
+    "promises": {
+      "expertise": {
+        "title": "Expertise & Écoute",
+        "description": "Chaque couronne est unique. Chaque conseil aussi."
+      },
+      "natural": {
+        "title": "Ingrédients Naturels",
+        "description": "Des formules pures, efficaces et respectueuses."
+      },
+      "results": {
+        "title": "Résultats Durables",
+        "description": "Une méthode pensée pour des résultats visibles."
+      },
+      "love": {
+        "title": "Amour & Authenticité",
+        "description": "Une marque créée par amour pour nos cheveux."
+      }
+    },
+    "bestsellers": {
+      "title": "Nos Best-Sellers",
+      "subtitle": "Les essentiels Awura plébiscités pour sublimer ta couronne au quotidien.",
+      "seeAll": "Voir toute la boutique",
+      "newBadge": "Nouveau",
+      "openImage": "Agrandir l'image de {{name}}",
+      "addToCart": "Ajouter {{name}} au panier",
+      "ingredientAlt": "Composition / ingrédients de {{name}}",
+      "lifestyleAlt": "Résultat sur cheveux — {{name}}",
+      "products": {
+        "butter": {
+          "name": "Beurre Capillaire",
+          "description": "Hydrate en profondeur les textures sèches."
+        },
+        "detangler": {
+          "name": "Démêlant nourrissant",
+          "description": "Démêle en douceur et nourrit les textures."
+        },
+        "mask": {
+          "name": "Masque Capillaire",
+          "description": "Répare et nourrit intensément la fibre."
+        },
+        "growth": {
+          "name": "Lotion Active Repousse",
+          "description": "Hydratante et fortifiante pour stimuler la pousse."
+        },
+        "soap": {
+          "name": "Savon solide",
+          "description": "Nettoie en douceur, à base d'ingrédients naturels."
+        }
+      }
+    },
+    "ingredients": {
+      "eyebrow": "Formules naturelles",
+      "title": "Des ingrédients choisis pour ta couronne",
+      "description": "Chaque produit Awura est associé à sa composition : beurre de karité, coco, huiles végétales et actifs botaniques sélectionnés pour leur efficacité.",
+      "pairAlt": "Ingrédients du produit {{name}}",
+      "pairLabel": "Produit {{number}} · composition"
+    },
+    "feature": {
+      "eyebrow": "Soin signature",
+      "title": "Lotion Active Repousse",
+      "description": "Hydratante et fortifiante — une lotion naturelle pour stimuler la pousse et renforcer ta couronne.",
+      "cta": "Découvrir la lotion",
+      "imageAlt": "Cheveux longs en bonne santé avec lotion Awura"
+    },
+    "diagnostic": {
+      "title": "Diagnostic Capillaire Personnalisé",
+      "subtitle": "Quelques informations pour préparer un conseil vraiment adapté à ta couronne.",
+      "submit": "Réserver mon diagnostic",
+      "success": "Merci ! Nous te recontactons rapidement pour confirmer ton créneau.",
+      "fields": {
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "email": "E-mail",
+        "phone": "Téléphone",
+        "hairType": "Type de cheveux",
+        "concern": "Problématique principale",
+        "goal": "Objectif capillaire",
+        "slot": "Créneau souhaité",
+        "selectPlaceholder": "Sélectionner…"
+      },
+      "options": {
+        "hairType": [
+          "4A — Bouclés serrés",
+          "4B — Crépus",
+          "4C — Très crépus",
+          "3A–3C — Bouclés",
+          "Locs / Tresses"
+        ],
+        "concern": [
+          "Sécheresse",
+          "Casse",
+          "Manque de densité",
+          "Pousse lente",
+          "Cuir chevelu sensible"
+        ],
+        "goal": [
+          "Hydratation",
+          "Longueur",
+          "Définition",
+          "Réparation",
+          "Volume"
+        ]
+      }
+    },
+    "testimonials": {
+      "title": "Elles ont transformé leur couronne",
+      "seeAll": "Voir tous les avis",
+      "items": {
+        "sarah": {
+          "name": "Sarah M.",
+          "quote": "Enfin une routine qui comprend vraiment mes cheveux. Résultat visible en trois semaines."
+        },
+        "amina": {
+          "name": "Amina K.",
+          "quote": "Le diagnostic m'a ouvert les yeux. Plus de casse, plus de brillance, et une vraie confiance."
+        },
+        "lea": {
+          "name": "Léa D.",
+          "quote": "Des produits nobles, un accompagnement humain. Awura a changé mon rapport à ma couronne."
+        }
+      }
+    }
+  }
+}

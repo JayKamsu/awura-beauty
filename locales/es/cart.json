@@ -1,0 +1,11 @@
+{
+  "cart": {
+    "title": "Carrito",
+    "empty": "Tu carrito está vacío por ahora.",
+    "continueShopping": "Seguir comprando",
+    "quantity": "Cant.",
+    "remove": "Eliminar",
+    "subtotal": "Subtotal",
+    "checkout": "Finalizar compra"
+  }
+}

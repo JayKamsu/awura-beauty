@@ -16,7 +16,7 @@ export function ThemeToggle() {
   if (!mounted) {
     return (
       <span
-        className="inline-flex size-10 items-center justify-center rounded-xl"
+        className="inline-flex size-11 items-center justify-center rounded-xl"
         aria-hidden
       />
     );
@@ -28,7 +28,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="inline-flex size-10 items-center justify-center rounded-xl text-foreground transition hover:bg-background-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      className="inline-flex size-11 items-center justify-center rounded-xl text-foreground transition hover:bg-background-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       aria-label={isDark ? t("header.themeToLight") : t("header.themeToDark")}
     >
       {isDark ? (

@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import { BrandLogo } from "@/components/ui/brand-logo";
+import { CONTACT_EMAIL } from "@/lib/site";
 
 const FOOTER_BLOCKS = [
   {
@@ -41,7 +44,12 @@ export function Footer() {
 
   return (
     <footer className="mt-auto bg-primary text-background">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4 md:px-6">
+      <div className="mx-auto flex max-w-7xl flex-col items-start gap-8 px-4 pt-12 md:px-6">
+        <Link href="/" aria-label={t("header.brand")} className="inline-flex">
+          <BrandLogo tone="on-dark" className="h-16 w-auto sm:h-20" sizes="200px" />
+        </Link>
+      </div>
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4 md:px-6">
         {FOOTER_BLOCKS.map((block) => (
           <div key={block.key} className="space-y-3">
             <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-background/10 text-accent-light">
@@ -55,11 +63,27 @@ export function Footer() {
             <p className="text-sm leading-relaxed text-background/80">
               {t(`footer.${block.key}.description`)}
             </p>
+            {block.key === "customerService" ? (
+              <div className="space-y-1 text-sm">
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  className="block text-accent-light transition hover:text-background"
+                >
+                  {CONTACT_EMAIL}
+                </a>
+                <Link
+                  href="/contact"
+                  className="block text-background/80 underline-offset-4 hover:text-background hover:underline"
+                >
+                  {t("footer.contactLink")}
+                </Link>
+              </div>
+            ) : null}
           </div>
         ))}
       </div>
       <div className="border-t border-background/15 px-4 py-4 text-center text-xs text-background/70 md:px-6">
-        © {year} Awura Beauty — {t("footer.rights")}
+        © {year} {t("footer.brand")} — {t("footer.rights")}
       </div>
     </footer>
   );

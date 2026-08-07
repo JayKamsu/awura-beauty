@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" fill="none">
+  <path
+    d="M100 18c-6 10-14 18-24 24 12 2 22 8 28 18 6-10 16-16 28-18-10-6-18-14-24-24Z"
+    fill="currentColor"
+    opacity="0.9"
+  />
+  <path
+    d="M42 210 100 42l58 168h-28l-12-36H82l-12 36H42Zm52-62h22L105 92 94 148Z"
+    fill="currentColor"
+  />
+</svg>

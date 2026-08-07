@@ -1,0 +1,25 @@
+{
+  "blog": {
+    "title": "Le Blog",
+    "subtitle": "Conseils, routines et inspirations pour sublimer ta couronne au quotidien.",
+    "tutorialsTitle": "Tutoriels",
+    "tutorialsSubtitle": "Apprends à utiliser chaque soin Awura, geste après geste, avec le produit associé.",
+    "tabs": {
+      "articles": "Articles",
+      "tutorials": "Tutoriels"
+    },
+    "badgeArticle": "Article",
+    "badgeTutorial": "Tutoriel",
+    "readMore": "Lire la suite",
+    "emptyArticles": "Aucun article pour le moment.",
+    "emptyTutorials": "Aucun tutoriel pour le moment.",
+    "tipLabel": "Astuce",
+    "backBlog": "Retour au blog",
+    "backTutorials": "Retour aux tutoriels",
+    "relatedProduct": {
+      "eyebrow": "Produit associé",
+      "cta": "Voir la fiche produit",
+      "linkLabel": "Découvrir {{name}}"
+    }
+  }
+}

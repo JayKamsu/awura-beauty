@@ -1,0 +1,36 @@
+{
+  "account": {
+    "title": "My account",
+    "welcome": "Signed in as {{email}}",
+    "loading": "Loading account…",
+    "loginRequired": "Sign in to view your orders and shipping status.",
+    "logout": "Sign out",
+    "ordersTitle": "Order history",
+    "ordersLoading": "Loading orders…",
+    "noOrders": "No orders yet.",
+    "orderId": "Order #{{id}}",
+    "paymentStatus": "Payment",
+    "shippingStatus": "Shipping",
+    "paymentMethod": "Method",
+    "status": {
+      "payment": {
+        "pending": "Pending",
+        "paid": "Paid",
+        "processing": "Processing",
+        "cancelled": "Cancelled",
+        "refunded": "Refunded"
+      },
+      "shipping": {
+        "preparing": "Preparing",
+        "shipped": "Shipped",
+        "in_transit": "In transit",
+        "delivered": "Delivered"
+      }
+    },
+    "carrier": "Carrier",
+    "trackingNumber": "Tracking number",
+    "refreshTracking": "Refresh tracking",
+    "trackingLoading": "Tracking…",
+    "openTracking": "Open tracking"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "checkout": {
+    "title": "Pedido",
+    "emptyCart": "Añade productos antes de pagar.",
+    "shipping": "Envío",
+    "payment": "Pago",
+    "summary": "Resumen",
+    "email": "E-mail",
+    "fullName": "Nombre completo",
+    "address": "Dirección",
+    "city": "Ciudad",
+    "postalCode": "Código postal",
+    "country": "País",
+    "loading": "Preparando…",
+    "payStripe": "Pagar con Stripe",
+    "preparePaypal": "Continuar con PayPal",
+    "paymentError": "No se pudo iniciar el pago. Comprueba la configuración.",
+    "paypalNotConfigured": "PayPal no está configurado (falta NEXT_PUBLIC_PAYPAL_CLIENT_ID).",
+    "methods": {
+      "stripe": {
+        "label": "Stripe",
+        "hint": "Pago seguro con tarjeta"
+      },
+      "paypal": {
+        "label": "PayPal",
+        "hint": "Cuenta PayPal o tarjeta"
+      }
+    },
+    "successTitle": "Gracias por tu pedido",
+    "successBody": "Pedido {{id}} confirmado. Puedes seguir el envío en tu cuenta.",
+    "cancelTitle": "Pago cancelado",
+    "cancelBody": "No se realizó ningún cargo. Puedes intentarlo de nuevo cuando quieras.",
+    "viewAccount": "Ver mi cuenta",
+    "retry": "Volver al pedido",
+    "trackShipping": "Seguir mi envío"
+  }
+}

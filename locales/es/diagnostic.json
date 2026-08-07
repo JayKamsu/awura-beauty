@@ -1,0 +1,179 @@
+{
+  "diagnostic": {
+    "eyebrow": "Diagnóstico capilar",
+    "title": "Entiende por fin tu corona",
+    "subtitle": "Responde a algunas preguntas: construiremos tu perfil capilar y te recomendaremos 3 productos Awura adaptados.",
+    "progress": "Paso {{current}} / {{total}}",
+    "progressLabel": "Progreso del diagnóstico",
+    "back": "Atrás",
+    "next": "Continuar",
+    "seeResult": "Ver mi resultado",
+    "loading": "Analizando…",
+    "steps": {
+      "hairType": {
+        "title": "¿Cuál es tu tipo de cabello?",
+        "subtitle": "Elige la textura más cercana a tu corona."
+      },
+      "scalp": {
+        "title": "¿Cómo está tu cuero cabelludo?",
+        "subtitle": "El estado del cuero cabelludo orienta los cuidados diarios."
+      },
+      "habits": {
+        "title": "¿Cuáles son tus hábitos?",
+        "subtitle": "Los hábitos cotidianos definen lo que necesita tu fibra."
+      },
+      "goal": {
+        "title": "¿Cuál es tu objetivo principal?",
+        "subtitle": "Priorizaremos una rutina clara en torno a tu objetivo."
+      }
+    },
+    "options": {
+      "hairType": {
+        "4a": {
+          "label": "4A — Rizos apretados",
+          "hint": "Espirales definidas, volumen suave"
+        },
+        "4b": {
+          "label": "4B — Crespo",
+          "hint": "Ángulos en Z, densidad marcada"
+        },
+        "4c": {
+          "label": "4C — Muy crespo",
+          "hint": "Fibra fina a densa, fuerte encogimiento"
+        },
+        "3abc": {
+          "label": "3A–3C — Rizado",
+          "hint": "Rizos suaves a apretados"
+        },
+        "locs": {
+          "label": "Locs / Trenzas",
+          "hint": "Peinados protectores a largo plazo"
+        }
+      },
+      "scalp": {
+        "dry": {
+          "label": "Seco",
+          "hint": "Tirantez, falta de confort"
+        },
+        "oily": {
+          "label": "Graso",
+          "hint": "Las raíces brillan rápido"
+        },
+        "sensitive": {
+          "label": "Sensible",
+          "hint": "Reactividad, necesita suavidad"
+        },
+        "balanced": {
+          "label": "Equilibrado",
+          "hint": "Confort diario general"
+        },
+        "flaky": {
+          "label": "Con caspa",
+          "hint": "Caspa o sequedad visible"
+        }
+      },
+      "habits": {
+        "frequent_wash": {
+          "label": "Lavados frecuentes",
+          "hint": "Varias veces por semana"
+        },
+        "heat_styling": {
+          "label": "Calor / secador",
+          "hint": "Herramientas de calor regulares"
+        },
+        "protective": {
+          "label": "Peinados protectores",
+          "hint": "Trenzas, pelucas, pañuelos"
+        },
+        "minimal": {
+          "label": "Rutina mínima",
+          "hint": "Pocos productos, gestos simples"
+        },
+        "hard_detangle": {
+          "label": "Difícil de desenredar",
+          "hint": "Nudos, rotura al peinar"
+        }
+      },
+      "goal": {
+        "hydration": {
+          "label": "Hidratación",
+          "hint": "Suavidad y confort de la fibra"
+        },
+        "length": {
+          "label": "Largo / crecimiento",
+          "hint": "Apoyar y conservar el crecimiento"
+        },
+        "definition": {
+          "label": "Definición",
+          "hint": "Rizos limpios y marcados"
+        },
+        "repair": {
+          "label": "Reparación",
+          "hint": "Fibra cansada, puntas dañadas"
+        },
+        "volume": {
+          "label": "Volumen",
+          "hint": "Densidad y cuerpo"
+        }
+      }
+    },
+    "profiles": {
+      "hydration": {
+        "title": "Perfil hidratación profunda",
+        "summary": "Tu corona necesita una rutina rica en nutrición. Prioriza mantecas y mascarillas para recuperar el confort de la fibra."
+      },
+      "growth": {
+        "title": "Perfil crecimiento activo",
+        "summary": "Tu objetivo apunta al largo. Una loción fortificante y el cuidado regular del cuero cabelludo serán tus aliados."
+      },
+      "repair": {
+        "title": "Perfil reparación intensa",
+        "summary": "Tu fibra necesita reparación. Apuesta por cuidados reconstructores e hidratación sellada para reducir la rotura."
+      },
+      "detangle": {
+        "title": "Perfil desenredado y definición",
+        "summary": "El desenredado y la definición son centrales. Un desenredante nutritivo facilitará las rutinas sin estresar la fibra."
+      },
+      "balance": {
+        "title": "Perfil equilibrio diario",
+        "summary": "Tu corona prospera con una rutina equilibrada: limpieza suave, hidratación justa y apoyo duradero de la fibra."
+      }
+    },
+    "tags": {
+      "hydratation": "Hidratación",
+      "pousse": "Crecimiento",
+      "réparation": "Reparación",
+      "démêlage": "Desenredado",
+      "équilibre": "Equilibrio",
+      "4a": "4A",
+      "4b": "4B",
+      "4c": "4C",
+      "3abc": "3A–3C",
+      "locs": "Locs",
+      "dry": "Cuero cabelludo seco",
+      "oily": "Cuero cabelludo graso",
+      "sensitive": "Cuero cabelludo sensible",
+      "balanced": "Cuero cabelludo equilibrado",
+      "flaky": "Con caspa",
+      "frequent_wash": "Lavado frecuente",
+      "heat_styling": "Calor",
+      "protective": "Protector",
+      "minimal": "Mínimo",
+      "hard_detangle": "Desenredar",
+      "hydration": "Hidratación",
+      "length": "Largo",
+      "definition": "Definición",
+      "repair": "Reparación",
+      "volume": "Volumen"
+    },
+    "result": {
+      "eyebrow": "Tu resultado",
+      "productsTitle": "3 productos recomendados para ti",
+      "savedLinked": "Diagnóstico guardado en tu cuenta.",
+      "savedAnonymous": "Diagnóstico guardado. Inicia sesión para encontrarlo en tu cuenta.",
+      "saveFallback": "Resultado calculado en local (Supabase no disponible para guardar).",
+      "shopCta": "Ver la tienda",
+      "restart": "Repetir el diagnóstico"
+    }
+  }
+}

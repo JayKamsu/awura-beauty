@@ -1,0 +1,18 @@
+{
+  "contact": {
+    "eyebrow": "Service client",
+    "title": "Nous contacter",
+    "subtitle": "Une question sur ta commande, un conseil capillaire ou un partenariat ? Écris-nous, on te répond sous 24–48h.",
+    "emailLabel": "E-mail service client",
+    "hours": "Disponible 6j/7 — réponse sous 24 à 48 heures ouvrées.",
+    "fields": {
+      "name": "Nom",
+      "email": "E-mail",
+      "message": "Message"
+    },
+    "submit": "Envoyer le message",
+    "success": "Ton client e-mail va s'ouvrir avec le message prêt à envoyer.",
+    "mailSubject": "Contact Awura Beauty — {{name}}",
+    "anonymous": "Visiteur"
+  }
+}

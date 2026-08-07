@@ -1,0 +1,37 @@
+{
+  "checkout": {
+    "title": "Checkout",
+    "emptyCart": "Add products before checking out.",
+    "shipping": "Shipping",
+    "payment": "Payment",
+    "summary": "Summary",
+    "email": "Email",
+    "fullName": "Full name",
+    "address": "Address",
+    "city": "City",
+    "postalCode": "Postal code",
+    "country": "Country",
+    "loading": "Preparing…",
+    "payStripe": "Pay with Stripe",
+    "preparePaypal": "Continue with PayPal",
+    "paymentError": "Payment could not be started. Check configuration.",
+    "paypalNotConfigured": "PayPal is not configured (missing NEXT_PUBLIC_PAYPAL_CLIENT_ID).",
+    "methods": {
+      "stripe": {
+        "label": "Stripe",
+        "hint": "Secure card payment"
+      },
+      "paypal": {
+        "label": "PayPal",
+        "hint": "PayPal account or card"
+      }
+    },
+    "successTitle": "Thank you for your order",
+    "successBody": "Order {{id}} confirmed. You can track shipping status in your account.",
+    "cancelTitle": "Payment cancelled",
+    "cancelBody": "No charge was made. You can try again anytime.",
+    "viewAccount": "View my account",
+    "retry": "Back to checkout",
+    "trackShipping": "Track my shipment"
+  }
+}

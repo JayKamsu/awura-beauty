@@ -1,0 +1,25 @@
+{
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Tips, routines and inspiration to elevate your crown every day.",
+    "tutorialsTitle": "Tutorials",
+    "tutorialsSubtitle": "Learn how to use each Awura product, step by step, with the matching product page.",
+    "tabs": {
+      "articles": "Articles",
+      "tutorials": "Tutorials"
+    },
+    "badgeArticle": "Article",
+    "badgeTutorial": "Tutorial",
+    "readMore": "Read more",
+    "emptyArticles": "No articles yet.",
+    "emptyTutorials": "No tutorials yet.",
+    "tipLabel": "Tip",
+    "backBlog": "Back to blog",
+    "backTutorials": "Back to tutorials",
+    "relatedProduct": {
+      "eyebrow": "Related product",
+      "cta": "View product page",
+      "linkLabel": "Discover {{name}}"
+    }
+  }
+}

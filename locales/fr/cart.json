@@ -1,0 +1,11 @@
+{
+  "cart": {
+    "title": "Panier",
+    "empty": "Ton panier est vide pour le moment.",
+    "continueShopping": "Continuer mes achats",
+    "quantity": "Qté",
+    "remove": "Retirer",
+    "subtotal": "Sous-total",
+    "checkout": "Passer commande"
+  }
+}

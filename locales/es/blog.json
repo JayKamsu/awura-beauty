@@ -1,0 +1,25 @@
+{
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Consejos, rutinas e inspiración para realzar tu corona cada día.",
+    "tutorialsTitle": "Tutoriales",
+    "tutorialsSubtitle": "Aprende a usar cada producto Awura, paso a paso, con su ficha asociada.",
+    "tabs": {
+      "articles": "Artículos",
+      "tutorials": "Tutoriales"
+    },
+    "badgeArticle": "Artículo",
+    "badgeTutorial": "Tutorial",
+    "readMore": "Leer más",
+    "emptyArticles": "Todavía no hay artículos.",
+    "emptyTutorials": "Todavía no hay tutoriales.",
+    "tipLabel": "Consejo",
+    "backBlog": "Volver al blog",
+    "backTutorials": "Volver a los tutoriales",
+    "relatedProduct": {
+      "eyebrow": "Producto relacionado",
+      "cta": "Ver ficha del producto",
+      "linkLabel": "Descubrir {{name}}"
+    }
+  }
+}

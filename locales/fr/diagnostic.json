@@ -1,0 +1,179 @@
+{
+  "diagnostic": {
+    "eyebrow": "Diagnostic capillaire",
+    "title": "Comprendre enfin ta couronne",
+    "subtitle": "Réponds à quelques questions : on établit ton profil capillaire et on te recommande 3 soins Awura adaptés.",
+    "progress": "Étape {{current}} / {{total}}",
+    "progressLabel": "Progression du diagnostic",
+    "back": "Retour",
+    "next": "Continuer",
+    "seeResult": "Voir mon résultat",
+    "loading": "Analyse en cours…",
+    "steps": {
+      "hairType": {
+        "title": "Quel est ton type de cheveux ?",
+        "subtitle": "Choisis la texture qui se rapproche le plus de ta couronne."
+      },
+      "scalp": {
+        "title": "Comment va ton cuir chevelu ?",
+        "subtitle": "L'état du cuir chevelu guide le choix des soins quotidiens."
+      },
+      "habits": {
+        "title": "Quelles sont tes habitudes ?",
+        "subtitle": "Tes gestes du quotidien influencent les besoins de ta fibre."
+      },
+      "goal": {
+        "title": "Quel est ton objectif principal ?",
+        "subtitle": "On priorise une routine claire autour de ton but."
+      }
+    },
+    "options": {
+      "hairType": {
+        "4a": {
+          "label": "4A — Bouclés serrés",
+          "hint": "Ressorts définis, volume doux"
+        },
+        "4b": {
+          "label": "4B — Crépus",
+          "hint": "Angles en Z, densité marquée"
+        },
+        "4c": {
+          "label": "4C — Très crépus",
+          "hint": "Fibre fine à dense, shrinkage fort"
+        },
+        "3abc": {
+          "label": "3A–3C — Bouclés",
+          "hint": "Boucles souples à serrées"
+        },
+        "locs": {
+          "label": "Locs / Tresses",
+          "hint": "Styles protégés longue durée"
+        }
+      },
+      "scalp": {
+        "dry": {
+          "label": "Sec",
+          "hint": "Tiraillements, manque de confort"
+        },
+        "oily": {
+          "label": "Gras",
+          "hint": "Racines rapidement luisantes"
+        },
+        "sensitive": {
+          "label": "Sensible",
+          "hint": "Réactivité, besoin de douceur"
+        },
+        "balanced": {
+          "label": "Équilibré",
+          "hint": "Confort global au quotidien"
+        },
+        "flaky": {
+          "label": "Squames",
+          "hint": "Pellicules ou sécheresse visible"
+        }
+      },
+      "habits": {
+        "frequent_wash": {
+          "label": "Lavage fréquent",
+          "hint": "Plusieurs fois par semaine"
+        },
+        "heat_styling": {
+          "label": "Chaleur / brushing",
+          "hint": "Outils chauffants réguliers"
+        },
+        "protective": {
+          "label": "Styles protecteurs",
+          "hint": "Tresses, perruques, foulards"
+        },
+        "minimal": {
+          "label": "Routine minimale",
+          "hint": "Peu de produits, gestes simples"
+        },
+        "hard_detangle": {
+          "label": "Démêlage difficile",
+          "hint": "Nœuds, casse au peignage"
+        }
+      },
+      "goal": {
+        "hydration": {
+          "label": "Hydratation",
+          "hint": "Souplesse et confort de la fibre"
+        },
+        "length": {
+          "label": "Longueur / pousse",
+          "hint": "Stimuler et conserver la pousse"
+        },
+        "definition": {
+          "label": "Définition",
+          "hint": "Boucles nettes et dessinées"
+        },
+        "repair": {
+          "label": "Réparation",
+          "hint": "Fibre fatiguée, pointes abîmées"
+        },
+        "volume": {
+          "label": "Volume",
+          "hint": "Densité et corps à la chevelure"
+        }
+      }
+    },
+    "profiles": {
+      "hydration": {
+        "title": "Profil Hydratation profonde",
+        "summary": "Ta couronne a besoin d'une routine riche en nutrition. Priorise les beurres et masques pour restaurer le confort de la fibre."
+      },
+      "growth": {
+        "title": "Profil Pousse active",
+        "summary": "Ton objectif penche vers la longueur. Une lotion fortifiante et des soins réguliers du cuir chevelu seront tes alliés."
+      },
+      "repair": {
+        "title": "Profil Réparation intense",
+        "summary": "La fibre demande réparation. Mise sur des soins reconstructeurs et une hydratation scellée pour limiter la casse."
+      },
+      "detangle": {
+        "title": "Profil Démêlage & définition",
+        "summary": "Le démêlage et la définition sont au cœur de ton besoin. Un démêlant nourrissant facilitera tes routines sans stresser la fibre."
+      },
+      "balance": {
+        "title": "Profil Équilibre au quotidien",
+        "summary": "Ta couronne gagne à une routine équilibrée : nettoyer en douceur, hydrater juste ce qu'il faut, et soutenir la fibre durablement."
+      }
+    },
+    "tags": {
+      "hydratation": "Hydratation",
+      "pousse": "Pousse",
+      "réparation": "Réparation",
+      "démêlage": "Démêlage",
+      "équilibre": "Équilibre",
+      "4a": "4A",
+      "4b": "4B",
+      "4c": "4C",
+      "3abc": "3A–3C",
+      "locs": "Locs",
+      "dry": "Cuir sec",
+      "oily": "Cuir gras",
+      "sensitive": "Cuir sensible",
+      "balanced": "Cuir équilibré",
+      "flaky": "Squames",
+      "frequent_wash": "Lavage fréquent",
+      "heat_styling": "Chaleur",
+      "protective": "Protecteur",
+      "minimal": "Minimal",
+      "hard_detangle": "Démêlage",
+      "hydration": "Hydratation",
+      "length": "Longueur",
+      "definition": "Définition",
+      "repair": "Réparation",
+      "volume": "Volume"
+    },
+    "result": {
+      "eyebrow": "Ton résultat",
+      "productsTitle": "3 soins recommandés pour toi",
+      "savedLinked": "Diagnostic enregistré sur ton compte.",
+      "savedAnonymous": "Diagnostic enregistré. Connecte-toi pour le retrouver dans ton espace.",
+      "saveFallback": "Résultat calculé localement (Supabase non disponible pour la sauvegarde).",
+      "shopCta": "Voir la boutique",
+      "restart": "Refaire le diagnostic"
+    }
+  }
+}

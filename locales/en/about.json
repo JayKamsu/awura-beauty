@@ -1,0 +1,57 @@
+{
+  "about": {
+    "story": {
+      "eyebrow": "Our story",
+      "title": "Awura Beauty, born to honor your crown",
+      "paragraph1": "Awura Beauty was born from a simple truth: too many women with textured hair still have to settle for guesswork and formulas that don't truly understand them.",
+      "paragraph2": "The brand was created to offer another path — one of listening, noble ingredients and personalized guidance, so every crown is treated with the respect it deserves.",
+      "paragraph3": "From hair diagnostics to everyday care, Awura Beauty builds a complete experience: understand your hair, choose the right habits, and reclaim confidence in your natural beauty.",
+      "imageAlt": "Textured hair highlighted with Awura Beauty care"
+    },
+    "mission": {
+      "title": "Our mission",
+      "subtitle": "Four pillars that guide every formula, every recommendation and every conversation with you.",
+      "items": {
+        "expertise": {
+          "title": "Expertise & Care",
+          "body": "Every crown is unique. We take time to understand your hair type, history and goals, so we can offer truly tailored advice — never one-size-fits-all solutions."
+        },
+        "natural": {
+          "title": "Natural Ingredients",
+          "body": "Our formulas rely on botanical actives chosen for their efficacy: shea butter, coconut, plant oils and carefully selected extracts. Pure care that respects fiber and scalp."
+        },
+        "results": {
+          "title": "Lasting Results",
+          "body": "We don't chase artificial instant effects. Our method aims for visible, lasting results: hydration, density, softness and vitality built into a realistic routine."
+        },
+        "love": {
+          "title": "Love & Authenticity",
+          "body": "Awura Beauty was born out of love for our hair. Authenticity, pride and care sit at the heart of the brand — so you feel seen, understood and celebrated."
+        }
+      }
+    },
+    "commitments": {
+      "title": "Our commitments",
+      "subtitle": "What we promise, beyond the bottle.",
+      "items": {
+        "naturality": {
+          "title": "Natural care",
+          "description": "Nature-inspired formulas designed to respect your hair fiber and scalp every day."
+        },
+        "crueltyFree": {
+          "title": "Cruelty-free",
+          "description": "Our products are not tested on animals. Responsible beauty, with no compromise on ethics."
+        },
+        "artisanal": {
+          "title": "Artisanal making",
+          "description": "A careful, human approach: controlled batches and attention at every step of production."
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to care for your crown?",
+      "description": "Start with a personalized hair diagnostic: we'll help you understand what your hair truly needs.",
+      "button": "Book my diagnostic"
+    }
+  }
+}

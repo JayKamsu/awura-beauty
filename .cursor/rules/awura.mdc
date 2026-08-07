@@ -1,22 +1,36 @@
 ---
-description: Règles du projet Awura Beauty
+description: Architecture Awura — production first, hexagonale, SEO/GEO
 alwaysApply: true
 ---
 
-# Projet Awura Beauty
+# Projet Awura Beauty (production)
+
+Tout le code, la config et les décisions d’architecture ciblent la **production**.
+Le local n’est qu’un environnement de travail ; ne jamais laisser de bypass, secrets
+faibles ou fallback insecure « pour plus tard ».
 
 - Stack : Next.js (App Router) + TypeScript + Tailwind + Supabase.
+- Architecture **hexagonale** :
+  - Domain : `lib/domain`
+  - Ports + container : `lib/application`
+  - Adapters : `lib/infrastructure` (supabase, payments, shipping, notifications)
+  - UI : `features/*` + `app/*` (minces)
+- Appeler les services via `container` (`@/lib/application/container`), pas les SDK
+  directement. Types métier via `@/lib/domain`.
+- Admin : `requireAdminFromRequest` + `createAdminSupabaseClient` (service_role en prod).
+  Jamais `ADMIN_DEV_BYPASS=true` en production. Jamais faire confiance à `user_metadata.role`.
+- SEO / GEO : metadata, sitemap, robots, JSON-LD, `llms.txt` — voir skill `awura-seo-geo`.
 - Ne jamais coder une couleur en hexadécimal en dur dans un composant :
   toujours utiliser les tokens Tailwind (bg-primary, text-accent, bg-background-alt...).
-- Le site doit fonctionner en mode clair ET sombre partout, sans exception.
-- Chaque fonctionnalité (diagnostic, blog, boutique, panier, compte client)
-  est un module autonome dans /features, avec ses propres composants,
-  hooks et appels Supabase. Pas de dépendances croisées entre modules.
-- Tous les accès à Supabase, Stripe, PayPal, l'API La Poste et Mondial Relay
-  passent par des fonctions dans /lib/connectors, jamais d'appel direct depuis un composant.
-- Composants réutilisables (boutons, cartes, inputs) dans /components/ui.
-- Toujours prévoir les textes traduisibles via i18next (jamais de texte
-  en dur destiné à l'utilisateur final dans un composant, passer par t("clé")).
-- Respecter l'esthétique de la maquette : typographie serif pour les titres,
-  sans-serif pour le texte courant, beaucoup de blanc/espace, coins arrondis doux,
-  ambiance nature/premium.
+- Clair ET sombre partout.
+- Features isolées dans `/features` — pas de dépendances croisées.
+- UI réutilisable dans `/components/ui`.
+- i18n : toujours `t("clé")` pour le texte utilisateur.
+- Esthétique maquette : serif titres, sans-serif corps, beaucoup d’espace, coins doux.
+
+## Hygiène des fichiers
+
+- Étendre avant de créer.
+- ~8 fichiers max par dossier feuille ; sinon regrouper.
+- Fichiers / scripts ponctuels : supprimer dès qu’ils ont servi.
+- Pas de wrappers vides, pas d’orphelins, pas de doublons.

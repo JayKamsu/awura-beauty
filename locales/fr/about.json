@@ -1,0 +1,57 @@
+{
+  "about": {
+    "story": {
+      "eyebrow": "Notre histoire",
+      "title": "Awura Beauty, née pour honorer ta couronne",
+      "paragraph1": "Awura Beauty est née d'un constat simple : trop de femmes aux cheveux texturés doivent encore composer avec des conseils approximatifs et des formules qui ne les comprennent pas vraiment.",
+      "paragraph2": "La marque a été créée pour offrir une autre voie — celle de l'écoute, des ingrédients nobles et d'un accompagnement personnalisé, pour que chaque couronne soit traitée avec le respect qu'elle mérite.",
+      "paragraph3": "Du diagnostic capillaire aux soins du quotidien, Awura Beauty construit une expérience complète : comprendre tes cheveux, choisir les bons gestes, et retrouver confiance dans ta beauté naturelle.",
+      "imageAlt": "Cheveux texturés mis en valeur avec un soin Awura Beauty"
+    },
+    "mission": {
+      "title": "Notre mission",
+      "subtitle": "Quatre piliers qui guident chaque formule, chaque conseil et chaque échange avec toi.",
+      "items": {
+        "expertise": {
+          "title": "Expertise & Écoute",
+          "body": "Chaque couronne est unique. Nous prenons le temps de comprendre ton type de cheveux, ton historique et tes objectifs, pour te proposer des conseils vraiment adaptés — jamais de solutions toutes faites."
+        },
+        "natural": {
+          "title": "Ingrédients Naturels",
+          "body": "Nos formules s'appuient sur des actifs botaniques choisis pour leur efficacité : beurre de karité, coco, huiles végétales et extraits sélectionnés. Des soins purs, respectueux de la fibre et du cuir chevelu."
+        },
+        "results": {
+          "title": "Résultats Durables",
+          "body": "Nous ne cherchons pas l'effet immédiat artificiel. Notre méthode vise des résultats visibles dans la durée : hydratation, densité, douceur et vitalité qui s'inscrivent dans une routine réaliste."
+        },
+        "love": {
+          "title": "Amour & Authenticité",
+          "body": "Awura Beauty est née par amour pour nos cheveux. Authenticité, fierté et bienveillance sont au cœur de la marque — pour que tu te sentes vue, comprise et célébrée."
+        }
+      }
+    },
+    "commitments": {
+      "title": "Nos engagements",
+      "subtitle": "Ce que nous promettons, au-delà du flacon.",
+      "items": {
+        "naturality": {
+          "title": "Naturalité",
+          "description": "Des formules inspirées de la nature, pensées pour respecter ta fibre et ton cuir chevelu au quotidien."
+        },
+        "crueltyFree": {
+          "title": "Non testé sur les animaux",
+          "description": "Nos soins ne sont pas testés sur les animaux. Une beauté responsable, sans compromis sur l'éthique."
+        },
+        "artisanal": {
+          "title": "Fabrication artisanale",
+          "description": "Une approche soignée et humaine : des lots maîtrisés, une attention portée à chaque étape de fabrication."
+        }
+      }
+    },
+    "cta": {
+      "title": "Prête à prendre soin de ta couronne ?",
+      "description": "Commence par un diagnostic capillaire personnalisé : on t'aide à comprendre ce dont tes cheveux ont réellement besoin.",
+      "button": "Réserver mon diagnostic"
+    }
+  }
+}

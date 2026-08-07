@@ -1,0 +1,36 @@
+{
+  "account": {
+    "title": "Mon compte",
+    "welcome": "Connectée en tant que {{email}}",
+    "loading": "Chargement du compte…",
+    "loginRequired": "Connecte-toi pour voir tes commandes et le statut de livraison.",
+    "logout": "Se déconnecter",
+    "ordersTitle": "Historique des commandes",
+    "ordersLoading": "Chargement des commandes…",
+    "noOrders": "Aucune commande pour le moment.",
+    "orderId": "Commande #{{id}}",
+    "paymentStatus": "Paiement",
+    "shippingStatus": "Livraison",
+    "paymentMethod": "Mode",
+    "status": {
+      "payment": {
+        "pending": "En attente",
+        "paid": "Payée",
+        "processing": "En traitement",
+        "cancelled": "Annulée",
+        "refunded": "Remboursée"
+      },
+      "shipping": {
+        "preparing": "En préparation",
+        "shipped": "Expédiée",
+        "in_transit": "En transit",
+        "delivered": "Livrée"
+      }
+    },
+    "carrier": "Transporteur",
+    "trackingNumber": "N° de suivi",
+    "refreshTracking": "Actualiser le suivi",
+    "trackingLoading": "Suivi en cours…",
+    "openTracking": "Ouvrir le suivi"
+  }
+}

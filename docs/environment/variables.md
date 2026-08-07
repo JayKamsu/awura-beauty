@@ -48,10 +48,20 @@ Modèle versionné : `.env.example`.
 
 | Variable | Public | Description |
 | --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | oui | URL du site (`http://localhost:3000` en local) |
+| `NEXT_PUBLIC_SITE_URL` | oui | URL du site (`http://localhost:3000` en local, `https://awurabeauty.com` en prod) |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | oui | E-mail contact public |
+| `ADMIN_EMAILS` | non | Allowlist e-mails admin (serveur) |
+| `ADMIN_DEV_BYPASS` | non | `false` en production |
+
+## Déploiement (prod)
+
+1. Héberger l’app Next.js sur **Vercel** (recommandé) relié au repo GitHub.
+2. Domaine Hostinger **awurabeauty.com** → DNS vers Vercel.
+3. Dans Vercel → Settings → Environment Variables : copier depuis `.env.example` (valeurs prod), surtout `NEXT_PUBLIC_SITE_URL=https://awurabeauty.com` et `SUPABASE_SERVICE_ROLE_KEY`.
+4. `ADMIN_DEV_BYPASS=false` obligatoire en production.
 
 ## Sécurité
 
 - Ne jamais committer `.env.local`
 - Ne jamais exposer les secrets dans le client ou les logs
-- Accès API uniquement via `lib/connectors/`
+- Accès API uniquement via `lib/application/container` / adapters `lib/infrastructure`
