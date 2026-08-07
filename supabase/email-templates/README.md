@@ -1,22 +1,57 @@
-# Templates e-mail Supabase (Awura Beauty)
+# E-mails Auth Awura Beauty
 
-## 1. URLs de redirection (obligatoire)
+Templates HTML à coller dans Supabase → **Authentication → Emails → Templates**.
+Le SMTP custom doit être activé avant de pouvoir les modifier.
 
-Dashboard Supabase → **Authentication → URL Configuration** :
+## Fichiers & sujets
+
+| Template Supabase | Fichier | Subject |
+| --- | --- | --- |
+| Confirm sign up | `confirm-signup.html` | `Confirme ton e-mail — Awura Beauty` |
+| Invite user | `invite-user.html` | `Invitation Awura Beauty` |
+| Magic link | `magic-link.html` | `Ton lien de connexion — Awura Beauty` |
+| Change email address | `change-email.html` | `Confirme ton nouvel e-mail — Awura Beauty` |
+| Reset password | `reset-password.html` | `Réinitialise ton mot de passe — Awura Beauty` |
+| Reauthentication | `reauthentication.html` | `Ton code Awura Beauty` |
+
+Pour chaque template : ouvrir l’onglet → coller le **Subject** → coller le HTML du fichier → Save.
+
+## SMTP (obligatoire pour éditer)
+
+### Hostinger (recommandé si boîte `Care@…` déjà créée)
 
 | Champ | Valeur |
 | --- | --- |
-| Site URL | `https://awurabeauty.com` |
-| Redirect URLs | `https://awurabeauty.com/**` |
-| | `https://www.awurabeauty.com/**` |
-| | `http://localhost:3000/**` |
+| Sender email | `Care@awurabeauty.com` |
+| Sender name | `Awura Beauty` |
+| Host | `smtp.hostinger.com` |
+| Port | `465` |
+| Username | `Care@awurabeauty.com` |
+| Password | mot de passe de la boîte |
 
-## 2. Template confirmation
+### Alternative Resend
 
-Dashboard → **Authentication → Email Templates → Confirm signup** :
+| Champ | Valeur |
+| --- | --- |
+| Host | `smtp.resend.com` |
+| Port | `465` |
+| Username | `resend` |
+| Password | clé API Resend (`re_…`) |
+| Sender | adresse vérifiée sur le domaine |
 
-1. Subject : `Confirme ton e-mail — Awura Beauty`
-2. Body : coller le contenu de `confirm-signup.html`
-3. Enregistrer
+## URLs de redirection
 
-Le lien de confirmation redirige vers `/auth/callback` (défini dans le code via `emailRedirectTo`).
+**Authentication → URL Configuration** :
+
+- Site URL : `https://awurabeauty.com`
+- Redirect URLs :
+  - `https://awurabeauty.com/**`
+  - `https://www.awurabeauty.com/**`
+  - `http://localhost:3000/**`
+
+Le code envoie déjà `emailRedirectTo` vers `/auth/callback`.
+
+## Contournement temporaire (dev seulement)
+
+**Authentication → Providers → Email** → désactiver **Confirm email**.
+À ne **pas** laisser ainsi en production.

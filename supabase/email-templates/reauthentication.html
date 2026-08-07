@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Code de confirmation — Awura Beauty</title>
+  </head>
+  <body style="margin:0;padding:0;background:#faf3ec;font-family:Georgia,'Times New Roman',serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#faf3ec;padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border-radius:24px;overflow:hidden;border:1px solid #e5dacc;">
+            <tr>
+              <td style="background:#1b3323;padding:28px 32px;text-align:center;">
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#d9b79b;">
+                  Awura Beauty
+                </p>
+                <h1 style="margin:10px 0 0;font-size:28px;line-height:1.2;color:#faf3ec;font-weight:500;">
+                  Code de confirmation
+                </h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:32px;font-family:Arial,Helvetica,sans-serif;color:#1e1e1e;">
+                <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#6b6b63;">
+                  Pour sécuriser une action sensible sur ton compte Awura Beauty, saisis le code ci-dessous.
+                </p>
+                <p style="margin:0 0 28px;font-size:14px;line-height:1.5;color:#6b6b63;">
+                  Compte : <strong style="color:#1b3323;">{{ .Email }}</strong>
+                </p>
+                <p style="margin:0 0 8px;font-size:13px;line-height:1.5;color:#6b6b63;text-align:center;">
+                  Ton code à usage unique
+                </p>
+                <p style="margin:0 0 28px;font-family:Arial,Helvetica,sans-serif;font-size:32px;font-weight:700;letter-spacing:0.24em;text-align:center;color:#1b3323;">
+                  {{ .Token }}
+                </p>
+                <p style="margin:0;font-size:13px;line-height:1.5;color:#6b6b63;">
+                  Ce code expire rapidement. Si tu n’as pas initié cette action, ignore cet e-mail.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 32px 28px;background:#f3e9df;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:#6b6b63;text-align:center;">
+                Soins naturels pour cheveux texturés — Awura Beauty<br />
+                <a href="{{ .SiteURL }}" style="color:#8c6f59;text-decoration:none;">{{ .SiteURL }}</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { LocaleCurrencySwitcher } from "@/components/ui/locale-currency-switcher";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useAdminAccess } from "@/features/admin/hooks/use-admin-access";
+import { useAuth } from "@/features/auth/context/auth-provider";
 import { useCart } from "@/features/cart/context/cart-provider";
 
 const NAV_ITEMS = [
@@ -23,7 +25,14 @@ const iconClass =
 export function Header() {
   const { t } = useTranslation();
   const { itemCount } = useCart();
+  const { user, loading: authLoading } = useAuth();
+  const { isAdmin } = useAdminAccess();
   const [open, setOpen] = useState(false);
+
+  const accountInitial = user?.email?.trim().charAt(0).toUpperCase() ?? null;
+  const accountLabel = user
+    ? t("header.accountLoggedIn", { email: user.email ?? "" })
+    : t("header.account");
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
@@ -66,6 +75,14 @@ export function Header() {
               {t(item.key)}
             </Link>
           ))}
+          {isAdmin ? (
+            <Link
+              href="/admin"
+              className="text-sm font-medium text-accent transition hover:text-accent-light"
+            >
+              {t("header.admin")}
+            </Link>
+          ) : null}
         </nav>
 
         <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
@@ -75,9 +92,23 @@ export function Header() {
           <div className="hidden sm:block">
             <ThemeToggle />
           </div>
-          <HeaderIcon href="/compte" label={t("header.account")}>
-            <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2-7 4.5V20h14v-1.5C19 16 16 14 12 14Z" />
-          </HeaderIcon>
+          {!authLoading && user ? (
+            <Link
+              href="/compte"
+              aria-label={accountLabel}
+              title={accountLabel}
+              className={`relative ${iconClass} bg-accent/10 text-accent hover:bg-accent/15`}
+            >
+              <span className="font-serif text-sm font-semibold leading-none">
+                {accountInitial}
+              </span>
+              <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-accent" aria-hidden />
+            </Link>
+          ) : (
+            <HeaderIcon href="/compte" label={accountLabel}>
+              <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2-7 4.5V20h14v-1.5C19 16 16 14 12 14Z" />
+            </HeaderIcon>
+          )}
           <span className="hidden sm:inline-flex">
             <HeaderIcon href="/recherche" label={t("header.search")}>
               <circle cx="11" cy="11" r="6.5" />
@@ -115,6 +146,22 @@ export function Header() {
                 {t(item.key)}
               </Link>
             ))}
+            <Link
+              href="/compte"
+              className="flex min-h-11 items-center rounded-xl px-3 text-sm text-foreground transition hover:bg-background-alt"
+              onClick={() => setOpen(false)}
+            >
+              {user ? t("header.myProfile") : t("header.account")}
+            </Link>
+            {isAdmin ? (
+              <Link
+                href="/admin"
+                className="flex min-h-11 items-center rounded-xl px-3 text-sm font-medium text-accent transition hover:bg-background-alt"
+                onClick={() => setOpen(false)}
+              >
+                {t("header.admin")}
+              </Link>
+            ) : null}
             <Link
               href="/recherche"
               className="flex min-h-11 items-center rounded-xl px-3 text-sm text-foreground transition hover:bg-background-alt sm:hidden"

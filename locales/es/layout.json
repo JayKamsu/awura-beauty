@@ -20,6 +20,9 @@
   "header": {
     "brand": "AWURA BEAUTY",
     "account": "Mi cuenta",
+    "accountLoggedIn": "Mi perfil ({{email}})",
+    "myProfile": "Mi perfil",
+    "admin": "Admin",
     "search": "Buscar",
     "cart": "Carrito",
     "themeToLight": "Cambiar a modo claro",

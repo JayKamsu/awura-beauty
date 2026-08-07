@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { useAdminAccess } from "@/features/admin/hooks/use-admin-access";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { listMyOrders } from "@/lib/infrastructure/supabase/orders";
 import type { OrderRow, ShippingStatus } from "@/lib/infrastructure/supabase/order-types";
@@ -24,6 +25,7 @@ type TrackingPayload = {
 export function AccountPageContent() {
   const { t, i18n } = useTranslation();
   const { user, loading, logout, configured } = useAuth();
+  const { isAdmin } = useAdminAccess();
   const { currency } = usePreferences();
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
@@ -117,6 +119,34 @@ export function AccountPageContent() {
           {t("account.logout")}
         </Button>
       </div>
+
+      <section className="space-y-4 rounded-2xl border border-border p-6">
+        <h2 className="font-serif text-2xl text-primary">{t("account.profileTitle")}</h2>
+        <dl className="grid gap-3 text-sm sm:grid-cols-2">
+          <div>
+            <dt className="text-muted">{t("account.profileEmail")}</dt>
+            <dd className="mt-1 text-foreground">{user.email}</dd>
+          </div>
+          {user.created_at ? (
+            <div>
+              <dt className="text-muted">{t("account.profileSince")}</dt>
+              <dd className="mt-1 text-foreground">
+                {new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
+                  dateStyle: "long",
+                }).format(new Date(user.created_at))}
+              </dd>
+            </div>
+          ) : null}
+        </dl>
+        {isAdmin ? (
+          <div className="border-t border-border pt-4">
+            <p className="mb-3 text-sm text-muted">{t("account.adminHint")}</p>
+            <Button href="/admin" size="md">
+              {t("account.openAdmin")}
+            </Button>
+          </div>
+        ) : null}
+      </section>
 
       <section className="space-y-6">
         <h2 className="font-serif text-3xl text-primary">{t("account.ordersTitle")}</h2>
