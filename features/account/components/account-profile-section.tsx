@@ -126,7 +126,8 @@ export function AccountProfileSection({
               {pending ? t("account.profileSaving") : t("account.profileSave")}
             </Button>
           </div>
-          {profile?.updated_at ? (
+          {profile?.updated_at &&
+          (profile.first_name || profile.last_name || profile.phone) ? (
             <p className="text-xs text-muted sm:col-span-2">
               {t("account.profileUpdatedAt", {
                 date: new Intl.DateTimeFormat(undefined, {

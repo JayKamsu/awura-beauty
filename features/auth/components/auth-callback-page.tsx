@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { Button } from "@/components/ui/button";
+import { resolvePostLoginPath } from "@/features/auth/lib/resolve-post-login-path";
 import { exchangeAuthCode } from "@/lib/infrastructure/supabase/auth";
 
 export function AuthCallbackPage() {
@@ -23,7 +24,10 @@ export function AuthCallbackPage() {
       if (!code) {
         // Hash tokens (#access_token=) : Supabase client les lit via detectSessionInUrl
         window.setTimeout(() => {
-          if (!cancelled) router.replace(next);
+          if (cancelled) return;
+          void resolvePostLoginPath(next).then((destination) => {
+            if (!cancelled) router.replace(destination);
+          });
         }, 400);
         return;
       }
@@ -36,7 +40,9 @@ export function AuthCallbackPage() {
         return;
       }
 
-      router.replace(next);
+      const destination = await resolvePostLoginPath(next);
+      if (cancelled) return;
+      router.replace(destination);
       router.refresh();
     })();
 

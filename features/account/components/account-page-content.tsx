@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { AccountDiagnosticsSection } from "@/features/account/components/account-diagnostics-section";
 import { AccountOrdersSection } from "@/features/account/components/account-orders-section";
 import { AccountProfileSection } from "@/features/account/components/account-profile-section";
 import { AccountSecuritySection } from "@/features/account/components/account-security-section";
+import { useAdminAccess } from "@/features/admin/hooks/use-admin-access";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { listMyOrders } from "@/lib/infrastructure/supabase/orders";
 import type { OrderRow } from "@/lib/infrastructure/supabase/order-types";
@@ -21,12 +23,20 @@ const SECTIONS = [
 
 export function AccountPageContent() {
   const { t, i18n } = useTranslation();
+  const router = useRouter();
   const { user, loading, logout, configured } = useAuth();
+  const { isAdmin, loading: adminLoading } = useAdminAccess();
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
 
   useEffect(() => {
-    if (!user) {
+    if (!loading && !adminLoading && user && isAdmin) {
+      router.replace("/admin");
+    }
+  }, [adminLoading, isAdmin, loading, router, user]);
+
+  useEffect(() => {
+    if (!user || isAdmin) {
       setOrders([]);
       return;
     }
@@ -42,9 +52,9 @@ export function AccountPageContent() {
     return () => {
       mounted = false;
     };
-  }, [user]);
+  }, [isAdmin, user]);
 
-  if (loading) {
+  if (loading || (user && adminLoading) || (user && isAdmin)) {
     return (
       <main className="mx-auto flex w-full max-w-4xl flex-1 px-4 py-20 md:px-6">
         <p className="text-muted">{t("account.loading")}</p>

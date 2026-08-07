@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/context/auth-provider";
+import { resolvePostLoginPath } from "@/features/auth/lib/resolve-post-login-path";
 
 type AuthFormProps = {
   mode: "login" | "signup";
@@ -38,12 +39,14 @@ export function AuthForm({
 
     if (mode === "login") {
       const message = await signIn(email, password);
-      setPending(false);
       if (message) {
+        setPending(false);
         setError(message);
         return;
       }
-      router.push(redirectTo);
+      const destination = await resolvePostLoginPath(redirectTo);
+      setPending(false);
+      router.push(destination);
       router.refresh();
       return;
     }
