@@ -8,6 +8,7 @@ import { BrandLogo } from "@/components/ui/brand-logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { resolvePostLoginPath } from "@/features/auth/lib/resolve-post-login-path";
+import { useActionLock } from "@/lib/hooks/use-action-lock";
 
 type AuthFormProps = {
   mode: "login" | "signup";
@@ -23,50 +24,58 @@ export function AuthForm({
   showForgotPassword = true,
 }: AuthFormProps) {
   const { t } = useTranslation();
-  const { signIn, signUp, configured } = useAuth();
+  const { signIn, signUp, signInWithGoogle, configured } = useAuth();
   const router = useRouter();
+  const { locked, run } = useActionLock();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
   const [info, setInfo] = useState<string | null>(null);
 
-  const onSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    setError(null);
-    setInfo(null);
-    setPending(true);
+  const onGoogle = () => {
+    void run(async () => {
+      setError(null);
+      setInfo(null);
+      const message = await signInWithGoogle(redirectTo);
+      if (message) setError(message);
+      // Sinon redirection navigateur vers Google — le verrou se libère au finally
+    });
+  };
 
-    if (mode === "login") {
-      const message = await signIn(email, password);
-      if (message) {
-        setPending(false);
-        setError(message);
+  const onSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    void run(async () => {
+      setError(null);
+      setInfo(null);
+
+      if (mode === "login") {
+        const message = await signIn(email, password);
+        if (message) {
+          setError(message);
+          return;
+        }
+        const destination = await resolvePostLoginPath(redirectTo);
+        router.push(destination);
+        router.refresh();
         return;
       }
-      const destination = await resolvePostLoginPath(redirectTo);
-      setPending(false);
-      router.push(destination);
+
+      const result = await signUp(email, password);
+
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+
+      if (result.needsEmailConfirmation) {
+        setInfo(t("auth.signupConfirmEmail"));
+        return;
+      }
+
+      setInfo(t("auth.signupSuccess"));
+      router.push(redirectTo);
       router.refresh();
-      return;
-    }
-
-    const result = await signUp(email, password);
-    setPending(false);
-
-    if (result.error) {
-      setError(result.error);
-      return;
-    }
-
-    if (result.needsEmailConfirmation) {
-      setInfo(t("auth.signupConfirmEmail"));
-      return;
-    }
-
-    setInfo(t("auth.signupSuccess"));
-    router.push(redirectTo);
-    router.refresh();
+    });
   };
 
   const fieldClass =
@@ -82,6 +91,24 @@ export function AuthForm({
           {t("auth.notConfigured")}
         </p>
       ) : null}
+
+      <Button
+        type="button"
+        variant="primary-outline"
+        size="lg"
+        className="w-full"
+        pending={locked}
+        disabled={!configured}
+        onClick={onGoogle}
+      >
+        {locked ? t("auth.loading") : t("auth.continueWithGoogle")}
+      </Button>
+
+      <div className="flex items-center gap-3 text-xs text-muted">
+        <span className="h-px flex-1 bg-border" />
+        <span>{t("auth.orEmail")}</span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
 
       <label className="block space-y-1.5 text-sm">
         <span className="text-muted">{t("auth.email")}</span>
@@ -130,8 +157,14 @@ export function AuthForm({
         </p>
       ) : null}
 
-      <Button type="submit" size="lg" className="w-full" disabled={pending || !configured}>
-        {pending
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        pending={locked}
+        disabled={!configured}
+      >
+        {locked
           ? t("auth.loading")
           : mode === "login"
             ? t("auth.loginSubmit")

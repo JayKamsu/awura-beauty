@@ -4,29 +4,44 @@ import Image from "next/image";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Stars } from "@/components/ui/stars";
+import {
+  cmsOr,
+  usePageCmsFields,
+} from "@/features/cms/context/page-cms-context";
 import { HOME_IMAGES } from "@/features/home/data/content";
 
 export function HeroSection() {
   const { t } = useTranslation();
+  const cms = usePageCmsFields("hero");
+  const cmsTitle = cms.title?.trim();
+  const subtitle = cmsOr(cms, "subtitle", t("home.hero.subtitle"));
+  const heroImage = cmsOr(cms, "image_url", HOME_IMAGES.hero);
+  const ctaLabel = cms.cta_label?.trim();
 
   return (
     <section className="relative overflow-hidden bg-background">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 md:px-6 lg:grid-cols-2 lg:gap-12 lg:py-20">
         <div className="order-2 space-y-8 lg:order-1">
           <div className="space-y-5">
-            <h1 className="font-serif text-4xl leading-[1.1] text-primary sm:text-5xl lg:text-6xl">
-              {t("home.hero.titleBefore")}
-              <span className="text-accent">{t("home.hero.titleAccent")}</span>
-              {t("home.hero.titleAfter")}
-            </h1>
+            {cmsTitle ? (
+              <h1 className="font-serif text-4xl leading-[1.1] text-primary sm:text-5xl lg:text-6xl">
+                {cmsTitle}
+              </h1>
+            ) : (
+              <h1 className="font-serif text-4xl leading-[1.1] text-primary sm:text-5xl lg:text-6xl">
+                {t("home.hero.titleBefore")}
+                <span className="text-accent">{t("home.hero.titleAccent")}</span>
+                {t("home.hero.titleAfter")}
+              </h1>
+            )}
             <p className="max-w-xl text-base leading-relaxed text-primary/80 sm:text-lg">
-              {t("home.hero.subtitle")}
+              {subtitle}
             </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Button href="/diagnostic-capillaire" size="lg">
-              {t("home.hero.ctaDiagnostic")}
+              {ctaLabel || t("home.hero.ctaDiagnostic")}
             </Button>
             <Button href="/boutique" variant="accent-outline" size="lg">
               {t("home.hero.ctaShop")}
@@ -71,7 +86,7 @@ export function HeroSection() {
           </div>
           <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem]">
             <Image
-              src={HOME_IMAGES.hero}
+              src={heroImage}
               alt={t("home.hero.imageAlt")}
               fill
               className="object-cover object-top"

@@ -10,6 +10,7 @@ import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
 import { AdminSearchField } from "@/features/admin/components/admin-search-field";
 import { ConfirmDeleteButton } from "@/features/admin/components/confirm-delete-button";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
+import { useActionLock } from "@/lib/hooks/use-action-lock";
 import type { BlogPost, BlogPostKind } from "@/lib/infrastructure/supabase/blog-types";
 
 const emptyForm = {
@@ -30,6 +31,7 @@ const fieldClass =
 export function AdminContentPanel() {
   const { t } = useTranslation();
   const adminFetch = useAdminFetch();
+  const { locked: pending, run } = useActionLock();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [form, setForm] = useState(emptyForm);
   const [feedback, setFeedback] = useState<{
@@ -38,7 +40,6 @@ export function AdminContentPanel() {
   } | null>(null);
   const [query, setQuery] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [pending, setPending] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   const load = useCallback(async () => {
@@ -80,42 +81,42 @@ export function AdminContentPanel() {
     setForm((prev) => ({ ...prev, cover_image_url: json.url! }));
   };
 
-  const save = async () => {
-    setPending(true);
-    setFeedback(null);
-    const paragraphs = form.body
-      .split(/\n+/)
-      .map((text) => text.trim())
-      .filter(Boolean)
-      .map((text) => ({ type: "paragraph" as const, text }));
+  const save = () => {
+    void run(async () => {
+      setFeedback(null);
+      const paragraphs = form.body
+        .split(/\n+/)
+        .map((text) => text.trim())
+        .filter(Boolean)
+        .map((text) => ({ type: "paragraph" as const, text }));
 
-    const payload = {
-      ...(form.id ? { id: form.id } : {}),
-      slug: form.slug,
-      kind: form.kind,
-      title: form.title,
-      excerpt: form.excerpt,
-      cover_image_url: form.cover_image_url,
-      published_at: form.published_at,
-      product_slug: form.product_slug || null,
-      content: paragraphs,
-    };
+      const payload = {
+        ...(form.id ? { id: form.id } : {}),
+        slug: form.slug,
+        kind: form.kind,
+        title: form.title,
+        excerpt: form.excerpt,
+        cover_image_url: form.cover_image_url,
+        published_at: form.published_at,
+        product_slug: form.product_slug || null,
+        content: paragraphs,
+      };
 
-    const response = await adminFetch("/api/admin/posts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      const response = await adminFetch("/api/admin/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        setFeedback({ tone: "error", message: t("admin.saveError") });
+        return;
+      }
+
+      setFeedback({ tone: "success", message: t("admin.saveSuccess") });
+      setForm(emptyForm);
+      await load();
     });
-
-    setPending(false);
-    if (!response.ok) {
-      setFeedback({ tone: "error", message: t("admin.saveError") });
-      return;
-    }
-
-    setFeedback({ tone: "success", message: t("admin.saveSuccess") });
-    setForm(emptyForm);
-    await load();
   };
 
   const edit = (post: BlogPost) => {
@@ -248,7 +249,7 @@ export function AdminContentPanel() {
           />
         </label>
         <div className="flex flex-wrap gap-3 lg:col-span-2">
-          <Button type="button" disabled={pending} onClick={() => void save()}>
+          <Button type="button" pending={pending} onClick={save}>
             {pending
               ? t("admin.saving")
               : form.id

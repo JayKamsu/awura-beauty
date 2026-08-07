@@ -34,6 +34,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# secrets locaux (OAuth Google, etc.)
+.local/
+
 # vercel
 .vercel
 

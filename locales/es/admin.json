@@ -14,7 +14,11 @@
     "contentTitle": "Blog y tutoriales",
     "contentSubtitle": "Gestiona los artículos y tutoriales publicados en el sitio.",
     "pagesTitle": "Páginas y visualización",
-    "pagesSubtitle": "Elige qué secciones mostrar y en qué orden (inicio, sobre nosotros…).",
+    "pagesSubtitle": "Orden, visibilidad y contenido detallado de las secciones (inicio, sobre nosotros…).",
+    "notificationsTitle": "Notificaciones push",
+    "notificationsSubtitle": "Envía una notificación a todos los navegadores suscritos.",
+    "messagesTitle": "Mensajes de soporte",
+    "messagesSubtitle": "Responde a las conversaciones de clientes en tiempo real.",
     "customersTitle": "Clientes",
     "customersSubtitle": "Clientes a partir de los pedidos (e-mail, volumen, gasto acumulado).",
     "quickLinks": "Accesos rápidos",
@@ -91,14 +95,31 @@
       "orders": "Pedidos",
       "content": "Contenido",
       "pages": "Páginas",
-      "customers": "Clientes"
+      "customers": "Clientes",
+      "notifications": "Notificaciones",
+      "messages": "Mensajes"
     },
     "pages": {
-      "save": "Guardar visualización",
+      "save": "Guardar página",
       "moveUp": "Subir",
       "moveDown": "Bajar",
       "visible": "Visible",
       "hidden": "Oculto",
+      "editDetails": "Editar detalles",
+      "hideDetails": "Ocultar detalles",
+      "uploadImage": "Subir imagen",
+      "locales": {
+        "fr": "Français",
+        "en": "English",
+        "es": "Español"
+      },
+      "fields": {
+        "title": "Título",
+        "subtitle": "Subtítulo",
+        "body": "Texto",
+        "image_url": "URL de imagen",
+        "cta_label": "Etiqueta CTA"
+      },
       "keys": {
         "home": "Inicio",
         "about": "Sobre nosotros"
@@ -115,6 +136,29 @@
         "commitments": "Compromisos",
         "cta": "Llamada a la acción"
       }
+    },
+    "notifications": {
+      "title": "Título",
+      "body": "Mensaje",
+      "link": "Enlace (opcional)",
+      "send": "Enviar notificación",
+      "sending": "Enviando…",
+      "success": "Notificación enviada ({{count}} destinatario(s)).",
+      "error": "Error al enviar.",
+      "emptyTokens": "Aún no hay suscriptores push.",
+      "subscribers": "{{count}} navegador(es) suscrito(s).",
+      "stub": "Firebase no configurado — envío simulado."
+    },
+    "messages": {
+      "empty": "Ninguna conversación.",
+      "select": "Selecciona una conversación",
+      "reply": "Responder",
+      "placeholder": "Escribe tu respuesta…",
+      "closed": "Conversación cerrada",
+      "close": "Cerrar",
+      "open": "Reabrir",
+      "customer": "Cliente",
+      "you": "Tú"
     },
     "guard": {
       "loading": "Verificando permisos…",

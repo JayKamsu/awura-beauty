@@ -113,6 +113,12 @@ export function AccountPageContent() {
             {t(section.key)}
           </a>
         ))}
+        <a
+          href="/compte/messages"
+          className="inline-flex min-h-11 items-center rounded-xl px-3 text-sm text-muted transition hover:bg-background-alt hover:text-foreground"
+        >
+          {t("account.nav.messages")}
+        </a>
       </nav>
 
       <AccountProfileSection email={user.email ?? ""} memberSince={memberSince} />

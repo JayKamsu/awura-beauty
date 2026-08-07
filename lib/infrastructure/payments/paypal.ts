@@ -65,9 +65,18 @@ export async function createPayPalOrder(input: {
   return { id: json.id ?? null, error: null };
 }
 
+export type PayPalCaptureResult = {
+  ok: boolean;
+  error: string | null;
+  status?: string | null;
+  awuraOrderId?: string | null;
+  amountValue?: string | null;
+  currencyCode?: string | null;
+};
+
 export async function capturePayPalOrder(
   paypalOrderId: string,
-): Promise<{ ok: boolean; error: string | null }> {
+): Promise<PayPalCaptureResult> {
   const token = await getPayPalAccessToken();
   if (!token) return { ok: false, error: "PayPal is not configured" };
 
@@ -89,5 +98,40 @@ export async function capturePayPalOrder(
     return { ok: false, error: "Unable to capture PayPal order" };
   }
 
-  return { ok: true, error: null };
+  const json = (await response.json()) as {
+    status?: string;
+    purchase_units?: Array<{
+      custom_id?: string;
+      reference_id?: string;
+      payments?: {
+        captures?: Array<{
+          amount?: { value?: string; currency_code?: string };
+          status?: string;
+        }>;
+      };
+      amount?: { value?: string; currency_code?: string };
+    }>;
+  };
+
+  const unit = json.purchase_units?.[0];
+  const capture = unit?.payments?.captures?.[0];
+  const status = capture?.status ?? json.status ?? null;
+  const paid =
+    status === "COMPLETED" ||
+    status === "CAPTURED" ||
+    json.status === "COMPLETED";
+
+  if (!paid) {
+    return { ok: false, error: "PayPal capture not completed", status };
+  }
+
+  return {
+    ok: true,
+    error: null,
+    status,
+    awuraOrderId: unit?.custom_id ?? unit?.reference_id ?? null,
+    amountValue: capture?.amount?.value ?? unit?.amount?.value ?? null,
+    currencyCode:
+      capture?.amount?.currency_code ?? unit?.amount?.currency_code ?? null,
+  };
 }

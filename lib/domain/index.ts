@@ -57,13 +57,19 @@ export type NotificationPayload = {
 };
 
 export type {
+  PageFieldKey,
   PageLayout,
+  PageLocale,
   PageSectionConfig,
+  PageSectionFields,
   PageSectionId,
 } from "@/lib/domain/page-layout";
 
 export {
   DEFAULT_ABOUT_SECTIONS,
   DEFAULT_HOME_SECTIONS,
+  PAGE_FIELD_KEYS,
+  PAGE_LOCALES,
   defaultLayoutFor,
+  isPageSectionId,
 } from "@/lib/domain/page-layout";

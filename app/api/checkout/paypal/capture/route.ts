@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server";
+import { markOrderPaid } from "@/lib/application/checkout/mark-order-paid";
 import { capturePayPalOrder } from "@/lib/infrastructure/payments/paypal";
-import { updateOrderPayment } from "@/lib/infrastructure/supabase/orders";
+import { getOrderById } from "@/lib/infrastructure/supabase/orders";
 
 type CaptureBody = {
   paypalOrderId: string;
   orderId: string;
 };
+
+function amountsMatch(expected: number, actual: string | null | undefined) {
+  if (!actual) return false;
+  const a = Number(actual);
+  if (!Number.isFinite(a)) return false;
+  return Math.abs(a - expected) < 0.01;
+}
 
 export async function POST(request: Request) {
   const body = (await request.json()) as CaptureBody;
@@ -22,11 +30,49 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!body.orderId.startsWith("demo-")) {
-    await updateOrderPayment(body.orderId, {
-      paymentStatus: "paid",
-      status: "paid",
-    });
+  if (
+    capture.awuraOrderId &&
+    capture.awuraOrderId !== body.orderId
+  ) {
+    return NextResponse.json(
+      { error: "PayPal order mismatch" },
+      { status: 400 },
+    );
+  }
+
+  if (body.orderId.startsWith("demo-")) {
+    return NextResponse.json({ ok: true, orderId: body.orderId });
+  }
+
+  const order = await getOrderById(body.orderId);
+  if (!order) {
+    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  }
+
+  if (order.payment_method !== "paypal") {
+    return NextResponse.json({ error: "Invalid payment method" }, { status: 400 });
+  }
+
+  if (!amountsMatch(order.total, capture.amountValue)) {
+    return NextResponse.json(
+      { error: "PayPal amount mismatch" },
+      { status: 400 },
+    );
+  }
+
+  if (
+    capture.currencyCode &&
+    capture.currencyCode.toUpperCase() !== order.currency.toUpperCase()
+  ) {
+    return NextResponse.json(
+      { error: "PayPal currency mismatch" },
+      { status: 400 },
+    );
+  }
+
+  const ok = await markOrderPaid(body.orderId);
+  if (!ok) {
+    return NextResponse.json({ error: "Unable to update order" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, orderId: body.orderId });

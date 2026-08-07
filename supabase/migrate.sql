@@ -139,9 +139,7 @@ create policy "Users can insert own orders"
   on public.orders for insert to anon, authenticated
   with check (user_id is null or auth.uid() = user_id);
 
-create policy "Users can update own pending orders"
-  on public.orders for update to authenticated
-  using (auth.uid() = user_id);
+-- Pas d’UPDATE client : paiement / livraison via service_role uniquement.
 
 -- ── Blog ──────────────────────────────────────────────────
 create table if not exists public.blog_posts (
@@ -192,41 +190,53 @@ create policy "Anyone can insert diagnostics"
   on public.hair_diagnostics for insert to anon, authenticated
   with check (user_id is null or auth.uid() = user_id);
 
--- ── Page layouts (CMS affichage) ──────────────────────────
-create table if not exists public.page_layouts (
-  page_key text primary key,
-  sections jsonb not null default '[]'::jsonb,
-  updated_at timestamptz not null default now()
+-- ── CMS pages (relationnel, sans jsonb) ───────────────────
+-- Voir aussi migrate-page-cms-storage-push-chat.sql pour Storage / push / chat
+create table if not exists public.page_sections (
+  id uuid primary key default gen_random_uuid(),
+  page_key text not null,
+  section_key text not null,
+  position int not null default 0,
+  enabled boolean not null default true,
+  updated_at timestamptz not null default now(),
+  unique (page_key, section_key)
 );
 
-alter table public.page_layouts enable row level security;
+create table if not exists public.page_section_fields (
+  id uuid primary key default gen_random_uuid(),
+  section_id uuid not null references public.page_sections (id) on delete cascade,
+  field_key text not null,
+  locale text not null check (locale in ('fr', 'en', 'es')),
+  value text not null default '',
+  unique (section_id, field_key, locale)
+);
 
-drop policy if exists "Page layouts are publicly readable" on public.page_layouts;
-create policy "Page layouts are publicly readable"
-  on public.page_layouts for select to anon, authenticated using (true);
+create index if not exists page_sections_page_key_idx
+  on public.page_sections (page_key);
 
-insert into public.page_layouts (page_key, sections) values
-(
-  'home',
-  '[
-    {"id":"hero","enabled":true},
-    {"id":"promises","enabled":true},
-    {"id":"bestsellers","enabled":true},
-    {"id":"ingredients","enabled":true},
-    {"id":"feature","enabled":true},
-    {"id":"testimonials","enabled":true}
-  ]'::jsonb
-),
-(
-  'about',
-  '[
-    {"id":"story","enabled":true},
-    {"id":"mission","enabled":true},
-    {"id":"commitments","enabled":true},
-    {"id":"cta","enabled":true}
-  ]'::jsonb
-)
-on conflict (page_key) do nothing;
+alter table public.page_sections enable row level security;
+alter table public.page_section_fields enable row level security;
+
+drop policy if exists "Page sections publicly readable" on public.page_sections;
+create policy "Page sections publicly readable"
+  on public.page_sections for select to anon, authenticated using (true);
+
+drop policy if exists "Page section fields publicly readable" on public.page_section_fields;
+create policy "Page section fields publicly readable"
+  on public.page_section_fields for select to anon, authenticated using (true);
+
+insert into public.page_sections (page_key, section_key, position, enabled) values
+  ('home', 'hero', 0, true),
+  ('home', 'promises', 1, true),
+  ('home', 'bestsellers', 2, true),
+  ('home', 'ingredients', 3, true),
+  ('home', 'feature', 4, true),
+  ('home', 'testimonials', 5, true),
+  ('about', 'story', 0, true),
+  ('about', 'mission', 1, true),
+  ('about', 'commitments', 2, true),
+  ('about', 'cta', 3, true)
+on conflict (page_key, section_key) do nothing;
 
 -- ── Profiles (compte client) ──────────────────────────────
 create table if not exists public.profiles (
@@ -274,4 +284,36 @@ drop trigger if exists on_auth_user_created_profile on auth.users;
 create trigger on_auth_user_created_profile
   after insert on auth.users
   for each row execute function public.handle_new_user_profile();
+
+-- ── Push + chat (détail Storage / Realtime dans migrate-page-cms-storage-push-chat.sql)
+create table if not exists public.push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  fcm_token text not null unique,
+  user_id uuid references auth.users (id) on delete set null,
+  user_agent text not null default '',
+  created_at timestamptz not null default now(),
+  last_seen_at timestamptz not null default now()
+);
+
+alter table public.push_subscriptions enable row level security;
+
+create table if not exists public.support_conversations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  status text not null default 'open' check (status in ('open', 'closed')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.support_messages (
+  id uuid primary key default gen_random_uuid(),
+  conversation_id uuid not null references public.support_conversations (id) on delete cascade,
+  sender_id uuid references auth.users (id) on delete set null,
+  sender_role text not null check (sender_role in ('customer', 'admin')),
+  body text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.support_conversations enable row level security;
+alter table public.support_messages enable row level security;
 

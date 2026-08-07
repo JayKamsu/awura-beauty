@@ -40,8 +40,4 @@ create policy "Users can insert own orders"
     or auth.uid() = user_id
   );
 
-create policy "Users can update own pending orders"
-  on public.orders
-  for update
-  to authenticated
-  using (auth.uid() = user_id);
+-- Pas d’UPDATE client : paiement / livraison via service_role uniquement.

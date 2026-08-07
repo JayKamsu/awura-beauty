@@ -10,6 +10,7 @@
       "profile": "Profile",
       "orders": "Orders",
       "diagnostics": "Diagnostics",
+      "messages": "Messages",
       "security": "Security"
     },
     "profileTitle": "My profile",

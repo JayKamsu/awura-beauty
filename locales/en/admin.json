@@ -14,7 +14,11 @@
     "contentTitle": "Blog & tutorials",
     "contentSubtitle": "Manage articles and tutorials published on the site.",
     "pagesTitle": "Pages & display",
-    "pagesSubtitle": "Choose which sections to show and in which order (home, about…).",
+    "pagesSubtitle": "Order, visibility and detailed section content (home, about…).",
+    "notificationsTitle": "Push notifications",
+    "notificationsSubtitle": "Send a notification to all subscribed browsers.",
+    "messagesTitle": "Support messages",
+    "messagesSubtitle": "Reply to customer conversations in real time.",
     "customersTitle": "Customers",
     "customersSubtitle": "Customers from orders (email, volume, lifetime spend).",
     "quickLinks": "Shortcuts",
@@ -91,14 +95,31 @@
       "orders": "Orders",
       "content": "Content",
       "pages": "Pages",
-      "customers": "Customers"
+      "customers": "Customers",
+      "notifications": "Notifications",
+      "messages": "Messages"
     },
     "pages": {
-      "save": "Save display",
+      "save": "Save page",
       "moveUp": "Move up",
       "moveDown": "Move down",
       "visible": "Visible",
       "hidden": "Hidden",
+      "editDetails": "Edit details",
+      "hideDetails": "Hide details",
+      "uploadImage": "Upload image",
+      "locales": {
+        "fr": "Français",
+        "en": "English",
+        "es": "Español"
+      },
+      "fields": {
+        "title": "Title",
+        "subtitle": "Subtitle",
+        "body": "Body",
+        "image_url": "Image URL",
+        "cta_label": "CTA label"
+      },
       "keys": {
         "home": "Home",
         "about": "About"
@@ -115,6 +136,29 @@
         "commitments": "Commitments",
         "cta": "Call to action"
       }
+    },
+    "notifications": {
+      "title": "Title",
+      "body": "Message",
+      "link": "Link (optional)",
+      "send": "Send notification",
+      "sending": "Sending…",
+      "success": "Notification sent ({{count}} recipient(s)).",
+      "error": "Failed to send.",
+      "emptyTokens": "No push subscribers yet.",
+      "subscribers": "{{count}} subscribed browser(s).",
+      "stub": "Firebase not configured — simulated send."
+    },
+    "messages": {
+      "empty": "No conversations.",
+      "select": "Select a conversation",
+      "reply": "Reply",
+      "placeholder": "Write your reply…",
+      "closed": "Conversation closed",
+      "close": "Close",
+      "open": "Reopen",
+      "customer": "Customer",
+      "you": "You"
     },
     "guard": {
       "loading": "Checking permissions…",

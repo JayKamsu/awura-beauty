@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { useActionLock } from "@/lib/hooks/use-action-lock";
 import { getMyProfile, updateMyProfile } from "@/lib/infrastructure/supabase/profiles";
 import type { ProfileRow } from "@/lib/infrastructure/supabase/profile-types";
 
@@ -19,12 +20,12 @@ export function AccountProfileSection({
   memberSince,
 }: AccountProfileSectionProps) {
   const { t } = useTranslation();
+  const { locked: pending, run } = useActionLock();
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(true);
-  const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,23 +44,23 @@ export function AccountProfileSection({
     };
   }, []);
 
-  const onSubmit = async (event: FormEvent) => {
+  const onSubmit = (event: FormEvent) => {
     event.preventDefault();
-    setPending(true);
-    setError(null);
-    setMessage(null);
-    const result = await updateMyProfile({
-      first_name: firstName,
-      last_name: lastName,
-      phone,
+    void run(async () => {
+      setError(null);
+      setMessage(null);
+      const result = await updateMyProfile({
+        first_name: firstName,
+        last_name: lastName,
+        phone,
+      });
+      if (result.error || !result.profile) {
+        setError(result.error ?? t("account.profileSaveError"));
+        return;
+      }
+      setProfile(result.profile);
+      setMessage(t("account.profileSaved"));
     });
-    setPending(false);
-    if (result.error || !result.profile) {
-      setError(result.error ?? t("account.profileSaveError"));
-      return;
-    }
-    setProfile(result.profile);
-    setMessage(t("account.profileSaved"));
   };
 
   return (
@@ -122,7 +123,7 @@ export function AccountProfileSection({
             </p>
           ) : null}
           <div className="sm:col-span-2">
-            <Button type="submit" disabled={pending}>
+            <Button type="submit" pending={pending}>
               {pending ? t("account.profileSaving") : t("account.profileSave")}
             </Button>
           </div>

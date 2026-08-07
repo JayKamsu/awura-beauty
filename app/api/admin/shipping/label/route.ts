@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { notifyOrderUser } from "@/lib/connectors/firebase";
 import { createLaPosteLabel } from "@/lib/infrastructure/shipping/laposte";
 import { createMondialRelayLabel } from "@/lib/infrastructure/shipping/mondialrelay";
 import type { ShippingCarrier } from "@/lib/infrastructure/shipping/types";
@@ -67,6 +68,15 @@ export async function POST(request: Request) {
       trackingNumber: label.trackingNumber,
       labelUrl: label.labelUrl,
       relayPointId: body.relayPointId ?? order.relay_point_id,
+    });
+
+    await notifyOrderUser({
+      userId: order.user_id,
+      title: "Commande expédiée",
+      body: label.trackingNumber
+        ? `Votre colis est en route (suivi : ${label.trackingNumber}).`
+        : "Votre colis Awura Beauty est en route.",
+      link: "/compte#commandes",
     });
 
     return NextResponse.json({

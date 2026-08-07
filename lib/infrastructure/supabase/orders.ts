@@ -42,13 +42,16 @@ export type CreateOrderInput = {
   paymentStatus?: string;
   status?: OrderRow["status"];
   relayPointId?: string | null;
+  /** Préférer userId issu du Bearer côté API (pas de session cookie serveur). */
+  userId?: string | null;
 };
 
 export async function createOrder(
   input: CreateOrderInput,
 ): Promise<{ order: OrderRow | null; error: string | null }> {
-  const supabase = createSupabaseClient();
-  const userId = await getCurrentUserId();
+  const supabase = createAdminSupabaseClient() ?? createSupabaseClient();
+  const userId =
+    input.userId !== undefined ? input.userId : await getCurrentUserId();
   const total = input.items.reduce(
     (sum, item) => sum + item.unit_price * item.quantity,
     0,
@@ -90,7 +93,7 @@ export async function updateOrderPayment(
     status: OrderRow["status"];
   },
 ): Promise<boolean> {
-  const supabase = createSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   if (!supabase) return false;
 
   const { error } = await supabase
@@ -114,7 +117,7 @@ export async function updateOrderShipping(
     relayPointId?: string | null;
   },
 ): Promise<boolean> {
-  const supabase = createSupabaseClient();
+  const supabase = createAdminSupabaseClient();
   if (!supabase) return false;
 
   const { error } = await supabase
@@ -170,7 +173,7 @@ export async function listAllOrders(): Promise<OrderRow[]> {
 }
 
 export async function getOrderById(orderId: string): Promise<OrderRow | null> {
-  const supabase = createSupabaseClient();
+  const supabase = createAdminSupabaseClient() ?? createSupabaseClient();
   if (!supabase) return null;
 
   const { data, error } = await supabase

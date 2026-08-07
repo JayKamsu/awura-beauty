@@ -6,27 +6,28 @@ import { useTranslation } from "react-i18next";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/context/auth-provider";
+import { useActionLock } from "@/lib/hooks/use-action-lock";
 
 export default function MotDePasseOubliePage() {
   const { t } = useTranslation();
   const { requestPasswordReset, configured } = useAuth();
+  const { locked: pending, run } = useActionLock();
   const [email, setEmail] = useState("");
-  const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
 
-  const onSubmit = async (event: FormEvent) => {
+  const onSubmit = (event: FormEvent) => {
     event.preventDefault();
-    setError(null);
-    setInfo(null);
-    setPending(true);
-    const message = await requestPasswordReset(email.trim());
-    setPending(false);
-    if (message) {
-      setError(message);
-      return;
-    }
-    setInfo(t("auth.forgotPasswordSent"));
+    void run(async () => {
+      setError(null);
+      setInfo(null);
+      const message = await requestPasswordReset(email.trim());
+      if (message) {
+        setError(message);
+        return;
+      }
+      setInfo(t("auth.forgotPasswordSent"));
+    });
   };
 
   const fieldClass =
@@ -71,7 +72,13 @@ export default function MotDePasseOubliePage() {
             {info}
           </p>
         ) : null}
-        <Button type="submit" size="lg" className="w-full" disabled={pending || !configured}>
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full"
+          pending={pending}
+          disabled={!configured}
+        >
           {pending ? t("auth.loading") : t("auth.forgotPasswordSubmit")}
         </Button>
         <p className="text-center text-sm text-muted">

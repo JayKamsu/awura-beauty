@@ -12,6 +12,7 @@ import type {
   OrderItem,
   OrderRow,
   PageLayout,
+  PageLocale,
   PageSectionConfig,
   PaymentMethod,
   ProductRow,
@@ -42,6 +43,7 @@ export type OrderPort = {
     paymentStatus?: string;
     status?: OrderRow["status"];
     relayPointId?: string | null;
+    userId?: string | null;
   }) => Promise<{ order: OrderRow | null; error: string | null }>;
   listMyOrders: () => Promise<OrderRow[]>;
   listAllOrders: () => Promise<OrderRow[]>;
@@ -104,9 +106,14 @@ export type PaymentPort = {
     orderId: string;
     amount: { currencyCode: string; value: string };
   }) => Promise<{ id: string | null; error: string | null }>;
-  capturePayPalOrder: (
-    paypalOrderId: string,
-  ) => Promise<{ ok: boolean; error?: string | null }>;
+  capturePayPalOrder: (paypalOrderId: string) => Promise<{
+    ok: boolean;
+    error?: string | null;
+    status?: string | null;
+    awuraOrderId?: string | null;
+    amountValue?: string | null;
+    currencyCode?: string | null;
+  }>;
 };
 
 export type ShippingPort = {
@@ -129,7 +136,7 @@ export type NotificationPort = {
 
 /** Port mise en page des pages (CMS affichage) */
 export type PageLayoutPort = {
-  getPageLayout: (pageKey: string) => Promise<PageLayout>;
+  getPageLayout: (pageKey: string, locale?: PageLocale) => Promise<PageLayout>;
   listPageLayouts: () => Promise<PageLayout[]>;
   savePageLayout: (
     pageKey: string,

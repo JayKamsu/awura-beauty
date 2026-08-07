@@ -1,0 +1,23 @@
+{
+  "support": {
+    "chat": {
+      "title": "Assistance Awura",
+      "pageSubtitle": "Échange en direct avec l’équipe Awura Beauty.",
+      "open": "Chat",
+      "close": "Fermer",
+      "send": "Envoyer",
+      "placeholder": "Écris ton message…",
+      "empty": "Aucun message pour le moment. Pose ta question !",
+      "loginRequired": "Connecte-toi pour discuter avec nous.",
+      "openFull": "Ouvrir la messagerie complète"
+    },
+    "push": {
+      "title": "Reste informée",
+      "body": "Active les notifications pour les offres et le suivi de commande.",
+      "enable": "Activer",
+      "enabling": "Activation…",
+      "later": "Plus tard",
+      "guestHint": "Tu peux aussi t’abonner sans compte."
+    }
+  }
+}

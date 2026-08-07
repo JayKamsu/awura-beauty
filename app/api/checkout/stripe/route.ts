@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
+import { resolveOrderItemsFromCatalog } from "@/lib/application/checkout/resolve-order-items";
+import { userIdFromRequest } from "@/lib/application/checkout/request-user";
 import { container } from "@/lib/application/container";
-import type { OrderItem } from "@/lib/domain";
 
 type StripeCheckoutBody = {
   email: string;
   currency: string;
-  items: OrderItem[];
+  items: Array<{ slug?: string; quantity?: number }>;
   shippingAddress: {
     fullName: string;
     line1: string;
@@ -22,27 +23,39 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
+  const resolved = await resolveOrderItemsFromCatalog(body.items);
+  if (resolved.error || !resolved.items.length) {
+    return NextResponse.json(
+      { error: resolved.error ?? "Invalid cart" },
+      { status: 400 },
+    );
+  }
+
+  const userId = await userIdFromRequest(request);
+  const currency = body.currency || "EUR";
+  const origin = new URL(request.url).origin;
+
   const { order, error } = await container.orders.createOrder({
     email: body.email,
     paymentMethod: "stripe",
-    currency: body.currency || "EUR",
-    items: body.items,
+    currency,
+    items: resolved.items,
     shippingAddress: body.shippingAddress,
     paymentStatus: "pending",
     status: "pending",
+    userId,
   });
 
   if (!order) {
     if (error === "Supabase is not configured") {
-      const origin = new URL(request.url).origin;
       const demoId = `demo-${Date.now()}`;
       const session = await container.payments.createStripeCheckout({
         orderId: demoId,
         customerEmail: body.email,
-        currency: body.currency || "EUR",
-        successUrl: `${origin}/commande/succes?orderId=${demoId}`,
+        currency,
+        successUrl: `${origin}/commande/succes?orderId=${demoId}&session_id={CHECKOUT_SESSION_ID}`,
         cancelUrl: `${origin}/commande/annule`,
-        lineItems: body.items.map((item) => ({
+        lineItems: resolved.items.map((item) => ({
           name: item.name,
           quantity: item.quantity,
           unitAmountCents: Math.round(item.unit_price * 100),
@@ -64,14 +77,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error ?? "Order failed" }, { status: 500 });
   }
 
-  const origin = new URL(request.url).origin;
   const session = await container.payments.createStripeCheckout({
     orderId: order.id,
     customerEmail: body.email,
-    currency: body.currency || "EUR",
-    successUrl: `${origin}/commande/succes?orderId=${order.id}`,
+    currency,
+    successUrl: `${origin}/commande/succes?orderId=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
     cancelUrl: `${origin}/commande/annule`,
-    lineItems: body.items.map((item) => ({
+    lineItems: resolved.items.map((item) => ({
       name: item.name,
       quantity: item.quantity,
       unitAmountCents: Math.round(item.unit_price * 100),

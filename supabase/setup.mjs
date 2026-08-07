@@ -49,13 +49,20 @@ if (databaseUrl) {
     console.error("Installe pg: npm i -D pg");
     process.exit(1);
   }
-  const sql = readFileSync("supabase/migrate.sql", "utf8");
   const client = new pg.Client({
     connectionString: databaseUrl,
     ssl: { rejectUnauthorized: false },
   });
   await client.connect();
+  const sql = readFileSync("supabase/migrate.sql", "utf8");
   await client.query(sql);
+  if (existsSync("supabase/migrate-page-cms-storage-push-chat.sql")) {
+    const extra = readFileSync(
+      "supabase/migrate-page-cms-storage-push-chat.sql",
+      "utf8",
+    );
+    await client.query(extra);
+  }
   await client.end();
   console.log("MIGRATION_OK");
 } else {

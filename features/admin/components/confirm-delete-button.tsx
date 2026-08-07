@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { useActionLock } from "@/lib/hooks/use-action-lock";
 
 type ConfirmDeleteButtonProps = {
   label: string;
@@ -19,7 +20,7 @@ export function ConfirmDeleteButton({
 }: ConfirmDeleteButtonProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { locked: pending, run } = useActionLock();
 
   if (!open) {
     return (
@@ -41,11 +42,11 @@ export function ConfirmDeleteButton({
         <Button
           type="button"
           variant="accent-outline"
-          disabled={pending || disabled}
+          pending={pending}
+          disabled={disabled}
           onClick={() => {
-            setPending(true);
-            void Promise.resolve(onConfirm()).finally(() => {
-              setPending(false);
+            void run(async () => {
+              await onConfirm();
               setOpen(false);
             });
           }}

@@ -10,8 +10,9 @@ import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
 import { AdminSearchField } from "@/features/admin/components/admin-search-field";
 import { ConfirmDeleteButton } from "@/features/admin/components/confirm-delete-button";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
-import type { ProductRow } from "@/lib/infrastructure/supabase/types";
+import { useActionLock } from "@/lib/hooks/use-action-lock";
 import { PRODUCT_CATEGORIES } from "@/lib/infrastructure/supabase/fallback-products";
+import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
 const emptyForm = {
   id: "",
@@ -36,6 +37,7 @@ const fieldClass =
 export function AdminProductsPanel() {
   const { t } = useTranslation();
   const adminFetch = useAdminFetch();
+  const { locked: pending, run } = useActionLock();
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [form, setForm] = useState(emptyForm);
   const [feedback, setFeedback] = useState<{
@@ -44,7 +46,6 @@ export function AdminProductsPanel() {
   } | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [pending, setPending] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   const load = useCallback(async () => {
@@ -86,8 +87,8 @@ export function AdminProductsPanel() {
     setForm((prev) => ({ ...prev, [field]: json.url! }));
   };
 
-  const save = async () => {
-    setPending(true);
+  const save = () => {
+    void run(async () => {
     setFeedback(null);
     const payload = {
       ...(form.id ? { id: form.id } : {}),
@@ -112,7 +113,6 @@ export function AdminProductsPanel() {
       body: JSON.stringify(payload),
     });
     const json = (await response.json()) as { error?: string };
-    setPending(false);
     if (!response.ok) {
       setFeedback({ tone: "error", message: json.error ?? t("admin.saveError") });
       return;
@@ -120,6 +120,7 @@ export function AdminProductsPanel() {
     setFeedback({ tone: "success", message: t("admin.saveSuccess") });
     setForm(emptyForm);
     await load();
+    });
   };
 
   const edit = (product: ProductRow) => {
@@ -277,7 +278,7 @@ export function AdminProductsPanel() {
           ))}
 
           <div className="flex flex-wrap gap-3 lg:col-span-2">
-            <Button type="button" disabled={pending} onClick={() => void save()}>
+            <Button type="button" pending={pending} onClick={save}>
               {pending
                 ? t("admin.saving")
                 : form.id

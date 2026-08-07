@@ -4,7 +4,7 @@ import {
   PayPalButtons,
   PayPalScriptProvider,
 } from "@paypal/react-paypal-js";
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -12,14 +12,27 @@ import { useAuth } from "@/features/auth/context/auth-provider";
 import { useCart } from "@/features/cart/context/cart-provider";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import { formatPrice } from "@/lib/format/price";
+import { useActionLock } from "@/lib/hooks/use-action-lock";
 import type { PaymentMethod } from "@/lib/infrastructure/supabase/order-types";
 
 export function CheckoutPageContent() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { currency } = usePreferences();
   const { items, subtotal, clearCart, itemCount } = useCart();
+  const { locked: pending, run } = useActionLock();
+  const paypalCaptureLock = useRef(false);
+
+  const authHeaders = (): HeadersInit => {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (session?.access_token) {
+      headers.Authorization = `Bearer ${session.access_token}`;
+    }
+    return headers;
+  };
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("stripe");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -29,7 +42,6 @@ export function CheckoutPageContent() {
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("FR");
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
   const [paypalOrderId, setPaypalOrderId] = useState<string | null>(null);
   const [awuraOrderId, setAwuraOrderId] = useState<string | null>(null);
 
@@ -69,11 +81,10 @@ export function CheckoutPageContent() {
     "w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition focus:border-accent";
 
   const startStripe = async () => {
-    setPending(true);
     setError(null);
     const response = await fetch("/api/checkout/stripe", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders(),
       body: JSON.stringify({
         email,
         currency,
@@ -82,7 +93,6 @@ export function CheckoutPageContent() {
       }),
     });
     const json = (await response.json()) as { url?: string; error?: string };
-    setPending(false);
 
     if (!response.ok || !json.url) {
       setError(json.error ?? t("checkout.paymentError"));
@@ -93,11 +103,10 @@ export function CheckoutPageContent() {
   };
 
   const preparePayPal = async () => {
-    setPending(true);
     setError(null);
     const response = await fetch("/api/checkout/paypal/create", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders(),
       body: JSON.stringify({
         email,
         currency,
@@ -110,25 +119,25 @@ export function CheckoutPageContent() {
       orderId?: string;
       error?: string;
     };
-    setPending(false);
 
     if (!response.ok || !json.paypalOrderId || !json.orderId) {
       setError(json.error ?? t("checkout.paymentError"));
-      return false;
+      return;
     }
 
     setPaypalOrderId(json.paypalOrderId);
     setAwuraOrderId(json.orderId);
-    return true;
   };
 
-  const onSubmit = async (event: FormEvent) => {
+  const onSubmit = (event: FormEvent) => {
     event.preventDefault();
-    if (paymentMethod === "stripe") {
-      await startStripe();
-      return;
-    }
-    await preparePayPal();
+    void run(async () => {
+      if (paymentMethod === "stripe") {
+        await startStripe();
+        return;
+      }
+      await preparePayPal();
+    });
   };
 
   return (
@@ -258,13 +267,13 @@ export function CheckoutPageContent() {
         ) : null}
 
         {paymentMethod === "stripe" ? (
-          <Button type="submit" size="lg" disabled={pending}>
+          <Button type="submit" size="lg" pending={pending}>
             {pending ? t("checkout.loading") : t("checkout.payStripe")}
           </Button>
         ) : (
           <div className="space-y-4">
             {!paypalOrderId ? (
-              <Button type="submit" size="lg" disabled={pending}>
+              <Button type="submit" size="lg" pending={pending}>
                 {pending ? t("checkout.loading") : t("checkout.preparePaypal")}
               </Button>
             ) : paypalClientId ? (
@@ -278,20 +287,31 @@ export function CheckoutPageContent() {
                   style={{ layout: "vertical", shape: "rect" }}
                   createOrder={async () => paypalOrderId}
                   onApprove={async () => {
-                    const response = await fetch("/api/checkout/paypal/capture", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        paypalOrderId,
-                        orderId: awuraOrderId,
-                      }),
-                    });
-                    if (!response.ok) {
+                    if (paypalCaptureLock.current) return;
+                    paypalCaptureLock.current = true;
+                    try {
+                      const response = await fetch(
+                        "/api/checkout/paypal/capture",
+                        {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            paypalOrderId,
+                            orderId: awuraOrderId,
+                          }),
+                        },
+                      );
+                      if (!response.ok) {
+                        setError(t("checkout.paymentError"));
+                        paypalCaptureLock.current = false;
+                        return;
+                      }
+                      clearCart();
+                      router.push(`/commande/succes?orderId=${awuraOrderId}`);
+                    } catch {
+                      paypalCaptureLock.current = false;
                       setError(t("checkout.paymentError"));
-                      return;
                     }
-                    clearCart();
-                    router.push(`/commande/succes?orderId=${awuraOrderId}`);
                   }}
                   onError={() => setError(t("checkout.paymentError"))}
                 />

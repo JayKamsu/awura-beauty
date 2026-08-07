@@ -9,21 +9,27 @@ import { useCart } from "@/features/cart/context/cart-provider";
 type CheckoutResultProps = {
   status: "success" | "cancel";
   orderId?: string;
+  sessionId?: string;
 };
 
-export function CheckoutResult({ status, orderId }: CheckoutResultProps) {
+export function CheckoutResult({
+  status,
+  orderId,
+  sessionId,
+}: CheckoutResultProps) {
   const { t } = useTranslation();
   const { clearCart } = useCart();
 
   useEffect(() => {
     if (status !== "success" || !orderId) return;
     clearCart();
+    // Confirmation sécurisée : exige une session Stripe vérifiée côté serveur.
     void fetch("/api/checkout/confirm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId }),
+      body: JSON.stringify({ orderId, sessionId }),
     });
-  }, [status, orderId, clearCart]);
+  }, [status, orderId, sessionId, clearCart]);
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center gap-6 px-4 py-20 text-center md:px-6">

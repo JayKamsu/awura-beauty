@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { LocaleCurrencySwitcher } from "@/components/ui/locale-currency-switcher";
@@ -9,25 +10,26 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAdminAccess } from "@/features/admin/hooks/use-admin-access";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { useCart } from "@/features/cart/context/cart-provider";
-
-const NAV_ITEMS = [
-  { href: "/", key: "nav.home" },
-  { href: "/boutique", key: "nav.shop" },
-  { href: "/diagnostic-capillaire", key: "nav.diagnostic" },
-  { href: "/a-propos", key: "nav.about" },
-  { href: "/blog", key: "nav.blog" },
-  { href: "/contact", key: "nav.contact" },
-] as const;
+import {
+  isNavActive,
+  MAIN_NAV_ITEMS,
+  MOBILE_MORE_NAV,
+} from "@/lib/navigation";
 
 const iconClass =
   "inline-flex size-11 items-center justify-center rounded-xl text-foreground transition hover:bg-background-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 export function Header() {
   const { t } = useTranslation();
+  const pathname = usePathname();
   const { itemCount } = useCart();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin } = useAdminAccess();
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   const accountInitial = user?.email?.trim().charAt(0).toUpperCase() ?? null;
   const accountLabel = user
@@ -66,15 +68,23 @@ export function Header() {
         </div>
 
         <nav className="hidden items-center gap-6 lg:flex" aria-label={t("nav.mainLabel")}>
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-sm text-muted transition hover:text-foreground"
-            >
-              {t(item.key)}
-            </Link>
-          ))}
+          {MAIN_NAV_ITEMS.map((item) => {
+            const active = isNavActive(pathname, item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={`text-sm transition ${
+                  active
+                    ? "font-medium text-foreground"
+                    : "text-muted hover:text-foreground"
+                }`}
+              >
+                {t(item.key)}
+              </Link>
+            );
+          })}
           {isAdmin ? (
             <Link
               href="/admin"
@@ -92,33 +102,37 @@ export function Header() {
           <div className="hidden sm:block">
             <ThemeToggle />
           </div>
-          {!authLoading && user ? (
-            <Link
-              href="/compte"
-              aria-label={accountLabel}
-              title={accountLabel}
-              className={`relative ${iconClass} bg-accent/10 text-accent hover:bg-accent/15`}
-            >
-              <span className="font-serif text-sm font-semibold leading-none">
-                {accountInitial}
-              </span>
-              <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-accent" aria-hidden />
-            </Link>
-          ) : (
-            <HeaderIcon href="/compte" label={accountLabel}>
-              <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2-7 4.5V20h14v-1.5C19 16 16 14 12 14Z" />
-            </HeaderIcon>
-          )}
-          <span className="hidden sm:inline-flex">
-            <HeaderIcon href="/recherche" label={t("header.search")}>
-              <circle cx="11" cy="11" r="6.5" />
-              <path d="m16 16 4 4" />
-            </HeaderIcon>
+
+          {/* Compte / panier : desktop (sur mobile → bottom bar) */}
+          <span className="hidden lg:inline-flex">
+            {!authLoading && user ? (
+              <Link
+                href="/compte"
+                aria-label={accountLabel}
+                title={accountLabel}
+                className={`relative ${iconClass} bg-accent/10 text-accent hover:bg-accent/15`}
+              >
+                <span className="font-serif text-sm font-semibold leading-none">
+                  {accountInitial}
+                </span>
+                <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-accent" aria-hidden />
+              </Link>
+            ) : (
+              <HeaderIcon href="/compte" label={accountLabel}>
+                <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4 0-7 2-7 4.5V20h14v-1.5C19 16 16 14 12 14Z" />
+              </HeaderIcon>
+            )}
           </span>
+
+          <HeaderIcon href="/recherche" label={t("header.search")}>
+            <circle cx="11" cy="11" r="6.5" />
+            <path d="m16 16 4 4" />
+          </HeaderIcon>
+
           <Link
             href="/panier"
             aria-label={t("header.cart")}
-            className={`relative ${iconClass}`}
+            className={`relative hidden lg:inline-flex ${iconClass}`}
           >
             <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.75">
               <path d="M6 7h12l-1 11H7L6 7Z" />
@@ -136,23 +150,23 @@ export function Header() {
       {open ? (
         <div className="border-t border-border bg-background px-4 py-4 lg:hidden">
           <nav className="flex flex-col gap-1" aria-label={t("nav.mobileLabel")}>
-            {NAV_ITEMS.map((item) => (
+            <p className="px-3 pb-2 text-xs font-medium uppercase tracking-[0.14em] text-muted">
+              {t("nav.moreTitle")}
+            </p>
+            {MOBILE_MORE_NAV.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex min-h-11 items-center rounded-xl px-3 text-sm text-foreground transition hover:bg-background-alt"
+                className={`flex min-h-11 items-center rounded-xl px-3 text-sm transition hover:bg-background-alt ${
+                  isNavActive(pathname, item.href)
+                    ? "bg-background-alt font-medium text-foreground"
+                    : "text-foreground"
+                }`}
                 onClick={() => setOpen(false)}
               >
                 {t(item.key)}
               </Link>
             ))}
-            <Link
-              href="/compte"
-              className="flex min-h-11 items-center rounded-xl px-3 text-sm text-foreground transition hover:bg-background-alt"
-              onClick={() => setOpen(false)}
-            >
-              {user ? t("header.myProfile") : t("header.account")}
-            </Link>
             {isAdmin ? (
               <Link
                 href="/admin"
@@ -162,13 +176,6 @@ export function Header() {
                 {t("header.admin")}
               </Link>
             ) : null}
-            <Link
-              href="/recherche"
-              className="flex min-h-11 items-center rounded-xl px-3 text-sm text-foreground transition hover:bg-background-alt sm:hidden"
-              onClick={() => setOpen(false)}
-            >
-              {t("header.search")}
-            </Link>
           </nav>
           <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4 md:hidden">
             <LocaleCurrencySwitcher />

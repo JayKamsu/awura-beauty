@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
+import { resolveOrderItemsFromCatalog } from "@/lib/application/checkout/resolve-order-items";
+import { userIdFromRequest } from "@/lib/application/checkout/request-user";
 import { createPayPalOrder } from "@/lib/infrastructure/payments/paypal";
 import { createOrder } from "@/lib/infrastructure/supabase/orders";
-import type { OrderItem } from "@/lib/infrastructure/supabase/order-types";
 
 type PayPalCreateBody = {
   email: string;
   currency: string;
-  items: OrderItem[];
+  items: Array<{ slug?: string; quantity?: number }>;
   shippingAddress: {
     fullName: string;
     line1: string;
@@ -23,19 +24,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
-  const total = body.items.reduce(
-    (sum, item) => sum + item.unit_price * item.quantity,
-    0,
-  );
+  const resolved = await resolveOrderItemsFromCatalog(body.items);
+  if (resolved.error || !resolved.items.length) {
+    return NextResponse.json(
+      { error: resolved.error ?? "Invalid cart" },
+      { status: 400 },
+    );
+  }
+
+  const userId = await userIdFromRequest(request);
+  const currency = body.currency || "EUR";
 
   const { order, error } = await createOrder({
     email: body.email,
     paymentMethod: "paypal",
-    currency: body.currency || "EUR",
-    items: body.items,
+    currency,
+    items: resolved.items,
     shippingAddress: body.shippingAddress,
     paymentStatus: "pending",
     status: "pending",
+    userId,
   });
 
   const orderId = order?.id ?? `demo-${Date.now()}`;
@@ -47,8 +55,8 @@ export async function POST(request: Request) {
   const paypal = await createPayPalOrder({
     orderId,
     amount: {
-      currencyCode: body.currency || "EUR",
-      value: total.toFixed(2),
+      currencyCode: currency,
+      value: resolved.total.toFixed(2),
     },
   });
 

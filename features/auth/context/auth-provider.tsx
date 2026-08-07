@@ -15,6 +15,7 @@ import {
   onAuthStateChange,
   requestPasswordReset,
   signInWithEmail,
+  signInWithGoogle,
   signOut,
   signUpWithEmail,
   updatePassword,
@@ -33,6 +34,7 @@ type AuthContextValue = {
   configured: boolean;
   signIn: (email: string, password: string) => Promise<string | null>;
   signUp: (email: string, password: string) => Promise<SignUpResult>;
+  signInWithGoogle: (redirectTo?: string) => Promise<string | null>;
   logout: () => Promise<void>;
   changePassword: (password: string) => Promise<string | null>;
   requestPasswordReset: (email: string) => Promise<string | null>;
@@ -98,6 +100,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  const signInGoogle = useCallback(async (redirectTo = "/compte") => {
+    const result = await signInWithGoogle(redirectTo);
+    return result.error?.message ?? null;
+  }, []);
+
   const logout = useCallback(async () => {
     await signOut();
     setUser(null);
@@ -122,6 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       configured,
       signIn,
       signUp,
+      signInWithGoogle: signInGoogle,
       logout,
       changePassword,
       requestPasswordReset: requestReset,
@@ -133,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       configured,
       signIn,
       signUp,
+      signInGoogle,
       logout,
       changePassword,
       requestReset,

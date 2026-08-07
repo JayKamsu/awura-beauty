@@ -9,13 +9,17 @@
     "home": "Accueil",
     "shop": "Boutique",
     "diagnostic": "Diagnostic Capillaire",
+    "diagnosticShort": "Diagnostic",
+    "accountShort": "Compte",
     "about": "À propos",
     "blog": "Le Blog",
     "contact": "Contact",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
     "mainLabel": "Navigation principale",
-    "mobileLabel": "Navigation mobile"
+    "mobileLabel": "Navigation mobile",
+    "bottomLabel": "Navigation rapide",
+    "moreTitle": "Plus"
   },
   "header": {
     "brand": "AWURA BEAUTY",

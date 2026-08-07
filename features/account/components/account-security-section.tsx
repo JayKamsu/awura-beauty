@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/context/auth-provider";
+import { useActionLock } from "@/lib/hooks/use-action-lock";
 
 const fieldClass =
   "w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition focus:border-accent";
@@ -12,36 +13,36 @@ const fieldClass =
 export function AccountSecuritySection() {
   const { t } = useTranslation();
   const { changePassword } = useAuth();
+  const { locked: pending, run } = useActionLock();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const onSubmit = async (event: FormEvent) => {
+  const onSubmit = (event: FormEvent) => {
     event.preventDefault();
-    setError(null);
-    setMessage(null);
+    void run(async () => {
+      setError(null);
+      setMessage(null);
 
-    if (password.length < 6) {
-      setError(t("account.passwordTooShort"));
-      return;
-    }
-    if (password !== confirm) {
-      setError(t("account.passwordMismatch"));
-      return;
-    }
+      if (password.length < 6) {
+        setError(t("account.passwordTooShort"));
+        return;
+      }
+      if (password !== confirm) {
+        setError(t("account.passwordMismatch"));
+        return;
+      }
 
-    setPending(true);
-    const err = await changePassword(password);
-    setPending(false);
-    if (err) {
-      setError(err);
-      return;
-    }
-    setPassword("");
-    setConfirm("");
-    setMessage(t("account.passwordChanged"));
+      const err = await changePassword(password);
+      if (err) {
+        setError(err);
+        return;
+      }
+      setPassword("");
+      setConfirm("");
+      setMessage(t("account.passwordChanged"));
+    });
   };
 
   return (
@@ -84,7 +85,7 @@ export function AccountSecuritySection() {
             {message}
           </p>
         ) : null}
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" pending={pending}>
           {pending ? t("account.passwordSaving") : t("account.passwordSave")}
         </Button>
       </form>

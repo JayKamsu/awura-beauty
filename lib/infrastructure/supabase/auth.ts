@@ -108,6 +108,36 @@ export async function signInWithEmail(
   return { user: data.user, session: data.session, error };
 }
 
+/** Connexion / inscription Google (OAuth via Supabase). */
+export async function signInWithGoogle(
+  nextPath = "/compte",
+): Promise<{ error: AuthError | null }> {
+  const supabase = createSupabaseClient();
+  if (!supabase) {
+    return {
+      error: {
+        name: "AuthError",
+        message: "Supabase is not configured",
+        status: 500,
+      } as AuthError,
+    };
+  }
+
+  const next = nextPath.startsWith("/") ? nextPath : `/${nextPath}`;
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: absoluteUrl(`/auth/callback?next=${encodeURIComponent(next)}`),
+      queryParams: {
+        access_type: "offline",
+        prompt: "select_account",
+      },
+    },
+  });
+
+  return { error };
+}
+
 export async function signOut(): Promise<{ error: AuthError | null }> {
   const supabase = createSupabaseClient();
   if (!supabase) return { error: null };

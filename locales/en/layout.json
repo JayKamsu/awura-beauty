@@ -9,13 +9,17 @@
     "home": "Home",
     "shop": "Shop",
     "diagnostic": "Hair Diagnostic",
+    "diagnosticShort": "Diagnostic",
+    "accountShort": "Account",
     "about": "About",
     "blog": "Blog",
     "contact": "Contact",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "mainLabel": "Main navigation",
-    "mobileLabel": "Mobile navigation"
+    "mobileLabel": "Mobile navigation",
+    "bottomLabel": "Quick navigation",
+    "moreTitle": "More"
   },
   "header": {
     "brand": "AWURA BEAUTY",

@@ -5,6 +5,9 @@ import { usePathname } from "next/navigation";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
+import { PushOptIn } from "@/features/notifications/components/push-opt-in";
+import { SupportChatWidget } from "@/features/support-chat/components/support-chat-widget";
 
 type SiteShellProps = {
   children: ReactNode;
@@ -22,8 +25,11 @@ export function SiteShell({ children }: SiteShellProps) {
     <>
       <AnnouncementBar />
       <Header />
-      <div className="flex flex-1 flex-col">{children}</div>
+      <div className="flex flex-1 flex-col pb-20 lg:pb-0">{children}</div>
       <Footer />
+      <MobileBottomNav />
+      <PushOptIn />
+      <SupportChatWidget />
     </>
   );
 }

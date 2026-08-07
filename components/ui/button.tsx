@@ -26,6 +26,8 @@ type BaseProps = {
   variant?: ButtonVariant;
   size?: ButtonSize;
   className?: string;
+  /** Désactive le bouton + aria-busy (anti double-clic). */
+  pending?: boolean;
 };
 
 type ButtonAsButton = BaseProps &
@@ -49,7 +51,7 @@ function buttonClasses(
   className?: string,
 ) {
   return cx(
-    "inline-flex items-center justify-center gap-2 rounded-xl font-medium uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50",
+    "inline-flex items-center justify-center gap-2 rounded-xl font-medium uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50 aria-busy:pointer-events-none aria-busy:opacity-50",
     variantClasses[variant],
     sizeClasses[size],
     className,
@@ -75,12 +77,20 @@ export function Button(props: ButtonProps) {
     variant: _variant,
     size: _size,
     className: _className,
+    pending = false,
     type = "button",
+    disabled,
     ...rest
   } = buttonProps;
 
   return (
-    <button type={type} className={classes} {...rest}>
+    <button
+      type={type}
+      className={classes}
+      disabled={Boolean(disabled || pending)}
+      aria-busy={pending || undefined}
+      {...rest}
+    >
       {children}
     </button>
   );

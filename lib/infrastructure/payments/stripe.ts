@@ -6,6 +6,10 @@ function getStripe() {
   return new Stripe(key);
 }
 
+export function getStripeClient(): Stripe | null {
+  return getStripe();
+}
+
 export type StripeLineItem = {
   name: string;
   unitAmountCents: number;

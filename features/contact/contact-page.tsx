@@ -3,10 +3,12 @@
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { useActionLock } from "@/lib/hooks/use-action-lock";
 import { CONTACT_EMAIL } from "@/lib/site";
 
 export function ContactPageContent() {
   const { t } = useTranslation();
+  const { locked, runSync } = useActionLock();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -17,14 +19,16 @@ export function ContactPageContent() {
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const subject = encodeURIComponent(
-      t("contact.mailSubject", { name: name.trim() || t("contact.anonymous") }),
-    );
-    const body = encodeURIComponent(
-      `${t("contact.fields.name")}: ${name}\n${t("contact.fields.email")}: ${email}\n\n${message}`,
-    );
-    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
-    setSent(true);
+    runSync(() => {
+      const subject = encodeURIComponent(
+        t("contact.mailSubject", { name: name.trim() || t("contact.anonymous") }),
+      );
+      const body = encodeURIComponent(
+        `${t("contact.fields.name")}: ${name}\n${t("contact.fields.email")}: ${email}\n\n${message}`,
+      );
+      window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+      setSent(true);
+    });
   };
 
   return (
@@ -84,7 +88,7 @@ export function ContactPageContent() {
             onChange={(e) => setMessage(e.target.value)}
           />
         </label>
-        <Button type="submit" size="lg">
+        <Button type="submit" size="lg" pending={locked}>
           {t("contact.submit")}
         </Button>
         {sent ? (
