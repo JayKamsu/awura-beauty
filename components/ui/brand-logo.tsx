@@ -45,8 +45,8 @@ export function BrandLogo({
       <Image
         src={src}
         alt={t("header.brand")}
-        width={320}
-        height={360}
+        width={827}
+        height={638}
         priority={priority}
         sizes={sizes}
         className="h-full w-auto object-contain object-left"

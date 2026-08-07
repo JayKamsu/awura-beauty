@@ -13,9 +13,9 @@ export default function manifest(): MetadataRoute.Manifest {
     lang: "fr",
     icons: [
       {
-        src: "/images/brand/logo-orange.jpg",
-        sizes: "512x512",
-        type: "image/jpeg",
+        src: "/images/brand/logo-orange.png",
+        sizes: "827x638",
+        type: "image/png",
         purpose: "any",
       },
     ],

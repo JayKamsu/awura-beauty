@@ -64,7 +64,7 @@ export function HeroSection() {
             className="pointer-events-none absolute -right-4 -top-6 z-0 opacity-20"
           >
             <img
-              src="/images/brand/logo-orange.jpg"
+              src="/images/brand/logo-orange.png"
               alt=""
               className="h-48 w-auto select-none sm:h-56"
             />

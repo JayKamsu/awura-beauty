@@ -10,13 +10,15 @@ type AdminAccess = {
 };
 
 /**
- * Vérifie les droits admin via l’API serveur (`ADMIN_EMAILS` + `app_metadata.role`).
- * Ne jamais se fier uniquement au client pour l’allowlist e-mail.
+ * Droits admin pour l’UI :
+ * - `app_metadata.role === "admin"` (JWT) → affichage immédiat
+ * - confirmation serveur via `/api/admin/me` (`ADMIN_EMAILS` + rôle)
  */
 export function useAdminAccess(): AdminAccess {
   const { user, loading: authLoading } = useAuth();
   const adminFetch = useAdminFetch();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const roleHint = user?.app_metadata?.role === "admin";
+  const [apiAdmin, setApiAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export function useAdminAccess(): AdminAccess {
     }
 
     if (!user) {
-      setIsAdmin(false);
+      setApiAdmin(false);
       setLoading(false);
       return;
     }
@@ -36,10 +38,10 @@ export function useAdminAccess(): AdminAccess {
     setLoading(true);
     void adminFetch("/api/admin/me")
       .then((res) => {
-        if (!cancelled) setIsAdmin(res.ok);
+        if (!cancelled) setApiAdmin(res.ok);
       })
       .catch(() => {
-        if (!cancelled) setIsAdmin(false);
+        if (!cancelled) setApiAdmin(false);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -50,5 +52,8 @@ export function useAdminAccess(): AdminAccess {
     };
   }, [adminFetch, authLoading, user]);
 
-  return { isAdmin, loading };
+  return {
+    isAdmin: roleHint || apiAdmin,
+    loading: authLoading || loading,
+  };
 }

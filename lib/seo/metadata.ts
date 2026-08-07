@@ -26,7 +26,7 @@ export function buildPageMetadata({
   noIndex = false,
 }: BuildMetadataInput = {}): Metadata {
   const url = absoluteUrl(path);
-  const ogImage = absoluteUrl(image || "/images/brand/logo-orange.jpg");
+  const ogImage = absoluteUrl(image || "/images/brand/logo-orange.png");
   const fullTitle = title ? `${title} · ${SITE_NAME}` : `${SITE_NAME} — ${SITE_TAGLINE}`;
 
   return {
@@ -92,8 +92,8 @@ export function rootMetadata(): Metadata {
     applicationName: SITE_NAME,
     category: "shopping",
     icons: {
-      icon: "/images/brand/logo-orange.jpg",
-      apple: "/images/brand/logo-orange.jpg",
+      icon: "/images/brand/logo-orange.png",
+      apple: "/images/brand/logo-orange.png",
     },
   };
 }

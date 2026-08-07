@@ -12,7 +12,7 @@ export function organizationJsonLd() {
     "@type": "Organization",
     name: SITE_NAME,
     url: absoluteUrl("/"),
-    logo: absoluteUrl("/images/brand/logo-orange.jpg"),
+    logo: absoluteUrl("/images/brand/logo-orange.png"),
     email: CONTACT_EMAIL,
     description: SITE_DESCRIPTION,
     foundingDate: "2024",
@@ -108,7 +108,7 @@ export function articleJsonLd(post: {
       name: SITE_NAME,
       logo: {
         "@type": "ImageObject",
-        url: absoluteUrl("/images/brand/logo-orange.jpg"),
+        url: absoluteUrl("/images/brand/logo-orange.png"),
       },
     },
     mainEntityOfPage: absoluteUrl(path),

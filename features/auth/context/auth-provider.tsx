@@ -67,7 +67,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(async (email: string, password: string) => {
     const result = await signInWithEmail(email, password);
-    return result.error?.message ?? null;
+    if (result.error?.message) return result.error.message;
+    if (result.session) {
+      setSession(result.session);
+      setUser(result.session.user);
+    } else {
+      const current = await getSession();
+      setSession(current);
+      setUser(current?.user ?? null);
+    }
+    return null;
   }, []);
 
   const signUp = useCallback(async (email: string, password: string) => {
