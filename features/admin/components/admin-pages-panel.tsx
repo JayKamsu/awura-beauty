@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { AdminFeedback } from "@/features/admin/components/admin-feedback";
+import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
 import type { PageLayout, PageSectionConfig } from "@/lib/domain";
 
@@ -13,8 +15,13 @@ export function AdminPagesPanel() {
   const adminFetch = useAdminFetch();
   const [pageKey, setPageKey] = useState<(typeof PAGE_KEYS)[number]>("home");
   const [sections, setSections] = useState<PageSectionConfig[]>([]);
-  const [message, setMessage] = useState<string | null>(null);
+  const [savedSnapshot, setSavedSnapshot] = useState("[]");
+  const [feedback, setFeedback] = useState<{
+    tone: "success" | "error";
+    message: string;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pending, setPending] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -23,13 +30,20 @@ export function AdminPagesPanel() {
     const layout =
       json.layouts?.find((item) => item.pageKey === pageKey) ??
       json.layouts?.[0];
-    setSections(layout?.sections ?? []);
+    const next = layout?.sections ?? [];
+    setSections(next);
+    setSavedSnapshot(JSON.stringify(next));
     setLoading(false);
   }, [adminFetch, pageKey]);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  const dirty = useMemo(
+    () => JSON.stringify(sections) !== savedSnapshot,
+    [savedSnapshot, sections],
+  );
 
   const move = (index: number, direction: -1 | 1) => {
     const target = index + direction;
@@ -51,25 +65,28 @@ export function AdminPagesPanel() {
   };
 
   const save = async () => {
-    setMessage(null);
+    setPending(true);
+    setFeedback(null);
     const response = await adminFetch("/api/admin/pages", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pageKey, sections }),
     });
+    setPending(false);
     if (!response.ok) {
-      setMessage(t("admin.saveError"));
+      setFeedback({ tone: "error", message: t("admin.saveError") });
       return;
     }
-    setMessage(t("admin.saveSuccess"));
+    setSavedSnapshot(JSON.stringify(sections));
+    setFeedback({ tone: "success", message: t("admin.saveSuccess") });
   };
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-10 md:px-6">
-      <header className="space-y-2">
-        <h1 className="font-serif text-4xl text-primary">{t("admin.pagesTitle")}</h1>
-        <p className="text-muted">{t("admin.pagesSubtitle")}</p>
-      </header>
+    <main className="relative mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-10 pb-28 md:px-6">
+      <AdminPageHeader
+        title={t("admin.pagesTitle")}
+        subtitle={t("admin.pagesSubtitle")}
+      />
 
       <div className="flex flex-wrap gap-2">
         {PAGE_KEYS.map((key) => (
@@ -77,7 +94,7 @@ export function AdminPagesPanel() {
             key={key}
             type="button"
             onClick={() => setPageKey(key)}
-            className={`rounded-full px-4 py-2 text-sm transition ${
+            className={`inline-flex min-h-11 items-center rounded-xl px-4 text-sm transition ${
               pageKey === key
                 ? "bg-primary text-background"
                 : "border border-border text-muted hover:border-accent"
@@ -88,11 +105,13 @@ export function AdminPagesPanel() {
         ))}
       </div>
 
-      {message ? (
-        <p className="rounded-xl bg-background-alt px-4 py-3 text-sm text-primary">
-          {message}
+      {dirty ? (
+        <p className="text-sm text-accent" role="status">
+          {t("admin.unsavedChanges")}
         </p>
       ) : null}
+
+      {feedback ? <AdminFeedback tone={feedback.tone} message={feedback.message} /> : null}
 
       {loading ? (
         <p className="text-muted">{t("admin.loading")}</p>
@@ -144,9 +163,16 @@ export function AdminPagesPanel() {
         </ul>
       )}
 
-      <Button type="button" onClick={() => void save()}>
-        {t("admin.pages.save")}
-      </Button>
+      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-sm lg:left-60">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
+          <p className="text-sm text-muted">
+            {dirty ? t("admin.unsavedChanges") : t("admin.allSaved")}
+          </p>
+          <Button type="button" disabled={pending || !dirty} onClick={() => void save()}>
+            {pending ? t("admin.saving") : t("admin.pages.save")}
+          </Button>
+        </div>
+      </div>
     </main>
   );
 }

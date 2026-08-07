@@ -13,9 +13,9 @@ export default function manifest(): MetadataRoute.Manifest {
     lang: "fr",
     icons: [
       {
-        src: "/favicon.ico",
+        src: "/favicon.png",
         sizes: "32x32",
-        type: "image/x-icon",
+        type: "image/png",
         purpose: "any",
       },
       {
@@ -33,6 +33,11 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         src: "/apple-icon.png",
         sizes: "180x180",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/images/brand/logo-orange.png",
         type: "image/png",
         purpose: "any",
       },

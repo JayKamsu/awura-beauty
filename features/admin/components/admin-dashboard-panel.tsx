@@ -3,10 +3,21 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { AdminEmptyState } from "@/features/admin/components/admin-empty-state";
+import { AdminFeedback } from "@/features/admin/components/admin-feedback";
+import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
 import { formatPrice } from "@/lib/format/price";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import type { AdminDashboardStats } from "@/lib/infrastructure/supabase/admin-dashboard";
+
+const QUICK_LINKS = [
+  { href: "/admin/produits", key: "manageProducts" },
+  { href: "/admin/commandes", key: "manageOrders" },
+  { href: "/admin/contenu", key: "manageContent" },
+  { href: "/admin/pages", key: "managePages" },
+  { href: "/admin/clients", key: "manageCustomers" },
+] as const;
 
 export function AdminDashboardPanel() {
   const { t, i18n } = useTranslation();
@@ -38,15 +49,15 @@ export function AdminDashboardPanel() {
 
   if (error) {
     return (
-      <main className="px-4 py-10 md:px-8">
-        <p className="text-muted">{t("admin.saveError")}</p>
+      <main className="mx-auto w-full max-w-6xl px-4 py-10 md:px-8">
+        <AdminFeedback tone="error" message={t("admin.saveError")} />
       </main>
     );
   }
 
   if (!stats) {
     return (
-      <main className="px-4 py-10 md:px-8">
+      <main className="mx-auto w-full max-w-6xl px-4 py-10 md:px-8">
         <p className="text-muted">{t("admin.loading")}</p>
       </main>
     );
@@ -54,19 +65,12 @@ export function AdminDashboardPanel() {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
-      <header className="space-y-1">
-        <p className="text-xs uppercase tracking-[0.18em] text-accent">
-          {t("admin.eyebrow")}
-        </p>
-        <h1 className="font-serif text-3xl text-primary md:text-4xl">
-          {t("admin.dashboardTitle")}
-        </h1>
-        <p className="max-w-xl text-sm text-muted md:text-base">
-          {t("admin.dashboardSubtitle")}
-        </p>
-      </header>
+      <AdminPageHeader
+        title={t("admin.dashboardTitle")}
+        subtitle={t("admin.dashboardSubtitle")}
+      />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl bg-background-alt px-5 py-5">
           <p className="text-xs uppercase tracking-wide text-muted">
             {t("admin.ordersToday")}
@@ -88,16 +92,29 @@ export function AdminDashboardPanel() {
           <p className="mt-2 font-serif text-3xl text-primary">
             {stats.lowStockProducts.length}
           </p>
-        </div>
-        <div className="rounded-2xl bg-background-alt px-5 py-5">
-          <p className="text-xs uppercase tracking-wide text-muted">
-            {t("admin.recentOrders")}
-          </p>
-          <p className="mt-2 font-serif text-3xl text-primary">
-            {stats.recentOrders.length}
-          </p>
+          <Link
+            href="/admin/produits"
+            className="mt-3 inline-block text-sm text-accent hover:text-accent-light"
+          >
+            {t("admin.viewLowStock")}
+          </Link>
         </div>
       </div>
+
+      <section className="space-y-3">
+        <h2 className="font-serif text-2xl text-primary">{t("admin.quickLinks")}</h2>
+        <div className="flex flex-wrap gap-2">
+          {QUICK_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="inline-flex min-h-11 items-center rounded-xl border border-border px-4 text-sm text-primary transition hover:border-accent hover:text-accent"
+            >
+              {t(`admin.${link.key}`)}
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="space-y-4">
@@ -111,9 +128,7 @@ export function AdminDashboardPanel() {
             </Link>
           </div>
           {stats.lowStockProducts.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted">
-              {t("admin.noLowStock")}
-            </p>
+            <AdminEmptyState message={t("admin.noLowStock")} />
           ) : (
             <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border">
               {stats.lowStockProducts.map((product) => (
@@ -144,9 +159,7 @@ export function AdminDashboardPanel() {
             </Link>
           </div>
           {stats.recentOrders.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted">
-              {t("admin.empty")}
-            </p>
+            <AdminEmptyState message={t("admin.empty")} />
           ) : (
             <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border">
               {stats.recentOrders.map((order) => (

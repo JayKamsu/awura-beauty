@@ -20,6 +20,13 @@ const NAV = [
 
 type Gate = "loading" | "login" | "forbidden" | "ok";
 
+function navTitleKey(pathname: string): string {
+  const match = NAV.find((item) =>
+    item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href),
+  );
+  return match ? `admin.nav.${match.key}` : "admin.navBrand";
+}
+
 export function AdminShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const pathname = usePathname();
@@ -27,7 +34,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const adminFetch = useAdminFetch();
   const [gate, setGate] = useState<Gate>("loading");
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const isLoginPage = pathname === "/admin/connexion";
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     let cancelled = false;
@@ -115,6 +127,31 @@ export function AdminShell({ children }: { children: ReactNode }) {
     );
   }
 
+  const navLinks = (
+    <nav className="flex flex-col gap-1" aria-label={t("admin.navLabel")}>
+      {NAV.map((item) => {
+        const active =
+          item.href === "/admin"
+            ? pathname === "/admin"
+            : pathname.startsWith(item.href);
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`rounded-xl px-3 py-2.5 text-sm transition ${
+              active
+                ? "bg-primary text-background"
+                : "text-muted hover:bg-background hover:text-primary"
+            }`}
+            onClick={() => setMenuOpen(false)}
+          >
+            {t(`admin.nav.${item.key}`)}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+
   return (
     <div className="flex min-h-full flex-1 bg-background">
       <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-background-alt/50 lg:flex">
@@ -132,27 +169,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </Link>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-1 p-3" aria-label={t("admin.navLabel")}>
-          {NAV.map((item) => {
-            const active =
-              item.href === "/admin"
-                ? pathname === "/admin"
-                : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`rounded-xl px-3 py-2.5 text-sm transition ${
-                  active
-                    ? "bg-primary text-background"
-                    : "text-muted hover:bg-background hover:text-primary"
-                }`}
-              >
-                {t(`admin.nav.${item.key}`)}
-              </Link>
-            );
-          })}
-        </nav>
+        <div className="flex flex-1 flex-col gap-1 p-3">{navLinks}</div>
 
         <div className="space-y-3 border-t border-border p-4">
           {adminEmail ? (
@@ -181,49 +198,73 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="border-b border-border bg-background lg:hidden">
           <div className="flex items-center justify-between gap-3 px-4 py-3">
-            <Link href="/admin" className="flex min-w-0 items-center gap-2">
-              <BrandLogo tone="auto" className="h-9 w-auto shrink-0" />
-              <span className="truncate font-serif text-lg text-primary">
-                {t("admin.navBrand")}
-              </span>
-            </Link>
-            <div className="flex shrink-0 items-center gap-1">
-              <Link
-                href="/"
-                className="inline-flex min-h-11 items-center rounded-xl px-2 text-xs text-muted"
+            <div className="flex min-w-0 items-center gap-2">
+              <button
+                type="button"
+                className="inline-flex size-11 items-center justify-center rounded-xl text-foreground transition hover:bg-background-alt"
+                aria-expanded={menuOpen}
+                aria-label={menuOpen ? t("admin.closeMenu") : t("admin.openMenu")}
+                onClick={() => setMenuOpen((value) => !value)}
               >
-                {t("admin.guard.backHome")}
-              </Link>
-              <Button type="button" variant="ghost" size="md" onClick={() => void logout()}>
-                {t("account.logout")}
-              </Button>
+                <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.75">
+                  {menuOpen ? (
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  ) : (
+                    <path d="M4 7h16M4 12h16M4 17h16" />
+                  )}
+                </svg>
+              </button>
+              <div className="min-w-0">
+                <p className="truncate font-serif text-lg text-primary">
+                  {t(navTitleKey(pathname))}
+                </p>
+              </div>
+            </div>
+            <Link href="/admin" className="shrink-0">
+              <BrandLogo tone="auto" className="h-9 w-auto" />
+            </Link>
+          </div>
+        </header>
+
+        {menuOpen ? (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <button
+              type="button"
+              className="absolute inset-0 bg-foreground/30"
+              aria-label={t("admin.closeMenu")}
+              onClick={() => setMenuOpen(false)}
+            />
+            <div className="absolute inset-y-0 left-0 flex w-[min(20rem,85vw)] flex-col bg-background shadow-lg">
+              <div className="border-b border-border px-4 py-4">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-accent">
+                  {t("admin.eyebrow")}
+                </p>
+                <p className="font-serif text-xl text-primary">{t("admin.navBrand")}</p>
+              </div>
+              <div className="flex-1 overflow-y-auto p-3">{navLinks}</div>
+              <div className="space-y-3 border-t border-border p-4">
+                {adminEmail ? (
+                  <p className="truncate text-xs text-muted">{adminEmail}</p>
+                ) : null}
+                <Button
+                  type="button"
+                  variant="primary-outline"
+                  className="w-full"
+                  onClick={() => void logout()}
+                >
+                  {t("account.logout")}
+                </Button>
+                <Link
+                  href="/"
+                  className="block text-center text-sm text-muted hover:text-accent"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {t("admin.guard.backHome")}
+                </Link>
+              </div>
             </div>
           </div>
-          <nav
-            className="flex gap-2 overflow-x-auto px-3 pb-3 snap-x snap-mandatory"
-            aria-label={t("admin.navLabel")}
-          >
-            {NAV.map((item) => {
-              const active =
-                item.href === "/admin"
-                  ? pathname === "/admin"
-                  : pathname.startsWith(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex min-h-11 shrink-0 snap-start items-center rounded-xl px-3 text-sm transition ${
-                    active
-                      ? "bg-primary text-background"
-                      : "border border-border text-muted"
-                  }`}
-                >
-                  {t(`admin.nav.${item.key}`)}
-                </Link>
-              );
-            })}
-          </nav>
-        </header>
+        ) : null}
 
         <div className="flex-1">{children}</div>
       </div>

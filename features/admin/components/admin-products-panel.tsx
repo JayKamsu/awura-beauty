@@ -1,9 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { AdminEmptyState } from "@/features/admin/components/admin-empty-state";
+import { AdminFeedback } from "@/features/admin/components/admin-feedback";
+import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
+import { AdminSearchField } from "@/features/admin/components/admin-search-field";
 import { ConfirmDeleteButton } from "@/features/admin/components/confirm-delete-button";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
@@ -26,29 +30,47 @@ const emptyForm = {
   stock: 10,
 };
 
+const fieldClass =
+  "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent";
+
 export function AdminProductsPanel() {
   const { t } = useTranslation();
   const adminFetch = useAdminFetch();
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [form, setForm] = useState(emptyForm);
-  const [message, setMessage] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    tone: "success" | "error";
+    message: string;
+  } | null>(null);
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [pending, setPending] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   const load = useCallback(async () => {
     const response = await adminFetch("/api/admin/products");
     const json = (await response.json()) as { products?: ProductRow[] };
     setProducts(json.products ?? []);
+    setLoaded(true);
   }, [adminFetch]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  const fieldClass =
-    "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent";
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return products;
+    return products.filter(
+      (product) =>
+        product.name.toLowerCase().includes(q) ||
+        product.slug.toLowerCase().includes(q) ||
+        product.category.toLowerCase().includes(q),
+    );
+  }, [products, query]);
 
-  const uploadImage = async (file: File) => {
-    setUploading(true);
+  const uploadImage = async (file: File, field: "image_url" | "ingredients_image_url" | "lifestyle_image_url") => {
+    setUploading(field);
     const body = new FormData();
     body.append("file", file);
     const response = await adminFetch("/api/admin/upload", {
@@ -56,16 +78,17 @@ export function AdminProductsPanel() {
       body,
     });
     const json = (await response.json()) as { url?: string; error?: string };
-    setUploading(false);
+    setUploading(null);
     if (!response.ok || !json.url) {
-      setMessage(json.error ?? t("admin.uploadError"));
-      return null;
+      setFeedback({ tone: "error", message: json.error ?? t("admin.uploadError") });
+      return;
     }
-    return json.url;
+    setForm((prev) => ({ ...prev, [field]: json.url! }));
   };
 
   const save = async () => {
-    setMessage(null);
+    setPending(true);
+    setFeedback(null);
     const payload = {
       ...(form.id ? { id: form.id } : {}),
       slug: form.slug,
@@ -89,11 +112,12 @@ export function AdminProductsPanel() {
       body: JSON.stringify(payload),
     });
     const json = (await response.json()) as { error?: string };
+    setPending(false);
     if (!response.ok) {
-      setMessage(json.error ?? t("admin.saveError"));
+      setFeedback({ tone: "error", message: json.error ?? t("admin.saveError") });
       return;
     }
-    setMessage(t("admin.saveSuccess"));
+    setFeedback({ tone: "success", message: t("admin.saveSuccess") });
     setForm(emptyForm);
     await load();
   };
@@ -115,6 +139,7 @@ export function AdminProductsPanel() {
       is_new: product.is_new,
       stock: product.stock,
     });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const remove = async (id: string) => {
@@ -122,140 +147,198 @@ export function AdminProductsPanel() {
       method: "DELETE",
     });
     if (!response.ok) {
-      setMessage(t("admin.deleteError"));
+      setFeedback({ tone: "error", message: t("admin.deleteError") });
       return;
     }
-    setMessage(t("admin.deleteSuccess"));
+    setFeedback({ tone: "success", message: t("admin.deleteSuccess") });
+    if (form.id === id) setForm(emptyForm);
     await load();
   };
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 md:px-6">
-      <header className="space-y-2">
-        <h1 className="font-serif text-4xl text-primary">{t("admin.productsTitle")}</h1>
-        <p className="text-muted">{t("admin.productsSubtitle")}</p>
-      </header>
+      <AdminPageHeader
+        title={t("admin.productsTitle")}
+        subtitle={t("admin.productsSubtitle")}
+      />
 
-      {message ? (
-        <p className="rounded-xl bg-background-alt px-4 py-3 text-sm text-primary">{message}</p>
-      ) : null}
+      {feedback ? <AdminFeedback tone={feedback.tone} message={feedback.message} /> : null}
 
-      <section className="grid gap-4 rounded-2xl border border-border p-5 lg:grid-cols-2">
-        {(
-          [
-            ["name", "text"],
-            ["slug", "text"],
-            ["price", "number"],
-            ["stock", "number"],
-            ["short_description", "text"],
-            ["image_url", "text"],
-          ] as const
-        ).map(([key, type]) => (
-          <label key={key} className="space-y-1 text-sm">
-            <span className="text-muted">{t(`admin.fields.${key}`)}</span>
-            <input
-              type={type}
+      <section className="space-y-4 rounded-2xl border border-border p-5">
+        <h2 className="font-serif text-2xl text-primary">
+          {form.id ? t("admin.editProduct") : t("admin.createProduct")}
+        </h2>
+        <div className="grid gap-4 lg:grid-cols-2">
+          {(
+            [
+              ["name", "text"],
+              ["slug", "text"],
+              ["price", "number"],
+              ["stock", "number"],
+              ["short_description", "text"],
+              ["image_url", "text"],
+              ["ingredients_image_url", "text"],
+              ["lifestyle_image_url", "text"],
+            ] as const
+          ).map(([key, type]) => (
+            <label key={key} className="space-y-1 text-sm">
+              <span className="text-muted">{t(`admin.fields.${key}`)}</span>
+              <input
+                type={type}
+                className={fieldClass}
+                value={String(form[key])}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    [key]: type === "number" ? Number(e.target.value) : e.target.value,
+                  }))
+                }
+              />
+            </label>
+          ))}
+
+          <label className="space-y-1 text-sm lg:col-span-2">
+            <span className="text-muted">{t("admin.fields.description")}</span>
+            <textarea
               className={fieldClass}
-              value={String(form[key])}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  [key]: type === "number" ? Number(e.target.value) : e.target.value,
-                }))
-              }
+              rows={3}
+              value={form.description}
+              onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
             />
           </label>
-        ))}
 
-        <label className="space-y-1 text-sm lg:col-span-2">
-          <span className="text-muted">{t("admin.fields.description")}</span>
-          <textarea
-            className={fieldClass}
-            rows={3}
-            value={form.description}
-            onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-          />
-        </label>
+          <label className="space-y-1 text-sm lg:col-span-2">
+            <span className="text-muted">{t("admin.fields.ingredients")}</span>
+            <textarea
+              className={fieldClass}
+              rows={3}
+              value={form.ingredients}
+              onChange={(e) => setForm((prev) => ({ ...prev, ingredients: e.target.value }))}
+            />
+          </label>
 
-        <label className="space-y-1 text-sm">
-          <span className="text-muted">{t("admin.fields.category")}</span>
-          <select
-            className={fieldClass}
-            value={form.category}
-            onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
-          >
-            {PRODUCT_CATEGORIES.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </label>
+          <label className="space-y-1 text-sm lg:col-span-2">
+            <span className="text-muted">{t("admin.fields.usage")}</span>
+            <textarea
+              className={fieldClass}
+              rows={3}
+              value={form.usage}
+              onChange={(e) => setForm((prev) => ({ ...prev, usage: e.target.value }))}
+            />
+          </label>
 
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={form.is_new}
-            onChange={(e) => setForm((prev) => ({ ...prev, is_new: e.target.checked }))}
-          />
-          <span className="text-muted">{t("admin.fields.is_new")}</span>
-        </label>
+          <label className="space-y-1 text-sm">
+            <span className="text-muted">{t("admin.fields.category")}</span>
+            <select
+              className={fieldClass}
+              value={form.category}
+              onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
+            >
+              {PRODUCT_CATEGORIES.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <label className="space-y-1 text-sm lg:col-span-2">
-          <span className="text-muted">{t("admin.uploadImage")}</span>
-          <input
-            type="file"
-            accept="image/*"
-            disabled={uploading}
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-              void uploadImage(file).then((url) => {
-                if (url) setForm((prev) => ({ ...prev, image_url: url }));
-              });
-            }}
-          />
-        </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={form.is_new}
+              onChange={(e) => setForm((prev) => ({ ...prev, is_new: e.target.checked }))}
+            />
+            <span className="text-muted">{t("admin.fields.is_new")}</span>
+          </label>
 
-        <div className="flex flex-wrap gap-3 lg:col-span-2">
-          <Button type="button" onClick={() => void save()}>
-            {form.id ? t("admin.updateProduct") : t("admin.createProduct")}
-          </Button>
-          <Button type="button" variant="ghost" onClick={() => setForm(emptyForm)}>
-            {t("admin.resetForm")}
-          </Button>
+          {(
+            [
+              ["image_url", "uploadImage"],
+              ["ingredients_image_url", "uploadIngredientsImage"],
+              ["lifestyle_image_url", "uploadLifestyleImage"],
+            ] as const
+          ).map(([field, labelKey]) => (
+            <label key={field} className="space-y-1 text-sm">
+              <span className="text-muted">{t(`admin.${labelKey}`)}</span>
+              <input
+                type="file"
+                accept="image/*"
+                disabled={Boolean(uploading)}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  void uploadImage(file, field);
+                }}
+              />
+              {uploading === field ? (
+                <span className="block text-xs text-muted">{t("admin.uploading")}</span>
+              ) : null}
+            </label>
+          ))}
+
+          <div className="flex flex-wrap gap-3 lg:col-span-2">
+            <Button type="button" disabled={pending} onClick={() => void save()}>
+              {pending
+                ? t("admin.saving")
+                : form.id
+                  ? t("admin.updateProduct")
+                  : t("admin.createProduct")}
+            </Button>
+            <Button type="button" variant="ghost" onClick={() => setForm(emptyForm)}>
+              {t("admin.resetForm")}
+            </Button>
+          </div>
         </div>
       </section>
 
-      <section className="space-y-3">
-        {products.map((product) => (
-          <article
-            key={product.id}
-            className="flex flex-col gap-4 rounded-2xl border border-border p-4 sm:flex-row sm:items-center"
-          >
-            <div className="relative size-20 overflow-hidden rounded-xl bg-background-alt">
-              {product.image_url ? (
-                <Image src={product.image_url} alt={product.name} fill className="object-cover" />
-              ) : null}
-            </div>
-            <div className="flex-1">
-              <p className="font-serif text-xl text-primary">{product.name}</p>
-              <p className="text-sm text-muted">
-                {product.slug} · {t("admin.stockLeft", { count: product.stock })}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="primary-outline" onClick={() => edit(product)}>
-                {t("admin.edit")}
-              </Button>
-              <ConfirmDeleteButton
-                label={t("admin.delete")}
-                confirmMessage={t("admin.confirmDeleteProduct", { name: product.name })}
-                onConfirm={() => remove(product.id)}
-              />
-            </div>
-          </article>
-        ))}
+      <section className="space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="font-serif text-2xl text-primary">{t("admin.productsList")}</h2>
+          <AdminSearchField value={query} onChange={setQuery} />
+        </div>
+
+        {!loaded ? (
+          <p className="text-muted">{t("admin.loading")}</p>
+        ) : filtered.length === 0 ? (
+          <AdminEmptyState
+            message={
+              products.length === 0
+                ? t("admin.noProducts")
+                : t("admin.noSearchResults")
+            }
+          />
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((product) => (
+              <article
+                key={product.id}
+                className="flex flex-col gap-4 rounded-2xl border border-border p-4 sm:flex-row sm:items-center"
+              >
+                <div className="relative size-20 overflow-hidden rounded-xl bg-background-alt">
+                  {product.image_url ? (
+                    <Image src={product.image_url} alt={product.name} fill className="object-cover" />
+                  ) : null}
+                </div>
+                <div className="flex-1">
+                  <p className="font-serif text-xl text-primary">{product.name}</p>
+                  <p className="text-sm text-muted">
+                    {product.slug} · {t("admin.stockLeft", { count: product.stock })}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" variant="primary-outline" onClick={() => edit(product)}>
+                    {t("admin.edit")}
+                  </Button>
+                  <ConfirmDeleteButton
+                    label={t("admin.delete")}
+                    confirmMessage={t("admin.confirmDeleteProduct", { name: product.name })}
+                    onConfirm={() => remove(product.id)}
+                  />
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );

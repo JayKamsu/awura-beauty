@@ -1,8 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { AdminEmptyState } from "@/features/admin/components/admin-empty-state";
+import { AdminFeedback } from "@/features/admin/components/admin-feedback";
+import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
+import { AdminSearchField } from "@/features/admin/components/admin-search-field";
 import { ConfirmDeleteButton } from "@/features/admin/components/confirm-delete-button";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
 import type { BlogPost, BlogPostKind } from "@/lib/infrastructure/supabase/blog-types";
@@ -19,27 +24,65 @@ const emptyForm = {
   body: "",
 };
 
+const fieldClass =
+  "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent";
+
 export function AdminContentPanel() {
   const { t } = useTranslation();
   const adminFetch = useAdminFetch();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [form, setForm] = useState(emptyForm);
-  const [message, setMessage] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{
+    tone: "success" | "error";
+    message: string;
+  } | null>(null);
+  const [query, setQuery] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   const load = useCallback(async () => {
     const response = await adminFetch("/api/admin/posts");
     const json = (await response.json()) as { posts?: BlogPost[] };
     setPosts(json.posts ?? []);
+    setLoaded(true);
   }, [adminFetch]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  const fieldClass =
-    "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent";
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return posts;
+    return posts.filter(
+      (post) =>
+        post.title.toLowerCase().includes(q) ||
+        post.slug.toLowerCase().includes(q) ||
+        post.kind.toLowerCase().includes(q),
+    );
+  }, [posts, query]);
+
+  const uploadCover = async (file: File) => {
+    setUploading(true);
+    const body = new FormData();
+    body.append("file", file);
+    const response = await adminFetch("/api/admin/upload", {
+      method: "POST",
+      body,
+    });
+    const json = (await response.json()) as { url?: string; error?: string };
+    setUploading(false);
+    if (!response.ok || !json.url) {
+      setFeedback({ tone: "error", message: json.error ?? t("admin.uploadError") });
+      return;
+    }
+    setForm((prev) => ({ ...prev, cover_image_url: json.url! }));
+  };
 
   const save = async () => {
+    setPending(true);
+    setFeedback(null);
     const paragraphs = form.body
       .split(/\n+/)
       .map((text) => text.trim())
@@ -64,12 +107,13 @@ export function AdminContentPanel() {
       body: JSON.stringify(payload),
     });
 
+    setPending(false);
     if (!response.ok) {
-      setMessage(t("admin.saveError"));
+      setFeedback({ tone: "error", message: t("admin.saveError") });
       return;
     }
 
-    setMessage(t("admin.saveSuccess"));
+    setFeedback({ tone: "success", message: t("admin.saveSuccess") });
     setForm(emptyForm);
     await load();
   };
@@ -89,6 +133,7 @@ export function AdminContentPanel() {
         .map((block) => (block.type === "paragraph" ? block.text : ""))
         .join("\n\n"),
     });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const remove = async (id: string) => {
@@ -96,25 +141,27 @@ export function AdminContentPanel() {
       method: "DELETE",
     });
     if (!response.ok) {
-      setMessage(t("admin.deleteError"));
+      setFeedback({ tone: "error", message: t("admin.deleteError") });
       return;
     }
-    setMessage(t("admin.deleteSuccess"));
+    setFeedback({ tone: "success", message: t("admin.deleteSuccess") });
+    if (form.id === id) setForm(emptyForm);
     await load();
   };
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 md:px-6">
-      <header className="space-y-2">
-        <h1 className="font-serif text-4xl text-primary">{t("admin.contentTitle")}</h1>
-        <p className="text-muted">{t("admin.contentSubtitle")}</p>
-      </header>
+      <AdminPageHeader
+        title={t("admin.contentTitle")}
+        subtitle={t("admin.contentSubtitle")}
+      />
 
-      {message ? (
-        <p className="rounded-xl bg-background-alt px-4 py-3 text-sm text-primary">{message}</p>
-      ) : null}
+      {feedback ? <AdminFeedback tone={feedback.tone} message={feedback.message} /> : null}
 
       <section className="grid gap-4 rounded-2xl border border-border p-5 lg:grid-cols-2">
+        <h2 className="font-serif text-2xl text-primary lg:col-span-2">
+          {form.id ? t("admin.updateContent") : t("admin.createContent")}
+        </h2>
         <label className="space-y-1 text-sm">
           <span className="text-muted">{t("admin.fields.title")}</span>
           <input
@@ -172,6 +219,18 @@ export function AdminContentPanel() {
           />
         </label>
         <label className="space-y-1 text-sm">
+          <span className="text-muted">{t("admin.uploadCover")}</span>
+          <input
+            type="file"
+            accept="image/*"
+            disabled={uploading}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) void uploadCover(file);
+            }}
+          />
+        </label>
+        <label className="space-y-1 text-sm lg:col-span-2">
           <span className="text-muted">{t("admin.fields.product_slug")}</span>
           <input
             className={fieldClass}
@@ -189,8 +248,12 @@ export function AdminContentPanel() {
           />
         </label>
         <div className="flex flex-wrap gap-3 lg:col-span-2">
-          <Button type="button" onClick={() => void save()}>
-            {form.id ? t("admin.updateContent") : t("admin.createContent")}
+          <Button type="button" disabled={pending} onClick={() => void save()}>
+            {pending
+              ? t("admin.saving")
+              : form.id
+                ? t("admin.updateContent")
+                : t("admin.createContent")}
           </Button>
           <Button type="button" variant="ghost" onClick={() => setForm(emptyForm)}>
             {t("admin.resetForm")}
@@ -198,30 +261,64 @@ export function AdminContentPanel() {
         </div>
       </section>
 
-      <section className="space-y-3">
-        {posts.map((post) => (
-          <article
-            key={post.id}
-            className="flex flex-col gap-3 rounded-2xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div>
-              <p className="text-xs uppercase tracking-wide text-muted">
-                {post.kind === "tutorial" ? t("blog.badgeTutorial") : t("blog.badgeArticle")}
-              </p>
-              <p className="font-serif text-xl text-primary">{post.title}</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="primary-outline" onClick={() => edit(post)}>
-                {t("admin.edit")}
-              </Button>
-              <ConfirmDeleteButton
-                label={t("admin.delete")}
-                confirmMessage={t("admin.confirmDeleteContent", { title: post.title })}
-                onConfirm={() => remove(post.id)}
-              />
-            </div>
-          </article>
-        ))}
+      <section className="space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="font-serif text-2xl text-primary">{t("admin.contentList")}</h2>
+          <AdminSearchField value={query} onChange={setQuery} />
+        </div>
+
+        {!loaded ? (
+          <p className="text-muted">{t("admin.loading")}</p>
+        ) : filtered.length === 0 ? (
+          <AdminEmptyState
+            message={
+              posts.length === 0 ? t("admin.noContent") : t("admin.noSearchResults")
+            }
+          />
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((post) => {
+              const href =
+                post.kind === "tutorial"
+                  ? `/tutoriels/${post.slug}`
+                  : `/blog/${post.slug}`;
+              return (
+                <article
+                  key={post.id}
+                  className="flex flex-col gap-3 rounded-2xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted">
+                      {post.kind === "tutorial"
+                        ? t("blog.badgeTutorial")
+                        : t("blog.badgeArticle")}
+                    </p>
+                    <p className="font-serif text-xl text-primary">{post.title}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      href={href}
+                      target="_blank"
+                      className="inline-flex min-h-11 items-center rounded-xl px-3 text-sm text-accent hover:text-accent-light"
+                    >
+                      {t("admin.viewOnSite")}
+                    </Link>
+                    <Button type="button" variant="primary-outline" onClick={() => edit(post)}>
+                      {t("admin.edit")}
+                    </Button>
+                    <ConfirmDeleteButton
+                      label={t("admin.delete")}
+                      confirmMessage={t("admin.confirmDeleteContent", {
+                        title: post.title,
+                      })}
+                      onConfirm={() => remove(post.id)}
+                    />
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </section>
     </main>
   );
