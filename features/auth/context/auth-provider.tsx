@@ -19,13 +19,18 @@ import {
 } from "@/lib/infrastructure/supabase/auth";
 import { getSupabaseEnv } from "@/lib/infrastructure/supabase/client";
 
+export type SignUpResult = {
+  error: string | null;
+  needsEmailConfirmation: boolean;
+};
+
 type AuthContextValue = {
   user: User | null;
   session: Session | null;
   loading: boolean;
   configured: boolean;
   signIn: (email: string, password: string) => Promise<string | null>;
-  signUp: (email: string, password: string) => Promise<string | null>;
+  signUp: (email: string, password: string) => Promise<SignUpResult>;
   logout: () => Promise<void>;
 };
 
@@ -67,7 +72,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = useCallback(async (email: string, password: string) => {
     const result = await signUpWithEmail(email, password);
-    return result.error?.message ?? null;
+    if (result.error?.message) {
+      return { error: result.error.message, needsEmailConfirmation: false };
+    }
+    if (result.session) {
+      setSession(result.session);
+      setUser(result.session.user);
+    }
+    return {
+      error: null,
+      needsEmailConfirmation: Boolean(result.needsEmailConfirmation),
+    };
   }, []);
 
   const logout = useCallback(async () => {

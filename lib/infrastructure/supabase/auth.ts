@@ -1,10 +1,13 @@
 import { createSupabaseClient } from "@/lib/infrastructure/supabase/client";
+import { absoluteUrl } from "@/lib/site";
 import type { User, Session, AuthError } from "@supabase/supabase-js";
 
 export type AuthResult = {
   user: User | null;
   session: Session | null;
   error: AuthError | null;
+  /** True si l'utilisateur doit confirmer son e-mail avant de se connecter. */
+  needsEmailConfirmation?: boolean;
 };
 
 export async function getCurrentUserId(): Promise<string | null> {
@@ -46,8 +49,39 @@ export async function signUpWithEmail(
     };
   }
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
-  return { user: data.user, session: data.session, error };
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: absoluteUrl("/auth/callback"),
+    },
+  });
+
+  return {
+    user: data.user,
+    session: data.session,
+    error,
+    needsEmailConfirmation: Boolean(data.user) && !data.session && !error,
+  };
+}
+
+/** Finalise le lien de confirmation / magic link (PKCE `?code=`). */
+export async function exchangeAuthCode(
+  code: string,
+): Promise<{ error: AuthError | null }> {
+  const supabase = createSupabaseClient();
+  if (!supabase) {
+    return {
+      error: {
+        name: "AuthError",
+        message: "Supabase is not configured",
+        status: 500,
+      } as AuthError,
+    };
+  }
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  return { error };
 }
 
 export async function signInWithEmail(

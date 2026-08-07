@@ -28,21 +28,32 @@ export function AuthForm({ mode }: AuthFormProps) {
     setInfo(null);
     setPending(true);
 
-    const message =
-      mode === "login"
-        ? await signIn(email, password)
-        : await signUp(email, password);
-
-    setPending(false);
-
-    if (message) {
-      setError(message);
+    if (mode === "login") {
+      const message = await signIn(email, password);
+      setPending(false);
+      if (message) {
+        setError(message);
+        return;
+      }
+      router.push("/compte");
+      router.refresh();
       return;
     }
 
-    if (mode === "signup") {
-      setInfo(t("auth.signupSuccess"));
+    const result = await signUp(email, password);
+    setPending(false);
+
+    if (result.error) {
+      setError(result.error);
+      return;
     }
+
+    if (result.needsEmailConfirmation) {
+      setInfo(t("auth.signupConfirmEmail"));
+      return;
+    }
+
+    setInfo(t("auth.signupSuccess"));
     router.push("/compte");
     router.refresh();
   };
