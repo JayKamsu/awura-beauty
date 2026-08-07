@@ -45,3 +45,6 @@ next-env.d.ts
 /public/uploads/*
 !/public/uploads/.gitkeep
 
+# supabase local CLI cache
+/supabase/.temp/
+
