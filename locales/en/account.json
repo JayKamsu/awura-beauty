@@ -5,11 +5,25 @@
     "loading": "Loading account…",
     "loginRequired": "Sign in to view your orders and shipping status.",
     "logout": "Sign out",
+    "navLabel": "Account sections",
+    "nav": {
+      "profile": "Profile",
+      "orders": "Orders",
+      "diagnostics": "Diagnostics",
+      "security": "Security"
+    },
     "profileTitle": "My profile",
     "profileEmail": "Email",
     "profileSince": "Member since",
-    "adminHint": "You have access to the admin area.",
-    "openAdmin": "Open admin",
+    "profileFirstName": "First name",
+    "profileLastName": "Last name",
+    "profilePhone": "Phone",
+    "profileLoading": "Loading profile…",
+    "profileSave": "Save",
+    "profileSaving": "Saving…",
+    "profileSaved": "Profile updated.",
+    "profileSaveError": "Unable to save profile.",
+    "profileUpdatedAt": "Last updated: {{date}}",
     "ordersTitle": "Order history",
     "ordersLoading": "Loading orders…",
     "noOrders": "No orders yet.",
@@ -17,6 +31,7 @@
     "paymentStatus": "Payment",
     "shippingStatus": "Shipping",
     "paymentMethod": "Method",
+    "shippingAddress": "Shipping address",
     "status": {
       "payment": {
         "pending": "Pending",
@@ -36,6 +51,20 @@
     "trackingNumber": "Tracking number",
     "refreshTracking": "Refresh tracking",
     "trackingLoading": "Tracking…",
-    "openTracking": "Open tracking"
+    "openTracking": "Open tracking",
+    "diagnosticsTitle": "My diagnostics",
+    "diagnosticsLoading": "Loading diagnostics…",
+    "diagnosticsEmpty": "No diagnostics saved yet.",
+    "diagnosticsNew": "Take a diagnostic",
+    "diagnosticsRecommendations": "Recommended products",
+    "securityTitle": "Security",
+    "securitySubtitle": "Change your password to keep your account secure.",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "passwordSave": "Update password",
+    "passwordSaving": "Updating…",
+    "passwordChanged": "Password updated.",
+    "passwordTooShort": "Password must be at least 6 characters.",
+    "passwordMismatch": "Passwords do not match."
   }
 }

@@ -13,9 +13,11 @@ import type { Session, User } from "@supabase/supabase-js";
 import {
   getSession,
   onAuthStateChange,
+  requestPasswordReset,
   signInWithEmail,
   signOut,
   signUpWithEmail,
+  updatePassword,
 } from "@/lib/infrastructure/supabase/auth";
 import { getSupabaseEnv } from "@/lib/infrastructure/supabase/client";
 
@@ -32,6 +34,8 @@ type AuthContextValue = {
   signIn: (email: string, password: string) => Promise<string | null>;
   signUp: (email: string, password: string) => Promise<SignUpResult>;
   logout: () => Promise<void>;
+  changePassword: (password: string) => Promise<string | null>;
+  requestPasswordReset: (email: string) => Promise<string | null>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -100,6 +104,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
   }, []);
 
+  const changePassword = useCallback(async (password: string) => {
+    const result = await updatePassword(password);
+    return result.error?.message ?? null;
+  }, []);
+
+  const requestReset = useCallback(async (email: string) => {
+    const result = await requestPasswordReset(email);
+    return result.error?.message ?? null;
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -109,8 +123,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       signUp,
       logout,
+      changePassword,
+      requestPasswordReset: requestReset,
     }),
-    [user, session, loading, configured, signIn, signUp, logout],
+    [
+      user,
+      session,
+      loading,
+      configured,
+      signIn,
+      signUp,
+      logout,
+      changePassword,
+      requestReset,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

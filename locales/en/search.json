@@ -1,0 +1,16 @@
+{
+  "search": {
+    "title": "Search",
+    "subtitle": "Find an Awura Beauty product, article or tutorial.",
+    "placeholder": "E.g. butter, detangler, curl…",
+    "submit": "Search",
+    "queryLabel": "Search",
+    "productsHeading": "Products",
+    "postsHeading": "Articles & tutorials",
+    "empty": "No results for “{{query}}”. Try another keyword.",
+    "idle": "Enter a keyword to start searching.",
+    "resultsCount": "{{count}} result(s)",
+    "viewProduct": "View product",
+    "viewPost": "Read"
+  }
+}

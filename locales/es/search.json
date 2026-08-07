@@ -1,0 +1,16 @@
+{
+  "search": {
+    "title": "Buscar",
+    "subtitle": "Encuentra un producto, artículo o tutorial de Awura Beauty.",
+    "placeholder": "Ej. manteca, desenredante, curl…",
+    "submit": "Buscar",
+    "queryLabel": "Búsqueda",
+    "productsHeading": "Productos",
+    "postsHeading": "Artículos y tutoriales",
+    "empty": "Ningún resultado para « {{query}} ». Prueba con otra palabra.",
+    "idle": "Escribe una palabra clave para buscar.",
+    "resultsCount": "{{count}} resultado(s)",
+    "viewProduct": "Ver producto",
+    "viewPost": "Leer"
+  }
+}

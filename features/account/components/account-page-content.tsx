@@ -1,38 +1,29 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { useAdminAccess } from "@/features/admin/hooks/use-admin-access";
+import { AccountDiagnosticsSection } from "@/features/account/components/account-diagnostics-section";
+import { AccountOrdersSection } from "@/features/account/components/account-orders-section";
+import { AccountProfileSection } from "@/features/account/components/account-profile-section";
+import { AccountSecuritySection } from "@/features/account/components/account-security-section";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { listMyOrders } from "@/lib/infrastructure/supabase/orders";
-import type { OrderRow, ShippingStatus } from "@/lib/infrastructure/supabase/order-types";
-import { usePreferences } from "@/components/providers/preferences-provider";
-import { formatPrice } from "@/lib/format/price";
+import type { OrderRow } from "@/lib/infrastructure/supabase/order-types";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 
-type TrackingPayload = {
-  shippingStatus?: ShippingStatus;
-  statusLabel?: string;
-  trackingNumber?: string | null;
-  carrier?: string | null;
-  labelUrl?: string | null;
-  events?: Array<{ date: string; label: string; location?: string }>;
-  error?: string;
-};
+const SECTIONS = [
+  { id: "profil", key: "account.nav.profile" },
+  { id: "commandes", key: "account.nav.orders" },
+  { id: "diagnostics", key: "account.nav.diagnostics" },
+  { id: "securite", key: "account.nav.security" },
+] as const;
 
 export function AccountPageContent() {
   const { t, i18n } = useTranslation();
   const { user, loading, logout, configured } = useAuth();
-  const { isAdmin } = useAdminAccess();
-  const { currency } = usePreferences();
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
-  const [trackingByOrder, setTrackingByOrder] = useState<
-    Record<string, TrackingPayload>
-  >({});
-  const [trackingLoadingId, setTrackingLoadingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -52,33 +43,6 @@ export function AccountPageContent() {
       mounted = false;
     };
   }, [user]);
-
-  const refreshTracking = async (orderId: string) => {
-    setTrackingLoadingId(orderId);
-    const response = await fetch(
-      `/api/account/shipping/track?orderId=${encodeURIComponent(orderId)}`,
-    );
-    const json = (await response.json()) as TrackingPayload;
-    setTrackingByOrder((prev) => ({ ...prev, [orderId]: json }));
-    setTrackingLoadingId(null);
-
-    if (json.shippingStatus) {
-      setOrders((prev) =>
-        prev.map((order) =>
-          order.id === orderId
-            ? {
-                ...order,
-                shipping_status: json.shippingStatus as ShippingStatus,
-                tracking_number: json.trackingNumber ?? order.tracking_number,
-                shipping_carrier:
-                  (json.carrier as OrderRow["shipping_carrier"]) ??
-                  order.shipping_carrier,
-              }
-            : order,
-        ),
-      );
-    }
-  };
 
   if (loading) {
     return (
@@ -108,6 +72,12 @@ export function AccountPageContent() {
     );
   }
 
+  const memberSince = user.created_at
+    ? new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
+        dateStyle: "long",
+      }).format(new Date(user.created_at))
+    : undefined;
+
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-10 px-4 py-14 md:px-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -120,172 +90,29 @@ export function AccountPageContent() {
         </Button>
       </div>
 
-      <section className="space-y-4 rounded-2xl border border-border p-6">
-        <h2 className="font-serif text-2xl text-primary">{t("account.profileTitle")}</h2>
-        <dl className="grid gap-3 text-sm sm:grid-cols-2">
-          <div>
-            <dt className="text-muted">{t("account.profileEmail")}</dt>
-            <dd className="mt-1 text-foreground">{user.email}</dd>
-          </div>
-          {user.created_at ? (
-            <div>
-              <dt className="text-muted">{t("account.profileSince")}</dt>
-              <dd className="mt-1 text-foreground">
-                {new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
-                  dateStyle: "long",
-                }).format(new Date(user.created_at))}
-              </dd>
-            </div>
-          ) : null}
-        </dl>
-        {isAdmin ? (
-          <div className="border-t border-border pt-4">
-            <p className="mb-3 text-sm text-muted">{t("account.adminHint")}</p>
-            <Button href="/admin" size="md">
-              {t("account.openAdmin")}
-            </Button>
-          </div>
-        ) : null}
-      </section>
+      <nav
+        className="flex flex-wrap gap-2 border-b border-border pb-4"
+        aria-label={t("account.navLabel")}
+      >
+        {SECTIONS.map((section) => (
+          <a
+            key={section.id}
+            href={`#${section.id}`}
+            className="inline-flex min-h-11 items-center rounded-xl px-3 text-sm text-muted transition hover:bg-background-alt hover:text-foreground"
+          >
+            {t(section.key)}
+          </a>
+        ))}
+      </nav>
 
-      <section className="space-y-6">
-        <h2 className="font-serif text-3xl text-primary">{t("account.ordersTitle")}</h2>
-
-        {ordersLoading ? (
-          <p className="text-muted">{t("account.ordersLoading")}</p>
-        ) : orders.length === 0 ? (
-          <div className="rounded-2xl bg-background-alt p-8 text-center">
-            <p className="text-muted">{t("account.noOrders")}</p>
-            <Button href="/boutique" className="mt-4">
-              {t("cart.continueShopping")}
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {orders.map((order) => {
-              const tracking = trackingByOrder[order.id];
-              return (
-                <article
-                  key={order.id}
-                  className="space-y-4 rounded-2xl border border-border p-5"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm text-muted">
-                        {t("account.orderId", { id: order.id.slice(0, 8) })}
-                      </p>
-                      <p className="font-serif text-2xl text-primary">
-                        {formatPrice(
-                          order.total,
-                          order.currency || currency,
-                          i18n.language,
-                        )}
-                      </p>
-                      <p className="text-sm text-muted">
-                        {new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
-                          dateStyle: "medium",
-                        }).format(new Date(order.created_at))}
-                      </p>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <p>
-                        <span className="text-muted">{t("account.paymentStatus")} : </span>
-                        {t(`account.status.payment.${order.status}`)}
-                      </p>
-                      <p>
-                        <span className="text-muted">{t("account.shippingStatus")} : </span>
-                        {t(`account.status.shipping.${order.shipping_status}`)}
-                      </p>
-                      <p>
-                        <span className="text-muted">{t("account.paymentMethod")} : </span>
-                        {t(`checkout.methods.${order.payment_method}.label`)}
-                      </p>
-                      {order.shipping_carrier ? (
-                        <p>
-                          <span className="text-muted">{t("account.carrier")} : </span>
-                          {t(`admin.carriers.${order.shipping_carrier}`)}
-                        </p>
-                      ) : null}
-                      {order.tracking_number ? (
-                        <p>
-                          <span className="text-muted">{t("account.trackingNumber")} : </span>
-                          {order.tracking_number}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-3">
-                    <Button
-                      type="button"
-                      variant="primary-outline"
-                      size="md"
-                      disabled={trackingLoadingId === order.id}
-                      onClick={() => void refreshTracking(order.id)}
-                    >
-                      {trackingLoadingId === order.id
-                        ? t("account.trackingLoading")
-                        : t("account.refreshTracking")}
-                    </Button>
-                    {order.label_url || tracking?.labelUrl ? (
-                      <a
-                        href={order.label_url ?? tracking?.labelUrl ?? "#"}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center text-sm text-accent hover:text-accent-light"
-                      >
-                        {t("account.openTracking")}
-                      </a>
-                    ) : null}
-                  </div>
-
-                  {tracking?.statusLabel ? (
-                    <div className="rounded-xl bg-background-alt p-4 text-sm">
-                      <p className="font-medium text-primary">{tracking.statusLabel}</p>
-                      {tracking.events && tracking.events.length > 0 ? (
-                        <ul className="mt-3 space-y-2 text-muted">
-                          {tracking.events.slice(0, 5).map((event, index) => (
-                            <li key={`${order.id}-event-${index}`}>
-                              {event.label}
-                              {event.location ? ` — ${event.location}` : ""}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
-                      {tracking.error ? (
-                        <p className="mt-2 text-accent">{tracking.error}</p>
-                      ) : null}
-                    </div>
-                  ) : null}
-
-                  <ul className="space-y-2 border-t border-border pt-4 text-sm text-muted">
-                    {order.items.map((item) => (
-                      <li
-                        key={`${order.id}-${item.slug}`}
-                        className="flex justify-between gap-3"
-                      >
-                        <Link
-                          href={`/boutique/${item.slug}`}
-                          className="hover:text-accent"
-                        >
-                          {item.name} × {item.quantity}
-                        </Link>
-                        <span>
-                          {formatPrice(
-                            item.unit_price * item.quantity,
-                            order.currency || currency,
-                            i18n.language,
-                          )}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              );
-            })}
-          </div>
-        )}
-      </section>
+      <AccountProfileSection email={user.email ?? ""} memberSince={memberSince} />
+      <AccountOrdersSection
+        orders={orders}
+        ordersLoading={ordersLoading}
+        onOrdersChange={setOrders}
+      />
+      <AccountDiagnosticsSection />
+      <AccountSecuritySection />
     </main>
   );
 }

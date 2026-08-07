@@ -116,6 +116,44 @@ export async function signOut(): Promise<{ error: AuthError | null }> {
   return { error };
 }
 
+export async function updatePassword(
+  password: string,
+): Promise<{ error: AuthError | null }> {
+  const supabase = createSupabaseClient();
+  if (!supabase) {
+    return {
+      error: {
+        name: "AuthError",
+        message: "Supabase is not configured",
+        status: 500,
+      } as AuthError,
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+  return { error };
+}
+
+export async function requestPasswordReset(
+  email: string,
+): Promise<{ error: AuthError | null }> {
+  const supabase = createSupabaseClient();
+  if (!supabase) {
+    return {
+      error: {
+        name: "AuthError",
+        message: "Supabase is not configured",
+        status: 500,
+      } as AuthError,
+    };
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: absoluteUrl("/auth/callback?next=/compte"),
+  });
+  return { error };
+}
+
 export function onAuthStateChange(
   callback: (session: Session | null) => void,
 ): () => void {

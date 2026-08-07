@@ -41,7 +41,7 @@ export function websiteJsonLd() {
     },
     potentialAction: {
       "@type": "SearchAction",
-      target: `${absoluteUrl("/boutique")}?q={search_term_string}`,
+      target: `${absoluteUrl("/recherche")}?q={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
   };

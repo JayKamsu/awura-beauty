@@ -19,6 +19,10 @@ import type {
   ShippingStatus,
   TrackingResult,
 } from "@/lib/domain";
+import type {
+  ProfileRow,
+  ProfileUpdateInput,
+} from "@/lib/infrastructure/supabase/profile-types";
 
 export type CatalogPort = {
   listProducts: (params?: ListProductsParams) => Promise<ListProductsResult>;
@@ -73,6 +77,13 @@ export type DiagnosticPort = {
     recommendedProductSlugs: string[];
   }) => Promise<{ id: string | null; error: string | null }>;
   listMyDiagnostics: () => Promise<DiagnosticRecord[]>;
+};
+
+export type ProfilePort = {
+  getMyProfile: () => Promise<ProfileRow | null>;
+  updateMyProfile: (
+    input: ProfileUpdateInput,
+  ) => Promise<{ profile: ProfileRow | null; error: string | null }>;
 };
 
 export type PaymentPort = {

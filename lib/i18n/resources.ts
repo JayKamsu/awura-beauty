@@ -12,6 +12,7 @@ import frCheckout from "@/locales/fr/checkout.json";
 import frAccount from "@/locales/fr/account.json";
 import frAdmin from "@/locales/fr/admin.json";
 import frContact from "@/locales/fr/contact.json";
+import frSearch from "@/locales/fr/search.json";
 
 import enLayout from "@/locales/en/layout.json";
 import enHome from "@/locales/en/home.json";
@@ -25,6 +26,7 @@ import enCheckout from "@/locales/en/checkout.json";
 import enAccount from "@/locales/en/account.json";
 import enAdmin from "@/locales/en/admin.json";
 import enContact from "@/locales/en/contact.json";
+import enSearch from "@/locales/en/search.json";
 
 import esLayout from "@/locales/es/layout.json";
 import esHome from "@/locales/es/home.json";
@@ -38,6 +40,7 @@ import esCheckout from "@/locales/es/checkout.json";
 import esAccount from "@/locales/es/account.json";
 import esAdmin from "@/locales/es/admin.json";
 import esContact from "@/locales/es/contact.json";
+import esSearch from "@/locales/es/search.json";
 
 function mergeLocale(...parts: Record<string, unknown>[]): ResourceLanguage {
   return Object.assign({}, ...parts) as ResourceLanguage;
@@ -58,6 +61,7 @@ export const localeResources = {
       frAccount,
       frAdmin,
       frContact,
+      frSearch,
     ),
   },
   en: {
@@ -74,6 +78,7 @@ export const localeResources = {
       enAccount,
       enAdmin,
       enContact,
+      enSearch,
     ),
   },
   es: {
@@ -90,6 +95,7 @@ export const localeResources = {
       esAccount,
       esAdmin,
       esContact,
+      esSearch,
     ),
   },
 } as const;

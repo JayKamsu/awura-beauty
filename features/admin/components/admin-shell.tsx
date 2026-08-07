@@ -27,9 +27,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const adminFetch = useAdminFetch();
   const [gate, setGate] = useState<Gate>("loading");
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
+  const isLoginPage = pathname === "/admin/connexion";
 
   useEffect(() => {
     let cancelled = false;
+
+    if (isLoginPage) {
+      setGate("ok");
+      return;
+    }
 
     if (loading) {
       setGate("loading");
@@ -65,7 +71,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [adminFetch, loading, user]);
+  }, [adminFetch, isLoginPage, loading, user]);
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   if (gate === "loading") {
     return (
@@ -84,7 +94,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </h1>
         <p className="text-muted">{t("admin.guard.loginBody")}</p>
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <Button href="/compte/connexion">{t("auth.loginSubmit")}</Button>
+          <Button href="/admin/connexion">{t("auth.loginSubmit")}</Button>
           <Button href="/" variant="ghost">
             {t("admin.guard.backHome")}
           </Button>

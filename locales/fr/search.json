@@ -1,0 +1,16 @@
+{
+  "search": {
+    "title": "Recherche",
+    "subtitle": "Trouve un soin, un article ou un tutoriel Awura Beauty.",
+    "placeholder": "Ex. beurre, démêlant, curl…",
+    "submit": "Rechercher",
+    "queryLabel": "Recherche",
+    "productsHeading": "Produits",
+    "postsHeading": "Articles & tutoriels",
+    "empty": "Aucun résultat pour « {{query}} ». Essaie un autre mot-clé.",
+    "idle": "Saisis un mot-clé pour lancer la recherche.",
+    "resultsCount": "{{count}} résultat(s)",
+    "viewProduct": "Voir le produit",
+    "viewPost": "Lire"
+  }
+}

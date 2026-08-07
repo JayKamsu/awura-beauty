@@ -5,11 +5,25 @@
     "loading": "Cargando la cuenta…",
     "loginRequired": "Inicia sesión para ver tus pedidos y el estado del envío.",
     "logout": "Cerrar sesión",
+    "navLabel": "Secciones de la cuenta",
+    "nav": {
+      "profile": "Perfil",
+      "orders": "Pedidos",
+      "diagnostics": "Diagnósticos",
+      "security": "Seguridad"
+    },
     "profileTitle": "Mi perfil",
     "profileEmail": "Correo",
     "profileSince": "Miembro desde",
-    "adminHint": "Tienes acceso al área de administración.",
-    "openAdmin": "Abrir admin",
+    "profileFirstName": "Nombre",
+    "profileLastName": "Apellido",
+    "profilePhone": "Teléfono",
+    "profileLoading": "Cargando el perfil…",
+    "profileSave": "Guardar",
+    "profileSaving": "Guardando…",
+    "profileSaved": "Perfil actualizado.",
+    "profileSaveError": "No se pudo guardar el perfil.",
+    "profileUpdatedAt": "Última actualización: {{date}}",
     "ordersTitle": "Historial de pedidos",
     "ordersLoading": "Cargando pedidos…",
     "noOrders": "Todavía no hay pedidos.",
@@ -17,6 +31,7 @@
     "paymentStatus": "Pago",
     "shippingStatus": "Envío",
     "paymentMethod": "Método",
+    "shippingAddress": "Dirección de envío",
     "status": {
       "payment": {
         "pending": "Pendiente",
@@ -36,6 +51,20 @@
     "trackingNumber": "Número de seguimiento",
     "refreshTracking": "Actualizar seguimiento",
     "trackingLoading": "Seguimiento…",
-    "openTracking": "Abrir seguimiento"
+    "openTracking": "Abrir seguimiento",
+    "diagnosticsTitle": "Mis diagnósticos",
+    "diagnosticsLoading": "Cargando diagnósticos…",
+    "diagnosticsEmpty": "Todavía no hay diagnósticos guardados.",
+    "diagnosticsNew": "Hacer un diagnóstico",
+    "diagnosticsRecommendations": "Productos recomendados",
+    "securityTitle": "Seguridad",
+    "securitySubtitle": "Cambia tu contraseña para proteger tu cuenta.",
+    "newPassword": "Nueva contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "passwordSave": "Actualizar contraseña",
+    "passwordSaving": "Actualizando…",
+    "passwordChanged": "Contraseña actualizada.",
+    "passwordTooShort": "La contraseña debe tener al menos 6 caracteres.",
+    "passwordMismatch": "Las contraseñas no coinciden."
   }
 }

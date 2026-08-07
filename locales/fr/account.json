@@ -5,11 +5,25 @@
     "loading": "Chargement du compte…",
     "loginRequired": "Connecte-toi pour voir tes commandes et le statut de livraison.",
     "logout": "Se déconnecter",
+    "navLabel": "Sections du compte",
+    "nav": {
+      "profile": "Profil",
+      "orders": "Commandes",
+      "diagnostics": "Diagnostics",
+      "security": "Sécurité"
+    },
     "profileTitle": "Mon profil",
     "profileEmail": "E-mail",
     "profileSince": "Membre depuis",
-    "adminHint": "Tu as accès à l’espace d’administration.",
-    "openAdmin": "Ouvrir l’admin",
+    "profileFirstName": "Prénom",
+    "profileLastName": "Nom",
+    "profilePhone": "Téléphone",
+    "profileLoading": "Chargement du profil…",
+    "profileSave": "Enregistrer",
+    "profileSaving": "Enregistrement…",
+    "profileSaved": "Profil mis à jour.",
+    "profileSaveError": "Impossible d’enregistrer le profil.",
+    "profileUpdatedAt": "Dernière mise à jour : {{date}}",
     "ordersTitle": "Historique des commandes",
     "ordersLoading": "Chargement des commandes…",
     "noOrders": "Aucune commande pour le moment.",
@@ -17,6 +31,7 @@
     "paymentStatus": "Paiement",
     "shippingStatus": "Livraison",
     "paymentMethod": "Mode",
+    "shippingAddress": "Adresse de livraison",
     "status": {
       "payment": {
         "pending": "En attente",
@@ -36,6 +51,20 @@
     "trackingNumber": "N° de suivi",
     "refreshTracking": "Actualiser le suivi",
     "trackingLoading": "Suivi en cours…",
-    "openTracking": "Ouvrir le suivi"
+    "openTracking": "Ouvrir le suivi",
+    "diagnosticsTitle": "Mes diagnostics",
+    "diagnosticsLoading": "Chargement des diagnostics…",
+    "diagnosticsEmpty": "Aucun diagnostic enregistré pour le moment.",
+    "diagnosticsNew": "Faire un diagnostic",
+    "diagnosticsRecommendations": "Soins recommandés",
+    "securityTitle": "Sécurité",
+    "securitySubtitle": "Change ton mot de passe pour sécuriser ton compte.",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "passwordSave": "Mettre à jour le mot de passe",
+    "passwordSaving": "Mise à jour…",
+    "passwordChanged": "Mot de passe mis à jour.",
+    "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères.",
+    "passwordMismatch": "Les mots de passe ne correspondent pas."
   }
 }

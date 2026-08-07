@@ -12,6 +12,7 @@ import type {
   OrderPort,
   PageLayoutPort,
   PaymentPort,
+  ProfilePort,
   ShippingPort,
 } from "@/lib/application/ports";
 import { firebaseNotificationAdapter } from "@/lib/infrastructure/notifications/firebase";
@@ -48,6 +49,10 @@ import {
   listAllProductSlugs,
   listProducts,
 } from "@/lib/infrastructure/supabase/products";
+import {
+  getMyProfile,
+  updateMyProfile,
+} from "@/lib/infrastructure/supabase/profiles";
 
 export const catalogPort: CatalogPort = {
   listProducts,
@@ -83,6 +88,11 @@ export const diagnosticPort: DiagnosticPort = {
   listMyDiagnostics,
 };
 
+export const profilePort: ProfilePort = {
+  getMyProfile,
+  updateMyProfile,
+};
+
 export const paymentPort: PaymentPort = {
   createStripeCheckout: createStripeCheckoutSession,
   createPayPalOrder,
@@ -116,6 +126,7 @@ export const container = {
   orders: orderPort,
   content: contentPort,
   diagnostics: diagnosticPort,
+  profiles: profilePort,
   payments: paymentPort,
   shipping: shippingPort,
   notifications: notificationPort,

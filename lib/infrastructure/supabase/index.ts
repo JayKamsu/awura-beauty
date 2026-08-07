@@ -4,9 +4,11 @@ export {
   getCurrentUserId,
   getSession,
   onAuthStateChange,
+  requestPasswordReset,
   signInWithEmail,
   signOut,
   signUpWithEmail,
+  updatePassword,
 } from "./auth";
 export type { AuthResult } from "./auth";
 export {
@@ -30,6 +32,8 @@ export type {
   HairTypeAnswer,
   ScalpAnswer,
 } from "./diagnostic-types";
+export { getMyProfile, updateMyProfile } from "./profiles";
+export type { ProfileRow, ProfileUpdateInput } from "./profile-types";
 export {
   createOrder,
   getOrderById,

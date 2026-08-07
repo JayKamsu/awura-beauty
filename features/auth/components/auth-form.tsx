@@ -10,9 +10,17 @@ import { useAuth } from "@/features/auth/context/auth-provider";
 
 type AuthFormProps = {
   mode: "login" | "signup";
+  redirectTo?: string;
+  allowSignup?: boolean;
+  showForgotPassword?: boolean;
 };
 
-export function AuthForm({ mode }: AuthFormProps) {
+export function AuthForm({
+  mode,
+  redirectTo = "/compte",
+  allowSignup = true,
+  showForgotPassword = true,
+}: AuthFormProps) {
   const { t } = useTranslation();
   const { signIn, signUp, configured } = useAuth();
   const router = useRouter();
@@ -35,7 +43,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         setError(message);
         return;
       }
-      router.push("/compte");
+      router.push(redirectTo);
       router.refresh();
       return;
     }
@@ -54,7 +62,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     }
 
     setInfo(t("auth.signupSuccess"));
-    router.push("/compte");
+    router.push(redirectTo);
     router.refresh();
   };
 
@@ -97,6 +105,17 @@ export function AuthForm({ mode }: AuthFormProps) {
         />
       </label>
 
+      {mode === "login" && showForgotPassword ? (
+        <p className="text-right text-sm">
+          <Link
+            href="/compte/mot-de-passe-oublie"
+            className="text-accent hover:text-accent-light"
+          >
+            {t("auth.forgotPasswordLink")}
+          </Link>
+        </p>
+      ) : null}
+
       {error ? (
         <p className="text-sm text-accent" role="alert">
           {error}
@@ -116,23 +135,23 @@ export function AuthForm({ mode }: AuthFormProps) {
             : t("auth.signupSubmit")}
       </Button>
 
-      <p className="text-center text-sm text-muted">
-        {mode === "login" ? (
-          <>
-            {t("auth.noAccount")}{" "}
-            <Link href="/compte/inscription" className="text-accent hover:text-accent-light">
-              {t("auth.signupLink")}
-            </Link>
-          </>
-        ) : (
-          <>
-            {t("auth.hasAccount")}{" "}
-            <Link href="/compte/connexion" className="text-accent hover:text-accent-light">
-              {t("auth.loginLink")}
-            </Link>
-          </>
-        )}
-      </p>
+      {mode === "login" && allowSignup ? (
+        <p className="text-center text-sm text-muted">
+          {t("auth.noAccount")}{" "}
+          <Link href="/compte/inscription" className="text-accent hover:text-accent-light">
+            {t("auth.signupLink")}
+          </Link>
+        </p>
+      ) : null}
+
+      {mode === "signup" ? (
+        <p className="text-center text-sm text-muted">
+          {t("auth.hasAccount")}{" "}
+          <Link href="/compte/connexion" className="text-accent hover:text-accent-light">
+            {t("auth.loginLink")}
+          </Link>
+        </p>
+      ) : null}
     </form>
   );
 }
