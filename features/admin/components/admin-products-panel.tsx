@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import { AdminEmptyState } from "@/features/admin/components/admin-empty-state";
 import { AdminFeedback } from "@/features/admin/components/admin-feedback";
+import { AdminModal } from "@/features/admin/components/admin-modal";
 import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
 import { AdminSearchField } from "@/features/admin/components/admin-search-field";
 import { ConfirmDeleteButton } from "@/features/admin/components/confirm-delete-button";
@@ -37,7 +38,17 @@ const emptyForm = {
 };
 
 const fieldClass =
-  "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent";
+  "min-h-12 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-base outline-none focus:border-accent sm:min-h-11 sm:text-sm";
+
+function slugify(raw: string): string {
+  return raw
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 64);
+}
 
 export function AdminProductsPanel() {
   const { t, i18n } = useTranslation();
@@ -47,6 +58,7 @@ export function AdminProductsPanel() {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [form, setForm] = useState(emptyForm);
+  const [slugTouched, setSlugTouched] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [newCategoryLabel, setNewCategoryLabel] = useState("");
   const [feedback, setFeedback] = useState<{
@@ -76,15 +88,6 @@ export function AdminProductsPanel() {
   useEffect(() => {
     void load();
   }, [load]);
-
-  useEffect(() => {
-    if (!modalOpen) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setModalOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [modalOpen]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -119,6 +122,7 @@ export function AdminProductsPanel() {
       ...emptyForm,
       category: categories[0]?.slug ?? emptyForm.category,
     });
+    setSlugTouched(false);
     setModalOpen(true);
   };
 
@@ -142,12 +146,22 @@ export function AdminProductsPanel() {
       qr_url: product.qr_url ?? "",
       universe: product.universe === "child" ? "child" : "adult",
     });
+    setSlugTouched(true);
     setModalOpen(true);
   };
 
   const closeModal = () => {
     setModalOpen(false);
     setForm(emptyForm);
+    setSlugTouched(false);
+  };
+
+  const setName = (name: string) => {
+    setForm((prev) => ({
+      ...prev,
+      name,
+      slug: !prev.id && !slugTouched ? slugify(name) : prev.slug,
+    }));
   };
 
   const uploadImage = async (
@@ -178,7 +192,7 @@ export function AdminProductsPanel() {
       setFeedback(null);
       const payload = {
         ...(form.id ? { id: form.id } : {}),
-        slug: form.slug,
+        slug: form.slug || slugify(form.name),
         name: form.name,
         price: Number(form.price),
         short_description: form.short_description,
@@ -273,11 +287,40 @@ export function AdminProductsPanel() {
     await load();
   };
 
+  const productActions = (product: ProductRow) => (
+    <div className="flex flex-wrap gap-2">
+      <Button
+        type="button"
+        variant="ghost"
+        className="min-h-11 flex-1 sm:flex-none"
+        onClick={() => openEdit(product)}
+      >
+        {t("admin.edit")}
+      </Button>
+      <ConfirmDeleteButton
+        label={t("admin.delete")}
+        confirmMessage={t("admin.confirmDeleteProduct", {
+          name: product.name,
+        })}
+        onConfirm={() => remove(product.id)}
+      />
+    </div>
+  );
+
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 md:px-6">
+    <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 pb-24 md:gap-8 md:px-6 md:py-10 md:pb-10">
       <AdminPageHeader
         title={t("admin.productsTitle")}
         subtitle={t("admin.productsSubtitle")}
+        actions={
+          <Button
+            type="button"
+            className="hidden w-full sm:inline-flex sm:w-auto"
+            onClick={openCreate}
+          >
+            {t("admin.createProduct")}
+          </Button>
+        }
       />
 
       {feedback ? (
@@ -285,16 +328,20 @@ export function AdminProductsPanel() {
       ) : null}
 
       <section className="space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="font-serif text-2xl text-primary">
-            {t("admin.productsList")}
-          </h2>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <AdminSearchField value={query} onChange={setQuery} />
-            <Button type="button" onClick={openCreate}>
-              {t("admin.createProduct")}
-            </Button>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <h2 className="font-serif text-xl text-primary md:text-2xl">
+                {t("admin.productsList")}
+              </h2>
+              {loaded ? (
+                <p className="text-sm text-muted">
+                  {t("admin.productsCount", { count: filtered.length })}
+                </p>
+              ) : null}
+            </div>
           </div>
+          <AdminSearchField value={query} onChange={setQuery} />
         </div>
 
         {!loaded ? (
@@ -308,246 +355,276 @@ export function AdminProductsPanel() {
             }
           />
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-border">
-            <table className="min-w-full text-left text-sm">
-              <thead className="bg-background-alt text-xs uppercase tracking-wide text-muted">
-                <tr>
-                  <th className="px-3 py-2 font-medium">
-                    {t("admin.fields.name")}
-                  </th>
-                  <th className="px-3 py-2 font-medium">
-                    {t("admin.fields.category")}
-                  </th>
-                  <th className="px-3 py-2 font-medium">
-                    {t("admin.fields.stock")}
-                  </th>
-                  <th className="px-3 py-2 font-medium">
-                    {t("admin.fields.price")}
-                  </th>
-                  <th className="px-3 py-2 font-medium" />
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((product) => (
-                  <tr
-                    key={product.id}
-                    className="border-t border-border hover:bg-background-alt/60"
+          <>
+            {/* Mobile : cartes tactiles */}
+            <ul className="space-y-3 md:hidden">
+              {filtered.map((product) => (
+                <li
+                  key={product.id}
+                  className="rounded-2xl border border-border bg-background p-3"
+                >
+                  <button
+                    type="button"
+                    className="flex w-full items-start gap-3 text-left"
+                    onClick={() => openEdit(product)}
                   >
-                    <td className="px-3 py-2">
-                      <div className="flex items-center gap-2.5">
-                        <div className="relative size-9 shrink-0 overflow-hidden rounded-lg bg-background-alt">
-                          {product.image_url ? (
-                            <Image
-                              src={product.image_url}
-                              alt=""
-                              fill
-                              className="object-cover"
-                            />
-                          ) : null}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="truncate font-medium text-primary">
-                            {product.name}
-                          </p>
-                          <p className="truncate text-xs text-muted">
-                            {product.slug}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 text-muted">{product.category}</td>
-                    <td className="px-3 py-2 text-muted">{product.stock}</td>
-                    <td className="whitespace-nowrap px-3 py-2 text-primary">
-                      {formatPrice(product.price, currency, i18n.language)}
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      <div className="flex flex-wrap justify-end gap-1.5">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="md"
-                          onClick={() => openEdit(product)}
-                        >
-                          {t("admin.edit")}
-                        </Button>
-                        <ConfirmDeleteButton
-                          label={t("admin.delete")}
-                          confirmMessage={t("admin.confirmDeleteProduct", {
-                            name: product.name,
-                          })}
-                          onConfirm={() => remove(product.id)}
+                    <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-background-alt">
+                      {product.image_url ? (
+                        <Image
+                          src={product.image_url}
+                          alt=""
+                          fill
+                          className="object-cover"
                         />
-                      </div>
-                    </td>
+                      ) : null}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-primary">{product.name}</p>
+                      <p className="mt-0.5 text-sm text-muted">
+                        {product.category}
+                        {" · "}
+                        {formatPrice(product.price, currency, i18n.language)}
+                      </p>
+                      <p
+                        className={`mt-1 text-xs ${
+                          product.stock <= 5
+                            ? "font-medium text-accent"
+                            : "text-muted"
+                        }`}
+                      >
+                        {t("admin.stockLeft", { count: product.stock })}
+                      </p>
+                    </div>
+                  </button>
+                  <div className="mt-3 border-t border-border pt-3">
+                    {productActions(product)}
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {/* Desktop : tableau */}
+            <div className="hidden overflow-x-auto rounded-2xl border border-border md:block">
+              <table className="min-w-full text-left text-sm">
+                <thead className="bg-background-alt text-xs uppercase tracking-wide text-muted">
+                  <tr>
+                    <th className="px-3 py-2 font-medium">
+                      {t("admin.fields.name")}
+                    </th>
+                    <th className="px-3 py-2 font-medium">
+                      {t("admin.fields.category")}
+                    </th>
+                    <th className="px-3 py-2 font-medium">
+                      {t("admin.fields.stock")}
+                    </th>
+                    <th className="px-3 py-2 font-medium">
+                      {t("admin.fields.price")}
+                    </th>
+                    <th className="px-3 py-2 font-medium" />
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filtered.map((product) => (
+                    <tr
+                      key={product.id}
+                      className="border-t border-border hover:bg-background-alt/60"
+                    >
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className="relative size-9 shrink-0 overflow-hidden rounded-lg bg-background-alt">
+                            {product.image_url ? (
+                              <Image
+                                src={product.image_url}
+                                alt=""
+                                fill
+                                className="object-cover"
+                              />
+                            ) : null}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate font-medium text-primary">
+                              {product.name}
+                            </p>
+                            <p className="truncate text-xs text-muted">
+                              {product.slug}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 text-muted">
+                        {product.category}
+                      </td>
+                      <td className="px-3 py-2 text-muted">{product.stock}</td>
+                      <td className="whitespace-nowrap px-3 py-2 text-primary">
+                        {formatPrice(product.price, currency, i18n.language)}
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <div className="flex flex-wrap justify-end gap-1.5">
+                          {productActions(product)}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </section>
 
-      <section className="space-y-4 rounded-2xl border border-border p-5">
-        <div>
-          <h2 className="font-serif text-2xl text-primary">
+      <details className="rounded-2xl border border-border p-4 open:pb-5 md:p-5">
+        <summary className="cursor-pointer list-none font-serif text-xl text-primary marker:content-none [&::-webkit-details-marker]:hidden">
+          <span className="flex items-center justify-between gap-3">
             {t("admin.categoriesTitle")}
-          </h2>
-          <p className="mt-1 text-sm text-muted">{t("admin.categoriesSubtitle")}</p>
-        </div>
+            <span className="text-sm font-sans font-normal text-muted">
+              {categories.length}
+            </span>
+          </span>
+          <span className="mt-1 block font-sans text-sm font-normal text-muted">
+            {t("admin.categoriesSubtitle")}
+          </span>
+        </summary>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <input
-            className={fieldClass}
-            value={newCategoryLabel}
-            placeholder={t("admin.newCategoryPlaceholder")}
-            onChange={(e) => setNewCategoryLabel(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                createCategory();
-              }
-            }}
-          />
-          <Button
-            type="button"
-            pending={pending}
-            onClick={createCategory}
-            disabled={!newCategoryLabel.trim()}
-          >
-            {t("admin.addCategory")}
-          </Button>
-        </div>
+        <div className="mt-4 space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <input
+              className={fieldClass}
+              value={newCategoryLabel}
+              placeholder={t("admin.newCategoryPlaceholder")}
+              onChange={(e) => setNewCategoryLabel(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  createCategory();
+                }
+              }}
+            />
+            <Button
+              type="button"
+              pending={pending}
+              className="min-h-12 w-full sm:w-auto"
+              onClick={createCategory}
+              disabled={!newCategoryLabel.trim()}
+            >
+              {t("admin.addCategory")}
+            </Button>
+          </div>
 
-        {categories.length === 0 ? (
-          <p className="text-sm text-muted">{t("admin.noCategories")}</p>
-        ) : (
-          <ul className="divide-y divide-border rounded-xl border border-border">
-            {categories.map((category) => (
-              <li
-                key={category.slug}
-                className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
-              >
-                <div>
-                  <p className="font-medium text-primary">{category.label}</p>
-                  <p className="text-xs text-muted">{category.slug}</p>
-                </div>
-                <ConfirmDeleteButton
-                  label={t("admin.delete")}
-                  confirmMessage={t("admin.confirmDeleteCategory", {
-                    name: category.label,
-                  })}
-                  onConfirm={() => removeCategory(category.slug)}
-                />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+          {categories.length === 0 ? (
+            <p className="text-sm text-muted">{t("admin.noCategories")}</p>
+          ) : (
+            <ul className="divide-y divide-border rounded-xl border border-border">
+              {categories.map((category) => (
+                <li
+                  key={category.slug}
+                  className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="font-medium text-primary">{category.label}</p>
+                    <p className="text-xs text-muted">{category.slug}</p>
+                  </div>
+                  <ConfirmDeleteButton
+                    label={t("admin.delete")}
+                    confirmMessage={t("admin.confirmDeleteCategory", {
+                      name: category.label,
+                    })}
+                    onConfirm={() => removeCategory(category.slug)}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </details>
+
+      {/* FAB mobile */}
+      <div className="fixed inset-x-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 px-4 pb-2 sm:hidden">
+        <Button
+          type="button"
+          className="w-full shadow-lg"
+          onClick={openCreate}
+        >
+          {t("admin.createProduct")}
+        </Button>
+      </div>
 
       {modalOpen ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label={
-            form.id ? t("admin.editProduct") : t("admin.createProduct")
-          }
-          onClick={(event) => {
-            if (event.target === event.currentTarget) closeModal();
-          }}
-        >
-          <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-lg">
-            <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-              <h2 className="font-serif text-xl text-primary">
-                {form.id ? t("admin.editProduct") : t("admin.createProduct")}
-              </h2>
-              <Button type="button" variant="ghost" onClick={closeModal}>
+        <AdminModal
+          title={form.id ? t("admin.editProduct") : t("admin.createProduct")}
+          onClose={closeModal}
+          footer={
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full sm:w-auto"
+                onClick={closeModal}
+              >
                 {t("admin.cancel")}
               </Button>
-            </div>
-
-            <div className="overflow-y-auto p-4">
-              <div className="grid gap-4 lg:grid-cols-2">
-                {(
-                  [
-                    ["name", "text"],
-                    ["slug", "text"],
-                    ["price", "number"],
-                    ["shipping_fee", "number"],
-                    ["stock", "number"],
-                    ["short_description", "text"],
-                    ["image_url", "text"],
-                    ["ingredients_image_url", "text"],
-                    ["lifestyle_image_url", "text"],
-                    ["qr_url", "text"],
-                  ] as const
-                ).map(([key, type]) => (
-                  <label key={key} className="space-y-1 text-sm">
-                    <span className="text-muted">{t(`admin.fields.${key}`)}</span>
-                    <input
-                      type={type}
-                      className={fieldClass}
-                      value={String(form[key])}
-                      onChange={(e) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          [key]:
-                            type === "number"
-                              ? Number(e.target.value)
-                              : e.target.value,
-                        }))
-                      }
-                    />
-                  </label>
-                ))}
-
-                <label className="space-y-1 text-sm lg:col-span-2">
-                  <span className="text-muted">
-                    {t("admin.fields.description")}
-                  </span>
-                  <textarea
+              <Button
+                type="button"
+                pending={pending}
+                className="w-full sm:w-auto"
+                onClick={save}
+              >
+                {pending
+                  ? t("admin.saving")
+                  : form.id
+                    ? t("admin.updateProduct")
+                    : t("admin.createProduct")}
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-6">
+            <fieldset className="space-y-3">
+              <legend className="font-serif text-lg text-primary">
+                {t("admin.formEssentials")}
+              </legend>
+              <label className="block space-y-1 text-sm">
+                <span className="text-muted">{t("admin.fields.name")}</span>
+                <input
+                  className={fieldClass}
+                  value={form.name}
+                  onChange={(e) => setName(e.target.value)}
+                  autoComplete="off"
+                />
+              </label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block space-y-1 text-sm">
+                  <span className="text-muted">{t("admin.fields.price")}</span>
+                  <input
+                    type="number"
+                    inputMode="decimal"
                     className={fieldClass}
-                    rows={3}
-                    value={form.description}
+                    value={String(form.price)}
                     onChange={(e) =>
                       setForm((prev) => ({
                         ...prev,
-                        description: e.target.value,
+                        price: Number(e.target.value),
                       }))
                     }
                   />
                 </label>
-
-                <label className="space-y-1 text-sm lg:col-span-2">
-                  <span className="text-muted">
-                    {t("admin.fields.ingredients")}
-                  </span>
-                  <textarea
+                <label className="block space-y-1 text-sm">
+                  <span className="text-muted">{t("admin.fields.stock")}</span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
                     className={fieldClass}
-                    rows={3}
-                    value={form.ingredients}
+                    value={String(form.stock)}
                     onChange={(e) =>
                       setForm((prev) => ({
                         ...prev,
-                        ingredients: e.target.value,
+                        stock: Number(e.target.value),
                       }))
                     }
                   />
                 </label>
-
-                <label className="space-y-1 text-sm lg:col-span-2">
-                  <span className="text-muted">{t("admin.fields.usage")}</span>
-                  <textarea
-                    className={fieldClass}
-                    rows={3}
-                    value={form.usage}
-                    onChange={(e) =>
-                      setForm((prev) => ({ ...prev, usage: e.target.value }))
-                    }
-                  />
-                </label>
-
-                <label className="space-y-1 text-sm">
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block space-y-1 text-sm">
                   <span className="text-muted">
                     {t("admin.fields.category")}
                   </span>
@@ -568,8 +645,7 @@ export function AdminProductsPanel() {
                     ))}
                   </select>
                 </label>
-
-                <label className="space-y-1 text-sm">
+                <label className="block space-y-1 text-sm">
                   <span className="text-muted">
                     {t("admin.fields.universe")}
                   </span>
@@ -579,7 +655,8 @@ export function AdminProductsPanel() {
                     onChange={(e) =>
                       setForm((prev) => ({
                         ...prev,
-                        universe: e.target.value === "child" ? "child" : "adult",
+                        universe:
+                          e.target.value === "child" ? "child" : "adult",
                       }))
                     }
                   >
@@ -587,64 +664,178 @@ export function AdminProductsPanel() {
                     <option value="child">{t("admin.universeChild")}</option>
                   </select>
                 </label>
+              </div>
+              <label className="block space-y-1 text-sm">
+                <span className="text-muted">
+                  {t("admin.fields.short_description")}
+                </span>
+                <input
+                  className={fieldClass}
+                  value={form.short_description}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      short_description: e.target.value,
+                    }))
+                  }
+                />
+              </label>
+              <label className="flex min-h-12 items-center gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-5"
+                  checked={form.is_new}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      is_new: e.target.checked,
+                    }))
+                  }
+                />
+                <span className="text-muted">{t("admin.fields.is_new")}</span>
+              </label>
+            </fieldset>
 
-                <label className="flex items-center gap-2 text-sm">
+            <fieldset className="space-y-3">
+              <legend className="font-serif text-lg text-primary">
+                {t("admin.formImages")}
+              </legend>
+              {(
+                [
+                  ["image_url", "uploadImage"],
+                  ["ingredients_image_url", "uploadIngredientsImage"],
+                  ["lifestyle_image_url", "uploadLifestyleImage"],
+                ] as const
+              ).map(([field, labelKey]) => (
+                <label key={field} className="block space-y-2 text-sm">
+                  <span className="text-muted">{t(`admin.${labelKey}`)}</span>
+                  {form[field] ? (
+                    <div className="relative h-28 w-full overflow-hidden rounded-xl bg-background-alt sm:h-24 sm:w-40">
+                      <Image
+                        src={form[field]}
+                        alt=""
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : null}
                   <input
-                    type="checkbox"
-                    checked={form.is_new}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="block w-full text-sm"
+                    disabled={Boolean(uploading)}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      void uploadImage(file, field);
+                    }}
+                  />
+                  {uploading === field ? (
+                    <span className="block text-xs text-muted">
+                      {t("admin.uploading")}
+                    </span>
+                  ) : null}
+                </label>
+              ))}
+            </fieldset>
+
+            <fieldset className="space-y-3">
+              <legend className="font-serif text-lg text-primary">
+                {t("admin.formDetails")}
+              </legend>
+              <label className="block space-y-1 text-sm">
+                <span className="text-muted">
+                  {t("admin.fields.description")}
+                </span>
+                <textarea
+                  className={fieldClass}
+                  rows={3}
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
+                />
+              </label>
+              <label className="block space-y-1 text-sm">
+                <span className="text-muted">
+                  {t("admin.fields.ingredients")}
+                </span>
+                <textarea
+                  className={fieldClass}
+                  rows={3}
+                  value={form.ingredients}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      ingredients: e.target.value,
+                    }))
+                  }
+                />
+              </label>
+              <label className="block space-y-1 text-sm">
+                <span className="text-muted">{t("admin.fields.usage")}</span>
+                <textarea
+                  className={fieldClass}
+                  rows={3}
+                  value={form.usage}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, usage: e.target.value }))
+                  }
+                />
+              </label>
+            </fieldset>
+
+            <details className="rounded-xl border border-border p-3">
+              <summary className="cursor-pointer text-sm font-medium text-primary">
+                {t("admin.formAdvanced")}
+              </summary>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="block space-y-1 text-sm sm:col-span-2">
+                  <span className="text-muted">{t("admin.fields.slug")}</span>
+                  <input
+                    className={fieldClass}
+                    value={form.slug}
+                    onChange={(e) => {
+                      setSlugTouched(true);
+                      setForm((prev) => ({ ...prev, slug: e.target.value }));
+                    }}
+                  />
+                </label>
+                <label className="block space-y-1 text-sm">
+                  <span className="text-muted">
+                    {t("admin.fields.shipping_fee")}
+                  </span>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    className={fieldClass}
+                    value={String(form.shipping_fee)}
                     onChange={(e) =>
                       setForm((prev) => ({
                         ...prev,
-                        is_new: e.target.checked,
+                        shipping_fee: Number(e.target.value),
                       }))
                     }
                   />
-                  <span className="text-muted">{t("admin.fields.is_new")}</span>
                 </label>
-
-                {(
-                  [
-                    ["image_url", "uploadImage"],
-                    ["ingredients_image_url", "uploadIngredientsImage"],
-                    ["lifestyle_image_url", "uploadLifestyleImage"],
-                  ] as const
-                ).map(([field, labelKey]) => (
-                  <label key={field} className="space-y-1 text-sm">
-                    <span className="text-muted">{t(`admin.${labelKey}`)}</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      disabled={Boolean(uploading)}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        void uploadImage(file, field);
-                      }}
-                    />
-                    {uploading === field ? (
-                      <span className="block text-xs text-muted">
-                        {t("admin.uploading")}
-                      </span>
-                    ) : null}
-                  </label>
-                ))}
+                <label className="block space-y-1 text-sm">
+                  <span className="text-muted">{t("admin.fields.qr_url")}</span>
+                  <input
+                    className={fieldClass}
+                    value={form.qr_url}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, qr_url: e.target.value }))
+                    }
+                  />
+                </label>
               </div>
-            </div>
-
-            <div className="flex flex-wrap justify-end gap-3 border-t border-border px-4 py-3">
-              <Button type="button" variant="ghost" onClick={closeModal}>
-                {t("admin.cancel")}
-              </Button>
-              <Button type="button" pending={pending} onClick={save}>
-                {pending
-                  ? t("admin.saving")
-                  : form.id
-                    ? t("admin.updateProduct")
-                    : t("admin.createProduct")}
-              </Button>
-            </div>
+            </details>
           </div>
-        </div>
+        </AdminModal>
       ) : null}
     </main>
   );

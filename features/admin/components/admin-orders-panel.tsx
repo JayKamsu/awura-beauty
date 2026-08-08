@@ -307,7 +307,7 @@ export function AdminOrdersPanel() {
       </div>
 
       <div
-        className="flex flex-wrap gap-1.5"
+        className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible"
         role="group"
         aria-label={t("admin.filterStatus")}
       >
@@ -316,7 +316,7 @@ export function AdminOrdersPanel() {
             key={status}
             type="button"
             onClick={() => setStatusFilter(status)}
-            className={`inline-flex min-h-8 items-center rounded-lg px-2.5 text-xs transition ${
+            className={`inline-flex min-h-11 shrink-0 items-center rounded-xl px-3.5 text-sm transition ${
               statusFilter === status
                 ? "bg-primary text-background"
                 : "border border-border text-muted hover:border-accent"
@@ -342,9 +342,9 @@ export function AdminOrdersPanel() {
         />
       ) : (
         <>
-          <div className="overflow-x-auto rounded-2xl border border-border">
+          <div className="md:overflow-x-auto md:rounded-2xl md:border md:border-border">
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-background-alt text-xs uppercase tracking-wide text-muted">
+              <thead className="hidden bg-background-alt text-xs uppercase tracking-wide text-muted md:table-header-group">
                 <tr>
                   <th className="px-3 py-2 font-medium">
                     {t("admin.colOrder")}
@@ -370,7 +370,7 @@ export function AdminOrdersPanel() {
                   <th className="px-3 py-2 font-medium" />
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="block space-y-3 md:table-row-group md:space-y-0">
                 {pageRows.map((order) => {
                   const open = expandedId === order.id;
                   const savedCarrier = order.shipping_carrier;
@@ -389,40 +389,57 @@ export function AdminOrdersPanel() {
                     <Fragment key={order.id}>
                       <tr
                         id={`order-${order.id}`}
-                        className={`border-t border-border ${
+                        className={`block rounded-2xl border border-border md:table-row md:rounded-none md:border-0 md:border-t ${
                           focusOrderId === order.id || open
                             ? "bg-accent/5"
-                            : "hover:bg-background-alt/60"
+                            : "bg-background hover:bg-background-alt/60 md:bg-transparent"
                         }`}
                       >
-                        <td className="whitespace-nowrap px-3 py-2 font-medium text-primary">
+                        <td
+                          data-label={t("admin.colOrder")}
+                          className="flex items-center justify-between gap-3 px-3 py-2.5 font-medium text-primary before:text-xs before:uppercase before:tracking-wide before:text-muted before:content-[attr(data-label)] md:table-cell md:whitespace-nowrap md:before:content-none"
+                        >
                           #{order.id.slice(0, 8)}
                         </td>
-                        <td className="max-w-[14rem] truncate px-3 py-2 text-muted">
-                          {order.shipping_address?.fullName
-                            ? `${order.shipping_address.fullName} · ${order.email}`
-                            : order.email}
+                        <td
+                          data-label={t("admin.colClient")}
+                          className="flex items-start justify-between gap-3 px-3 py-2 text-muted before:shrink-0 before:text-xs before:uppercase before:tracking-wide before:text-muted before:content-[attr(data-label)] md:table-cell md:max-w-[14rem] md:truncate md:before:content-none"
+                        >
+                          <span className="min-w-0 break-words text-right md:text-left">
+                            {order.shipping_address?.fullName
+                              ? `${order.shipping_address.fullName} · ${order.email}`
+                              : order.email}
+                          </span>
                         </td>
-                        <td className="whitespace-nowrap px-3 py-2 text-primary">
+                        <td
+                          data-label={t("admin.colTotal")}
+                          className="flex items-center justify-between gap-3 px-3 py-2 text-primary before:text-xs before:uppercase before:tracking-wide before:text-muted before:content-[attr(data-label)] md:table-cell md:whitespace-nowrap md:before:content-none"
+                        >
                           {formatPrice(
                             order.total,
                             order.currency || currency,
                             i18n.language,
                           )}
                         </td>
-                        <td className="px-3 py-2 text-muted">
-                          <span className="block whitespace-nowrap">
-                            {t(
-                              `checkout.methods.${order.payment_method}.label`,
-                            )}
-                          </span>
-                          <span className="text-xs">
-                            {t(
-                              `account.status.payment.${order.status}`,
-                            )}
+                        <td
+                          data-label={t("admin.colPayment")}
+                          className="flex items-center justify-between gap-3 px-3 py-2 text-muted before:text-xs before:uppercase before:tracking-wide before:text-muted before:content-[attr(data-label)] md:table-cell md:before:content-none"
+                        >
+                          <span className="text-right md:text-left">
+                            <span className="block whitespace-nowrap">
+                              {t(
+                                `checkout.methods.${order.payment_method}.label`,
+                              )}
+                            </span>
+                            <span className="text-xs">
+                              {t(`account.status.payment.${order.status}`)}
+                            </span>
                           </span>
                         </td>
-                        <td className="px-3 py-2">
+                        <td
+                          data-label={t("admin.colShipping")}
+                          className="flex items-center justify-between gap-3 px-3 py-2 before:text-xs before:uppercase before:tracking-wide before:text-muted before:content-[attr(data-label)] md:table-cell md:before:content-none"
+                        >
                           <span
                             className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${shippingBadgeClass(order.shipping_status)}`}
                           >
@@ -431,21 +448,27 @@ export function AdminOrdersPanel() {
                             )}
                           </span>
                         </td>
-                        <td className="whitespace-nowrap px-3 py-2 text-muted">
+                        <td
+                          data-label={t("admin.colCarrier")}
+                          className="flex items-center justify-between gap-3 px-3 py-2 text-muted before:text-xs before:uppercase before:tracking-wide before:text-muted before:content-[attr(data-label)] md:table-cell md:whitespace-nowrap md:before:content-none"
+                        >
                           {savedCarrier
                             ? t(`admin.carriers.${savedCarrier}`)
                             : "—"}
                         </td>
-                        <td className="whitespace-nowrap px-3 py-2 text-muted">
+                        <td
+                          data-label={t("admin.colDate")}
+                          className="flex items-center justify-between gap-3 px-3 py-2 text-muted before:text-xs before:uppercase before:tracking-wide before:text-muted before:content-[attr(data-label)] md:table-cell md:whitespace-nowrap md:before:content-none"
+                        >
                           {new Intl.DateTimeFormat(
                             toIntlLocale(i18n.language),
                             { dateStyle: "short" },
                           ).format(new Date(order.created_at))}
                         </td>
-                        <td className="px-3 py-2 text-right">
+                        <td className="block border-t border-border px-3 py-3 text-center md:table-cell md:border-0 md:py-2 md:text-right">
                           <button
                             type="button"
-                            className="text-sm text-accent hover:text-accent-light"
+                            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-border text-sm text-accent hover:border-accent md:inline md:min-h-0 md:w-auto md:border-0 md:text-accent"
                             onClick={() =>
                               setExpandedId(open ? null : order.id)
                             }
@@ -456,8 +479,8 @@ export function AdminOrdersPanel() {
                       </tr>
 
                       {open ? (
-                        <tr className="border-t border-border bg-background-alt/40">
-                          <td colSpan={8} className="px-3 py-3">
+                        <tr className="mb-1 block rounded-2xl border border-border bg-background-alt/40 md:mb-0 md:table-row md:rounded-none md:border-0 md:border-t">
+                          <td colSpan={8} className="block px-3 py-3 md:table-cell">
                             <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
                               <div className="space-y-2 text-sm text-muted">
                                 {order.shipping_address ? (

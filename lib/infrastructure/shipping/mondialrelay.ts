@@ -252,7 +252,6 @@ export async function searchMondialRelayPoints(input: {
     };
   }
 
-  const lang = "FR";
   const rayon = "20";
   const delaiEnvoi = "0";
   /**

@@ -25,7 +25,7 @@ export function AuthForm({
   showForgotPassword = true,
 }: AuthFormProps) {
   const { t } = useTranslation();
-  const { signIn, signUp, signInWithGoogle, session, configured } = useAuth();
+  const { signIn, signUp, signInWithGoogle, configured } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { locked, run } = useActionLock();

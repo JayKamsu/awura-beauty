@@ -64,7 +64,7 @@ export async function sendDiagnosticResultToClient(
 
   let userId = input.userId ?? null;
   let answers = input.answers ?? {};
-  let appointmentId = input.appointmentId ?? null;
+  const appointmentId = input.appointmentId ?? null;
   let email = input.email ?? null;
 
   if (appointmentId) {

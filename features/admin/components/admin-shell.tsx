@@ -27,6 +27,57 @@ const NAV = [
   { href: "/admin/clients", key: "customers" },
 ] as const;
 
+/** Raccourcis barre basse mobile (le reste via le menu). */
+const MOBILE_QUICK_NAV = [
+  { href: "/admin", key: "dashboard" },
+  { href: "/admin/produits", key: "products" },
+  { href: "/admin/commandes", key: "orders" },
+  { href: "/admin/messages", key: "messages" },
+] as const;
+
+function NavIcon({ name }: { name: (typeof MOBILE_QUICK_NAV)[number]["key"] | "more" }) {
+  const common = {
+    viewBox: "0 0 24 24",
+    className: "size-5",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.75,
+  } as const;
+  switch (name) {
+    case "dashboard":
+      return (
+        <svg {...common}>
+          <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z" />
+        </svg>
+      );
+    case "products":
+      return (
+        <svg {...common}>
+          <path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5v-7z" />
+          <path d="M12 12v8M4 8.5l8 3.5 8-3.5" />
+        </svg>
+      );
+    case "orders":
+      return (
+        <svg {...common}>
+          <path d="M7 7h10l1 12H6L7 7zM9 7V5a3 3 0 0 1 6 0v2" />
+        </svg>
+      );
+    case "messages":
+      return (
+        <svg {...common}>
+          <path d="M5 6h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-4 3v-3H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z" />
+        </svg>
+      );
+    default:
+      return (
+        <svg {...common}>
+          <path d="M5 7h14M5 12h14M5 17h14" />
+        </svg>
+      );
+  }
+}
+
 type Gate = "loading" | "login" | "forbidden" | "ok";
 
 function navTitleKey(pathname: string): string {
@@ -49,6 +100,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -261,14 +321,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
               aria-label={t("admin.closeMenu")}
               onClick={() => setMenuOpen(false)}
             />
-            <div className="absolute inset-y-0 left-0 flex w-[min(20rem,85vw)] flex-col bg-background shadow-lg">
-              <div className="border-b border-border px-4 py-4">
+            <div className="absolute inset-y-0 left-0 flex w-[min(20rem,88vw)] flex-col bg-background pb-[env(safe-area-inset-bottom)] shadow-lg">
+              <div className="border-b border-border px-4 py-4 pt-[max(1rem,env(safe-area-inset-top))]">
                 <p className="text-[10px] uppercase tracking-[0.18em] text-accent">
                   {t("admin.eyebrow")}
                 </p>
                 <p className="font-serif text-xl text-primary">{t("admin.navBrand")}</p>
               </div>
-              <div className="flex-1 overflow-y-auto p-3">{navLinks}</div>
+              <div className="flex-1 overflow-y-auto overscroll-contain p-3">
+                {navLinks}
+              </div>
               <div className="space-y-3 border-t border-border p-4">
                 {adminEmail ? (
                   <p className="truncate text-xs text-muted">{adminEmail}</p>
@@ -293,7 +355,54 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </div>
         ) : null}
 
-        <div className="flex-1">{children}</div>
+        <div className="flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0">
+          {children}
+        </div>
+
+        <nav
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm lg:hidden"
+          aria-label={t("admin.navLabel")}
+        >
+          <ul className="grid grid-cols-5 gap-0.5 px-1 pt-1">
+            {MOBILE_QUICK_NAV.map((item) => {
+              const active =
+                item.href === "/admin"
+                  ? pathname === "/admin"
+                  : pathname.startsWith(item.href);
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={`flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[10px] transition ${
+                      active
+                        ? "text-primary"
+                        : "text-muted hover:text-primary"
+                    }`}
+                  >
+                    <NavIcon name={item.key} />
+                    <span className="truncate font-medium">
+                      {t(`admin.nav.${item.key}`)}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+            <li>
+              <button
+                type="button"
+                className={`flex min-h-12 w-full flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[10px] transition ${
+                  menuOpen ? "text-primary" : "text-muted hover:text-primary"
+                }`}
+                aria-expanded={menuOpen}
+                aria-label={menuOpen ? t("admin.closeMenu") : t("admin.openMenu")}
+                onClick={() => setMenuOpen((value) => !value)}
+              >
+                <NavIcon name="more" />
+                <span className="truncate font-medium">{t("admin.moreMenu")}</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
   );

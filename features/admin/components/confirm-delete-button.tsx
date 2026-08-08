@@ -27,6 +27,7 @@ export function ConfirmDeleteButton({
       <Button
         type="button"
         variant="accent-outline"
+        className="min-h-11 flex-1 sm:flex-none"
         disabled={disabled}
         onClick={() => setOpen(true)}
       >

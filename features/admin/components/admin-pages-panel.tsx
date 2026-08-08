@@ -327,7 +327,7 @@ export function AdminPagesPanel() {
         </ul>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-sm lg:left-60">
+      <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-0 right-0 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-sm lg:bottom-0 lg:left-60">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
           <p className="text-sm text-muted">
             {dirty ? t("admin.unsavedChanges") : t("admin.allSaved")}
