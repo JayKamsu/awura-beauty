@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Diagnostic Capillaire",
+  title: "Diagnostic capillaire en ligne ou présentiel | Awura Beauty",
   description:
-    "Fais ton diagnostic capillaire Awura Beauty et reçois une routine personnalisée pour cheveux texturés, afro et métissés.",
+    "Diagnostic Awura : analyse en ligne gratuite avec routine et liens produits, ou rendez-vous présentiel avec analyse du cuir chevelu au trichogramme et suivi personnalisé.",
   path: "/diagnostic-capillaire",
 });
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function DiagnosticLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return children;
 }
-

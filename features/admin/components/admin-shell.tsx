@@ -15,8 +15,10 @@ import { PushNotificationButton } from "@/features/notifications/components/push
 const NAV = [
   { href: "/admin", key: "dashboard" },
   { href: "/admin/produits", key: "products" },
+  { href: "/admin/marque", key: "brand" },
   { href: "/admin/commandes", key: "orders" },
   { href: "/admin/paiements", key: "payments" },
+  { href: "/admin/diagnostic", key: "diagnostic" },
   { href: "/admin/livraison", key: "shipping" },
   { href: "/admin/contenu", key: "content" },
   { href: "/admin/pages", key: "pages" },

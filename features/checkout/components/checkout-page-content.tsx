@@ -12,6 +12,13 @@ import { usePreferences } from "@/components/providers/preferences-provider";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { useCart } from "@/features/cart/context/cart-provider";
 import { RelayPointPicker } from "@/features/checkout/components/relay-point-picker";
+import {
+  ColissimoMark,
+  MondialRelayMark,
+  PayPalMark,
+  PickupMark,
+  StripeMark,
+} from "@/features/checkout/components/checkout-brand-marks";
 import type { RelayPoint } from "@/lib/domain";
 import { formatPrice } from "@/lib/format/price";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
@@ -88,8 +95,42 @@ export function CheckoutPageContent() {
   const [editingAddress, setEditingAddress] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [stripePublishableKey, setStripePublishableKey] = useState(
+    () => process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? "",
+  );
+  const [paypalClientId, setPaypalClientId] = useState(
+    () => process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID?.trim() ?? "",
+  );
+  const [paymentConfigLoaded, setPaymentConfigLoaded] = useState(false);
   const [paypalOrderId, setPaypalOrderId] = useState<string | null>(null);
   const [awuraOrderId, setAwuraOrderId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/checkout/config")
+      .then((r) => r.json())
+      .then(
+        (json: {
+          stripePublishableKey?: string;
+          paypalClientId?: string;
+        }) => {
+          if (cancelled) return;
+          if (json.stripePublishableKey?.trim()) {
+            setStripePublishableKey(json.stripePublishableKey.trim());
+          }
+          if (json.paypalClientId?.trim()) {
+            setPaypalClientId(json.paypalClientId.trim());
+          }
+          setPaymentConfigLoaded(true);
+        },
+      )
+      .catch(() => {
+        if (!cancelled) setPaymentConfigLoaded(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (authLoading) return;
@@ -233,14 +274,13 @@ export function CheckoutPageContent() {
     };
   }, [shippingCarrier, quoteItemsKey, items.length, subtotal, pointsToRedeem, session?.access_token]);
 
-  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-  const stripePublishableKey =
-    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? "";
-  /** Bouton test tant que les clés publiques paiement sont absentes. */
   const allowManualCheckout =
-    !stripePublishableKey && !paypalClientId?.trim();
+    paymentConfigLoaded &&
+    !stripePublishableKey &&
+    !paypalClientId;
 
   useEffect(() => {
+    if (!paymentConfigLoaded) return;
     if (allowManualCheckout) {
       setPaymentMethod("manual");
       return;
@@ -250,10 +290,15 @@ export function CheckoutPageContent() {
         return stripePublishableKey ? "stripe" : "paypal";
       }
       if (current === "stripe" && !stripePublishableKey) return "paypal";
-      if (current === "paypal" && !paypalClientId?.trim()) return "stripe";
+      if (current === "paypal" && !paypalClientId) return "stripe";
       return current;
     });
-  }, [allowManualCheckout, stripePublishableKey, paypalClientId]);
+  }, [
+    allowManualCheckout,
+    stripePublishableKey,
+    paypalClientId,
+    paymentConfigLoaded,
+  ]);
 
   const shippingAddress = {
     fullName,
@@ -567,35 +612,39 @@ export function CheckoutPageContent() {
         <section className="space-y-4">
           <h2 className="font-serif text-2xl text-primary">{t("checkout.shippingMethod")}</h2>
           <div className="grid gap-3 sm:grid-cols-3">
-            {enabledCarriers.map((carrier) => (
-              <button
-                key={carrier}
-                type="button"
-                onClick={() => {
-                  setShippingCarrier(carrier);
-                  if (carrier !== "mondial_relay") setSelectedRelay(null);
-                  setPaypalOrderId(null);
-                }}
-                className={`rounded-2xl border px-4 py-4 text-left transition ${
-                  shippingCarrier === carrier
-                    ? "border-primary bg-primary text-background"
-                    : "border-border hover:border-accent"
-                }`}
-              >
-                <span className="block font-medium">
-                  {t(`checkout.carriers.${carrier}.label`)}
-                </span>
-                <span
-                  className={`mt-1 block text-sm ${
-                    shippingCarrier === carrier
-                      ? "text-background/80"
-                      : "text-muted"
+            {enabledCarriers.map((carrier) => {
+              const active = shippingCarrier === carrier;
+              const Mark =
+                carrier === "laposte"
+                  ? ColissimoMark
+                  : carrier === "mondial_relay"
+                    ? MondialRelayMark
+                    : PickupMark;
+              return (
+                <button
+                  key={carrier}
+                  type="button"
+                  onClick={() => {
+                    setShippingCarrier(carrier);
+                    if (carrier !== "mondial_relay") setSelectedRelay(null);
+                    setPaypalOrderId(null);
+                  }}
+                  className={`rounded-2xl border bg-background px-4 py-4 text-left transition ${
+                    active
+                      ? "border-accent ring-1 ring-accent"
+                      : "border-border hover:border-accent"
                   }`}
                 >
-                  {t(`checkout.carriers.${carrier}.hint`)}
-                </span>
-              </button>
-            ))}
+                  <Mark className="mb-3 h-8 w-auto max-w-[9rem] object-contain object-left" />
+                  <span className="block font-medium text-primary">
+                    {t(`checkout.carriers.${carrier}.label`)}
+                  </span>
+                  <span className="mt-1 block text-sm text-muted">
+                    {t(`checkout.carriers.${carrier}.hint`)}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </section>
 
@@ -764,32 +813,40 @@ export function CheckoutPageContent() {
               (allowManualCheckout
                 ? ["manual", "stripe", "paypal"]
                 : ["stripe", "paypal"]) as PaymentMethod[]
-            ).map((method) => (
-              <button
-                key={method}
-                type="button"
-                onClick={() => {
-                  setPaymentMethod(method);
-                  setPaypalOrderId(null);
-                }}
-                className={`rounded-2xl border px-4 py-4 text-left transition ${
-                  paymentMethod === method
-                    ? "border-primary bg-primary text-background"
-                    : "border-border hover:border-accent"
-                }`}
-              >
-                <span className="block font-medium">
-                  {t(`checkout.methods.${method}.label`)}
-                </span>
-                <span
-                  className={`mt-1 block text-sm ${
-                    paymentMethod === method ? "text-background/80" : "text-muted"
+            ).map((method) => {
+              const active = paymentMethod === method;
+              return (
+                <button
+                  key={method}
+                  type="button"
+                  onClick={() => {
+                    setPaymentMethod(method);
+                    setPaypalOrderId(null);
+                  }}
+                  className={`rounded-2xl border bg-background px-4 py-4 text-left transition ${
+                    active
+                      ? "border-accent ring-1 ring-accent"
+                      : "border-border hover:border-accent"
                   }`}
                 >
-                  {t(`checkout.methods.${method}.hint`)}
-                </span>
-              </button>
-            ))}
+                  {method === "stripe" ? (
+                    <StripeMark className="mb-3 h-8 w-auto object-contain object-left" />
+                  ) : method === "paypal" ? (
+                    <PayPalMark className="mb-3 h-8 w-auto object-contain object-left" />
+                  ) : (
+                    <span className="mb-3 block text-xs uppercase tracking-wide text-muted">
+                      {t("checkout.methods.manual.label")}
+                    </span>
+                  )}
+                  <span className="block font-medium text-primary">
+                    {t(`checkout.methods.${method}.label`)}
+                  </span>
+                  <span className="mt-1 block text-sm text-muted">
+                    {t(`checkout.methods.${method}.hint`)}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </section>
 

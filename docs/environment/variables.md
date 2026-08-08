@@ -17,7 +17,12 @@ Modèle versionné : `.env.example`.
 
 | Variable | Public | Description |
 | --- | --- | --- |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | oui | Clé publishable test |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | oui | Clé publishable (live/test). Sur Vercel : **ne pas** marquer Sensitive (`--no-sensitive`), sinon absente du checkout navigateur. |
+| `STRIPE_SECRET_KEY` | oui | Clé secrète serveur |
+| `STRIPE_WEBHOOK_SECRET` | oui | Secret webhook |
+| `NEXT_PUBLIC_PAYPAL_CLIENT_ID` | oui | Client ID PayPal — même règle Vercel `--no-sensitive` |
+| `PAYPAL_CLIENT_SECRET` | oui | Secret PayPal |
+| `PAYPAL_API_BASE` | oui | `https://api-m.paypal.com` (live) |
 | `STRIPE_SECRET_KEY` | non | Clé secrète test |
 | `STRIPE_WEBHOOK_SECRET` | non | Secret webhook |
 

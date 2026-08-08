@@ -8,7 +8,7 @@ Awura Beauty est une marque française de soins capillaires naturels, formulés 
 
 - [Accueil](/): Présentation de la marque et best-sellers
 - [Boutique](/boutique): Catalogue complet des soins Awura
-- [Diagnostic Capillaire](/diagnostic-capillaire): Questionnaire pour recommander une routine
+- [Diagnostic Capillaire](/diagnostic-capillaire): En ligne (gratuit, routine + liens produits) ou présentiel (trichogramme, bilan & suivi routine)
 - [À propos](/a-propos): Histoire, mission et engagements
 - [Blog](/blog): Conseils capillaires et éducation texture
 - [Tutoriels](/tutoriels): Guides d'utilisation des produits

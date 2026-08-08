@@ -1,98 +1,131 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { DiagnosticProgress } from "@/features/diagnostic/components/diagnostic-progress";
 import { DiagnosticResult } from "@/features/diagnostic/components/diagnostic-result";
-import {
-  DIAGNOSTIC_STEPS,
-  getOptionsForStep,
-  type DiagnosticStepId,
-} from "@/features/diagnostic/engine/recommend";
-import { buildDiagnosticResult } from "@/features/diagnostic/engine/recommend";
-import {
-  getProductsBySlugs,
-  saveHairDiagnostic,
-  type DiagnosticAnswers,
-  type DiagnosticProfile,
-  type ProductRow,
-} from "@/lib/infrastructure/supabase";
-
-type AnswersState = Partial<DiagnosticAnswers>;
+import { useAuth } from "@/features/auth/context/auth-provider";
+import type {
+  DiagnosticAnswerMap,
+  DiagnosticProfile,
+  DiagnosticQuestion,
+  DiagnosticRoutineStep,
+  DiagnosticSettings,
+} from "@/lib/domain/diagnostic";
+import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
 export function DiagnosticWizard() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { session } = useAuth();
+  const [questions, setQuestions] = useState<DiagnosticQuestion[]>([]);
+  const [settings, setSettings] = useState<DiagnosticSettings | null>(null);
+  const [loading, setLoading] = useState(true);
   const [stepIndex, setStepIndex] = useState(0);
-  const [answers, setAnswers] = useState<AnswersState>({});
+  const [answers, setAnswers] = useState<DiagnosticAnswerMap>({});
   const [profile, setProfile] = useState<DiagnosticProfile | null>(null);
+  const [routine, setRoutine] = useState<DiagnosticRoutineStep[]>([]);
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [saved, setSaved] = useState(false);
   const [linkedToUser, setLinkedToUser] = useState(false);
   const [done, setDone] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  const step = DIAGNOSTIC_STEPS[stepIndex] as DiagnosticStepId;
-  const options = useMemo(() => getOptionsForStep(step), [step]);
-  const selected = answers[step];
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const res = await fetch(
+        `/api/diagnostic/questionnaire?channel=online&locale=${encodeURIComponent(i18n.language)}`,
+      );
+      const json = (await res.json()) as {
+        questions?: DiagnosticQuestion[];
+        settings?: DiagnosticSettings;
+      };
+      if (cancelled) return;
+      setQuestions(json.questions ?? []);
+      setSettings(json.settings ?? null);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [i18n.language]);
 
-  const selectOption = (value: (typeof options)[number]) => {
-    setAnswers((prev) => ({ ...prev, [step]: value }));
+  const step = questions[stepIndex];
+  const selected = step ? answers[step.questionKey] : undefined;
+
+  const selectOption = (valueKey: string) => {
+    if (!step) return;
+    setAnswers((prev) => ({ ...prev, [step.questionKey]: valueKey }));
   };
 
   const goNext = () => {
-    if (!selected) return;
-
-    const nextAnswers = { ...answers, [step]: selected } as AnswersState;
-
-    if (stepIndex < DIAGNOSTIC_STEPS.length - 1) {
-      setAnswers(nextAnswers);
-      setStepIndex((index) => index + 1);
+    if (!step || !selected) return;
+    if (stepIndex < questions.length - 1) {
+      setStepIndex((i) => i + 1);
       return;
     }
 
-    const completeAnswers = nextAnswers as DiagnosticAnswers;
-    setAnswers(completeAnswers);
-
     startTransition(async () => {
-      const result = buildDiagnosticResult(completeAnswers);
-      const recommended = await getProductsBySlugs(result.recommendedProductSlugs);
-      const persist = await saveHairDiagnostic({
-        answers: completeAnswers,
-        profile: result.profile,
-        recommendedProductSlugs: result.recommendedProductSlugs,
+      const headers: HeadersInit = { "Content-Type": "application/json" };
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`;
+      }
+      const res = await fetch("/api/diagnostic/submit", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ answers, locale: i18n.language }),
       });
-
-      setProfile(result.profile);
-      setProducts(recommended);
-      setSaved(persist.saved);
-      setLinkedToUser(persist.linkedToUser);
+      const json = (await res.json()) as {
+        profile?: DiagnosticProfile;
+        routine?: DiagnosticRoutineStep[];
+        products?: ProductRow[];
+        saved?: boolean;
+        linkedToUser?: boolean;
+      };
+      if (!res.ok || !json.profile) return;
+      setProfile(json.profile);
+      setRoutine(json.routine ?? []);
+      setProducts(json.products ?? []);
+      setSaved(Boolean(json.saved));
+      setLinkedToUser(Boolean(json.linkedToUser));
       setDone(true);
     });
   };
 
   const goBack = () => {
     if (stepIndex === 0) return;
-    setStepIndex((index) => index - 1);
+    setStepIndex((i) => i - 1);
   };
 
   const restart = () => {
     setStepIndex(0);
     setAnswers({});
     setProfile(null);
+    setRoutine([]);
     setProducts([]);
     setSaved(false);
     setLinkedToUser(false);
     setDone(false);
   };
 
+  if (loading) {
+    return <p className="text-muted">{t("diagnostic.loading")}</p>;
+  }
+
+  if (!questions.length) {
+    return <p className="text-muted">{t("diagnostic.emptyQuestions")}</p>;
+  }
+
   if (done && profile) {
     return (
       <DiagnosticResult
         profile={profile}
         products={products}
+        routine={routine}
         saved={saved}
         linkedToUser={linkedToUser}
+        settings={settings}
         onRestart={restart}
       />
     );
@@ -100,42 +133,41 @@ export function DiagnosticWizard() {
 
   return (
     <div className="space-y-8">
-      <DiagnosticProgress
-        stepIndex={stepIndex}
-        totalSteps={DIAGNOSTIC_STEPS.length}
-      />
+      <DiagnosticProgress stepIndex={stepIndex} totalSteps={questions.length} />
 
       <div className="space-y-3">
         <h2 className="font-serif text-3xl text-primary sm:text-4xl">
-          {t(`diagnostic.steps.${step}.title`)}
+          {step.title}
         </h2>
-        <p className="text-muted">{t(`diagnostic.steps.${step}.subtitle`)}</p>
+        {step.subtitle ? (
+          <p className="text-muted">{step.subtitle}</p>
+        ) : null}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {options.map((option) => {
-          const isActive = selected === option;
+        {step.options.map((option) => {
+          const isActive = selected === option.valueKey;
           return (
             <button
-              key={option}
+              key={option.id}
               type="button"
-              onClick={() => selectOption(option)}
+              onClick={() => selectOption(option.valueKey)}
               className={`rounded-2xl border px-5 py-4 text-left transition ${
                 isActive
                   ? "border-primary bg-primary text-background"
                   : "border-border bg-background hover:border-accent"
               }`}
             >
-              <span className="block font-medium">
-                {t(`diagnostic.options.${step}.${option}.label`)}
-              </span>
-              <span
-                className={`mt-1 block text-sm ${
-                  isActive ? "text-background/80" : "text-muted"
-                }`}
-              >
-                {t(`diagnostic.options.${step}.${option}.hint`)}
-              </span>
+              <span className="block font-medium">{option.label}</span>
+              {option.hint ? (
+                <span
+                  className={`mt-1 block text-sm ${
+                    isActive ? "text-background/80" : "text-muted"
+                  }`}
+                >
+                  {option.hint}
+                </span>
+              ) : null}
             </button>
           );
         })}
@@ -158,7 +190,7 @@ export function DiagnosticWizard() {
         >
           {pending
             ? t("diagnostic.loading")
-            : stepIndex === DIAGNOSTIC_STEPS.length - 1
+            : stepIndex === questions.length - 1
               ? t("diagnostic.seeResult")
               : t("diagnostic.next")}
         </Button>

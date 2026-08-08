@@ -71,7 +71,12 @@
       "eyebrow": "Signature care",
       "title": "Active Growth Lotion",
       "description": "Hydrating and fortifying — a natural lotion to support growth and strengthen your crown.",
-      "cta": "Discover the lotion",
+      "cta": "Book my diagnostic",
+      "ctaOnline": "Free online diagnostic",
+      "ctaPhysical": "In-person €39.80",
+      "sideTitle": "Awura Beauty diagnostic",
+      "sideOnline": "Online: free (value €90) — personalized routine for your crown.",
+      "sidePhysical": "In person: €39.80 (instead of €150) — face-to-face analysis + care plan.",
       "imageAlt": "Healthy long hair with Awura lotion"
     },
     "diagnostic": {

@@ -1,0 +1,18 @@
+---
+description: Charte graphique Awura Beauty — tokens, typo, logo, fiches produit
+alwaysApply: true
+---
+
+# Design system Awura (obligatoire)
+
+Source de vérité : **`docs/design-system/`** (README, brand, colors, typography, logo, product-sheet).
+
+Quand tu génères ou modifies de l’UI :
+
+1. Tokens sémantiques uniquement (`primary`, `accent`, `background`, `muted`…) — pas d’hex.
+2. Palette Adulte par défaut ; pastel Enfant seulement sous `data-awura-universe="child"`.
+3. Montserrat partout ; titres ExtraBold (`font-serif` ou `font-extrabold`).
+4. Respecter interdits logo / Duafe (pas d’opacité, pas de déformation, clear space).
+5. Fiche produit détail : Nom → Bénéfices → Composition → Utilisation → QR/lien.
+6. Textures / motifs africains en filigrane subtil, camaïeu palette.
+7. Ton : héritage + luxe + naturel + modernité.

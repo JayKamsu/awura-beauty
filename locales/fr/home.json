@@ -71,7 +71,12 @@
       "eyebrow": "Soin signature",
       "title": "Lotion Active Repousse",
       "description": "Hydratante et fortifiante — une lotion naturelle pour stimuler la pousse et renforcer ta couronne.",
-      "cta": "Découvrir la lotion",
+      "cta": "Réserver mon diagnostic",
+      "ctaOnline": "Diagnostic gratuit en ligne",
+      "ctaPhysical": "RDV présentiel 39,80 €",
+      "sideTitle": "Diagnostic Awura Beauty",
+      "sideOnline": "En ligne : gratuit (valeur 90 €) — routine personnalisée pour ta couronne.",
+      "sidePhysical": "Présentiel : 39,80 € (au lieu de 150 €) — analyse en face à face + plan de soins.",
       "imageAlt": "Cheveux longs en bonne santé avec lotion Awura"
     },
     "diagnostic": {

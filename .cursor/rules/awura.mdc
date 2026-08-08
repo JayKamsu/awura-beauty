@@ -20,13 +20,16 @@ faibles ou fallback insecure « pour plus tard ».
 - Admin : `requireAdminFromRequest` + `createAdminSupabaseClient` (service_role en prod).
   Jamais `ADMIN_DEV_BYPASS=true` en production. Jamais faire confiance à `user_metadata.role`.
 - SEO / GEO : metadata, sitemap, robots, JSON-LD, `llms.txt` — voir skill `awura-seo-geo`.
-- Ne jamais coder une couleur en hexadécimal en dur dans un composant :
-  toujours utiliser les tokens Tailwind (bg-primary, text-accent, bg-background-alt...).
-- Clair ET sombre partout.
+- Design system officiel : `docs/design-system/` (charte Luxury Organic).
+  Couleurs Vert Forêt / Doré / Sauge / Sable — tokens Tailwind uniquement
+  (bg-primary, text-accent…). Jamais d’hex en composant.
+- Typo : Montserrat (ExtraBold titres via `font-serif`, Regular corps, Light légendes).
+- Univers Adulte (défaut) ≠ Enfant (pastel) — jamais mélanger dans une section.
+- Clair ET sombre partout (dark dérivé charte).
 - Features isolées dans `/features` — pas de dépendances croisées.
 - UI réutilisable dans `/components/ui`.
 - i18n : toujours `t("clé")` pour le texte utilisateur.
-- Esthétique maquette : serif titres, sans-serif corps, beaucoup d’espace, coins doux.
+- Esthétique : luxe naturel, espace, coins doux, Duafe / clear space logo.
 
 ## Hygiène des fichiers
 

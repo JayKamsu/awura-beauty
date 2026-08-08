@@ -25,11 +25,17 @@ type ProductCardProps = {
   onAddToCart?: (product: ProductCardData) => void;
 };
 
+function isCoarsePointer(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(hover: none), (pointer: coarse)").matches;
+}
+
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();
   const { addItem } = useCart();
-  const [showIngredients, setShowIngredients] = useState(false);
+  /** Mobile / tactile : bascule manuelle (desktop = hover CSS). */
+  const [touchReveal, setTouchReveal] = useState(false);
   const [added, setAdded] = useState(false);
 
   const hasIngredientsImage = Boolean(product.ingredientImage);
@@ -51,6 +57,12 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
     window.setTimeout(() => setAdded(false), 1800);
   };
 
+  const handleMediaClick = (event: React.MouseEvent) => {
+    if (!hasIngredientsImage || !isCoarsePointer()) return;
+    event.preventDefault();
+    setTouchReveal((value) => !value);
+  };
+
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl bg-background-alt/60">
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-background-alt">
@@ -64,20 +76,25 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           href={href}
           className="absolute inset-0 z-0 block"
           aria-label={t("shop.viewProduct")}
+          onClick={handleMediaClick}
         >
           <span
             aria-hidden
             className={`absolute inset-0 transition-[opacity,transform] duration-500 ease-out ${
-              showIngredients
+              touchReveal
                 ? "pointer-events-none scale-95 opacity-0"
                 : "scale-100 opacity-100"
+            } ${
+              hasIngredientsImage
+                ? "[@media(hover:hover)]:group-hover:pointer-events-none [@media(hover:hover)]:group-hover:scale-95 [@media(hover:hover)]:group-hover:opacity-0"
+                : ""
             }`}
           >
             <Image
               src={product.image}
               alt={product.name}
               fill
-              className="object-cover transition duration-500 group-hover:scale-105"
+              className="object-cover transition duration-500 [@media(hover:hover)]:group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 20vw"
             />
           </span>
@@ -85,14 +102,14 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             <span
               aria-hidden
               className={`absolute inset-0 transition-[opacity,transform] duration-500 ease-out ${
-                showIngredients
+                touchReveal
                   ? "scale-100 opacity-100"
                   : "pointer-events-none scale-95 opacity-0"
-              }`}
+              } [@media(hover:hover)]:group-hover:pointer-events-auto [@media(hover:hover)]:group-hover:scale-100 [@media(hover:hover)]:group-hover:opacity-100`}
             >
               <Image
                 src={product.ingredientImage!}
-                alt=""
+                alt={t("shop.ingredientAlt", { name: product.name })}
                 fill
                 className="object-cover"
                 sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 20vw"
@@ -102,21 +119,21 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         </Link>
 
         {hasIngredientsImage ? (
-          <button
-            type="button"
-            onClick={() => setShowIngredients((value) => !value)}
-            className="absolute inset-x-3 bottom-3 z-20 min-h-11 rounded-xl bg-background/95 px-3 py-2 text-center text-[11px] font-medium tracking-wide text-primary shadow-sm backdrop-blur-sm transition hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-            aria-pressed={showIngredients}
-            aria-label={
-              showIngredients
-                ? t("shop.seeProduct", { name: product.name })
-                : t("shop.seeIngredients", { name: product.name })
-            }
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-3 z-10 flex justify-center gap-1.5 [@media(hover:hover)]:hidden"
+            aria-hidden
           >
-            {showIngredients
-              ? t("shop.seeProductBadge")
-              : t("shop.seeIngredientsBadge")}
-          </button>
+            <span
+              className={`size-1.5 rounded-full transition ${
+                touchReveal ? "bg-background/50" : "bg-background"
+              }`}
+            />
+            <span
+              className={`size-1.5 rounded-full transition ${
+                touchReveal ? "bg-background" : "bg-background/50"
+              }`}
+            />
+          </div>
         ) : null}
       </div>
 

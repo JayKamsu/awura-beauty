@@ -16,7 +16,13 @@ const LABEL_MIME: Record<string, string> = {
   "image/jpeg": ".jpg",
 };
 
-export type StorageFolder = "products" | "blog" | "pages" | "uploads" | "labels";
+export type StorageFolder =
+  | "products"
+  | "blog"
+  | "pages"
+  | "uploads"
+  | "labels"
+  | "brand";
 
 function publicObjectUrl(path: string): string | null {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");

@@ -26,6 +26,13 @@ jobs:
       ADMIN_DEV_BYPASS: "false"
       ADMIN_EMAILS: admin@awura.local
       SENTRY_AUTH_TOKEN: ""
+      # Clés publishable factices pour le build CI (jamais utilisées en prod)
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
+      NEXT_PUBLIC_PAYPAL_CLIENT_ID: ci_paypal_client_placeholder
+      STRIPE_SECRET_KEY: sk_test_ci_placeholder
+      PAYPAL_CLIENT_SECRET: ci_paypal_secret_placeholder
+      PAYPAL_API_BASE: https://api-m.sandbox.paypal.com
+      STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
 
     steps:
       - name: Checkout

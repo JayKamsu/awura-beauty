@@ -30,9 +30,18 @@ function paginate(
   };
 }
 
-function filterFallback(category?: string | null) {
-  if (!category || category === "all") return FALLBACK_PRODUCTS;
-  return FALLBACK_PRODUCTS.filter((product) => product.category === category);
+function filterFallback(
+  category?: string | null,
+  universe?: "adult" | "child" | null,
+) {
+  let list = FALLBACK_PRODUCTS;
+  if (category && category !== "all") {
+    list = list.filter((product) => product.category === category);
+  }
+  if (universe === "adult" || universe === "child") {
+    list = list.filter((product) => product.universe === universe);
+  }
+  return list;
 }
 
 function mapRow(row: Record<string, unknown>): ProductRow {
@@ -54,6 +63,8 @@ function mapRow(row: Record<string, unknown>): ProductRow {
     is_new: Boolean(row.is_new),
     stock: Number(row.stock ?? 0),
     shipping_fee: Number(row.shipping_fee ?? 0),
+    qr_url: String(row.qr_url ?? ""),
+    universe: row.universe === "child" ? "child" : "adult",
     created_at: row.created_at ? String(row.created_at) : undefined,
   };
 }
@@ -64,10 +75,16 @@ export async function listProducts(
   const page = params.page ?? 1;
   const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE;
   const category = params.category;
+  const universe = params.universe;
 
   const supabase = createSupabaseClient();
   if (!supabase) {
-    return paginate(filterFallback(category), page, pageSize, "fallback");
+    return paginate(
+      filterFallback(category, universe),
+      page,
+      pageSize,
+      "fallback",
+    );
   }
 
   let query = supabase
@@ -78,6 +95,9 @@ export async function listProducts(
   if (category && category !== "all") {
     query = query.eq("category", category);
   }
+  if (universe === "adult" || universe === "child") {
+    query = query.eq("universe", universe);
+  }
 
   const from = (Math.max(1, page) - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -85,12 +105,27 @@ export async function listProducts(
   const { data, error, count } = await query.range(from, to);
 
   if (error) {
-    return paginate(filterFallback(category), page, pageSize, "fallback");
+    return paginate(
+      filterFallback(category, universe),
+      page,
+      pageSize,
+      "fallback",
+    );
   }
 
   // Table vide / non seedée → fallback local
-  if ((count === 0 || !data) && (!category || category === "all") && page <= 1) {
-    return paginate(filterFallback(category), page, pageSize, "fallback");
+  if (
+    (count === 0 || !data) &&
+    (!category || category === "all") &&
+    !universe &&
+    page <= 1
+  ) {
+    return paginate(
+      filterFallback(category, universe),
+      page,
+      pageSize,
+      "fallback",
+    );
   }
 
   const rows = data ?? [];

@@ -24,10 +24,11 @@ export async function createStripeCheckoutSession(input: {
   lineItems: StripeLineItem[];
   successUrl: string;
   cancelUrl: string;
-}): Promise<{ url: string | null; error: string | null }> {
+  metadata?: Record<string, string>;
+}): Promise<{ url: string | null; sessionId: string | null; error: string | null }> {
   const stripe = getStripe();
   if (!stripe) {
-    return { url: null, error: "Stripe is not configured" };
+    return { url: null, sessionId: null, error: "Stripe is not configured" };
   }
 
   const session = await stripe.checkout.sessions.create({
@@ -36,7 +37,10 @@ export async function createStripeCheckoutSession(input: {
     success_url: input.successUrl,
     cancel_url: input.cancelUrl,
     client_reference_id: input.orderId,
-    metadata: { orderId: input.orderId },
+    metadata: {
+      orderId: input.orderId,
+      ...(input.metadata ?? {}),
+    },
     line_items: input.lineItems.map((item) => ({
       quantity: item.quantity,
       price_data: {
@@ -50,5 +54,5 @@ export async function createStripeCheckoutSession(input: {
     })),
   });
 
-  return { url: session.url, error: null };
+  return { url: session.url, sessionId: session.id, error: null };
 }

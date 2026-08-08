@@ -1,179 +1,146 @@
 {
   "diagnostic": {
-    "eyebrow": "Diagnóstico capilar",
-    "title": "Entiende por fin tu corona",
-    "subtitle": "Responde a algunas preguntas: construiremos tu perfil capilar y te recomendaremos 3 productos Awura adaptados.",
-    "progress": "Paso {{current}} / {{total}}",
-    "progressLabel": "Progreso del diagnóstico",
+    "eyebrow": "Diagnóstico capilar Awura",
+    "title": "Comprende por fin tu corona",
+    "subtitle": "Responde unas preguntas: creamos tu perfil y te recomendamos una rutina Awura.",
+    "hubTitle": "Tu santuario para tu corona",
+    "hubSubtitle": "¿Rotura, picor, sequedad o cuero sensible sin respuesta clara? Te acompañamos online o en presencial para entender tu fibra y cuidar de forma duradera.",
+    "hubPromise": "Dos formatos, un mismo objetivo: un informe claro, una rutina para cabello texturizado y los productos Awura adecuados — con el proceso a seguir.",
+    "offersEyebrow": "Nuestros acompañamientos",
+    "offersTitle": "Online o presencial",
+    "offersSubtitle": "Elige la profundidad: quiz guiado a distancia, o consulta con observación del cuero cabelludo mediante tricograma.",
+    "expertiseNote": "Expertise Awura Beauty para coronas afro, crespas y texturizadas — diagnóstico, rutina personalizada y cuidados naturales pensados para tu fibra.",
+    "meta": {
+      "duration": "Duración",
+      "price": "Precio"
+    },
+    "backToHub": "Volver a los acompañamientos",
     "back": "Atrás",
     "next": "Continuar",
     "seeResult": "Ver mi resultado",
     "loading": "Analizando…",
-    "steps": {
-      "hairType": {
-        "title": "¿Cuál es tu tipo de cabello?",
-        "subtitle": "Elige la textura más cercana a tu corona."
-      },
-      "scalp": {
-        "title": "¿Cómo está tu cuero cabelludo?",
-        "subtitle": "El estado del cuero cabelludo orienta los cuidados diarios."
-      },
-      "habits": {
-        "title": "¿Cuáles son tus hábitos?",
-        "subtitle": "Los hábitos cotidianos definen lo que necesita tu fibra."
-      },
-      "goal": {
-        "title": "¿Cuál es tu objetivo principal?",
-        "subtitle": "Priorizaremos una rutina clara en torno a tu objetivo."
+    "emptyQuestions": "No hay preguntas disponibles por ahora.",
+    "progress": "Paso {{current}} / {{total}}",
+    "progressLabel": "Progreso del diagnóstico",
+    "price": {
+      "free": "Gratis"
+    },
+    "online": {
+      "eyebrow": "Online",
+      "badge": "A distancia",
+      "title": "Diagnóstico online",
+      "subtitle": "Análisis guiado a distancia para entender las necesidades de tu corona y salir con una rutina clara.",
+      "cardTitle": "Diagnóstico capilar online",
+      "cardBody": "Análisis completo a distancia: perfil, retorno detallado, proceso a seguir y enlaces de productos a comprar.",
+      "duration": "~10 min",
+      "meta": "{{duration}} · {{price}} (valor {{compare}})",
+      "cta": "Empezar el diagnóstico gratis",
+      "includes": {
+        "1": "Cuestionario guiado sobre textura, cuero y objetivos",
+        "2": "Retorno detallado con proceso wash day / entre lavados",
+        "3": "Nueva rutina Awura con los productos adecuados",
+        "4": "Enlaces de compra + guardado en tu cuenta"
       }
     },
-    "options": {
-      "hairType": {
-        "4a": {
-          "label": "4A — Rizos apretados",
-          "hint": "Espirales definidas, volumen suave"
-        },
-        "4b": {
-          "label": "4B — Crespo",
-          "hint": "Ángulos en Z, densidad marcada"
-        },
-        "4c": {
-          "label": "4C — Muy crespo",
-          "hint": "Fibra fina a densa, fuerte encogimiento"
-        },
-        "3abc": {
-          "label": "3A–3C — Rizado",
-          "hint": "Rizos suaves a apretados"
-        },
-        "locs": {
-          "label": "Locs / Trenzas",
-          "hint": "Peinados protectores a largo plazo"
-        }
+    "physical": {
+      "eyebrow": "Presencial",
+      "badge": "Consulta",
+      "title": "Diagnóstico presencial",
+      "subtitle": "Consulta cara a cara: observación del cuero con tricograma, luego rutina personalizada y lista de productos.",
+      "cardTitle": "Diagnóstico capilar presencial",
+      "cardBody": "Consulta con observación directa del cuero cabelludo (tricograma) para un informe completo y seguimiento de rutina a medida.",
+      "duration": "{{minutes}} min",
+      "meta": "{{duration}} min · {{price}} (valor {{compare}})",
+      "cta": "Reservar mi cita",
+      "locationLabel": "Lugar",
+      "includes": {
+        "1": "Análisis del cuero cabelludo con tricograma",
+        "2": "Informe personalizado tras la consulta",
+        "3": "Seguimiento de rutina con gestos y cadencia",
+        "4": "Lista de productos Awura propuesta, visible en tu cuenta"
       },
-      "scalp": {
-        "dry": {
-          "label": "Seco",
-          "hint": "Tirantez, falta de confort"
-        },
-        "oily": {
-          "label": "Graso",
-          "hint": "Las raíces brillan rápido"
-        },
-        "sensitive": {
-          "label": "Sensible",
-          "hint": "Reactividad, necesita suavidad"
-        },
-        "balanced": {
-          "label": "Equilibrado",
-          "hint": "Confort diario general"
-        },
-        "flaky": {
-          "label": "Con caspa",
-          "hint": "Caspa o sequedad visible"
-        }
-      },
-      "habits": {
-        "frequent_wash": {
-          "label": "Lavados frecuentes",
-          "hint": "Varias veces por semana"
-        },
-        "heat_styling": {
-          "label": "Calor / secador",
-          "hint": "Herramientas de calor regulares"
-        },
-        "protective": {
-          "label": "Peinados protectores",
-          "hint": "Trenzas, pelucas, pañuelos"
-        },
-        "minimal": {
-          "label": "Rutina mínima",
-          "hint": "Pocos productos, gestos simples"
-        },
-        "hard_detangle": {
-          "label": "Difícil de desenredar",
-          "hint": "Nudos, rotura al peinar"
-        }
-      },
-      "goal": {
-        "hydration": {
-          "label": "Hidratación",
-          "hint": "Suavidad y confort de la fibra"
-        },
-        "length": {
-          "label": "Largo / crecimiento",
-          "hint": "Apoyar y conservar el crecimiento"
-        },
-        "definition": {
-          "label": "Definición",
-          "hint": "Rizos limpios y marcados"
-        },
-        "repair": {
-          "label": "Reparación",
-          "hint": "Fibra cansada, puntas dañadas"
-        },
-        "volume": {
-          "label": "Volumen",
-          "hint": "Densidad y cuerpo"
-        }
+      "chooseSlot": "Elegir franja",
+      "slotsTitle": "Disponibilidad",
+      "slotsSubtitle": "Elige una franja. La duración la define el equipo Awura.",
+      "priceLabel": "{{price}} (en lugar de {{compare}})",
+      "noSlots": "No hay franjas abiertas en las próximas semanas. Vuelve pronto o contáctanos.",
+      "contactTitle": "Tus datos",
+      "payCta": "Pagar {{price}} y reservar",
+      "bookError": "No se pudo iniciar el pago. Inténtalo de nuevo.",
+      "successTitle": "Cita confirmada",
+      "successBody": "¡Gracias! Tu cita está reservada. Tras el tricograma, tu informe y rutina personalizada aparecerán en tu cuenta.",
+      "status": {
+        "pending_payment": "Pago pendiente",
+        "confirmed": "Confirmada",
+        "cancelled": "Cancelada",
+        "completed": "Completada"
       }
     },
     "profiles": {
       "hydration": {
         "title": "Perfil hidratación profunda",
-        "summary": "Tu corona necesita una rutina rica en nutrición. Prioriza mantecas y mascarillas para recuperar el confort de la fibra."
+        "summary": "Tu corona necesita una rutina rica en nutrición. Prioriza hidratación y sellado para restaurar el confort de la fibra."
       },
       "growth": {
         "title": "Perfil crecimiento activo",
-        "summary": "Tu objetivo apunta al largo. Una loción fortificante y el cuidado regular del cuero cabelludo serán tus aliados."
+        "summary": "Tu objetivo apunta a la longitud. Una loción fortificante y el cuidado del cuero cabelludo serán tus aliados."
       },
       "repair": {
         "title": "Perfil reparación intensa",
-        "summary": "Tu fibra necesita reparación. Apuesta por cuidados reconstructores e hidratación sellada para reducir la rotura."
+        "summary": "La fibra pide reparación. Apuesta por cuidados reconstructores e hidratación sellada para limitar la rotura."
       },
       "detangle": {
-        "title": "Perfil desenredado y definición",
-        "summary": "El desenredado y la definición son centrales. Un desenredante nutritivo facilitará las rutinas sin estresar la fibra."
+        "title": "Perfil desenredo y definición",
+        "summary": "El desenredo y la definición son clave. Un acondicionador nutritivo facilitará tus rutinas sin estresar la fibra."
       },
       "balance": {
         "title": "Perfil equilibrio diario",
-        "summary": "Tu corona prospera con una rutina equilibrada: limpieza suave, hidratación justa y apoyo duradero de la fibra."
+        "summary": "Tu corona gana con una rutina equilibrada: limpiar con suavidad, hidratar lo justo y sellar de forma duradera."
       }
     },
     "tags": {
       "hydratation": "Hidratación",
       "pousse": "Crecimiento",
       "réparation": "Reparación",
-      "démêlage": "Desenredado",
+      "démêlage": "Desenredo",
       "équilibre": "Equilibrio",
+      "scellage": "Sellado",
+      "cuir chevelu": "Cuero cabelludo",
+      "souplesse": "Suavidad",
+      "force": "Fuerza",
+      "légèreté": "Ligereza",
+      "trichogramme": "Tricograma",
       "4a": "4A",
       "4b": "4B",
       "4c": "4C",
       "3abc": "3A–3C",
-      "locs": "Locs",
-      "dry": "Cuero cabelludo seco",
-      "oily": "Cuero cabelludo graso",
-      "sensitive": "Cuero cabelludo sensible",
-      "balanced": "Cuero cabelludo equilibrado",
-      "flaky": "Con caspa",
-      "frequent_wash": "Lavado frecuente",
-      "heat_styling": "Calor",
-      "protective": "Protector",
-      "minimal": "Mínimo",
-      "hard_detangle": "Desenredar",
-      "hydration": "Hidratación",
-      "length": "Largo",
-      "definition": "Definición",
-      "repair": "Reparación",
-      "volume": "Volumen"
+      "locs": "Locs"
+    },
+    "video": {
+      "eyebrow": "Visio Awura",
+      "title": "Sala de consulta",
+      "subtitle": "Cita del {{date}} — activa cámara y micrófono para empezar.",
+      "loading": "Abriendo la sala…",
+      "error": "No se pudo abrir la visio. Comprueba que la cita está confirmada o vuelve a iniciar sesión.",
+      "openExternal": "Abrir a pantalla completa",
+      "joinCta": "Unirse a la visio",
+      "hint": "Visio gratuita con Jitsi. Si el marco queda vacío, usa « Abrir a pantalla completa ». Permite cámara y micrófono en el navegador."
     },
     "result": {
-      "eyebrow": "Tu resultado",
-      "productsTitle": "3 productos recomendados para ti",
-      "savedLinked": "Diagnóstico guardado en tu cuenta.",
-      "savedAnonymous": "Diagnóstico guardado. Inicia sesión para encontrarlo en tu cuenta.",
-      "saveFallback": "Resultado calculado en local (Supabase no disponible para guardar).",
+      "eyebrow": "Para tu corona",
+      "productsTitle": "Productos a comprar",
+      "routineTitle": "Tu nueva rutina Awura",
+      "routineSubtitle": "Los productos adecuados, en orden, con gestos y cadencia a seguir.",
+      "processTitle": "El proceso a seguir",
+      "processSubtitle": "Wash day, entre lavados y enlaces de compra — un retorno detallado para tu corona.",
+      "buyProduct": "Ver / comprar este cuidado",
+      "onlineValue": "Diagnóstico online {{price}} (valor {{compare}})",
+      "savedLinked": "Diagnóstico guardado en tu cuenta — puedes consultarlo cuando quieras.",
+      "savedAnonymous": "Diagnóstico guardado. Inicia sesión para verlo en tu espacio.",
+      "saveFallback": "Resultado calculado (guardado no disponible por ahora).",
       "shopCta": "Ver la tienda",
-      "restart": "Repetir el diagnóstico"
+      "accountCta": "Mi cuenta",
+      "restart": "Repetir diagnóstico"
     }
   }
 }

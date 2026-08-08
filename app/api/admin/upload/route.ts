@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import { uploadPublicImage, type StorageFolder } from "@/lib/connectors/supabase-storage";
 import { requireAdminFromRequest } from "@/lib/infrastructure/supabase/admin-auth";
 
-const FOLDERS = new Set<StorageFolder>(["products", "blog", "pages", "uploads"]);
+const FOLDERS = new Set<StorageFolder>([
+  "products",
+  "blog",
+  "pages",
+  "uploads",
+  "brand",
+]);
 
 export async function POST(request: Request) {
   const auth = await requireAdminFromRequest(request);

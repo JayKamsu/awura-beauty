@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40" role="img" aria-label="Colissimo">
+  <!-- Couleurs La Poste / Colissimo -->
+  <rect width="200" height="40" rx="6" fill="#FFCC00"/>
+  <g fill="#003DA5">
+    <path d="M18 12h8.5c4.2 0 6.8 2.2 6.8 5.6 0 3.5-2.6 5.7-6.8 5.7H22v4.7H18V12zm4 3.1v5.1h4.2c1.9 0 3-.9 3-2.55 0-1.65-1.1-2.55-3-2.55H22z"/>
+    <path d="M36.2 12h3.9l5.3 9.3V12h3.8v16h-3.7l-5.4-9.4V28h-3.9V12z"/>
+    <path d="M53.5 12h11.2v3.1h-7.3v3.3h6.6v3H57.4v3.5h7.5V28H53.5V12z"/>
+    <path d="M68.8 12h4.1l3.3 11.2L79.6 12h4l-5.5 16h-4.1L68.8 12z"/>
+    <path d="M87 12h3.9v12.9h7.2V28H87V12z"/>
+    <path d="M101.2 12h3.9v16h-3.9V12z"/>
+    <path d="M108.5 12h4.1l5.2 9.3V12h3.8v16h-4.1l-5.2-9.3V28h-3.8V12z"/>
+    <path d="M125.8 12h11.2v3.1h-7.3v3.3h6.6v3h-6.6v3.5h7.5V28h-11.4V12z"/>
+    <path d="M141.2 12h3.9v12.9h7.2V28h-11.1V12z"/>
+  </g>
+  <circle cx="182" cy="20" r="10" fill="#003DA5"/>
+  <path d="M177.5 20h9M182 15.5v9" stroke="#FFCC00" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

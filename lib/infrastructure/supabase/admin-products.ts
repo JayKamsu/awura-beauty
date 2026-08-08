@@ -24,6 +24,8 @@ function mapRow(row: Record<string, unknown>): ProductRow {
     is_new: Boolean(row.is_new),
     stock: Number(row.stock ?? 0),
     shipping_fee: Number(row.shipping_fee ?? 0),
+    qr_url: String(row.qr_url ?? ""),
+    universe: row.universe === "child" ? "child" : "adult",
     created_at: row.created_at ? String(row.created_at) : undefined,
   };
 }
@@ -50,7 +52,7 @@ export async function adminUpsertProduct(
   input: ProductInput,
 ): Promise<{ product: ProductRow | null; error: string | null }> {
   const supabase = createAdminSupabaseClient();
-  const payload = {
+  const payload: Omit<ProductRow, "id" | "created_at"> = {
     slug: input.slug,
     name: input.name,
     price: input.price,
@@ -65,6 +67,8 @@ export async function adminUpsertProduct(
     is_new: input.is_new,
     stock: input.stock,
     shipping_fee: Number(input.shipping_fee ?? 0),
+    qr_url: String(input.qr_url ?? ""),
+    universe: input.universe === "child" ? "child" : "adult",
   };
 
   if (supabase) {

@@ -34,6 +34,12 @@ export function buildContentSecurityPolicy(): string {
     "https://identitytoolkit.googleapis.com",
     "https://securetoken.googleapis.com",
     "https://accounts.google.com",
+    "https://*.jit.si",
+    "https://meet.jit.si",
+    "wss://*.jit.si",
+    "wss://meet.jit.si",
+    "https://*.jitsi.net",
+    "wss://*.jitsi.net",
   ];
   if (supabase) connect.push(supabase);
 
@@ -61,6 +67,8 @@ export function buildContentSecurityPolicy(): string {
     "https://accounts.google.com",
     "https://www.gstatic.com",
     "https://*.sentry-cdn.com",
+    "https://meet.jit.si",
+    "https://*.jit.si",
   ];
 
   const frame = [
@@ -70,6 +78,8 @@ export function buildContentSecurityPolicy(): string {
     "https://www.paypal.com",
     "https://www.sandbox.paypal.com",
     "https://accounts.google.com",
+    "https://meet.jit.si",
+    "https://*.jit.si",
   ];
 
   const directives = [
@@ -99,7 +109,8 @@ export function buildSecurityHeaders(): Array<{ key: string; value: string }> {
     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
     {
       key: "Permissions-Policy",
-      value: "camera=(), microphone=(), geolocation=(), payment=(self)",
+      value:
+        'camera=(self "https://meet.jit.si"), microphone=(self "https://meet.jit.si"), geolocation=(), payment=(self)',
     },
     {
       key: "Strict-Transport-Security",

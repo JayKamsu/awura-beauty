@@ -1,30 +1,60 @@
 @import "tailwindcss";
 
-/* Tokens light (défaut) — source de vérité hex */
+/*
+  Design system Awura Beauty — charte officielle (docs/design-system/).
+  Tokens sémantiques pour Tailwind ; hex bruts --awura-* pour référence.
+*/
+
 :root {
-  --awura-background: #faf3ec;
-  --awura-background-alt: #f3e9df;
-  --awura-primary: #1b3323;
-  --awura-accent: #8c6f59;
-  --awura-accent-light: #b49076;
-  --awura-foreground: #1e1e1e;
-  --awura-muted: #6b6b63;
-  --awura-border: #e5dacc;
+  /* Raw brand (Adulte) */
+  --awura-green-forest: #0f3d2e;
+  --awura-gold-warm: #e59136;
+  --awura-green-sage: #a6bb9a;
+  --awura-beige-sand: #e6d9c1;
+  --awura-black-ebony: #1a1a1a;
+  --awura-white: #ffffff;
+
+  /* Raw brand (Enfant — ne pas mélanger avec Adulte) */
+  --awura-green-pastel: #a5d2ac;
+  --awura-peach-soft: #ffd8c2;
+  --awura-cream-light: #fff5e6;
+  --awura-lavender-light: #e6d6f7;
+
+  /* Sémantique light — Univers Adulte */
+  --awura-background: var(--awura-beige-sand);
+  --awura-background-alt: #f0e8d8;
+  --awura-primary: var(--awura-green-forest);
+  --awura-accent: var(--awura-gold-warm);
+  --awura-accent-light: var(--awura-green-sage);
+  --awura-foreground: var(--awura-black-ebony);
+  --awura-muted: #5a6b5c;
+  --awura-border: #d4c4a8;
 }
 
-/* Tokens dark (next-themes, class strategy) */
+/* Dark — dérivé charte (forêt + or + sable) */
 .dark {
-  --awura-background: #14201a;
-  --awura-background-alt: #1b2a22;
-  --awura-primary: #2e5a3e;
-  --awura-accent: #c79a78;
-  --awura-accent-light: #d9b79b;
-  --awura-foreground: #f3e9df;
-  --awura-muted: #a9a79e;
-  --awura-border: #2c3b32;
+  --awura-background: #0a281f;
+  --awura-background-alt: #143d2e;
+  --awura-primary: var(--awura-green-sage);
+  --awura-accent: var(--awura-gold-warm);
+  --awura-accent-light: #f0b06a;
+  --awura-foreground: var(--awura-beige-sand);
+  --awura-muted: #a6bb9a;
+  --awura-border: #2a4a3c;
 }
 
-/* Mapping Tailwind → utilitaires bg-primary, text-accent, etc. */
+/* Univers Enfant — activer via data-awura-universe="child" sur un wrapper */
+[data-awura-universe="child"] {
+  --awura-background: var(--awura-cream-light);
+  --awura-background-alt: var(--awura-peach-soft);
+  --awura-primary: #3d7a4a;
+  --awura-accent: #e8a07a;
+  --awura-accent-light: var(--awura-green-pastel);
+  --awura-foreground: #2a3d2e;
+  --awura-muted: #6b7d6e;
+  --awura-border: #e0d0c0;
+}
+
 @theme inline {
   --color-background: var(--awura-background);
   --color-background-alt: var(--awura-background-alt);
@@ -35,11 +65,18 @@
   --color-muted: var(--awura-muted);
   --color-border: var(--awura-border);
   --font-sans: var(--font-awura-sans);
-  --font-serif: var(--font-awura-serif);
+  --font-serif: var(--font-awura-sans);
 }
 
 body {
   background: var(--awura-background);
   color: var(--awura-foreground);
   font-family: var(--font-awura-sans), ui-sans-serif, sans-serif;
+  font-weight: 400;
+}
+
+/* Titres maquette : Montserrat ExtraBold (font-serif = display brand) */
+.font-serif {
+  font-family: var(--font-awura-sans), ui-sans-serif, sans-serif;
+  font-weight: 800;
 }

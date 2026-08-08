@@ -2,6 +2,8 @@
 
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import { BrandSettingsProvider, useBrandSettings } from "@/components/brand/brand-settings-provider";
+import { DuafePattern } from "@/components/brand/duafe-pattern";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
@@ -15,25 +17,44 @@ type SiteShellProps = {
   children: ReactNode;
 };
 
-export function SiteShell({ children }: SiteShellProps) {
-  const pathname = usePathname();
-  const isAdmin = pathname.startsWith("/admin");
-
-  if (isAdmin) {
-    return <div className="flex min-h-full flex-1 flex-col">{children}</div>;
-  }
+function PublicShell({ children }: { children: ReactNode }) {
+  const { settings } = useBrandSettings();
 
   return (
     <>
-      <AnnouncementBar />
-      <Header />
-      <div className="flex flex-1 flex-col pb-20 lg:pb-0">{children}</div>
-      <Footer />
-      <MobileBottomNav />
+      <div className="relative flex min-h-full flex-1 flex-col">
+        <DuafePattern enabled={settings.showDuafePattern} />
+        <div className="relative z-[1] flex min-h-full flex-1 flex-col">
+          <AnnouncementBar />
+          <Header />
+          <div className="flex flex-1 flex-col pb-20 lg:pb-0">{children}</div>
+          <Footer />
+          <MobileBottomNav />
+        </div>
+      </div>
       <PushForegroundListener />
       <PushNavigateListener />
       <PushOptIn />
       <SupportChatWidget />
     </>
+  );
+}
+
+export function SiteShell({ children }: SiteShellProps) {
+  const pathname = usePathname();
+  const isAdmin = pathname.startsWith("/admin");
+
+  if (isAdmin) {
+    return (
+      <BrandSettingsProvider>
+        <div className="flex min-h-full flex-1 flex-col">{children}</div>
+      </BrandSettingsProvider>
+    );
+  }
+
+  return (
+    <BrandSettingsProvider>
+      <PublicShell>{children}</PublicShell>
+    </BrandSettingsProvider>
   );
 }

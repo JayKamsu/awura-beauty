@@ -24,6 +24,8 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     is_new: false,
     stock: 18,
     shipping_fee: 0,
+    qr_url: "",
+    universe: "adult",
   },
   {
     id: "00000000-0000-4000-8000-000000000002",
@@ -44,6 +46,8 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     is_new: false,
     stock: 18,
     shipping_fee: 0,
+    qr_url: "",
+    universe: "adult",
   },
   {
     id: "00000000-0000-4000-8000-000000000003",
@@ -64,6 +68,8 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     is_new: false,
     stock: 18,
     shipping_fee: 0,
+    qr_url: "",
+    universe: "adult",
   },
   {
     id: "00000000-0000-4000-8000-000000000004",
@@ -84,6 +90,8 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     is_new: false,
     stock: 18,
     shipping_fee: 0,
+    qr_url: "",
+    universe: "adult",
   },
   {
     id: "00000000-0000-4000-8000-000000000005",
@@ -103,6 +111,8 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     is_new: true,
     stock: 4,
     shipping_fee: 0,
+    qr_url: "",
+    universe: "adult",
   },
 ];
 

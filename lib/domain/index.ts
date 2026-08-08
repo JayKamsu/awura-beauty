@@ -26,14 +26,23 @@ export type {
 } from "@/lib/infrastructure/supabase/blog-types";
 
 export type {
+  DiagnosticAnswerMap,
   DiagnosticAnswers,
+  DiagnosticAppointment,
+  DiagnosticChannel,
+  DiagnosticLocale,
+  DiagnosticOption,
   DiagnosticProfile,
+  DiagnosticQuestion,
   DiagnosticRecord,
+  DiagnosticRoutineStep,
+  DiagnosticSettings,
+  DiagnosticSlot,
   GoalAnswer,
   HabitsAnswer,
   HairTypeAnswer,
   ScalpAnswer,
-} from "@/lib/infrastructure/supabase/diagnostic-types";
+} from "@/lib/domain/diagnostic";
 
 export type {
   CreateShippingLabelInput,

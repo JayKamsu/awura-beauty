@@ -1,25 +1,34 @@
 import { createSupabaseClient } from "@/lib/infrastructure/supabase/client";
 import { getCurrentUserId } from "@/lib/infrastructure/supabase/auth";
+import { mapDiagnosticRecord } from "@/lib/infrastructure/supabase/diagnostic-admin";
 import type {
+  DiagnosticAnswerMap,
   DiagnosticAnswers,
+  DiagnosticChannel,
   DiagnosticProfile,
   DiagnosticRecord,
-} from "@/lib/infrastructure/supabase/diagnostic-types";
+  DiagnosticRoutineStep,
+} from "@/lib/domain/diagnostic";
 
 export type SaveDiagnosticInput = {
-  answers: DiagnosticAnswers;
+  answers: DiagnosticAnswers | DiagnosticAnswerMap;
   profile: DiagnosticProfile;
   recommendedProductSlugs: string[];
+  channel?: DiagnosticChannel;
+  appointmentId?: string | null;
+  routine?: DiagnosticRoutineStep[];
+  userId?: string | null;
 };
 
 export async function saveHairDiagnostic(
   input: SaveDiagnosticInput,
 ): Promise<{ id: string | null; saved: boolean; linkedToUser: boolean }> {
-  const userId = await getCurrentUserId();
+  const userId =
+    input.userId !== undefined ? input.userId : await getCurrentUserId();
   const supabase = createSupabaseClient();
 
   if (!supabase) {
-    return { id: null, saved: false, linkedToUser: false };
+    return { id: null, saved: false, linkedToUser: Boolean(userId) };
   }
 
   const payload = {
@@ -27,6 +36,9 @@ export async function saveHairDiagnostic(
     answers: input.answers,
     profile: input.profile,
     recommended_product_slugs: input.recommendedProductSlugs,
+    channel: input.channel ?? "online",
+    appointment_id: input.appointmentId ?? null,
+    routine: input.routine ?? [],
   };
 
   const { data, error } = await supabase
@@ -36,7 +48,25 @@ export async function saveHairDiagnostic(
     .maybeSingle();
 
   if (error || !data) {
-    return { id: null, saved: false, linkedToUser: Boolean(userId) };
+    // Colonnes v2 absentes : fallback insert legacy
+    const legacy = await supabase
+      .from("hair_diagnostics")
+      .insert({
+        user_id: userId,
+        answers: input.answers,
+        profile: input.profile,
+        recommended_product_slugs: input.recommendedProductSlugs,
+      })
+      .select("id")
+      .maybeSingle();
+    if (legacy.error || !legacy.data) {
+      return { id: null, saved: false, linkedToUser: Boolean(userId) };
+    }
+    return {
+      id: String((legacy.data as { id: string }).id),
+      saved: true,
+      linkedToUser: Boolean(userId),
+    };
   }
 
   return {
@@ -59,12 +89,5 @@ export async function listMyDiagnostics(): Promise<DiagnosticRecord[]> {
 
   if (error || !data) return [];
 
-  return data.map((row) => ({
-    id: String(row.id),
-    user_id: row.user_id ? String(row.user_id) : null,
-    answers: row.answers as DiagnosticAnswers,
-    profile: row.profile as DiagnosticProfile,
-    recommended_product_slugs: (row.recommended_product_slugs as string[]) ?? [],
-    created_at: String(row.created_at),
-  }));
+  return data.map((row) => mapDiagnosticRecord(row as Record<string, unknown>));
 }

@@ -21,6 +21,10 @@ export type ProductRow = {
   stock: number;
   /** Supplément livraison unitaire (€), hors retrait sur place. */
   shipping_fee: number;
+  /** URL QR override (vide = défaut marque admin). */
+  qr_url: string;
+  /** Univers charte : adult (défaut) | child (pastel). */
+  universe: "adult" | "child";
   created_at?: string;
 };
 
@@ -33,6 +37,7 @@ export type ProductCategory =
 
 export type ListProductsParams = {
   category?: string | null;
+  universe?: "adult" | "child" | null;
   page?: number;
   pageSize?: number;
 };

@@ -72,7 +72,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }>;
 
   return (
-    <main className="flex w-full flex-1 flex-col">
+    <main
+      className="flex w-full flex-1 flex-col"
+      data-awura-universe={product.universe === "child" ? "child" : undefined}
+    >
       <JsonLd data={productJsonLd(product)} />
       <JsonLd
         data={breadcrumbJsonLd([

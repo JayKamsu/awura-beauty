@@ -71,7 +71,12 @@
       "eyebrow": "Cuidado firma",
       "title": "Loción Activa Crecimiento",
       "description": "Hidratante y fortificante — una loción natural para estimular el crecimiento y fortalecer tu corona.",
-      "cta": "Descubrir la loción",
+      "cta": "Reservar mi diagnóstico",
+      "ctaOnline": "Diagnóstico online gratis",
+      "ctaPhysical": "Cita presencial 39,80 €",
+      "sideTitle": "Diagnóstico Awura Beauty",
+      "sideOnline": "Online: gratis (valor 90 €) — rutina personalizada para tu corona.",
+      "sidePhysical": "Presencial: 39,80 € (en lugar de 150 €) — análisis cara a cara + plan de cuidados.",
       "imageAlt": "Cabello largo saludable con loción Awura"
     },
     "diagnostic": {

@@ -4,8 +4,10 @@ import type {
   CreateShippingLabelInput,
   CreateShippingLabelResult,
   DiagnosticAnswers,
+  DiagnosticChannel,
   DiagnosticProfile,
   DiagnosticRecord,
+  DiagnosticRoutineStep,
   ListProductsParams,
   ListProductsResult,
   NotificationPayload,
@@ -84,6 +86,10 @@ export type DiagnosticPort = {
     answers: DiagnosticAnswers;
     profile: DiagnosticProfile;
     recommendedProductSlugs: string[];
+    channel?: DiagnosticChannel;
+    appointmentId?: string | null;
+    routine?: DiagnosticRoutineStep[];
+    userId?: string | null;
   }) => Promise<{ id: string | null; error: string | null }>;
   listMyDiagnostics: () => Promise<DiagnosticRecord[]>;
 };
@@ -102,13 +108,18 @@ export type PaymentPort = {
     currency: string;
     successUrl: string;
     cancelUrl: string;
+    metadata?: Record<string, string>;
     lineItems: Array<{
       name: string;
       quantity: number;
       unitAmountCents: number;
       imageUrl?: string;
     }>;
-  }) => Promise<{ url: string | null; error: string | null }>;
+  }) => Promise<{
+    url: string | null;
+    sessionId?: string | null;
+    error: string | null;
+  }>;
   createPayPalOrder: (input: {
     orderId: string;
     amount: { currencyCode: string; value: string };

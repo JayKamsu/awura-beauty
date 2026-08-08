@@ -1,126 +1,85 @@
 {
   "diagnostic": {
-    "eyebrow": "Diagnostic capillaire",
+    "eyebrow": "Diagnostic capillaire Awura",
     "title": "Comprendre enfin ta couronne",
-    "subtitle": "Réponds à quelques questions : on établit ton profil capillaire et on te recommande 3 soins Awura adaptés.",
-    "progress": "Étape {{current}} / {{total}}",
-    "progressLabel": "Progression du diagnostic",
+    "subtitle": "Réponds à quelques questions : on établit ton profil capillaire et on te recommande une routine Awura adaptée.",
+    "hubTitle": "Ton sanctuaire pour ta couronne",
+    "hubSubtitle": "Casse, démangeaisons, sécheresse ou cuir chevelu sensible sans réponse claire ? On t’accompagne en ligne ou en présentiel pour comprendre ta fibre et retrouver un soin durable.",
+    "hubPromise": "Deux formats, un même objectif : un bilan clair, une routine adaptée aux cheveux texturés, et les bons produits Awura — avec le processus à suivre.",
+    "offersEyebrow": "Nos accompagnements",
+    "offersTitle": "En ligne ou en présentiel",
+    "offersSubtitle": "Choisis l’intensité de l’analyse : quiz guidé à distance, ou consultation avec observation du cuir chevelu au trichogramme.",
+    "expertiseNote": "Expertise Awura Beauty pour les couronnes afro, crépues et texturées — diagnostic, routine personnalisée, et soins naturels pensés pour ta fibre.",
+    "meta": {
+      "duration": "Durée",
+      "price": "Tarif"
+    },
+    "backToHub": "Retour aux accompagnements",
     "back": "Retour",
     "next": "Continuer",
     "seeResult": "Voir mon résultat",
     "loading": "Analyse en cours…",
-    "steps": {
-      "hairType": {
-        "title": "Quel est ton type de cheveux ?",
-        "subtitle": "Choisis la texture qui se rapproche le plus de ta couronne."
-      },
-      "scalp": {
-        "title": "Comment va ton cuir chevelu ?",
-        "subtitle": "L'état du cuir chevelu guide le choix des soins quotidiens."
-      },
-      "habits": {
-        "title": "Quelles sont tes habitudes ?",
-        "subtitle": "Tes gestes du quotidien influencent les besoins de ta fibre."
-      },
-      "goal": {
-        "title": "Quel est ton objectif principal ?",
-        "subtitle": "On priorise une routine claire autour de ton but."
+    "emptyQuestions": "Aucune question disponible pour le moment.",
+    "progress": "Étape {{current}} / {{total}}",
+    "progressLabel": "Progression du diagnostic",
+    "price": {
+      "free": "Gratuit"
+    },
+    "online": {
+      "eyebrow": "En ligne",
+      "badge": "À distance",
+      "title": "Diagnostic en ligne",
+      "subtitle": "Une analyse guidée à distance pour comprendre les besoins de ta couronne et repartir avec une routine claire.",
+      "cardTitle": "Diagnostic capillaire en ligne",
+      "cardBody": "Analyse complète à distance : profil, retour détaillé, processus à suivre et liens vers les soins à acheter.",
+      "duration": "~10 min",
+      "meta": "{{duration}} · {{price}} (valeur {{compare}})",
+      "cta": "Commencer le diagnostic gratuit",
+      "includes": {
+        "1": "Questionnaire guidé sur ta texture, ton scalp et tes objectifs",
+        "2": "Retour détaillé avec le processus wash day / entre-deux",
+        "3": "Nouvelle routine Awura avec les bons produits",
+        "4": "Liens d’achat + sauvegarde dans ton compte"
       }
     },
-    "options": {
-      "hairType": {
-        "4a": {
-          "label": "4A — Bouclés serrés",
-          "hint": "Ressorts définis, volume doux"
-        },
-        "4b": {
-          "label": "4B — Crépus",
-          "hint": "Angles en Z, densité marquée"
-        },
-        "4c": {
-          "label": "4C — Très crépus",
-          "hint": "Fibre fine à dense, shrinkage fort"
-        },
-        "3abc": {
-          "label": "3A–3C — Bouclés",
-          "hint": "Boucles souples à serrées"
-        },
-        "locs": {
-          "label": "Locs / Tresses",
-          "hint": "Styles protégés longue durée"
-        }
+    "physical": {
+      "eyebrow": "Présentiel",
+      "badge": "Consultation",
+      "title": "Diagnostic présentiel",
+      "subtitle": "Consultation en face à face : observation du cuir chevelu au trichogramme, puis routine personnalisée et liste de produits.",
+      "cardTitle": "Diagnostic capillaire en présentiel",
+      "cardBody": "Consultation avec observation directe du cuir chevelu (trichogramme) pour un bilan complet et un suivi de routine sur-mesure.",
+      "duration": "{{minutes}} min",
+      "meta": "{{duration}} min · {{price}} (valeur {{compare}})",
+      "cta": "Réserver mon rendez-vous",
+      "locationLabel": "Lieu",
+      "includes": {
+        "1": "Analyse du cuir chevelu au trichogramme",
+        "2": "Bilan personnalisé après la consultation",
+        "3": "Suivi routine avec gestes et cadence",
+        "4": "Liste de produits Awura proposée, visible dans ton compte"
       },
-      "scalp": {
-        "dry": {
-          "label": "Sec",
-          "hint": "Tiraillements, manque de confort"
-        },
-        "oily": {
-          "label": "Gras",
-          "hint": "Racines rapidement luisantes"
-        },
-        "sensitive": {
-          "label": "Sensible",
-          "hint": "Réactivité, besoin de douceur"
-        },
-        "balanced": {
-          "label": "Équilibré",
-          "hint": "Confort global au quotidien"
-        },
-        "flaky": {
-          "label": "Squames",
-          "hint": "Pellicules ou sécheresse visible"
-        }
-      },
-      "habits": {
-        "frequent_wash": {
-          "label": "Lavage fréquent",
-          "hint": "Plusieurs fois par semaine"
-        },
-        "heat_styling": {
-          "label": "Chaleur / brushing",
-          "hint": "Outils chauffants réguliers"
-        },
-        "protective": {
-          "label": "Styles protecteurs",
-          "hint": "Tresses, perruques, foulards"
-        },
-        "minimal": {
-          "label": "Routine minimale",
-          "hint": "Peu de produits, gestes simples"
-        },
-        "hard_detangle": {
-          "label": "Démêlage difficile",
-          "hint": "Nœuds, casse au peignage"
-        }
-      },
-      "goal": {
-        "hydration": {
-          "label": "Hydratation",
-          "hint": "Souplesse et confort de la fibre"
-        },
-        "length": {
-          "label": "Longueur / pousse",
-          "hint": "Stimuler et conserver la pousse"
-        },
-        "definition": {
-          "label": "Définition",
-          "hint": "Boucles nettes et dessinées"
-        },
-        "repair": {
-          "label": "Réparation",
-          "hint": "Fibre fatiguée, pointes abîmées"
-        },
-        "volume": {
-          "label": "Volume",
-          "hint": "Densité et corps à la chevelure"
-        }
+      "chooseSlot": "Choisir un créneau",
+      "slotsTitle": "Disponibilités",
+      "slotsSubtitle": "Sélectionne un créneau. La durée est définie par l’équipe Awura.",
+      "priceLabel": "{{price}} (au lieu de {{compare}})",
+      "noSlots": "Aucun créneau ouvert sur les prochaines semaines. Reviens bientôt ou contacte-nous.",
+      "contactTitle": "Tes coordonnées",
+      "payCta": "Payer {{price}} et réserver",
+      "bookError": "Impossible de démarrer le paiement. Réessaie.",
+      "successTitle": "Rendez-vous confirmé",
+      "successBody": "Merci ! Ton RDV est réservé. Après l’analyse au trichogramme, ton bilan et ta routine personnalisée arriveront dans ton compte.",
+      "status": {
+        "pending_payment": "Paiement en attente",
+        "confirmed": "Confirmé",
+        "cancelled": "Annulé",
+        "completed": "Terminé"
       }
     },
     "profiles": {
       "hydration": {
         "title": "Profil Hydratation profonde",
-        "summary": "Ta couronne a besoin d'une routine riche en nutrition. Priorise les beurres et masques pour restaurer le confort de la fibre."
+        "summary": "Ta couronne a besoin d’une routine riche en nutrition. Priorise hydratation et scellage pour restaurer le confort de la fibre."
       },
       "growth": {
         "title": "Profil Pousse active",
@@ -136,7 +95,7 @@
       },
       "balance": {
         "title": "Profil Équilibre au quotidien",
-        "summary": "Ta couronne gagne à une routine équilibrée : nettoyer en douceur, hydrater juste ce qu'il faut, et soutenir la fibre durablement."
+        "summary": "Ta couronne gagne à une routine équilibrée : nettoyer en douceur, hydrater juste ce qu’il faut, et sceller durablement."
       }
     },
     "tags": {
@@ -145,34 +104,42 @@
       "réparation": "Réparation",
       "démêlage": "Démêlage",
       "équilibre": "Équilibre",
+      "scellage": "Scellage",
+      "cuir chevelu": "Cuir chevelu",
+      "souplesse": "Souplesse",
+      "force": "Force",
+      "légèreté": "Légèreté",
+      "trichogramme": "Trichogramme",
       "4a": "4A",
       "4b": "4B",
       "4c": "4C",
       "3abc": "3A–3C",
-      "locs": "Locs",
-      "dry": "Cuir sec",
-      "oily": "Cuir gras",
-      "sensitive": "Cuir sensible",
-      "balanced": "Cuir équilibré",
-      "flaky": "Squames",
-      "frequent_wash": "Lavage fréquent",
-      "heat_styling": "Chaleur",
-      "protective": "Protecteur",
-      "minimal": "Minimal",
-      "hard_detangle": "Démêlage",
-      "hydration": "Hydratation",
-      "length": "Longueur",
-      "definition": "Définition",
-      "repair": "Réparation",
-      "volume": "Volume"
+      "locs": "Locs"
+    },
+    "video": {
+      "eyebrow": "Visio Awura",
+      "title": "Salle de consultation",
+      "subtitle": "RDV du {{date}} — active caméra et micro pour démarrer.",
+      "loading": "Ouverture de la salle…",
+      "error": "Impossible d’ouvrir la visio. Vérifie que le RDV est confirmé, ou reconnecte-toi.",
+      "openExternal": "Ouvrir en plein écran",
+      "joinCta": "Rejoindre la visio",
+      "hint": "Visio gratuite via Jitsi. Si l’écran reste vide, utilise « Ouvrir en plein écran ». Autorise caméra et micro dans le navigateur."
     },
     "result": {
-      "eyebrow": "Ton résultat",
-      "productsTitle": "3 soins recommandés pour toi",
-      "savedLinked": "Diagnostic enregistré sur ton compte.",
+      "eyebrow": "Pour ta couronne",
+      "productsTitle": "Produits à acheter",
+      "routineTitle": "Ta nouvelle routine Awura",
+      "routineSubtitle": "Les bons produits, dans l’ordre, avec le geste et la cadence à suivre.",
+      "processTitle": "Le processus à suivre",
+      "processSubtitle": "Wash day, entre-deux lavages, puis tes liens d’achat — un retour détaillé pour ta couronne.",
+      "buyProduct": "Voir / acheter ce soin",
+      "onlineValue": "Diagnostic en ligne {{price}} (valeur {{compare}})",
+      "savedLinked": "Diagnostic enregistré sur ton compte — tu peux le retrouver à tout moment.",
       "savedAnonymous": "Diagnostic enregistré. Connecte-toi pour le retrouver dans ton espace.",
-      "saveFallback": "Résultat calculé localement (Supabase non disponible pour la sauvegarde).",
+      "saveFallback": "Résultat calculé (sauvegarde indisponible pour le moment).",
       "shopCta": "Voir la boutique",
+      "accountCta": "Voir mon compte",
       "restart": "Refaire le diagnostic"
     }
   }

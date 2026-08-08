@@ -8,7 +8,7 @@ Index de la documentation technique et produit.
 | --- | --- |
 | [getting-started](./getting-started/setup.md) | Mise en place locale et checklist |
 | [architecture](./architecture/overview.md) | Structure du code et conventions |
-| [design-system](./design-system/colors.md) | Tokens, typographie, thèmes |
+| [design-system](./design-system/README.md) | Charte officielle (couleurs, typo, logo, fiches) |
 | [environment](./environment/variables.md) | Variables d'environnement |
 | [integrations](./integrations/overview.md) | Connecteurs externes |
 | [features](./features/overview.md) | Modules métier |

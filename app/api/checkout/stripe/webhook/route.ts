@@ -36,12 +36,28 @@ export async function POST(request: Request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
+    const appointmentId = session.metadata?.appointmentId ?? null;
+    if (
+      appointmentId &&
+      (session.payment_status === "paid" || session.status === "complete")
+    ) {
+      const { updateAppointment } = await import(
+        "@/lib/infrastructure/supabase/diagnostic-admin"
+      );
+      await updateAppointment(appointmentId, {
+        status: "confirmed",
+        stripeSessionId: session.id,
+      });
+      return NextResponse.json({ received: true });
+    }
+
     const orderId =
       session.metadata?.orderId ?? session.client_reference_id ?? null;
 
     if (
       orderId &&
       !orderId.startsWith("demo-") &&
+      !orderId.startsWith("diag-") &&
       (session.payment_status === "paid" || session.status === "complete")
     ) {
       await markOrderPaid(orderId);
