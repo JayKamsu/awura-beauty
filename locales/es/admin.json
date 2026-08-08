@@ -8,6 +8,8 @@
     "dashboardTitle": "Panel",
     "dashboardSubtitle": "Vista del día: pedidos, facturación y stock bajo.",
     "ordersTitle": "Gestión de pedidos",
+    "paymentsTitle": "Pagos",
+    "paymentsSubtitle": "Estado Stripe / PayPal, seguimiento de pagos y acciones admin.",
     "ordersSubtitle": "Lista densa: filtro, búsqueda, recibos y seguimiento — detalle bajo demanda.",
     "productsTitle": "Gestión de productos",
     "productsSubtitle": "Crea, modifica o elimina fichas de producto (con subida de imagen).",
@@ -149,6 +151,7 @@
       "dashboard": "Panel",
       "products": "Productos",
       "orders": "Pedidos",
+      "payments": "Pagos",
       "shipping": "Envío",
       "content": "Contenido",
       "pages": "Páginas",
@@ -265,6 +268,28 @@
       "laposte": "Colissimo (domicilio)",
       "mondial_relay": "Mondial Relay",
       "pickup": "Recogida en tienda"
+    },
+    "payments": {
+      "ready": "Listo",
+      "incomplete": "Incompleto",
+      "stripePublishable": "Clave publicable",
+      "stripeSecret": "Clave secreta",
+      "stripeWebhook": "Secreto webhook",
+      "paypalClient": "Client ID",
+      "paypalSecret": "Secret",
+      "paypalLiveApi": "API Live (no Sandbox)",
+      "openStripeDashboard": "Abrir dashboard Stripe",
+      "openPaypalDashboard": "Abrir dashboard PayPal",
+      "refundHint": "Para un reembolso real, hazlo en Stripe o PayPal, luego marca el pedido como reembolsado aquí.",
+      "empty": "Ningún pago para estos filtros.",
+      "markPaid": "Marcar pagado",
+      "markRefunded": "Marcar reembolsado",
+      "markCancelled": "Cancelar",
+      "actionSuccess": {
+        "mark_paid": "Pedido marcado como pagado.",
+        "mark_refunded": "Pedido marcado como reembolsado.",
+        "mark_cancelled": "Pedido cancelado."
+      }
     }
   }
 }

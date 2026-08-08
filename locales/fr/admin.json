@@ -8,6 +8,8 @@
     "dashboardTitle": "Tableau de bord",
     "dashboardSubtitle": "Vue du jour : commandes, chiffre d'affaires et stocks bas.",
     "ordersTitle": "Gestion des commandes",
+    "paymentsTitle": "Paiements",
+    "paymentsSubtitle": "État Stripe / PayPal, suivi des paiements et actions admin.",
     "ordersSubtitle": "Liste dense : filtre, recherche, reçus et suivi — détail à la demande.",
     "productsTitle": "Gestion des produits",
     "productsSubtitle": "Crée, modifie ou supprime les fiches produits (avec upload d'image).",
@@ -149,6 +151,7 @@
       "dashboard": "Dashboard",
       "products": "Produits",
       "orders": "Commandes",
+      "payments": "Paiements",
       "shipping": "Livraison",
       "content": "Contenu",
       "pages": "Pages",
@@ -265,6 +268,28 @@
       "laposte": "Colissimo (domicile)",
       "mondial_relay": "Mondial Relay",
       "pickup": "Retrait sur place"
+    },
+    "payments": {
+      "ready": "Prêt",
+      "incomplete": "Incomplet",
+      "stripePublishable": "Clé publishable",
+      "stripeSecret": "Clé secrète",
+      "stripeWebhook": "Webhook secret",
+      "paypalClient": "Client ID",
+      "paypalSecret": "Secret",
+      "paypalLiveApi": "API Live (pas Sandbox)",
+      "openStripeDashboard": "Ouvrir le dashboard Stripe",
+      "openPaypalDashboard": "Ouvrir le dashboard PayPal",
+      "refundHint": "Pour un vrai remboursement d’argent, fais-le dans Stripe ou PayPal, puis marque la commande remboursée ici.",
+      "empty": "Aucun paiement pour ces filtres.",
+      "markPaid": "Marquer payée",
+      "markRefunded": "Marquer remboursée",
+      "markCancelled": "Annuler",
+      "actionSuccess": {
+        "mark_paid": "Commande marquée payée.",
+        "mark_refunded": "Commande marquée remboursée.",
+        "mark_cancelled": "Commande annulée."
+      }
     }
   }
 }

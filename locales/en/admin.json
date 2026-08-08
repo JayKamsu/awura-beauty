@@ -8,6 +8,8 @@
     "dashboardTitle": "Dashboard",
     "dashboardSubtitle": "Today's view: orders, revenue and low stock.",
     "ordersTitle": "Order management",
+    "paymentsTitle": "Payments",
+    "paymentsSubtitle": "Stripe / PayPal status, payment tracking and admin actions.",
     "ordersSubtitle": "Dense list: filter, search, receipts and tracking — expand for details.",
     "productsTitle": "Product management",
     "productsSubtitle": "Create, edit or delete product pages (with image upload).",
@@ -149,6 +151,7 @@
       "dashboard": "Dashboard",
       "products": "Products",
       "orders": "Orders",
+      "payments": "Payments",
       "shipping": "Shipping",
       "content": "Content",
       "pages": "Pages",
@@ -265,6 +268,28 @@
       "laposte": "Colissimo (home)",
       "mondial_relay": "Mondial Relay",
       "pickup": "Store pickup"
+    },
+    "payments": {
+      "ready": "Ready",
+      "incomplete": "Incomplete",
+      "stripePublishable": "Publishable key",
+      "stripeSecret": "Secret key",
+      "stripeWebhook": "Webhook secret",
+      "paypalClient": "Client ID",
+      "paypalSecret": "Secret",
+      "paypalLiveApi": "Live API (not Sandbox)",
+      "openStripeDashboard": "Open Stripe dashboard",
+      "openPaypalDashboard": "Open PayPal dashboard",
+      "refundHint": "For a real money refund, do it in Stripe or PayPal, then mark the order as refunded here.",
+      "empty": "No payments for these filters.",
+      "markPaid": "Mark paid",
+      "markRefunded": "Mark refunded",
+      "markCancelled": "Cancel",
+      "actionSuccess": {
+        "mark_paid": "Order marked as paid.",
+        "mark_refunded": "Order marked as refunded.",
+        "mark_cancelled": "Order cancelled."
+      }
     }
   }
 }
