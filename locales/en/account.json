@@ -9,6 +9,7 @@
     "nav": {
       "profile": "Profile",
       "orders": "Orders",
+      "payments": "Payments",
       "loyalty": "Loyalty",
       "diagnostics": "Diagnostics",
       "messages": "Messages",
@@ -109,6 +110,18 @@
         "code_required": "Enter a referral code.",
         "profile_missing": "Profile not found."
       }
+    },
+    "payments": {
+      "title": "Payments & notifications",
+      "subtitle": "Available payment methods and alerts about your orders.",
+      "methodsTitle": "How to pay",
+      "methodsHint": "At checkout, choose Stripe (card) or PayPal. No card data is stored on Awura Beauty — payment is secured by the provider.",
+      "notificationsTitle": "Order notifications",
+      "notificationsBody": "Get alerts when payment is confirmed, when your parcel ships, and if a refund is recorded.",
+      "pushUnavailable": "Push notifications are not available on this device right now.",
+      "receiptHint": "After payment, your receipt is available in order history (View receipt).",
+      "refundHint": "A refund shows as “Refunded” on your orders. Contact support if you need help.",
+      "contactSupport": "Contact support"
     }
   }
 }

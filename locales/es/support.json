@@ -13,7 +13,7 @@
     },
     "push": {
       "title": "Mantente al día",
-      "body": "Activa las notificaciones para ofertas y pedidos.",
+      "body": "Activa las notificaciones para el pago confirmado, el seguimiento del envío y los reembolsos.",
       "enable": "Activar",
       "enableShort": "Notificaciones",
       "enabled": "Notificaciones activadas",

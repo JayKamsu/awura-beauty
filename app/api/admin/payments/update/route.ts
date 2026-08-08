@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { markOrderPaid } from "@/lib/application/checkout/mark-order-paid";
+import { notifyOrderRefunded } from "@/lib/application/notifications/order-notify";
 import { requireAdminFromRequest } from "@/lib/infrastructure/supabase/admin-auth";
 import {
   getOrderById,
@@ -58,6 +59,10 @@ export async function POST(request: Request) {
   const ok = await updateOrderPayment(orderId, patch);
   if (!ok) {
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
+  }
+
+  if (action === "mark_refunded") {
+    await notifyOrderRefunded({ userId: order.user_id, orderId });
   }
 
   const updated = await getOrderById(orderId);

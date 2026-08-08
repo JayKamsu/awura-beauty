@@ -13,7 +13,7 @@
     },
     "push": {
       "title": "Reste informée",
-      "body": "Active les notifications pour les offres et le suivi de commande.",
+      "body": "Active les notifications pour le paiement confirmé, le suivi de livraison et les remboursements.",
       "enable": "Activer",
       "enableShort": "Notifications",
       "enabled": "Notifications activées",

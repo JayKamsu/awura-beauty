@@ -13,7 +13,7 @@
     },
     "push": {
       "title": "Stay in the loop",
-      "body": "Enable notifications for offers and order updates.",
+      "body": "Enable notifications for payment confirmation, shipping updates, and refunds.",
       "enable": "Enable",
       "enableShort": "Notifications",
       "enabled": "Notifications enabled",

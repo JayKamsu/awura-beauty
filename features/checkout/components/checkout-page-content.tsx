@@ -240,6 +240,21 @@ export function CheckoutPageContent() {
   const allowManualCheckout =
     !stripePublishableKey && !paypalClientId?.trim();
 
+  useEffect(() => {
+    if (allowManualCheckout) {
+      setPaymentMethod("manual");
+      return;
+    }
+    setPaymentMethod((current) => {
+      if (current === "manual") {
+        return stripePublishableKey ? "stripe" : "paypal";
+      }
+      if (current === "stripe" && !stripePublishableKey) return "paypal";
+      if (current === "paypal" && !paypalClientId?.trim()) return "stripe";
+      return current;
+    });
+  }, [allowManualCheckout, stripePublishableKey, paypalClientId]);
+
   const shippingAddress = {
     fullName,
     line1:

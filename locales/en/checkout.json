@@ -75,6 +75,7 @@
     },
     "successTitle": "Thank you for your order",
     "successBody": "Order {{id}} confirmed. You can track shipping status in your account.",
+    "confirmingPayment": "Confirming payment…",
     "cancelTitle": "Payment cancelled",
     "cancelBody": "No charge was made. You can try again anytime.",
     "viewAccount": "View my account",

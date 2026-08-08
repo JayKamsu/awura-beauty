@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { AccountDiagnosticsSection } from "@/features/account/components/account-diagnostics-section";
 import { AccountLoyaltySection } from "@/features/account/components/account-loyalty-section";
 import { AccountOrdersSection } from "@/features/account/components/account-orders-section";
+import { AccountPaymentsSection } from "@/features/account/components/account-payments-section";
 import { AccountProfileSection } from "@/features/account/components/account-profile-section";
 import { AccountSecuritySection } from "@/features/account/components/account-security-section";
 import { useAdminAccess } from "@/features/admin/hooks/use-admin-access";
@@ -18,6 +19,7 @@ import { toIntlLocale } from "@/lib/i18n/intl-locale";
 const SECTIONS = [
   { id: "profil", key: "account.nav.profile" },
   { id: "commandes", key: "account.nav.orders" },
+  { id: "paiements", key: "account.nav.payments" },
   { id: "fidelite", key: "account.nav.loyalty" },
   { id: "diagnostics", key: "account.nav.diagnostics" },
   { id: "securite", key: "account.nav.security" },
@@ -131,6 +133,7 @@ export function AccountPageContent() {
           onOrdersChange={setOrders}
         />
       </Suspense>
+      <AccountPaymentsSection />
       <AccountLoyaltySection />
       <AccountDiagnosticsSection />
       <AccountSecuritySection />

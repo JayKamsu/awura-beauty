@@ -75,6 +75,7 @@
     },
     "successTitle": "Merci pour ta commande",
     "successBody": "Commande {{id}} confirmée. Tu peux suivre le statut de livraison dans ton compte.",
+    "confirmingPayment": "Confirmation du paiement en cours…",
     "cancelTitle": "Paiement annulé",
     "cancelBody": "Aucun prélèvement n'a été effectué. Tu peux réessayer quand tu veux.",
     "viewAccount": "Voir mon compte",

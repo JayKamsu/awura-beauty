@@ -139,7 +139,7 @@ export async function userHasPaidOrder(
   const supabase = createAdminSupabaseClient();
   if (!supabase || !userId) return false;
 
-  let query = supabase
+  const query = supabase
     .from("orders")
     .select("id")
     .eq("user_id", userId)

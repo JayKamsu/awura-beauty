@@ -9,9 +9,19 @@ import { DocumentPreviewModal } from "@/components/ui/document-preview-modal";
 import { ShippingTimeline } from "@/features/account/components/shipping-timeline";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { usePreferences } from "@/components/providers/preferences-provider";
+import {
+  isOrderPaid,
+  resolvePaymentStatus,
+} from "@/lib/application/checkout/payment-status";
 import { formatPrice } from "@/lib/format/price";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import type { OrderRow, ShippingStatus } from "@/lib/infrastructure/supabase/order-types";
+
+function paymentTone(status: string): string {
+  if (status === "paid") return "bg-primary/10 text-primary";
+  if (status === "pending") return "bg-accent/15 text-accent";
+  return "bg-background-alt text-muted";
+}
 
 type TrackingPayload = {
   shippingStatus?: ShippingStatus;
@@ -130,6 +140,8 @@ export function AccountOrdersSection({
           {orders.map((order) => {
             const tracking = trackingByOrder[order.id];
             const address = order.shipping_address;
+            const paymentStatus = resolvePaymentStatus(order);
+            const paid = isOrderPaid(order);
             return (
               <article
                 id={`order-${order.id}`}
@@ -159,9 +171,13 @@ export function AccountOrdersSection({
                     </p>
                   </div>
                   <div className="space-y-2 text-sm">
-                    <p>
-                      <span className="text-muted">{t("account.paymentStatus")} : </span>
-                      {t(`account.status.payment.${order.status}`)}
+                    <p className="flex flex-wrap items-center gap-2">
+                      <span className="text-muted">{t("account.paymentStatus")} :</span>
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${paymentTone(paymentStatus)}`}
+                      >
+                        {t(`account.status.payment.${paymentStatus}`)}
+                      </span>
                     </p>
                     <p>
                       <span className="text-muted">{t("account.shippingStatus")} : </span>
@@ -177,8 +193,7 @@ export function AccountOrdersSection({
                         {t(`admin.carriers.${order.shipping_carrier}`)}
                       </p>
                     ) : null}
-                    {order.payment_status === "paid" ||
-                    order.status === "paid" ? (
+                    {paid ? (
                       <Button
                         type="button"
                         variant="primary-outline"

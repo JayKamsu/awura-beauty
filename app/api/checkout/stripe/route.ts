@@ -113,7 +113,7 @@ export async function POST(request: Request) {
         customerEmail: body.email,
         currency,
         successUrl: `${origin}/commande/succes?orderId=${demoId}&session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: `${origin}/commande/annule`,
+        cancelUrl: `${origin}/commande/annule?orderId=${demoId}`,
         lineItems,
       });
 
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
     customerEmail: body.email,
     currency,
     successUrl: `${origin}/commande/succes?orderId=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
-    cancelUrl: `${origin}/commande/annule`,
+    cancelUrl: `${origin}/commande/annule?orderId=${order.id}`,
     lineItems,
   });
 

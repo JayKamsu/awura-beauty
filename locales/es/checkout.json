@@ -75,6 +75,7 @@
     },
     "successTitle": "Gracias por tu pedido",
     "successBody": "Pedido {{id}} confirmado. Puedes seguir el envío en tu cuenta.",
+    "confirmingPayment": "Confirmando el pago…",
     "cancelTitle": "Pago cancelado",
     "cancelBody": "No se realizó ningún cargo. Puedes intentarlo de nuevo cuando quieras.",
     "viewAccount": "Ver mi cuenta",

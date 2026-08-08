@@ -130,6 +130,20 @@ export function buildPaymentReceiptHtml(order: OrderRow): string {
       <tbody>
         ${lines}
         <tr class="totals"><td class="muted">Sous-total</td><td style="text-align:right">${money(subtotal, order.currency)}</td></tr>
+        ${
+          order.discount_amount > 0
+            ? `<tr class="totals"><td class="muted">${
+                order.referral_discount_applied
+                  ? "Remises (parrainage / points)"
+                  : "Remise points fidélité"
+              }</td><td style="text-align:right">−${money(order.discount_amount, order.currency)}</td></tr>`
+            : ""
+        }
+        ${
+          order.points_redeemed > 0
+            ? `<tr class="totals"><td class="muted">Points utilisés</td><td style="text-align:right">${order.points_redeemed} pts</td></tr>`
+            : ""
+        }
         <tr class="totals"><td class="muted">Livraison</td><td style="text-align:right">${money(order.shipping_fee || 0, order.currency)}</td></tr>
         <tr class="totals"><td class="total">Total TTC</td><td class="total" style="text-align:right">${money(order.total, order.currency)}</td></tr>
       </tbody>

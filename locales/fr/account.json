@@ -9,6 +9,7 @@
     "nav": {
       "profile": "Profil",
       "orders": "Commandes",
+      "payments": "Paiements",
       "loyalty": "Fidélité",
       "diagnostics": "Diagnostics",
       "messages": "Messages",
@@ -109,6 +110,18 @@
         "code_required": "Indique un code parrain.",
         "profile_missing": "Profil introuvable."
       }
+    },
+    "payments": {
+      "title": "Paiements & notifications",
+      "subtitle": "Modes de paiement disponibles et alertes liées à tes commandes.",
+      "methodsTitle": "Comment payer",
+      "methodsHint": "Au checkout, choisis Stripe (carte) ou PayPal. Aucune carte n’est stockée sur Awura Beauty : le paiement est sécurisé chez le prestataire.",
+      "notificationsTitle": "Notifications de commande",
+      "notificationsBody": "Reçois une alerte quand ton paiement est confirmé, quand ton colis part, et en cas de remboursement.",
+      "pushUnavailable": "Les notifications push ne sont pas disponibles sur cet appareil pour le moment.",
+      "receiptHint": "Après paiement, ton reçu est disponible dans l’historique des commandes (bouton « Voir le reçu »).",
+      "refundHint": "Un remboursement apparaît comme « Remboursée » dans tes commandes. Pour une question, contacte le support.",
+      "contactSupport": "Contacter le support"
     }
   }
 }

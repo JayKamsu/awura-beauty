@@ -48,7 +48,7 @@ export async function notifyOrderPaid(input: OrderNotifyBase & {
     title: "Commande confirmée",
     body: pickup
       ? "Paiement reçu. Nous préparons votre retrait sur place."
-      : "Merci ! Votre paiement Awura Beauty est confirmé.",
+      : "Merci ! Votre paiement Awura Beauty est confirmé. Votre reçu est disponible dans Mon compte.",
     link: orderAccountLink(input.orderId),
   });
 
@@ -56,6 +56,15 @@ export async function notifyOrderPaid(input: OrderNotifyBase & {
     title: "Nouvelle commande",
     body: `Commande ${input.orderId.slice(0, 8)} payée.`,
     link: orderAdminLink(input.orderId),
+  });
+}
+
+export async function notifyOrderRefunded(input: OrderNotifyBase): Promise<void> {
+  await notifyOrderUser({
+    userId: input.userId,
+    title: "Remboursement enregistré",
+    body: "Le remboursement de votre commande Awura Beauty a été enregistré. Consultez le détail dans Mon compte.",
+    link: orderAccountLink(input.orderId),
   });
 }
 
