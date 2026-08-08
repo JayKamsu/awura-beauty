@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { resolveOrderItemsFromCatalog } from "@/lib/application/checkout/resolve-order-items";
 import { userIdFromRequest } from "@/lib/application/checkout/request-user";
+import { resolveCheckoutShipping } from "@/lib/application/checkout/shipping-options";
 import { container } from "@/lib/application/container";
 
 type StripeCheckoutBody = {
@@ -13,7 +14,11 @@ type StripeCheckoutBody = {
     city: string;
     postalCode: string;
     country: string;
+    phone?: string;
+    email?: string;
   };
+  shippingCarrier?: string;
+  relayPointId?: string | null;
 };
 
 export async function POST(request: Request) {
@@ -21,6 +26,11 @@ export async function POST(request: Request) {
 
   if (!body.email || !body.items?.length || !body.shippingAddress) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
+
+  const shipping = resolveCheckoutShipping(body);
+  if (!shipping.ok) {
+    return NextResponse.json({ error: shipping.error }, { status: 400 });
   }
 
   const resolved = await resolveOrderItemsFromCatalog(body.items);
@@ -44,6 +54,8 @@ export async function POST(request: Request) {
     paymentStatus: "pending",
     status: "pending",
     userId,
+    shippingCarrier: shipping.shippingCarrier,
+    relayPointId: shipping.relayPointId,
   });
 
   if (!order) {

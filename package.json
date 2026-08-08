@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "env:push:mondial": "node scripts/push-mondial-relay-vercel.mjs"
   },
   "dependencies": {
     "@paypal/react-paypal-js": "^10.3.0",

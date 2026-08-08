@@ -12,6 +12,7 @@
  */
 
 import { createHash } from "node:crypto";
+import type { RelayPoint } from "@/lib/domain/shipping";
 import {
   mapCarrierStatusToShippingStatus,
   type CreateShippingLabelInput,
@@ -27,7 +28,7 @@ function getConfig() {
     brandCode: process.env.MONDIAL_RELAY_BRAND_CODE ?? "11",
     wsdlUrl:
       process.env.MONDIAL_RELAY_WSDL_URL ??
-      "https://api.mondialrelay.com/Web_Services.asmx",
+      "https://api.mondialrelay.com/WebService.asmx",
   };
 }
 
@@ -201,6 +202,198 @@ export async function createMondialRelayLabel(
     labelBase64: null,
     rawStatus: `STAT=${stat ?? "0"}`,
   };
+}
+
+/**
+ * Recherche Points Relais (WSI4_PointRelais_Recherche) autour d’un CP.
+ */
+export async function searchMondialRelayPoints(input: {
+  postalCode: string;
+  city?: string;
+  country?: string;
+  limit?: number;
+}): Promise<{ points: RelayPoint[]; error: string | null }> {
+  const postalCode = input.postalCode.replace(/\s+/g, "").trim();
+  if (!/^\d{4,5}$/.test(postalCode)) {
+    return { points: [], error: "Invalid postal code" };
+  }
+
+  const config = getConfig();
+  const country = (input.country || "FR").toUpperCase().slice(0, 2);
+  const city = (input.city ?? "").trim();
+  const limit = String(Math.min(Math.max(input.limit ?? 12, 1), 30));
+
+  if (!config.enseigne || !config.privateKey) {
+    return {
+      points: buildMockRelayPoints(postalCode, city || "Ville", country),
+      error: null,
+    };
+  }
+
+  const lang = "FR";
+  const rayon = "20";
+  const security = md5(
+    [
+      config.enseigne,
+      country,
+      "",
+      city,
+      postalCode,
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      rayon,
+      "",
+      "",
+      limit,
+      lang,
+      config.privateKey,
+    ].join(""),
+  );
+
+  const soapBody = `<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <WSI4_PointRelais_Recherche xmlns="http://www.mondialrelay.fr/webservice/">
+      <Enseigne>${escapeXml(config.enseigne)}</Enseigne>
+      <Pays>${escapeXml(country)}</Pays>
+      <NumPointRelais></NumPointRelais>
+      <Ville>${escapeXml(city)}</Ville>
+      <CP>${escapeXml(postalCode)}</CP>
+      <Latitude></Latitude>
+      <Longitude></Longitude>
+      <Taille></Taille>
+      <Poids></Poids>
+      <Action></Action>
+      <DelaiEnvoi></DelaiEnvoi>
+      <RayonRecherche>${rayon}</RayonRecherche>
+      <TypeActivite></TypeActivite>
+      <NACE></NACE>
+      <NombreResultats>${limit}</NombreResultats>
+      <Langue>${lang}</Langue>
+      <Security>${security}</Security>
+    </WSI4_PointRelais_Recherche>
+  </soap:Body>
+</soap:Envelope>`;
+
+  try {
+    const response = await fetch(config.wsdlUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/xml; charset=utf-8",
+        SOAPAction:
+          "http://www.mondialrelay.fr/webservice/WSI4_PointRelais_Recherche",
+      },
+      body: soapBody,
+    });
+
+    if (!response.ok) {
+      return {
+        points: [],
+        error: `Mondial Relay search error (${response.status})`,
+      };
+    }
+
+    const xml = await response.text();
+    const stat = extractXmlTag(xml, "STAT");
+    if (stat && stat !== "0") {
+      return {
+        points: [],
+        error: `Mondial Relay rejected search (STAT=${stat})`,
+      };
+    }
+
+    const points = parseRelayPointsFromXml(xml, country);
+    return { points, error: null };
+  } catch (error) {
+    return {
+      points: [],
+      error:
+        error instanceof Error ? error.message : "Unable to search relay points",
+    };
+  }
+}
+
+function buildMockRelayPoints(
+  postalCode: string,
+  city: string,
+  country: string,
+): RelayPoint[] {
+  return [
+    {
+      id: "00001",
+      name: "Point Relais Démo Centre",
+      address: "12 rue de la Beauté",
+      postalCode,
+      city,
+      country,
+      distanceKm: 0.4,
+    },
+    {
+      id: "00002",
+      name: "Point Relais Démo Marché",
+      address: "5 avenue des Capucines",
+      postalCode,
+      city,
+      country,
+      distanceKm: 1.2,
+    },
+    {
+      id: "00003",
+      name: "Point Relais Démo Gare",
+      address: "1 place de la Gare",
+      postalCode,
+      city,
+      country,
+      distanceKm: 2.1,
+    },
+  ];
+}
+
+function parseRelayPointsFromXml(xml: string, country: string): RelayPoint[] {
+  const blocks =
+    xml.match(/<(?:ns:)?PointRelais_Details>[\s\S]*?<\/(?:ns:)?PointRelais_Details>/gi) ??
+    xml.match(/<PointRelais_Details>[\s\S]*?<\/PointRelais_Details>/gi) ??
+    [];
+
+  const points: RelayPoint[] = [];
+  for (const block of blocks) {
+    const id = extractXmlTag(block, "Num") ?? extractXmlTag(block, "Number");
+    if (!id) continue;
+    const name =
+      extractXmlTag(block, "LgAdr1") ??
+      extractXmlTag(block, "Nom") ??
+      `Point Relais ${id}`;
+    const address =
+      extractXmlTag(block, "LgAdr3") ??
+      extractXmlTag(block, "LgAdr2") ??
+      "";
+    const city = extractXmlTag(block, "Ville") ?? "";
+    const postalCode = extractXmlTag(block, "CP") ?? "";
+    const distanceRaw = extractXmlTag(block, "Distance");
+    const latRaw = extractXmlTag(block, "Latitude");
+    const lngRaw = extractXmlTag(block, "Longitude");
+    const distanceKm = distanceRaw
+      ? Number(distanceRaw.replace(",", ".")) / 1000
+      : null;
+
+    points.push({
+      id: id.trim(),
+      name: name.trim(),
+      address: address.trim(),
+      postalCode: postalCode.trim(),
+      city: city.trim(),
+      country,
+      distanceKm: Number.isFinite(distanceKm) ? distanceKm : null,
+      lat: latRaw ? Number(latRaw.replace(",", ".")) : null,
+      lng: lngRaw ? Number(lngRaw.replace(",", ".")) : null,
+    });
+  }
+
+  return points;
 }
 
 /**

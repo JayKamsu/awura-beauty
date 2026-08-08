@@ -1,0 +1,80 @@
+# Sync manuel des secrets Mondial Relay → Vercel (production + preview).
+# Ne tourne PAS à chaque push : déclenchement manuel uniquement.
+#
+# Secrets GitHub requis :
+#   VERCEL_TOKEN
+#   MONDIAL_RELAY_ENSEIGNE
+#   MONDIAL_RELAY_PRIVATE_KEY
+#   MONDIAL_RELAY_BRAND_CODE
+#   MONDIAL_RELAY_MODE          (optionnel, défaut production)
+#   MONDIAL_RELAY_WSDL_URL      (optionnel)
+#
+# Variables repo (Settings → Variables) optionnelles :
+#   VERCEL_SCOPE / org — sinon le token doit avoir accès au projet lié.
+
+name: Sync Mondial Relay → Vercel
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: sync-mondial-vercel
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Push env to Vercel
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Push Mondial Relay env
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          MONDIAL_RELAY_ENSEIGNE: ${{ secrets.MONDIAL_RELAY_ENSEIGNE }}
+          MONDIAL_RELAY_PRIVATE_KEY: ${{ secrets.MONDIAL_RELAY_PRIVATE_KEY }}
+          MONDIAL_RELAY_BRAND_CODE: ${{ secrets.MONDIAL_RELAY_BRAND_CODE }}
+          MONDIAL_RELAY_MODE: ${{ secrets.MONDIAL_RELAY_MODE }}
+          MONDIAL_RELAY_WSDL_URL: ${{ secrets.MONDIAL_RELAY_WSDL_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${VERCEL_TOKEN:-}" ]; then
+            echo "Secret VERCEL_TOKEN manquant"
+            exit 1
+          fi
+          if [ -z "${MONDIAL_RELAY_ENSEIGNE:-}" ] || [ -z "${MONDIAL_RELAY_PRIVATE_KEY:-}" ]; then
+            echo "Secrets Mondial Relay manquants"
+            exit 1
+          fi
+
+          MODE="${MONDIAL_RELAY_MODE:-production}"
+          BRAND="${MONDIAL_RELAY_BRAND_CODE:-41}"
+          WSDL="${MONDIAL_RELAY_WSDL_URL:-https://api.mondialrelay.com/WebService.asmx}"
+
+          push_var() {
+            local name="$1"
+            local value="$2"
+            local environment="$3"
+            printf '%s' "$value" | vercel env add "$name" "$environment" --token "$VERCEL_TOKEN" --force --yes
+            echo "OK $name@$environment"
+          }
+
+          for environment in production preview; do
+            push_var MONDIAL_RELAY_ENSEIGNE "$MONDIAL_RELAY_ENSEIGNE" "$environment"
+            push_var MONDIAL_RELAY_PRIVATE_KEY "$MONDIAL_RELAY_PRIVATE_KEY" "$environment"
+            push_var MONDIAL_RELAY_BRAND_CODE "$BRAND" "$environment"
+            push_var MONDIAL_RELAY_MODE "$MODE" "$environment"
+            push_var MONDIAL_RELAY_WSDL_URL "$WSDL" "$environment"
+            push_var SHIPPING_AUTO_LABEL_ON_PAID "true" "$environment"
+          done

@@ -2,11 +2,13 @@
   "checkout": {
     "title": "Checkout",
     "emptyCart": "Add products before checking out.",
-    "shipping": "Shipping",
+    "shipping": "Address",
+    "shippingMethod": "Shipping method",
     "payment": "Payment",
     "summary": "Summary",
     "email": "Email",
     "fullName": "Full name",
+    "phone": "Phone",
     "address": "Address",
     "city": "City",
     "postalCode": "Postal code",
@@ -16,6 +18,26 @@
     "preparePaypal": "Continue with PayPal",
     "paymentError": "Payment could not be started. Check configuration.",
     "paypalNotConfigured": "PayPal is not configured (missing NEXT_PUBLIC_PAYPAL_CLIENT_ID).",
+    "carriers": {
+      "laposte": {
+        "label": "La Poste — home delivery",
+        "hint": "Delivered to the address below"
+      },
+      "mondial_relay": {
+        "label": "Mondial Relay — Parcel shop",
+        "hint": "Pick up at a nearby Parcel shop"
+      }
+    },
+    "relayTitle": "Choose a Parcel shop",
+    "relayHint": "Nearby Parcel shops appear from your postal code.",
+    "relayLoading": "Searching Parcel shops…",
+    "relaySearchError": "Unable to load Parcel shops.",
+    "relayEmpty": "No Parcel shop found for this postal code.",
+    "relayDemo": "Demo mode (Mondial Relay keys missing)",
+    "relayCode": "Code {{id}}",
+    "relayMap": "Map",
+    "relaySelected": "Selected Parcel shop: {{id}}",
+    "relayRequired": "Select a Parcel shop to continue.",
     "methods": {
       "stripe": {
         "label": "Stripe",

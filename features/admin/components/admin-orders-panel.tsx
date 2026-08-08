@@ -46,6 +46,7 @@ export function AdminOrdersPanel() {
     message: string;
   } | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
   const [carrierByOrder, setCarrierByOrder] = useState<
     Record<string, ShippingCarrier>
   >({});
@@ -71,7 +72,11 @@ export function AdminOrdersPanel() {
   }, [orders, statusFilter]);
 
   const createLabel = async (order: OrderRow, carrierForce?: ShippingCarrier) => {
-    const carrier = carrierForce ?? carrierByOrder[order.id] ?? "laposte";
+    const carrier =
+      carrierForce ??
+      carrierByOrder[order.id] ??
+      order.shipping_carrier ??
+      "laposte";
     setPendingId(order.id);
     setFeedback(null);
 
@@ -110,6 +115,33 @@ export function AdminOrdersPanel() {
     await loadOrders();
   };
 
+  const syncTracking = async () => {
+    setSyncing(true);
+    setFeedback(null);
+    const response = await adminFetch("/api/shipping/sync", { method: "POST" });
+    const json = (await response.json()) as {
+      error?: string;
+      updated?: number;
+      checked?: number;
+    };
+    setSyncing(false);
+    if (!response.ok) {
+      setFeedback({
+        tone: "error",
+        message: json.error ?? t("admin.syncTrackingError"),
+      });
+      return;
+    }
+    setFeedback({
+      tone: "success",
+      message: t("admin.syncTrackingSuccess", {
+        updated: json.updated ?? 0,
+        checked: json.checked ?? 0,
+      }),
+    });
+    await loadOrders();
+  };
+
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-10 md:px-6">
       <AdminPageHeader
@@ -118,6 +150,19 @@ export function AdminOrdersPanel() {
       />
 
       {feedback ? <AdminFeedback tone={feedback.tone} message={feedback.message} /> : null}
+
+      <p className="text-sm text-muted">{t("admin.autoLabelHint")}</p>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          type="button"
+          variant="primary-outline"
+          pending={syncing}
+          onClick={() => void syncTracking()}
+        >
+          {syncing ? t("admin.syncTrackingLoading") : t("admin.syncTracking")}
+        </Button>
+      </div>
 
       <div className="flex flex-wrap gap-2" role="group" aria-label={t("admin.filterStatus")}>
         {STATUS_FILTERS.map((status) => (
@@ -180,6 +225,16 @@ export function AdminOrdersPanel() {
                         {t("admin.tracking")}: {order.tracking_number}
                       </p>
                     ) : null}
+                    {order.shipping_carrier || order.relay_point_id ? (
+                      <p className="text-sm text-muted">
+                        {t("admin.clientShippingChoice", {
+                          carrier: order.shipping_carrier
+                            ? t(`admin.carriers.${order.shipping_carrier}`)
+                            : "—",
+                          relay: order.relay_point_id ?? "—",
+                        })}
+                      </p>
+                    ) : null}
                   </div>
 
                   <div className="w-full max-w-xs space-y-3 sm:w-auto">
@@ -223,19 +278,16 @@ export function AdminOrdersPanel() {
 
                     <Button
                       type="button"
-                      onClick={() =>
-                        void createLabel(
-                          order,
-                          carrier === "laposte" ? "laposte" : carrier,
-                        )
-                      }
-                      disabled={pendingId === order.id}
+                      pending={pendingId === order.id}
+                      onClick={() => void createLabel(order, carrier)}
                     >
                       {pendingId === order.id
                         ? t("admin.generating")
-                        : carrier === "laposte"
-                          ? t("admin.generateLaPosteLabel")
-                          : t("admin.generateLabel")}
+                        : order.tracking_number
+                          ? t("admin.regenerateLabel")
+                          : carrier === "laposte"
+                            ? t("admin.generateLaPosteLabel")
+                            : t("admin.generateLabel")}
                     </Button>
 
                     {order.label_url ? (

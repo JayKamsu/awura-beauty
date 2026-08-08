@@ -1,13 +1,7 @@
 import { NextResponse } from "next/server";
-import { notifyOrderUser } from "@/lib/connectors/firebase";
-import { createLaPosteLabel } from "@/lib/infrastructure/shipping/laposte";
-import { createMondialRelayLabel } from "@/lib/infrastructure/shipping/mondialrelay";
+import { createOrderShippingLabel } from "@/lib/application/shipping/create-order-label";
 import type { ShippingCarrier } from "@/lib/infrastructure/shipping/types";
 import { requireAdminFromRequest } from "@/lib/infrastructure/supabase/admin-auth";
-import {
-  getOrderById,
-  updateOrderShipping,
-} from "@/lib/infrastructure/supabase/orders";
 
 type LabelBody = {
   orderId: string;
@@ -30,70 +24,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
-  const order = await getOrderById(body.orderId);
-  if (!order) {
-    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  const result = await createOrderShippingLabel({
+    orderId: body.orderId,
+    carrier: body.carrier,
+    relayPointId: body.relayPointId,
+    weightGrams: body.weightGrams,
+    notify: true,
+  });
+
+  if (!result.ok) {
+    const status =
+      result.error === "Order not found"
+        ? 404
+        : result.error.includes("requires")
+          ? 400
+          : 500;
+    return NextResponse.json({ error: result.error }, { status });
   }
-  if (!order.shipping_address) {
-    return NextResponse.json(
-      { error: "Order has no shipping address" },
-      { status: 400 },
-    );
-  }
 
-  const recipient = {
-    ...order.shipping_address,
-    email: order.shipping_address.email ?? order.email,
-  };
-
-  try {
-    const label =
-      body.carrier === "laposte"
-        ? await createLaPosteLabel({
-            orderId: order.id,
-            recipient,
-            weightGrams: body.weightGrams,
-          })
-        : await createMondialRelayLabel({
-            orderId: order.id,
-            recipient,
-            weightGrams: body.weightGrams,
-            relayPointId:
-              body.relayPointId ?? order.relay_point_id ?? undefined,
-          });
-
-    await updateOrderShipping(order.id, {
-      shippingStatus: "shipped",
-      shippingCarrier: label.carrier,
-      trackingNumber: label.trackingNumber,
-      labelUrl: label.labelUrl,
-      relayPointId: body.relayPointId ?? order.relay_point_id,
-    });
-
-    await notifyOrderUser({
-      userId: order.user_id,
-      title: "Commande expédiée",
-      body: label.trackingNumber
-        ? `Votre colis est en route (suivi : ${label.trackingNumber}).`
-        : "Votre colis Awura Beauty est en route.",
-      link: "/compte#commandes",
-    });
-
-    return NextResponse.json({
-      orderId: order.id,
-      carrier: label.carrier,
-      trackingNumber: label.trackingNumber,
-      labelUrl: label.labelUrl,
-      labelBase64: label.labelBase64,
-      shippingStatus: "shipped",
-    });
-  } catch (error) {
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "Unable to create label",
-      },
-      { status: 500 },
-    );
-  }
+  return NextResponse.json({
+    orderId: body.orderId,
+    carrier: result.carrier,
+    trackingNumber: result.trackingNumber,
+    labelUrl: result.labelUrl,
+    shippingStatus: "shipped",
+  });
 }

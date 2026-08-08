@@ -1,16 +1,19 @@
+import { maybeAutoCreateLabelAfterPaid } from "@/lib/application/shipping/create-order-label";
 import { notifyOrderUser } from "@/lib/connectors/firebase";
 import {
   getOrderById,
   updateOrderPayment,
 } from "@/lib/infrastructure/supabase/orders";
 
-/** Marque une commande payée (service_role) + notif push si possible. */
+/** Marque une commande payée (service_role) + notif push + étiquette auto si possible. */
 export async function markOrderPaid(orderId: string): Promise<boolean> {
   if (!orderId || orderId.startsWith("demo-")) return true;
 
   const order = await getOrderById(orderId);
   if (!order) return false;
   if (order.payment_status === "paid" || order.status === "paid") {
+    // Idempotent : tente quand même l’étiquette si absente
+    await maybeAutoCreateLabelAfterPaid(orderId);
     return true;
   }
 
@@ -26,6 +29,7 @@ export async function markOrderPaid(orderId: string): Promise<boolean> {
       body: "Merci ! Votre paiement Awura Beauty est confirmé.",
       link: "/compte#commandes",
     });
+    await maybeAutoCreateLabelAfterPaid(orderId);
   }
 
   return ok;

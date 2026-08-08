@@ -45,6 +45,16 @@ export function proxy(request: NextRequest) {
     if (limited) return limited;
   }
 
+  if (pathname.startsWith("/api/shipping")) {
+    const limited = rateLimitResponse(
+      request,
+      pathname.includes("/sync")
+        ? RATE_LIMITS.shippingSync
+        : RATE_LIMITS.shippingSearch,
+    );
+    if (limited) return limited;
+  }
+
   if (pathname.startsWith("/api/admin")) {
     response.headers.set("Cache-Control", "no-store");
 
@@ -83,5 +93,6 @@ export const config = {
     "/api/checkout/:path*",
     "/api/support/:path*",
     "/api/push/:path*",
+    "/api/shipping/:path*",
   ],
 };

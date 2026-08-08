@@ -65,6 +65,8 @@ export type {
   PageSectionId,
 } from "@/lib/domain/page-layout";
 
+export type { RelayPoint, ShippingMethod } from "@/lib/domain/shipping";
+
 export {
   DEFAULT_ABOUT_SECTIONS,
   DEFAULT_HOME_SECTIONS,

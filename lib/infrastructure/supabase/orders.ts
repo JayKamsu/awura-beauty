@@ -42,6 +42,7 @@ export type CreateOrderInput = {
   paymentStatus?: string;
   status?: OrderRow["status"];
   relayPointId?: string | null;
+  shippingCarrier?: ShippingCarrier | null;
   /** Préférer userId issu du Bearer côté API (pas de session cookie serveur). */
   userId?: string | null;
 };
@@ -70,6 +71,7 @@ export async function createOrder(
       payment_method: input.paymentMethod,
       payment_status: input.paymentStatus ?? "pending",
       shipping_status: "preparing",
+      shipping_carrier: input.shippingCarrier ?? null,
       relay_point_id: input.relayPointId ?? null,
       total,
       currency: input.currency,

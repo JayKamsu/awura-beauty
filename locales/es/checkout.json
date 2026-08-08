@@ -2,11 +2,13 @@
   "checkout": {
     "title": "Pedido",
     "emptyCart": "Añade productos antes de pagar.",
-    "shipping": "Envío",
+    "shipping": "Dirección",
+    "shippingMethod": "Método de envío",
     "payment": "Pago",
     "summary": "Resumen",
     "email": "E-mail",
     "fullName": "Nombre completo",
+    "phone": "Teléfono",
     "address": "Dirección",
     "city": "Ciudad",
     "postalCode": "Código postal",
@@ -16,6 +18,26 @@
     "preparePaypal": "Continuar con PayPal",
     "paymentError": "No se pudo iniciar el pago. Comprueba la configuración.",
     "paypalNotConfigured": "PayPal no está configurado (falta NEXT_PUBLIC_PAYPAL_CLIENT_ID).",
+    "carriers": {
+      "laposte": {
+        "label": "La Poste — domicilio",
+        "hint": "Entrega en la dirección indicada"
+      },
+      "mondial_relay": {
+        "label": "Mondial Relay — Punto de recogida",
+        "hint": "Recogida en un punto cercano"
+      }
+    },
+    "relayTitle": "Elegir un Point Relais",
+    "relayHint": "Los puntos cercanos aparecen según tu código postal.",
+    "relayLoading": "Buscando puntos de recogida…",
+    "relaySearchError": "No se pudieron cargar los puntos de recogida.",
+    "relayEmpty": "No hay puntos para este código postal.",
+    "relayDemo": "Modo demo (faltan claves Mondial Relay)",
+    "relayCode": "Código {{id}}",
+    "relayMap": "Mapa",
+    "relaySelected": "Punto seleccionado: {{id}}",
+    "relayRequired": "Selecciona un Point Relais para continuar.",
     "methods": {
       "stripe": {
         "label": "Stripe",

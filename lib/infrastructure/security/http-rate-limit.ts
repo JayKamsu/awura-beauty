@@ -33,4 +33,6 @@ export const RATE_LIMITS = {
   pushSubscribe: { name: "push:subscribe", limit: 20, windowMs: 60_000 },
   adminWrite: { name: "admin:write", limit: 60, windowMs: 60_000 },
   adminUpload: { name: "admin:upload", limit: 30, windowMs: 60_000 },
+  shippingSearch: { name: "shipping:search", limit: 40, windowMs: 60_000 },
+  shippingSync: { name: "shipping:sync", limit: 20, windowMs: 60_000 },
 } as const satisfies Record<string, RateLimitOptions>;
