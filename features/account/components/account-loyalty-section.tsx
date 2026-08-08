@@ -43,6 +43,8 @@ export function AccountLoyaltySection() {
 
   useEffect(() => {
     void load();
+    // token only — load se recreate à chaque render
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- session token gate
   }, [session?.access_token]);
 
   useEffect(() => {
@@ -73,6 +75,7 @@ export function AccountLoyaltySection() {
       }
       await load();
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot attach on token
   }, [session?.access_token]);
 
   const copyLink = async () => {

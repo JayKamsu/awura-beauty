@@ -78,10 +78,13 @@ export function HeroSection() {
             aria-hidden
             className="pointer-events-none absolute -right-4 -top-6 z-0 opacity-20"
           >
-            <img
+            <Image
               src="/images/brand/logo-orange.png"
               alt=""
+              width={224}
+              height={224}
               className="h-48 w-auto select-none sm:h-56"
+              aria-hidden
             />
           </div>
           <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem]">

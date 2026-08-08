@@ -272,6 +272,7 @@ export function CheckoutPageContent() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- authHeaders via session token
   }, [shippingCarrier, quoteItemsKey, items.length, subtotal, pointsToRedeem, session?.access_token]);
 
   const allowManualCheckout =

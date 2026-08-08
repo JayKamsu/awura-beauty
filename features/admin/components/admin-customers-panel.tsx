@@ -51,6 +51,7 @@ export function AdminCustomersPanel() {
         setError(true);
         setLoading(false);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount + adminFetch identity
   }, [adminFetch]);
 
   const filtered = useMemo(() => {

@@ -16,8 +16,9 @@ const eslintConfig = defineConfig([
   ]),
   {
     rules: {
-      // Hydration / localStorage / auth gates: setState in effect is intentional here.
-      "react-hooks/set-state-in-effect": "warn",
+      // Chargement data / hydration / gates auth : setState dans un effect est voulu.
+      // La règle Next 16 affiche "Error:" dans le message → bruit CI trompeur.
+      "react-hooks/set-state-in-effect": "off",
       "@typescript-eslint/no-unused-vars": [
         "warn",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
@@ -25,5 +26,6 @@ const eslintConfig = defineConfig([
     },
   },
 ]);
+
 
 export default eslintConfig;

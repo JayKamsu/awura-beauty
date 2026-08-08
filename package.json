@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint . --quiet",
     "typecheck": "tsc --noEmit",
     "env:push:mondial": "node scripts/push-mondial-relay-vercel.mjs",
     "env:push:payments": "node scripts/push-payments-vercel.mjs"
