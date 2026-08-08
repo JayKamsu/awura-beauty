@@ -4,12 +4,14 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { usePreferences } from "@/components/providers/preferences-provider";
 import { AdminEmptyState } from "@/features/admin/components/admin-empty-state";
 import { AdminFeedback } from "@/features/admin/components/admin-feedback";
 import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
 import { AdminSearchField } from "@/features/admin/components/admin-search-field";
 import { ConfirmDeleteButton } from "@/features/admin/components/confirm-delete-button";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
+import { formatPrice } from "@/lib/format/price";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 import { PRODUCT_CATEGORIES } from "@/lib/infrastructure/supabase/fallback-products";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
@@ -36,7 +38,8 @@ const fieldClass =
   "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent";
 
 export function AdminProductsPanel() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { currency } = usePreferences();
   const adminFetch = useAdminFetch();
   const { locked: pending, run } = useActionLock();
   const [products, setProducts] = useState<ProductRow[]>([]);
@@ -313,35 +316,73 @@ export function AdminProductsPanel() {
             }
           />
         ) : (
-          <div className="space-y-3">
-            {filtered.map((product) => (
-              <article
-                key={product.id}
-                className="flex flex-col gap-4 rounded-2xl border border-border p-4 sm:flex-row sm:items-center"
-              >
-                <div className="relative size-20 overflow-hidden rounded-xl bg-background-alt">
-                  {product.image_url ? (
-                    <Image src={product.image_url} alt={product.name} fill className="object-cover" />
-                  ) : null}
-                </div>
-                <div className="flex-1">
-                  <p className="font-serif text-xl text-primary">{product.name}</p>
-                  <p className="text-sm text-muted">
-                    {product.slug} · {t("admin.stockLeft", { count: product.stock })}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button type="button" variant="primary-outline" onClick={() => edit(product)}>
-                    {t("admin.edit")}
-                  </Button>
-                  <ConfirmDeleteButton
-                    label={t("admin.delete")}
-                    confirmMessage={t("admin.confirmDeleteProduct", { name: product.name })}
-                    onConfirm={() => remove(product.id)}
-                  />
-                </div>
-              </article>
-            ))}
+          <div className="overflow-x-auto rounded-2xl border border-border">
+            <table className="min-w-full text-left text-sm">
+              <thead className="bg-background-alt text-xs uppercase tracking-wide text-muted">
+                <tr>
+                  <th className="px-3 py-2 font-medium">{t("admin.fields.name")}</th>
+                  <th className="px-3 py-2 font-medium">{t("admin.fields.category")}</th>
+                  <th className="px-3 py-2 font-medium">{t("admin.fields.stock")}</th>
+                  <th className="px-3 py-2 font-medium">{t("admin.fields.price")}</th>
+                  <th className="px-3 py-2 font-medium" />
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((product) => (
+                  <tr
+                    key={product.id}
+                    className="border-t border-border hover:bg-background-alt/60"
+                  >
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="relative size-9 shrink-0 overflow-hidden rounded-lg bg-background-alt">
+                          {product.image_url ? (
+                            <Image
+                              src={product.image_url}
+                              alt=""
+                              fill
+                              className="object-cover"
+                            />
+                          ) : null}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-primary">
+                            {product.name}
+                          </p>
+                          <p className="truncate text-xs text-muted">
+                            {product.slug}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 text-muted">{product.category}</td>
+                    <td className="px-3 py-2 text-muted">{product.stock}</td>
+                    <td className="whitespace-nowrap px-3 py-2 text-primary">
+                      {formatPrice(product.price, currency, i18n.language)}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <div className="flex flex-wrap justify-end gap-1.5">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="md"
+                          onClick={() => edit(product)}
+                        >
+                          {t("admin.edit")}
+                        </Button>
+                        <ConfirmDeleteButton
+                          label={t("admin.delete")}
+                          confirmMessage={t("admin.confirmDeleteProduct", {
+                            name: product.name,
+                          })}
+                          onConfirm={() => remove(product.id)}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </section>

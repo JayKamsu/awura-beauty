@@ -30,6 +30,16 @@ export const SITE_KEYWORDS = [
 export const CONTACT_EMAIL =
   process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "Care@awurabeauty.com";
 
+/** Infos légales optionnelles (reçus / mentions). */
+export const COMPANY_LEGAL_NAME =
+  process.env.NEXT_PUBLIC_COMPANY_LEGAL_NAME ?? SITE_NAME;
+export const COMPANY_ADDRESS =
+  process.env.NEXT_PUBLIC_COMPANY_ADDRESS?.trim() || null;
+export const COMPANY_SIRET =
+  process.env.NEXT_PUBLIC_COMPANY_SIRET?.trim() || null;
+export const COMPANY_VAT =
+  process.env.NEXT_PUBLIC_COMPANY_VAT?.trim() || null;
+
 /** URL canonique du site (prod = https://awurabeauty.com). Fallback localhost en dev. */
 export function getSiteUrl(): string {
   const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");

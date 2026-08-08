@@ -3,7 +3,8 @@
     "freeShipping": "Livraison offerte dès 80€ d'achat"
   },
   "common": {
-    "close": "Fermer"
+    "close": "Fermer",
+    "openInNewTab": "Ouvrir dans un nouvel onglet"
   },
   "nav": {
     "home": "Accueil",

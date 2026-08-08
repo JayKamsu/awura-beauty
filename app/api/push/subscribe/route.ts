@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
+import {
+  getUserFromAccessToken,
+  isAdminUser,
+} from "@/lib/infrastructure/supabase/admin-auth";
 import { upsertPushSubscription } from "@/lib/infrastructure/supabase/push-subscriptions";
-import { createSupabaseClient } from "@/lib/infrastructure/supabase/client";
 
 export async function POST(request: Request) {
   const body = (await request.json()) as {
@@ -12,21 +15,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "token required" }, { status: 400 });
   }
 
-  let userId: string | null = null;
   const authHeader = request.headers.get("authorization");
-  if (authHeader?.startsWith("Bearer ")) {
-    const accessToken = authHeader.slice("Bearer ".length);
-    const supabase = createSupabaseClient();
-    if (supabase) {
-      const { data } = await supabase.auth.getUser(accessToken);
-      userId = data.user?.id ?? null;
-    }
-  }
+  const accessToken = authHeader?.startsWith("Bearer ")
+    ? authHeader.slice("Bearer ".length)
+    : null;
+  const user = await getUserFromAccessToken(accessToken);
 
   const result = await upsertPushSubscription({
     token: body.token,
-    userId,
+    userId: user?.id ?? null,
     userAgent: body.userAgent,
+    isAdmin: isAdminUser(user),
   });
 
   if (!result.ok) {
@@ -36,5 +35,5 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, isAdmin: isAdminUser(user) });
 }

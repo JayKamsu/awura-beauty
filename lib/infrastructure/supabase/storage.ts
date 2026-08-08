@@ -10,7 +10,13 @@ const ALLOWED_MIME: Record<string, string> = {
   "image/gif": ".gif",
 };
 
-export type StorageFolder = "products" | "blog" | "pages" | "uploads";
+const LABEL_MIME: Record<string, string> = {
+  "application/pdf": ".pdf",
+  "image/png": ".png",
+  "image/jpeg": ".jpg",
+};
+
+export type StorageFolder = "products" | "blog" | "pages" | "uploads" | "labels";
 
 function publicObjectUrl(path: string): string | null {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
@@ -34,7 +40,10 @@ export async function ensureMediaBucket(): Promise<{ ok: boolean; error?: string
   const { error: createError } = await supabase.storage.createBucket(BUCKET, {
     public: true,
     fileSizeLimit: MAX_BYTES,
-    allowedMimeTypes: Object.keys(ALLOWED_MIME),
+    allowedMimeTypes: [
+      ...Object.keys(ALLOWED_MIME),
+      ...Object.keys(LABEL_MIME),
+    ],
   });
 
   if (createError && !/already exists/i.test(createError.message)) {
@@ -81,6 +90,50 @@ export async function uploadPublicImage(
   const { error } = await supabase.storage.from(BUCKET).upload(path, bytes, {
     contentType: mime,
     upsert: false,
+  });
+
+  if (error) {
+    return { url: null, error: error.message };
+  }
+
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  const url = data.publicUrl || publicObjectUrl(path);
+  if (!url) return { url: null, error: "Unable to build public URL" };
+
+  return { url, error: null };
+}
+
+/** Upload d’étiquette PDF/PNG (aperçu + impression admin). */
+export async function uploadShippingLabel(input: {
+  orderId: string;
+  bytes: Buffer;
+  contentType: "application/pdf" | "image/png" | "image/jpeg";
+}): Promise<{ url: string | null; error: string | null }> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return { url: null, error: "Supabase is not configured" };
+  }
+
+  const ext = LABEL_MIME[input.contentType];
+  if (!ext) {
+    return { url: null, error: "Unsupported label type" };
+  }
+
+  if (input.bytes.length <= 0 || input.bytes.length > MAX_BYTES) {
+    return { url: null, error: "Label file too large" };
+  }
+
+  const ensured = await ensureMediaBucket();
+  if (!ensured.ok) {
+    return { url: null, error: ensured.error ?? "Unable to ensure media bucket" };
+  }
+
+  const safeId = input.orderId.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 36);
+  const path = `labels/${safeId}-${Date.now()}${ext}`;
+
+  const { error } = await supabase.storage.from(BUCKET).upload(path, input.bytes, {
+    contentType: input.contentType,
+    upsert: true,
   });
 
   if (error) {

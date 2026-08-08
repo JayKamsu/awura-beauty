@@ -4,12 +4,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/context/auth-provider";
-import {
-  isFirebaseClientConfigured,
-  requestWebPushToken,
-} from "@/lib/connectors/firebase-client";
+import { usePushSubscription } from "@/features/notifications/hooks/use-push-subscription";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
-import { getSession } from "@/lib/infrastructure/supabase/auth";
 
 const DISMISS_KEY = "awura-push-dismissed";
 
@@ -17,41 +13,23 @@ export function PushOptIn() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { locked: pending, run } = useActionLock();
+  const { permission, configured, enable } = usePushSubscription();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!isFirebaseClientConfigured()) return;
-    if (!("Notification" in window)) return;
+    if (!configured) return;
     if (localStorage.getItem(DISMISS_KEY) === "1") return;
-    if (Notification.permission === "granted") return;
-    if (Notification.permission === "denied") return;
+    if (permission !== "default") return;
     setVisible(true);
-  }, []);
+  }, [configured, permission]);
 
   if (!visible) return null;
 
-  const enable = () => {
+  const onEnable = () => {
     void run(async () => {
-      const token = await requestWebPushToken();
-      if (!token) return;
-
-      const session = await getSession();
-      await fetch("/api/push/subscribe", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(session?.access_token
-            ? { Authorization: `Bearer ${session.access_token}` }
-            : {}),
-        },
-        body: JSON.stringify({
-          token,
-          userAgent: navigator.userAgent,
-        }),
-      });
-
-      setVisible(false);
+      const ok = await enable();
+      if (ok) setVisible(false);
     });
   };
 
@@ -62,7 +40,7 @@ export function PushOptIn() {
       </p>
       <p className="mt-1 text-sm text-muted">{t("support.push.body")}</p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <Button type="button" size="md" pending={pending} onClick={enable}>
+        <Button type="button" size="md" pending={pending} onClick={onEnable}>
           {pending ? t("support.push.enabling") : t("support.push.enable")}
         </Button>
         <Button

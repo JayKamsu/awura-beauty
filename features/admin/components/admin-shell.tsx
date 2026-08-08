@@ -8,6 +8,9 @@ import { BrandLogo } from "@/components/ui/brand-logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
+import { PushForegroundListener } from "@/features/notifications/components/push-foreground-listener";
+import { PushNavigateListener } from "@/features/notifications/components/push-navigate-listener";
+import { PushNotificationButton } from "@/features/notifications/components/push-notification-button";
 
 const NAV = [
   { href: "/admin", key: "dashboard" },
@@ -180,6 +183,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
               {adminEmail}
             </p>
           ) : null}
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs text-muted">{t("support.push.enableShort")}</p>
+            <PushNotificationButton
+              variant="admin"
+              hrefWhenEnabled="/admin/notifications"
+            />
+          </div>
           <Button
             type="button"
             variant="primary-outline"
@@ -199,9 +209,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="border-b border-border bg-background lg:hidden">
-          <div className="flex items-center justify-between gap-3 px-4 py-3">
-            <div className="flex min-w-0 items-center gap-2">
+        <PushForegroundListener />
+        <PushNavigateListener />
+        <header className="border-b border-border bg-background">
+          <div className="flex items-center justify-between gap-3 px-4 py-3 lg:px-6">
+            <div className="flex min-w-0 items-center gap-2 lg:hidden">
               <button
                 type="button"
                 className="inline-flex size-11 items-center justify-center rounded-xl text-foreground transition hover:bg-background-alt"
@@ -223,9 +235,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 </p>
               </div>
             </div>
-            <Link href="/admin" className="shrink-0">
-              <BrandLogo tone="auto" className="h-9 w-auto" />
-            </Link>
+            <p className="hidden font-serif text-xl text-primary lg:block">
+              {t(navTitleKey(pathname))}
+            </p>
+            <div className="flex items-center gap-1">
+              <PushNotificationButton
+                variant="admin"
+                hrefWhenEnabled="/admin/notifications"
+              />
+              <Link href="/admin" className="shrink-0 lg:hidden">
+                <BrandLogo tone="auto" className="h-9 w-auto" />
+              </Link>
+            </div>
           </div>
         </header>
 

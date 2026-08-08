@@ -1,5 +1,5 @@
 import { maybeAutoCreateLabelAfterPaid } from "@/lib/application/shipping/create-order-label";
-import { notifyOrderUser } from "@/lib/connectors/firebase";
+import { notifyOrderPaid } from "@/lib/application/notifications/order-notify";
 import {
   getOrderById,
   updateOrderPayment,
@@ -23,11 +23,10 @@ export async function markOrderPaid(orderId: string): Promise<boolean> {
   });
 
   if (ok) {
-    await notifyOrderUser({
+    await notifyOrderPaid({
       userId: order.user_id,
-      title: "Commande confirmée",
-      body: "Merci ! Votre paiement Awura Beauty est confirmé.",
-      link: "/compte#commandes",
+      orderId: order.id,
+      pickup: order.shipping_carrier === "pickup",
     });
     await maybeAutoCreateLabelAfterPaid(orderId);
   }

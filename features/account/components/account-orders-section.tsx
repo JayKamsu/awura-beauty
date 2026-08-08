@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { DocumentPreviewModal } from "@/components/ui/document-preview-modal";
+import { ShippingTimeline } from "@/features/account/components/shipping-timeline";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import { formatPrice } from "@/lib/format/price";
@@ -34,10 +37,48 @@ export function AccountOrdersSection({
   const { t, i18n } = useTranslation();
   const { session } = useAuth();
   const { currency } = usePreferences();
+  const searchParams = useSearchParams();
+  const focusOrderId = searchParams.get("order");
   const [trackingByOrder, setTrackingByOrder] = useState<
     Record<string, TrackingPayload>
   >({});
   const [trackingLoadingId, setTrackingLoadingId] = useState<string | null>(null);
+  const [receiptPreview, setReceiptPreview] = useState<{
+    title: string;
+    url: string;
+    subtitle?: string;
+  } | null>(null);
+  const [receiptLoadingId, setReceiptLoadingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!focusOrderId || ordersLoading) return;
+    const el = document.getElementById(`order-${focusOrderId}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [focusOrderId, ordersLoading, orders]);
+
+  const openReceipt = async (order: OrderRow) => {
+    if (!session?.access_token) return;
+    setReceiptLoadingId(order.id);
+    const response = await fetch(
+      `/api/account/orders/receipt?orderId=${encodeURIComponent(order.id)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      },
+    );
+    setReceiptLoadingId(null);
+    if (!response.ok) return;
+    const html = await response.text();
+    const blobUrl = URL.createObjectURL(
+      new Blob([html], { type: "text/html;charset=utf-8" }),
+    );
+    setReceiptPreview({
+      title: t("account.receiptPreviewTitle"),
+      url: blobUrl,
+      subtitle: t("account.orderId", { id: order.id.slice(0, 8) }),
+    });
+  };
 
   const refreshTracking = async (orderId: string) => {
     setTrackingLoadingId(orderId);
@@ -91,8 +132,13 @@ export function AccountOrdersSection({
             const address = order.shipping_address;
             return (
               <article
+                id={`order-${order.id}`}
                 key={order.id}
-                className="space-y-4 rounded-2xl border border-border p-5"
+                className={`space-y-4 rounded-2xl border p-5 ${
+                  focusOrderId === order.id
+                    ? "border-accent bg-accent/5"
+                    : "border-border"
+                }`}
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
@@ -131,17 +177,83 @@ export function AccountOrdersSection({
                         {t(`admin.carriers.${order.shipping_carrier}`)}
                       </p>
                     ) : null}
-                    {order.tracking_number ? (
-                      <p>
-                        <span className="text-muted">{t("account.trackingNumber")} : </span>
-                        {order.tracking_number}
-                      </p>
+                    {order.payment_status === "paid" ||
+                    order.status === "paid" ? (
+                      <Button
+                        type="button"
+                        variant="primary-outline"
+                        size="md"
+                        pending={receiptLoadingId === order.id}
+                        onClick={() => void openReceipt(order)}
+                      >
+                        {t("account.previewReceipt")}
+                      </Button>
                     ) : null}
                   </div>
                 </div>
 
+                <div className="rounded-xl bg-background-alt p-4">
+                  <p className="mb-3 font-medium text-primary">
+                    {t("account.shippingTimeline")}
+                  </p>
+                  <ShippingTimeline
+                    status={order.shipping_status}
+                    carrier={order.shipping_carrier}
+                  />
+                  {order.tracking_number ? (
+                    <p className="mt-4 text-sm text-muted">
+                      {t("account.trackingNumber")} :{" "}
+                      <span className="text-primary">{order.tracking_number}</span>
+                    </p>
+                  ) : (
+                    <p className="mt-4 text-sm text-muted">
+                      {t("account.trackingPending")}
+                    </p>
+                  )}
+                  {order.shipping_carrier &&
+                  order.shipping_carrier !== "pickup" ? (
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="md"
+                        disabled={trackingLoadingId === order.id}
+                        onClick={() => void refreshTracking(order.id)}
+                      >
+                        {trackingLoadingId === order.id
+                          ? t("account.trackingLoading")
+                          : t("account.refreshTracking")}
+                      </Button>
+                      {order.tracking_number ? (
+                        <a
+                          href={
+                            order.shipping_carrier === "mondial_relay"
+                              ? `https://www.mondialrelay.fr/suivi-de-colis/?codeParcel=${encodeURIComponent(order.tracking_number)}`
+                              : `https://www.laposte.fr/outils/suivre-vos-envois?code=${encodeURIComponent(order.tracking_number)}`
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center text-sm text-accent hover:text-accent-light"
+                        >
+                          {t("account.openTracking")}
+                        </a>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {tracking?.events && tracking.events.length > 0 ? (
+                    <ul className="mt-4 space-y-2 border-t border-border pt-3 text-sm text-muted">
+                      {tracking.events.slice(0, 5).map((event, index) => (
+                        <li key={`${order.id}-event-${index}`}>
+                          {event.label}
+                          {event.location ? ` — ${event.location}` : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+
                 {address ? (
-                  <div className="rounded-xl bg-background-alt p-4 text-sm">
+                  <div className="rounded-xl border border-border p-4 text-sm">
                     <p className="mb-1 font-medium text-primary">
                       {t("account.shippingAddress")}
                     </p>
@@ -160,49 +272,6 @@ export function AccountOrdersSection({
                         </>
                       ) : null}
                     </p>
-                  </div>
-                ) : null}
-
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    type="button"
-                    variant="primary-outline"
-                    size="md"
-                    disabled={trackingLoadingId === order.id}
-                    onClick={() => void refreshTracking(order.id)}
-                  >
-                    {trackingLoadingId === order.id
-                      ? t("account.trackingLoading")
-                      : t("account.refreshTracking")}
-                  </Button>
-                  {order.label_url || tracking?.labelUrl ? (
-                    <a
-                      href={order.label_url ?? tracking?.labelUrl ?? "#"}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center text-sm text-accent hover:text-accent-light"
-                    >
-                      {t("account.openTracking")}
-                    </a>
-                  ) : null}
-                </div>
-
-                {tracking?.statusLabel ? (
-                  <div className="rounded-xl bg-background-alt p-4 text-sm">
-                    <p className="font-medium text-primary">{tracking.statusLabel}</p>
-                    {tracking.events && tracking.events.length > 0 ? (
-                      <ul className="mt-3 space-y-2 text-muted">
-                        {tracking.events.slice(0, 5).map((event, index) => (
-                          <li key={`${order.id}-event-${index}`}>
-                            {event.label}
-                            {event.location ? ` — ${event.location}` : ""}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null}
-                    {tracking.error ? (
-                      <p className="mt-2 text-accent">{tracking.error}</p>
-                    ) : null}
                   </div>
                 ) : null}
 
@@ -233,6 +302,20 @@ export function AccountOrdersSection({
           })}
         </div>
       )}
+
+      {receiptPreview ? (
+        <DocumentPreviewModal
+          title={receiptPreview.title}
+          url={receiptPreview.url}
+          subtitle={receiptPreview.subtitle}
+          onClose={() => {
+            if (receiptPreview.url.startsWith("blob:")) {
+              URL.revokeObjectURL(receiptPreview.url);
+            }
+            setReceiptPreview(null);
+          }}
+        />
+      ) : null}
     </section>
   );
 }

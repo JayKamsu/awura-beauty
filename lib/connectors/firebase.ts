@@ -4,6 +4,7 @@
 export {
   firebaseNotificationAdapter,
   broadcastPush,
+  notifyAdminUsers,
   notifyOrderUser,
 } from "@/lib/infrastructure/notifications/firebase";
 

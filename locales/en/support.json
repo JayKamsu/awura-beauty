@@ -15,9 +15,14 @@
       "title": "Stay in the loop",
       "body": "Enable notifications for offers and order updates.",
       "enable": "Enable",
+      "enableShort": "Notifications",
+      "enabled": "Notifications enabled",
       "enabling": "Enabling…",
       "later": "Later",
-      "guestHint": "You can subscribe without an account."
+      "guestHint": "You can subscribe without an account.",
+      "blocked": "Notifications blocked",
+      "blockedTitle": "Notifications blocked",
+      "blockedBody": "Allow Awura Beauty notifications in your browser settings."
     }
   }
 }

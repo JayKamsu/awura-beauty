@@ -277,47 +277,66 @@ export function AdminContentPanel() {
             }
           />
         ) : (
-          <div className="space-y-3">
-            {filtered.map((post) => {
-              const href =
-                post.kind === "tutorial"
-                  ? `/tutoriels/${post.slug}`
-                  : `/blog/${post.slug}`;
-              return (
-                <article
-                  key={post.id}
-                  className="flex flex-col gap-3 rounded-2xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <p className="text-xs uppercase tracking-wide text-muted">
-                      {post.kind === "tutorial"
-                        ? t("blog.badgeTutorial")
-                        : t("blog.badgeArticle")}
-                    </p>
-                    <p className="font-serif text-xl text-primary">{post.title}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Link
-                      href={href}
-                      target="_blank"
-                      className="inline-flex min-h-11 items-center rounded-xl px-3 text-sm text-accent hover:text-accent-light"
+          <div className="overflow-x-auto rounded-2xl border border-border">
+            <table className="min-w-full text-left text-sm">
+              <thead className="bg-background-alt text-xs uppercase tracking-wide text-muted">
+                <tr>
+                  <th className="px-3 py-2 font-medium">{t("admin.fields.title")}</th>
+                  <th className="px-3 py-2 font-medium">{t("admin.fields.kind")}</th>
+                  <th className="px-3 py-2 font-medium" />
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((post) => {
+                  const href =
+                    post.kind === "tutorial"
+                      ? `/tutoriels/${post.slug}`
+                      : `/blog/${post.slug}`;
+                  return (
+                    <tr
+                      key={post.id}
+                      className="border-t border-border hover:bg-background-alt/60"
                     >
-                      {t("admin.viewOnSite")}
-                    </Link>
-                    <Button type="button" variant="primary-outline" onClick={() => edit(post)}>
-                      {t("admin.edit")}
-                    </Button>
-                    <ConfirmDeleteButton
-                      label={t("admin.delete")}
-                      confirmMessage={t("admin.confirmDeleteContent", {
-                        title: post.title,
-                      })}
-                      onConfirm={() => remove(post.id)}
-                    />
-                  </div>
-                </article>
-              );
-            })}
+                      <td className="px-3 py-2">
+                        <p className="font-medium text-primary">{post.title}</p>
+                        <p className="text-xs text-muted">{post.slug}</p>
+                      </td>
+                      <td className="px-3 py-2 text-muted">
+                        {post.kind === "tutorial"
+                          ? t("blog.badgeTutorial")
+                          : t("blog.badgeArticle")}
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <div className="flex flex-wrap justify-end gap-1.5">
+                          <Link
+                            href={href}
+                            target="_blank"
+                            className="inline-flex min-h-10 items-center px-2 text-sm text-accent hover:text-accent-light"
+                          >
+                            {t("admin.viewOnSite")}
+                          </Link>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="md"
+                            onClick={() => edit(post)}
+                          >
+                            {t("admin.edit")}
+                          </Button>
+                          <ConfirmDeleteButton
+                            label={t("admin.delete")}
+                            confirmMessage={t("admin.confirmDeleteContent", {
+                              title: post.title,
+                            })}
+                            onConfirm={() => remove(post.id)}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </section>

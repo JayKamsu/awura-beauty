@@ -1,11 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { AdminEmptyState } from "@/features/admin/components/admin-empty-state";
 import { AdminFeedback } from "@/features/admin/components/admin-feedback";
 import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
+import { AdminSearchField } from "@/features/admin/components/admin-search-field";
+import { DocumentPreviewModal } from "@/components/ui/document-preview-modal";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
 import type {
   OrderRow,
@@ -13,6 +16,7 @@ import type {
   ShippingStatus,
 } from "@/lib/infrastructure/supabase/order-types";
 import { formatPrice } from "@/lib/format/price";
+import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import { usePreferences } from "@/components/providers/preferences-provider";
 
 const STATUS_FILTERS = [
@@ -22,6 +26,8 @@ const STATUS_FILTERS = [
   "in_transit",
   "delivered",
 ] as const;
+
+const PAGE_SIZE = 40;
 
 function shippingBadgeClass(status: ShippingStatus): string {
   switch (status) {
@@ -39,20 +45,32 @@ export function AdminOrdersPanel() {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();
   const adminFetch = useAdminFetch();
+  const searchParams = useSearchParams();
+  const focusOrderId = searchParams.get("order");
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(0);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{
     tone: "success" | "error";
     message: string;
   } | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
-  const [carrierByOrder, setCarrierByOrder] = useState<
+  const [draftCarrierByOrder, setDraftCarrierByOrder] = useState<
     Record<string, ShippingCarrier>
   >({});
-  const [relayByOrder, setRelayByOrder] = useState<Record<string, string>>({});
+  const [draftRelayByOrder, setDraftRelayByOrder] = useState<
+    Record<string, string>
+  >({});
   const [statusFilter, setStatusFilter] =
     useState<(typeof STATUS_FILTERS)[number]>("all");
+  const [preview, setPreview] = useState<{
+    title: string;
+    url: string;
+    subtitle?: string | null;
+  } | null>(null);
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
@@ -66,38 +84,135 @@ export function AdminOrdersPanel() {
     void loadOrders();
   }, [loadOrders]);
 
-  const filtered = useMemo(() => {
-    if (statusFilter === "all") return orders;
-    return orders.filter((order) => order.shipping_status === statusFilter);
-  }, [orders, statusFilter]);
+  useEffect(() => {
+    if (!focusOrderId || loading) return;
+    setExpandedId(focusOrderId);
+    const el = document.getElementById(`order-${focusOrderId}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [focusOrderId, loading, orders]);
 
-  const createLabel = async (order: OrderRow, carrierForce?: ShippingCarrier) => {
-    const carrier =
-      carrierForce ??
-      carrierByOrder[order.id] ??
-      order.shipping_carrier ??
-      "laposte";
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return orders.filter((order) => {
+      if (statusFilter !== "all" && order.shipping_status !== statusFilter) {
+        return false;
+      }
+      if (!q) return true;
+      return (
+        order.id.toLowerCase().includes(q) ||
+        order.email.toLowerCase().includes(q) ||
+        (order.tracking_number ?? "").toLowerCase().includes(q) ||
+        (order.shipping_address?.fullName ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [orders, query, statusFilter]);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageSafe = Math.min(page, pageCount - 1);
+  const pageRows = filtered.slice(
+    pageSafe * PAGE_SIZE,
+    pageSafe * PAGE_SIZE + PAGE_SIZE,
+  );
+
+  useEffect(() => {
+    setPage(0);
+  }, [query, statusFilter]);
+
+  const updateShippingStatus = async (
+    order: OrderRow,
+    shippingStatus: ShippingStatus,
+  ) => {
     setPendingId(order.id);
     setFeedback(null);
+    const response = await adminFetch("/api/admin/shipping/status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId: order.id, shippingStatus }),
+    });
+    const json = (await response.json()) as {
+      error?: string;
+      order?: OrderRow;
+    };
+    setPendingId(null);
+    if (!response.ok || !json.order) {
+      setFeedback({
+        tone: "error",
+        message: json.error ?? t("admin.saveError"),
+      });
+      return;
+    }
+    setOrders((prev) =>
+      prev.map((row) => (row.id === order.id ? json.order! : row)),
+    );
+    setFeedback({ tone: "success", message: t("admin.statusUpdated") });
+  };
 
+  const applyCarrierChange = async (order: OrderRow) => {
+    const shippingCarrier =
+      draftCarrierByOrder[order.id] ?? order.shipping_carrier ?? "laposte";
+    const relayPointId =
+      shippingCarrier === "mondial_relay"
+        ? (draftRelayByOrder[order.id] ?? order.relay_point_id ?? "").trim()
+        : null;
+    if (shippingCarrier === "mondial_relay" && !relayPointId) {
+      setFeedback({ tone: "error", message: t("admin.relayRequired") });
+      return;
+    }
+    setPendingId(order.id);
+    setFeedback(null);
+    const response = await adminFetch("/api/admin/shipping/carrier", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderId: order.id,
+        shippingCarrier,
+        relayPointId,
+      }),
+    });
+    const json = (await response.json()) as {
+      error?: string;
+      order?: OrderRow;
+      unchanged?: boolean;
+    };
+    setPendingId(null);
+    if (!response.ok || !json.order) {
+      setFeedback({
+        tone: "error",
+        message: json.error ?? t("admin.saveError"),
+      });
+      return;
+    }
+    setOrders((prev) =>
+      prev.map((row) => (row.id === order.id ? json.order! : row)),
+    );
+    setFeedback({
+      tone: "success",
+      message: json.unchanged
+        ? t("admin.carrierUnchanged")
+        : t("admin.carrierChangedNotified"),
+    });
+  };
+
+  const createLabel = async (order: OrderRow) => {
+    const carrier = order.shipping_carrier ?? "laposte";
+    if (carrier === "pickup") return;
+    setPendingId(order.id);
+    setFeedback(null);
     const response = await adminFetch("/api/admin/shipping/label", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         orderId: order.id,
         carrier,
-        relayPointId: relayByOrder[order.id] || order.relay_point_id || undefined,
+        relayPointId: order.relay_point_id || undefined,
       }),
     });
-
     const json = (await response.json()) as {
       error?: string;
       trackingNumber?: string;
       labelUrl?: string;
     };
-
     setPendingId(null);
-
     if (!response.ok) {
       setFeedback({
         tone: "error",
@@ -105,7 +220,6 @@ export function AdminOrdersPanel() {
       });
       return;
     }
-
     setFeedback({
       tone: "success",
       message: t("admin.labelSuccess", {
@@ -113,6 +227,32 @@ export function AdminOrdersPanel() {
       }),
     });
     await loadOrders();
+  };
+
+  const openReceipt = async (order: OrderRow) => {
+    const response = await adminFetch(
+      `/api/admin/orders/receipt?orderId=${encodeURIComponent(order.id)}`,
+    );
+    if (!response.ok) {
+      setFeedback({ tone: "error", message: t("admin.receiptError") });
+      return;
+    }
+    const html = await response.text();
+    const blobUrl = URL.createObjectURL(
+      new Blob([html], { type: "text/html;charset=utf-8" }),
+    );
+    setPreview({
+      title: t("admin.receiptPreviewTitle"),
+      url: blobUrl,
+      subtitle: `#${order.id.slice(0, 8)} · ${order.email}`,
+    });
+  };
+
+  const closePreview = () => {
+    if (preview?.url.startsWith("blob:")) {
+      URL.revokeObjectURL(preview.url);
+    }
+    setPreview(null);
   };
 
   const syncTracking = async () => {
@@ -143,20 +283,22 @@ export function AdminOrdersPanel() {
   };
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-10 md:px-6">
+    <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-4 py-8 md:px-6">
       <AdminPageHeader
         title={t("admin.ordersTitle")}
         subtitle={t("admin.ordersSubtitle")}
       />
 
-      {feedback ? <AdminFeedback tone={feedback.tone} message={feedback.message} /> : null}
+      {feedback ? (
+        <AdminFeedback tone={feedback.tone} message={feedback.message} />
+      ) : null}
 
-      <p className="text-sm text-muted">{t("admin.autoLabelHint")}</p>
-
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <AdminSearchField value={query} onChange={setQuery} />
         <Button
           type="button"
           variant="primary-outline"
+          size="md"
           pending={syncing}
           onClick={() => void syncTracking()}
         >
@@ -164,13 +306,17 @@ export function AdminOrdersPanel() {
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-2" role="group" aria-label={t("admin.filterStatus")}>
+      <div
+        className="flex flex-wrap gap-1.5"
+        role="group"
+        aria-label={t("admin.filterStatus")}
+      >
         {STATUS_FILTERS.map((status) => (
           <button
             key={status}
             type="button"
             onClick={() => setStatusFilter(status)}
-            className={`inline-flex min-h-11 items-center rounded-xl px-3 text-sm transition ${
+            className={`inline-flex min-h-8 items-center rounded-lg px-2.5 text-xs transition ${
               statusFilter === status
                 ? "bg-primary text-background"
                 : "border border-border text-muted hover:border-accent"
@@ -181,6 +327,9 @@ export function AdminOrdersPanel() {
               : t(`account.status.shipping.${status}`)}
           </button>
         ))}
+        <span className="ml-auto self-center text-xs text-muted">
+          {t("admin.ordersCountLabel", { count: filtered.length })}
+        </span>
       </div>
 
       {loading ? (
@@ -192,183 +341,377 @@ export function AdminOrdersPanel() {
           }
         />
       ) : (
-        <div className="space-y-4">
-          {filtered.map((order) => {
-            const carrier =
-              carrierByOrder[order.id] ?? order.shipping_carrier ?? "laposte";
-            const address = order.shipping_address;
-            return (
-              <article
-                key={order.id}
-                className="space-y-4 rounded-2xl border border-border p-5"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted">
-                      {t("account.orderId", { id: order.id.slice(0, 8) })}
-                    </p>
-                    <p className="font-serif text-2xl text-primary">
-                      {formatPrice(
-                        order.total,
-                        order.currency || currency,
-                        i18n.language,
-                      )}
-                    </p>
-                    {order.shipping_fee > 0 ? (
-                      <p className="text-sm text-muted">
-                        {t("admin.shippingFeeLine", {
-                          amount: formatPrice(
-                            order.shipping_fee,
-                            order.currency || currency,
-                            i18n.language,
-                          ),
-                        })}
-                      </p>
-                    ) : null}
-                    <p className="text-sm text-muted">{order.email}</p>
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${shippingBadgeClass(order.shipping_status)}`}
-                    >
-                      {t(`account.status.shipping.${order.shipping_status}`)}
-                    </span>
-                    {order.tracking_number ? (
-                      <p className="text-sm text-primary">
-                        {t("admin.tracking")}: {order.tracking_number}
-                      </p>
-                    ) : null}
-                    {order.shipping_carrier || order.relay_point_id ? (
-                      <p className="text-sm text-muted">
-                        {t("admin.clientShippingChoice", {
-                          carrier: order.shipping_carrier
-                            ? t(`admin.carriers.${order.shipping_carrier}`)
-                            : "—",
-                          relay: order.relay_point_id ?? "—",
-                        })}
-                      </p>
-                    ) : null}
-                  </div>
+        <>
+          <div className="overflow-x-auto rounded-2xl border border-border">
+            <table className="min-w-full text-left text-sm">
+              <thead className="bg-background-alt text-xs uppercase tracking-wide text-muted">
+                <tr>
+                  <th className="px-3 py-2 font-medium">
+                    {t("admin.colOrder")}
+                  </th>
+                  <th className="px-3 py-2 font-medium">
+                    {t("admin.colClient")}
+                  </th>
+                  <th className="px-3 py-2 font-medium">
+                    {t("admin.colTotal")}
+                  </th>
+                  <th className="px-3 py-2 font-medium">
+                    {t("admin.colPayment")}
+                  </th>
+                  <th className="px-3 py-2 font-medium">
+                    {t("admin.colShipping")}
+                  </th>
+                  <th className="px-3 py-2 font-medium">
+                    {t("admin.colCarrier")}
+                  </th>
+                  <th className="px-3 py-2 font-medium">
+                    {t("admin.colDate")}
+                  </th>
+                  <th className="px-3 py-2 font-medium" />
+                </tr>
+              </thead>
+              <tbody>
+                {pageRows.map((order) => {
+                  const open = expandedId === order.id;
+                  const savedCarrier = order.shipping_carrier;
+                  const draftCarrier =
+                    draftCarrierByOrder[order.id] ?? savedCarrier ?? "laposte";
+                  const draftRelay =
+                    draftRelayByOrder[order.id] ?? order.relay_point_id ?? "";
+                  const carrierDirty =
+                    draftCarrier !== (savedCarrier ?? "laposte") ||
+                    (draftCarrier === "mondial_relay" &&
+                      draftRelay.trim() !== (order.relay_point_id ?? ""));
+                  const paid =
+                    order.payment_status === "paid" || order.status === "paid";
 
-                  <div className="w-full max-w-xs space-y-3 sm:w-auto">
-                    {order.shipping_carrier === "pickup" ||
-                    carrier === "pickup" ? (
-                      <p className="rounded-xl bg-background-alt px-3 py-2 text-sm text-muted">
-                        {t("admin.pickupNoLabel")}
-                      </p>
-                    ) : (
-                      <>
-                        <label className="block space-y-1 text-sm">
-                          <span className="text-muted">{t("admin.carrier")}</span>
-                          <select
-                            className="w-full rounded-xl border border-border bg-background px-3 py-2"
-                            value={carrier}
-                            onChange={(e) =>
-                              setCarrierByOrder((prev) => ({
-                                ...prev,
-                                [order.id]: e.target.value as ShippingCarrier,
-                              }))
-                            }
-                          >
-                            <option value="laposte">
-                              {t("admin.carriers.laposte")}
-                            </option>
-                            <option value="mondial_relay">
-                              {t("admin.carriers.mondial_relay")}
-                            </option>
-                          </select>
-                        </label>
-
-                        {carrier === "mondial_relay" ? (
-                          <label className="block space-y-1 text-sm">
-                            <span className="text-muted">
-                              {t("admin.relayPoint")}
-                            </span>
-                            <input
-                              className="w-full rounded-xl border border-border bg-background px-3 py-2"
-                              value={
-                                relayByOrder[order.id] ??
-                                order.relay_point_id ??
-                                ""
-                              }
-                              onChange={(e) =>
-                                setRelayByOrder((prev) => ({
-                                  ...prev,
-                                  [order.id]: e.target.value,
-                                }))
-                              }
-                              placeholder={t("admin.relayPlaceholder")}
-                            />
-                          </label>
-                        ) : null}
-
-                        <Button
-                          type="button"
-                          pending={pendingId === order.id}
-                          onClick={() => void createLabel(order, carrier)}
-                        >
-                          {pendingId === order.id
-                            ? t("admin.generating")
-                            : order.tracking_number
-                              ? t("admin.regenerateLabel")
-                              : carrier === "laposte"
-                                ? t("admin.generateLaPosteLabel")
-                                : t("admin.generateLabel")}
-                        </Button>
-
-                        {order.label_url ? (
-                          <a
-                            href={order.label_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="block text-sm text-accent hover:text-accent-light"
-                          >
-                            {t("admin.openLabel")}
-                          </a>
-                        ) : null}
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {address ? (
-                  <div className="rounded-xl bg-background-alt p-4 text-sm">
-                    <p className="mb-1 font-medium text-primary">
-                      {t("account.shippingAddress")}
-                    </p>
-                    <p className="text-muted">
-                      {address.fullName}
-                      <br />
-                      {address.line1}
-                      <br />
-                      {address.postalCode} {address.city}
-                      <br />
-                      {address.country}
-                    </p>
-                  </div>
-                ) : null}
-
-                {order.items?.length ? (
-                  <ul className="space-y-1 border-t border-border pt-3 text-sm text-muted">
-                    {order.items.map((item) => (
-                      <li key={`${order.id}-${item.slug}`} className="flex justify-between gap-3">
-                        <span>
-                          {item.name} × {item.quantity}
-                        </span>
-                        <span>
+                  return (
+                    <Fragment key={order.id}>
+                      <tr
+                        id={`order-${order.id}`}
+                        className={`border-t border-border ${
+                          focusOrderId === order.id || open
+                            ? "bg-accent/5"
+                            : "hover:bg-background-alt/60"
+                        }`}
+                      >
+                        <td className="whitespace-nowrap px-3 py-2 font-medium text-primary">
+                          #{order.id.slice(0, 8)}
+                        </td>
+                        <td className="max-w-[14rem] truncate px-3 py-2 text-muted">
+                          {order.shipping_address?.fullName
+                            ? `${order.shipping_address.fullName} · ${order.email}`
+                            : order.email}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-primary">
                           {formatPrice(
-                            item.unit_price * item.quantity,
+                            order.total,
                             order.currency || currency,
                             i18n.language,
                           )}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </article>
-            );
-          })}
-        </div>
+                        </td>
+                        <td className="px-3 py-2 text-muted">
+                          <span className="block whitespace-nowrap">
+                            {t(
+                              `checkout.methods.${order.payment_method}.label`,
+                            )}
+                          </span>
+                          <span className="text-xs">
+                            {t(
+                              `account.status.payment.${order.status}`,
+                            )}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <span
+                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${shippingBadgeClass(order.shipping_status)}`}
+                          >
+                            {t(
+                              `account.status.shipping.${order.shipping_status}`,
+                            )}
+                          </span>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-muted">
+                          {savedCarrier
+                            ? t(`admin.carriers.${savedCarrier}`)
+                            : "—"}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-muted">
+                          {new Intl.DateTimeFormat(
+                            toIntlLocale(i18n.language),
+                            { dateStyle: "short" },
+                          ).format(new Date(order.created_at))}
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <button
+                            type="button"
+                            className="text-sm text-accent hover:text-accent-light"
+                            onClick={() =>
+                              setExpandedId(open ? null : order.id)
+                            }
+                          >
+                            {open ? t("admin.collapse") : t("admin.details")}
+                          </button>
+                        </td>
+                      </tr>
+
+                      {open ? (
+                        <tr className="border-t border-border bg-background-alt/40">
+                          <td colSpan={8} className="px-3 py-3">
+                            <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
+                              <div className="space-y-2 text-sm text-muted">
+                                {order.shipping_address ? (
+                                  <p>
+                                    <span className="font-medium text-primary">
+                                      {order.shipping_address.fullName}
+                                    </span>
+                                    <br />
+                                    {order.shipping_address.line1}
+                                    <br />
+                                    {order.shipping_address.postalCode}{" "}
+                                    {order.shipping_address.city}
+                                    {order.shipping_address.phone ? (
+                                      <>
+                                        <br />
+                                        {order.shipping_address.phone}
+                                      </>
+                                    ) : null}
+                                  </p>
+                                ) : null}
+                                <ul className="space-y-1">
+                                  {order.items.map((item) => (
+                                    <li
+                                      key={`${order.id}-${item.slug}`}
+                                      className="flex justify-between gap-3"
+                                    >
+                                      <span>
+                                        {item.name} × {item.quantity}
+                                      </span>
+                                      <span>
+                                        {formatPrice(
+                                          item.unit_price * item.quantity,
+                                          order.currency || currency,
+                                          i18n.language,
+                                        )}
+                                      </span>
+                                    </li>
+                                  ))}
+                                </ul>
+                                {order.shipping_fee > 0 ? (
+                                  <p>
+                                    {t("admin.shippingFeeLine", {
+                                      amount: formatPrice(
+                                        order.shipping_fee,
+                                        order.currency || currency,
+                                        i18n.language,
+                                      ),
+                                    })}
+                                  </p>
+                                ) : null}
+                              </div>
+
+                              <div className="space-y-2 text-sm">
+                                <div className="flex flex-wrap gap-2">
+                                  {paid ? (
+                                    <Button
+                                      type="button"
+                                      variant="primary-outline"
+                                      size="md"
+                                      onClick={() => void openReceipt(order)}
+                                    >
+                                      {t("admin.previewReceipt")}
+                                    </Button>
+                                  ) : null}
+                                  {order.label_url ? (
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="md"
+                                      onClick={() =>
+                                        setPreview({
+                                          title: t("admin.labelPreviewTitle"),
+                                          url: order.label_url!,
+                                          subtitle: order.tracking_number,
+                                        })
+                                      }
+                                    >
+                                      {t("admin.previewLabel")}
+                                    </Button>
+                                  ) : null}
+                                </div>
+
+                                {order.tracking_number ? (
+                                  <p className="text-muted">
+                                    {t("admin.tracking")}:{" "}
+                                    <span className="text-primary">
+                                      {order.tracking_number}
+                                    </span>
+                                  </p>
+                                ) : savedCarrier &&
+                                  savedCarrier !== "pickup" ? (
+                                  <p className="text-muted">
+                                    {t("admin.labelPendingAuto")}
+                                  </p>
+                                ) : null}
+
+                                {savedCarrier === "pickup" ? (
+                                  <div className="flex flex-wrap gap-2">
+                                    {order.shipping_status === "preparing" ? (
+                                      <Button
+                                        type="button"
+                                        size="md"
+                                        pending={pendingId === order.id}
+                                        onClick={() =>
+                                          void updateShippingStatus(
+                                            order,
+                                            "shipped",
+                                          )
+                                        }
+                                      >
+                                        {t("admin.markPickupReady")}
+                                      </Button>
+                                    ) : null}
+                                    {order.shipping_status === "shipped" ||
+                                    order.shipping_status === "in_transit" ? (
+                                      <Button
+                                        type="button"
+                                        size="md"
+                                        pending={pendingId === order.id}
+                                        onClick={() =>
+                                          void updateShippingStatus(
+                                            order,
+                                            "delivered",
+                                          )
+                                        }
+                                      >
+                                        {t("admin.markPickupDone")}
+                                      </Button>
+                                    ) : null}
+                                  </div>
+                                ) : null}
+
+                                <details className="rounded-xl border border-border bg-background px-3 py-2">
+                                  <summary className="cursor-pointer text-muted">
+                                    {t("admin.advancedShipping")}
+                                  </summary>
+                                  <div className="mt-3 space-y-2">
+                                    <select
+                                      className="w-full rounded-xl border border-border bg-background px-3 py-2"
+                                      value={draftCarrier}
+                                      onChange={(e) =>
+                                        setDraftCarrierByOrder((prev) => ({
+                                          ...prev,
+                                          [order.id]: e.target
+                                            .value as ShippingCarrier,
+                                        }))
+                                      }
+                                    >
+                                      <option value="laposte">
+                                        {t("admin.carriers.laposte")}
+                                      </option>
+                                      <option value="mondial_relay">
+                                        {t("admin.carriers.mondial_relay")}
+                                      </option>
+                                      <option value="pickup">
+                                        {t("admin.carriers.pickup")}
+                                      </option>
+                                    </select>
+                                    {draftCarrier === "mondial_relay" ? (
+                                      <input
+                                        className="w-full rounded-xl border border-border bg-background px-3 py-2"
+                                        value={draftRelay}
+                                        onChange={(e) =>
+                                          setDraftRelayByOrder((prev) => ({
+                                            ...prev,
+                                            [order.id]: e.target.value,
+                                          }))
+                                        }
+                                        placeholder={t(
+                                          "admin.relayPlaceholder",
+                                        )}
+                                      />
+                                    ) : null}
+                                    {carrierDirty ? (
+                                      <Button
+                                        type="button"
+                                        variant="primary-outline"
+                                        size="md"
+                                        pending={pendingId === order.id}
+                                        onClick={() =>
+                                          void applyCarrierChange(order)
+                                        }
+                                      >
+                                        {t("admin.applyCarrierNotify")}
+                                      </Button>
+                                    ) : null}
+                                    {savedCarrier &&
+                                    savedCarrier !== "pickup" ? (
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="md"
+                                        pending={pendingId === order.id}
+                                        disabled={carrierDirty}
+                                        onClick={() => void createLabel(order)}
+                                      >
+                                        {t("admin.generateLabelManual")}
+                                      </Button>
+                                    ) : null}
+                                  </div>
+                                </details>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {pageCount > 1 ? (
+            <div className="flex items-center justify-between gap-3 text-sm">
+              <Button
+                type="button"
+                variant="ghost"
+                size="md"
+                disabled={pageSafe <= 0}
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+              >
+                {t("admin.prevPage")}
+              </Button>
+              <span className="text-muted">
+                {t("admin.pageOf", {
+                  page: pageSafe + 1,
+                  pages: pageCount,
+                })}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="md"
+                disabled={pageSafe >= pageCount - 1}
+                onClick={() =>
+                  setPage((p) => Math.min(pageCount - 1, p + 1))
+                }
+              >
+                {t("admin.nextPage")}
+              </Button>
+            </div>
+          ) : null}
+        </>
       )}
+
+      {preview ? (
+        <DocumentPreviewModal
+          title={preview.title}
+          url={preview.url}
+          subtitle={preview.subtitle}
+          onClose={closePreview}
+        />
+      ) : null}
     </main>
   );
 }

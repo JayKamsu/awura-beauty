@@ -328,9 +328,13 @@ create table if not exists public.push_subscriptions (
   fcm_token text not null unique,
   user_id uuid references auth.users (id) on delete set null,
   user_agent text not null default '',
+  is_admin boolean not null default false,
   created_at timestamptz not null default now(),
   last_seen_at timestamptz not null default now()
 );
+
+alter table public.push_subscriptions
+  add column if not exists is_admin boolean not null default false;
 
 alter table public.push_subscriptions enable row level security;
 

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { notifyShippingStatusChange } from "@/lib/application/notifications/order-notify";
 import { container } from "@/lib/application/container";
 import { requireAdminFromRequest } from "@/lib/infrastructure/supabase/admin-auth";
 import {
@@ -53,6 +54,14 @@ export async function POST(request: Request) {
           trackingNumber: order.tracking_number,
           labelUrl: order.label_url,
           relayPointId: order.relay_point_id,
+        });
+        await notifyShippingStatusChange({
+          userId: order.user_id,
+          orderId: order.id,
+          status: tracking.status,
+          previousStatus: order.shipping_status,
+          trackingNumber: order.tracking_number,
+          pickup: order.shipping_carrier === "pickup",
         });
         updated += 1;
       }

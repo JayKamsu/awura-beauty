@@ -8,12 +8,14 @@ export type PushSubscriptionRow = {
   fcm_token: string;
   user_id: string | null;
   user_agent: string;
+  is_admin: boolean;
 };
 
 export async function upsertPushSubscription(input: {
   token: string;
   userId?: string | null;
   userAgent?: string;
+  isAdmin?: boolean;
 }): Promise<{ ok: boolean; error?: string }> {
   // service_role pour upsert fiable (insert + update last_seen / user_id)
   const supabase = createAdminSupabaseClient() ?? createSupabaseClient();
@@ -25,6 +27,7 @@ export async function upsertPushSubscription(input: {
       fcm_token: input.token,
       user_id: input.userId ?? null,
       user_agent: input.userAgent ?? "",
+      is_admin: Boolean(input.isAdmin),
       last_seen_at: now,
     },
     { onConflict: "fcm_token" },
@@ -56,6 +59,21 @@ export async function listPushTokensForUser(userId: string): Promise<string[]> {
     .from("push_subscriptions")
     .select("fcm_token")
     .eq("user_id", userId);
+
+  if (error || !data) return [];
+  return data
+    .map((row) => String((row as { fcm_token: string }).fcm_token))
+    .filter(Boolean);
+}
+
+export async function listAdminPushTokens(): Promise<string[]> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("push_subscriptions")
+    .select("fcm_token")
+    .eq("is_admin", true);
 
   if (error || !data) return [];
   return data

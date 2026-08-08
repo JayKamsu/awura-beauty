@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -122,11 +122,13 @@ export function AccountPageContent() {
       </nav>
 
       <AccountProfileSection email={user.email ?? ""} memberSince={memberSince} />
-      <AccountOrdersSection
-        orders={orders}
-        ordersLoading={ordersLoading}
-        onOrdersChange={setOrders}
-      />
+      <Suspense fallback={<p className="text-muted">{t("account.ordersLoading")}</p>}>
+        <AccountOrdersSection
+          orders={orders}
+          ordersLoading={ordersLoading}
+          onOrdersChange={setOrders}
+        />
+      </Suspense>
       <AccountDiagnosticsSection />
       <AccountSecuritySection />
     </main>

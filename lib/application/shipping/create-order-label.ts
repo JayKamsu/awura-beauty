@@ -1,4 +1,5 @@
-import { notifyOrderUser } from "@/lib/connectors/firebase";
+import { notifyShippingStatusChange } from "@/lib/application/notifications/order-notify";
+import { resolvePrintableLabelUrl } from "@/lib/application/shipping/resolve-label-preview";
 import { createLaPosteLabel } from "@/lib/infrastructure/shipping/laposte";
 import { createMondialRelayLabel } from "@/lib/infrastructure/shipping/mondialrelay";
 import type { ShippingCarrier } from "@/lib/infrastructure/shipping/types";
@@ -60,29 +61,35 @@ export async function createOrderShippingLabel(input: {
             relayPointId,
           });
 
+    const printableUrl = await resolvePrintableLabelUrl({
+      orderId: order.id,
+      labelUrl: label.labelUrl,
+      labelBase64: label.labelBase64,
+    });
+
     await updateOrderShipping(order.id, {
       shippingStatus: "shipped",
       shippingCarrier: label.carrier,
       trackingNumber: label.trackingNumber,
-      labelUrl: label.labelUrl,
+      labelUrl: printableUrl,
       relayPointId: relayPointId ?? null,
     });
 
     if (input.notify !== false) {
-      await notifyOrderUser({
+      await notifyShippingStatusChange({
         userId: order.user_id,
-        title: "Commande expédiée",
-        body: label.trackingNumber
-          ? `Votre colis est en route (suivi : ${label.trackingNumber}).`
-          : "Votre colis Awura Beauty est en route.",
-        link: "/compte#commandes",
+        orderId: order.id,
+        status: "shipped",
+        previousStatus: order.shipping_status,
+        trackingNumber: label.trackingNumber,
+        pickup: false,
       });
     }
 
     return {
       ok: true,
       trackingNumber: label.trackingNumber,
-      labelUrl: label.labelUrl,
+      labelUrl: printableUrl,
       carrier: label.carrier,
     };
   } catch (error) {

@@ -44,7 +44,7 @@
     "relayTitle": "Choisir un Point Relais",
     "relayHint": "Les Points Relais proches de ton code postal s'affichent automatiquement.",
     "relayLoading": "Recherche des Points Relais…",
-    "relaySearchError": "Impossible de charger les Points Relais.",
+    "relaySearchError": "Impossible de charger les Points Relais. Vérifie le code postal ou réessaie.",
     "relayEmpty": "Aucun Point Relais trouvé pour ce code postal.",
     "relayDemo": "Mode démo (clés Mondial Relay absentes)",
     "relayCode": "Code {{id}}",

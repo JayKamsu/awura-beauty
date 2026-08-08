@@ -3,7 +3,8 @@
     "freeShipping": "Free shipping on orders over €80"
   },
   "common": {
-    "close": "Close"
+    "close": "Close",
+    "openInNewTab": "Open in new tab"
   },
   "nav": {
     "home": "Home",

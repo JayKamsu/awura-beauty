@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { notifyShippingStatusChange } from "@/lib/application/notifications/order-notify";
 import { container } from "@/lib/application/container";
 import { getUserFromAccessToken } from "@/lib/infrastructure/supabase/admin-auth";
 import { createAdminSupabaseClient } from "@/lib/infrastructure/supabase/client";
@@ -95,12 +96,24 @@ export async function GET(request: Request) {
       order.tracking_number,
     );
 
+    const previousStatus = order.shipping_status;
     await container.orders.updateOrderShipping(order.id, {
       shippingStatus: tracking.status,
       shippingCarrier: tracking.carrier,
       trackingNumber: tracking.trackingNumber,
       labelUrl: order.label_url,
     });
+
+    if (tracking.status !== previousStatus) {
+      await notifyShippingStatusChange({
+        userId: order.user_id,
+        orderId: order.id,
+        status: tracking.status,
+        previousStatus,
+        trackingNumber: tracking.trackingNumber,
+        pickup: order.shipping_carrier === "pickup",
+      });
+    }
 
     return NextResponse.json({
       orderId: order.id,

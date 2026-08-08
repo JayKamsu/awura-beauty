@@ -15,9 +15,14 @@
       "title": "Reste informée",
       "body": "Active les notifications pour les offres et le suivi de commande.",
       "enable": "Activer",
+      "enableShort": "Notifications",
+      "enabled": "Notifications activées",
       "enabling": "Activation…",
       "later": "Plus tard",
-      "guestHint": "Tu peux aussi t’abonner sans compte."
+      "guestHint": "Tu peux aussi t’abonner sans compte.",
+      "blocked": "Notifications bloquées",
+      "blockedTitle": "Notifications bloquées",
+      "blockedBody": "Autorise les notifications Awura Beauty dans les paramètres de ton navigateur."
     }
   }
 }

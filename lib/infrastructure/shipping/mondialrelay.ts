@@ -22,18 +22,35 @@ import {
 } from "@/lib/infrastructure/shipping/types";
 
 function getConfig() {
+  const enseigneRaw = (process.env.MONDIAL_RELAY_ENSEIGNE ?? "").trim();
+  // Enseigne MR = 8 caractères (padding espaces à droite si besoin)
+  const enseigne = enseigneRaw
+    ? enseigneRaw.toUpperCase().padEnd(8, " ").slice(0, 8)
+    : "";
   return {
-    enseigne: process.env.MONDIAL_RELAY_ENSEIGNE,
-    privateKey: process.env.MONDIAL_RELAY_PRIVATE_KEY,
-    brandCode: process.env.MONDIAL_RELAY_BRAND_CODE ?? "11",
+    enseigne,
+    privateKey: (process.env.MONDIAL_RELAY_PRIVATE_KEY ?? "").trim(),
+    brandCode: (process.env.MONDIAL_RELAY_BRAND_CODE ?? "11").trim(),
     wsdlUrl:
-      process.env.MONDIAL_RELAY_WSDL_URL ??
+      process.env.MONDIAL_RELAY_WSDL_URL?.trim() ||
       "https://api.mondialrelay.com/WebService.asmx",
   };
 }
 
 function md5(value: string) {
   return createHash("md5").update(value, "utf8").digest("hex").toUpperCase();
+}
+
+/** Message lisible pour les codes STAT Mondial Relay. */
+export function mondialRelayStatMessage(stat: string): string {
+  const messages: Record<string, string> = {
+    "97": "Clé de sécurité invalide (vérifie enseigne / clé privée / signature)",
+    "95": "Compte marchand non activé",
+    "92": "Enseigne invalide",
+    "93": "Code postal introuvable",
+    "80": "Colis enregistré",
+  };
+  return messages[stat] ?? `Erreur Mondial Relay (STAT=${stat})`;
 }
 
 function splitName(fullName: string) {
@@ -220,36 +237,46 @@ export async function searchMondialRelayPoints(input: {
 
   const config = getConfig();
   const country = (input.country || "FR").toUpperCase().slice(0, 2);
-  const city = (input.city ?? "").trim();
+  // Recherche par CP uniquement : plus fiable (évite écarts d’encodage ville / accents)
+  const city = "";
   const limit = String(Math.min(Math.max(input.limit ?? 12, 1), 30));
 
   if (!config.enseigne || !config.privateKey) {
     return {
-      points: buildMockRelayPoints(postalCode, city || "Ville", country),
+      points: buildMockRelayPoints(
+        postalCode,
+        (input.city ?? "").trim() || "Ville",
+        country,
+      ),
       error: null,
     };
   }
 
   const lang = "FR";
   const rayon = "20";
+  const delaiEnvoi = "0";
+  /**
+   * Signature officielle WSI4 (sans NACE ni Langue) :
+   * Enseigne + Pays + NumPointRelais + Ville + CP + Latitude + Longitude +
+   * Taille + Poids + Action + DelaiEnvoi + RayonRecherche + TypeActivite +
+   * NombreResultats + CLE_PRIVEE
+   */
   const security = md5(
     [
       config.enseigne,
       country,
-      "",
+      "", // NumPointRelais
       city,
       postalCode,
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
+      "", // Latitude
+      "", // Longitude
+      "", // Taille
+      "", // Poids
+      "", // Action
+      delaiEnvoi,
       rayon,
-      "",
-      "",
+      "", // TypeActivite
       limit,
-      lang,
       config.privateKey,
     ].join(""),
   );
@@ -261,19 +288,17 @@ export async function searchMondialRelayPoints(input: {
       <Enseigne>${escapeXml(config.enseigne)}</Enseigne>
       <Pays>${escapeXml(country)}</Pays>
       <NumPointRelais></NumPointRelais>
-      <Ville>${escapeXml(city)}</Ville>
+      <Ville></Ville>
       <CP>${escapeXml(postalCode)}</CP>
       <Latitude></Latitude>
       <Longitude></Longitude>
       <Taille></Taille>
       <Poids></Poids>
       <Action></Action>
-      <DelaiEnvoi></DelaiEnvoi>
+      <DelaiEnvoi>${delaiEnvoi}</DelaiEnvoi>
       <RayonRecherche>${rayon}</RayonRecherche>
       <TypeActivite></TypeActivite>
-      <NACE></NACE>
       <NombreResultats>${limit}</NombreResultats>
-      <Langue>${lang}</Langue>
       <Security>${security}</Security>
     </WSI4_PointRelais_Recherche>
   </soap:Body>
@@ -302,7 +327,7 @@ export async function searchMondialRelayPoints(input: {
     if (stat && stat !== "0") {
       return {
         points: [],
-        error: `Mondial Relay rejected search (STAT=${stat})`,
+        error: mondialRelayStatMessage(stat),
       };
     }
 

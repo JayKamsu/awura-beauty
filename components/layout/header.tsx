@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAdminAccess } from "@/features/admin/hooks/use-admin-access";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { useCart } from "@/features/cart/context/cart-provider";
+import { PushNotificationButton } from "@/features/notifications/components/push-notification-button";
 import {
   isNavActive,
   MAIN_NAV_ITEMS,
@@ -123,6 +124,8 @@ export function Header() {
               </HeaderIcon>
             )}
           </span>
+
+          <PushNotificationButton hrefWhenEnabled="/compte#commandes" />
 
           <HeaderIcon href="/recherche" label={t("header.search")}>
             <circle cx="11" cy="11" r="6.5" />

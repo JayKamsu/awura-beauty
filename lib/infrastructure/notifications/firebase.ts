@@ -10,11 +10,19 @@ import {
   getFirebaseMessaging,
   isFirebaseAdminConfigured,
 } from "@/lib/infrastructure/notifications/firebase-admin";
+import { absoluteUrl } from "@/lib/site";
 import {
   deletePushTokens,
+  listAdminPushTokens,
   listAllPushTokens,
   listPushTokensForUser,
 } from "@/lib/infrastructure/supabase/push-subscriptions";
+
+function resolveLink(link?: string): string | undefined {
+  if (!link) return undefined;
+  if (link.startsWith("http://") || link.startsWith("https://")) return link;
+  return absoluteUrl(link.startsWith("/") ? link : `/${link}`);
+}
 
 async function resolveTokens(payload: NotificationPayload): Promise<string[]> {
   if (payload.userId) {
@@ -22,6 +30,15 @@ async function resolveTokens(payload: NotificationPayload): Promise<string[]> {
   }
   if (payload.data?.token) {
     return [payload.data.token];
+  }
+  if (payload.data?.tokens) {
+    return payload.data.tokens
+      .split(",")
+      .map((token) => token.trim())
+      .filter(Boolean);
+  }
+  if (payload.data?.audience === "admin") {
+    return listAdminPushTokens();
   }
   if (payload.data?.broadcast === "true") {
     return listAllPushTokens();
@@ -59,14 +76,17 @@ export const firebaseNotificationAdapter: NotificationPort = {
       return { ok: true };
     }
 
-    const link = payload.data?.link;
+    const link = resolveLink(payload.data?.link);
+    const data: Record<string, string> = { ...(payload.data ?? {}) };
+    if (link) data.link = link;
+
     const response = await messaging.sendEachForMulticast({
       tokens,
       notification: {
         title: payload.title,
         body: payload.body,
       },
-      data: payload.data,
+      data,
       webpush: link
         ? {
             fcmOptions: { link },
@@ -130,11 +150,29 @@ export async function notifyOrderUser(input: {
   link?: string;
 }): Promise<void> {
   if (!input.userId) return;
+  const link = resolveLink(input.link);
   await firebaseNotificationAdapter.send({
     userId: input.userId,
     title: input.title,
     body: input.body,
     channel: "push",
-    data: input.link ? { link: input.link } : undefined,
+    data: link ? { link } : undefined,
+  });
+}
+
+export async function notifyAdminUsers(input: {
+  title: string;
+  body: string;
+  link?: string;
+}): Promise<void> {
+  const link = resolveLink(input.link);
+  await firebaseNotificationAdapter.send({
+    title: input.title,
+    body: input.body,
+    channel: "push",
+    data: {
+      audience: "admin",
+      ...(link ? { link } : {}),
+    },
   });
 }

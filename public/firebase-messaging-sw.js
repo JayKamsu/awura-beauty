@@ -18,10 +18,11 @@ function initMessaging(config) {
   const messaging = firebase.messaging();
   messaging.onBackgroundMessage((payload) => {
     const title = payload.notification?.title || "Awura Beauty";
+    const link = payload.data?.link || "/";
     const options = {
       body: payload.notification?.body || "",
       icon: "/favicon.png",
-      data: payload.data || {},
+      data: { ...(payload.data || {}), link },
     };
     self.registration.showNotification(title, options);
   });
@@ -42,6 +43,29 @@ self.addEventListener("message", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const link = event.notification.data?.link || "/";
-  event.waitUntil(self.clients.openWindow(link));
+  const raw = event.notification.data?.link || "/";
+  const targetUrl = new URL(raw, self.location.origin).href;
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        for (const client of clientList) {
+          if (client.url.startsWith(self.location.origin) && "focus" in client) {
+            if (typeof client.navigate === "function") {
+              return client.navigate(targetUrl).then((navigated) => {
+                return navigated ? navigated.focus() : client.focus();
+              });
+            }
+            return client.focus().then(() => {
+              client.postMessage({ type: "NOTIFICATION_NAVIGATE", url: targetUrl });
+            });
+          }
+        }
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(targetUrl);
+        }
+        return undefined;
+      }),
+  );
 });
