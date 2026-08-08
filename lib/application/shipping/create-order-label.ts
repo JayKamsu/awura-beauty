@@ -26,6 +26,9 @@ export async function createOrderShippingLabel(input: {
 }): Promise<CreateOrderLabelResult> {
   const order = await getOrderById(input.orderId);
   if (!order) return { ok: false, error: "Order not found" };
+  if (input.carrier === "pickup") {
+    return { ok: false, error: "Pickup orders do not need a shipping label" };
+  }
   if (!order.shipping_address) {
     return { ok: false, error: "Order has no shipping address" };
   }
@@ -106,7 +109,7 @@ export async function maybeAutoCreateLabelAfterPaid(
   if (order.tracking_number) return;
 
   const carrier = order.shipping_carrier;
-  if (!carrier) return;
+  if (!carrier || carrier === "pickup") return;
   if (carrier === "mondial_relay" && !order.relay_point_id) return;
 
   await createOrderShippingLabel({

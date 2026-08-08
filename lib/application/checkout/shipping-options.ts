@@ -5,14 +5,19 @@ type ShippingBody = {
   relayPointId?: string | null;
   shippingAddress?: {
     phone?: string;
+    fullName?: string;
   };
 };
+
+const CARRIERS: ShippingCarrier[] = ["laposte", "mondial_relay", "pickup"];
 
 export function resolveCheckoutShipping(body: ShippingBody):
   | { ok: true; shippingCarrier: ShippingCarrier; relayPointId: string | null }
   | { ok: false; error: string } {
-  const shippingCarrier: ShippingCarrier =
-    body.shippingCarrier === "mondial_relay" ? "mondial_relay" : "laposte";
+  const raw = String(body.shippingCarrier ?? "laposte");
+  const shippingCarrier = (
+    CARRIERS.includes(raw as ShippingCarrier) ? raw : "laposte"
+  ) as ShippingCarrier;
 
   const relayPointId =
     shippingCarrier === "mondial_relay"
@@ -24,10 +29,14 @@ export function resolveCheckoutShipping(body: ShippingBody):
   }
 
   if (
-    shippingCarrier === "mondial_relay" &&
+    (shippingCarrier === "mondial_relay" || shippingCarrier === "pickup") &&
     !String(body.shippingAddress?.phone ?? "").trim()
   ) {
-    return { ok: false, error: "Phone required for Mondial Relay" };
+    return { ok: false, error: "Phone required" };
+  }
+
+  if (!String(body.shippingAddress?.fullName ?? "").trim()) {
+    return { ok: false, error: "Name required" };
   }
 
   return { ok: true, shippingCarrier, relayPointId };

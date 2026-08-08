@@ -25,6 +25,10 @@ export function AccountProfileSection({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [city, setCity] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [country, setCountry] = useState("FR");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +41,10 @@ export function AccountProfileSection({
       setFirstName(data?.first_name ?? "");
       setLastName(data?.last_name ?? "");
       setPhone(data?.phone ?? "");
+      setAddressLine1(data?.address_line1 ?? "");
+      setCity(data?.city ?? "");
+      setPostalCode(data?.postal_code ?? "");
+      setCountry(data?.country || "FR");
       setLoading(false);
     });
     return () => {
@@ -53,6 +61,10 @@ export function AccountProfileSection({
         first_name: firstName,
         last_name: lastName,
         phone,
+        address_line1: addressLine1,
+        city,
+        postal_code: postalCode,
+        country,
       });
       if (result.error || !result.profile) {
         setError(result.error ?? t("account.profileSaveError"));
@@ -112,6 +124,42 @@ export function AccountProfileSection({
               type="tel"
             />
           </label>
+          <label className="block space-y-1.5 text-sm sm:col-span-2">
+            <span className="text-muted">{t("account.profileAddress")}</span>
+            <input
+              className={fieldClass}
+              value={addressLine1}
+              onChange={(e) => setAddressLine1(e.target.value)}
+              autoComplete="street-address"
+            />
+          </label>
+          <label className="block space-y-1.5 text-sm">
+            <span className="text-muted">{t("account.profileCity")}</span>
+            <input
+              className={fieldClass}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              autoComplete="address-level2"
+            />
+          </label>
+          <label className="block space-y-1.5 text-sm">
+            <span className="text-muted">{t("account.profilePostalCode")}</span>
+            <input
+              className={fieldClass}
+              value={postalCode}
+              onChange={(e) => setPostalCode(e.target.value)}
+              autoComplete="postal-code"
+            />
+          </label>
+          <label className="block space-y-1.5 text-sm sm:col-span-2">
+            <span className="text-muted">{t("account.profileCountry")}</span>
+            <input
+              className={fieldClass}
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              autoComplete="country"
+            />
+          </label>
           {error ? (
             <p className="text-sm text-accent sm:col-span-2" role="alert">
               {error}
@@ -128,7 +176,10 @@ export function AccountProfileSection({
             </Button>
           </div>
           {profile?.updated_at &&
-          (profile.first_name || profile.last_name || profile.phone) ? (
+          (profile.first_name ||
+            profile.last_name ||
+            profile.phone ||
+            profile.address_line1) ? (
             <p className="text-xs text-muted sm:col-span-2">
               {t("account.profileUpdatedAt", {
                 date: new Intl.DateTimeFormat(undefined, {

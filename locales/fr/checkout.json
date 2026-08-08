@@ -3,7 +3,13 @@
     "title": "Commande",
     "emptyCart": "Ajoute des produits avant de commander.",
     "shipping": "Adresse",
+    "contact": "Coordonnées",
     "shippingMethod": "Mode de livraison",
+    "shippingFee": "Livraison",
+    "shippingFree": "Offerte",
+    "freeShippingApplied": "Livraison offerte (seuil atteint).",
+    "total": "Total",
+    "pickupNotice": "Tu viendras récupérer ta commande sur place. Indique un téléphone pour être contacté(e).",
     "payment": "Paiement",
     "summary": "Récapitulatif",
     "email": "E-mail",
@@ -16,16 +22,23 @@
     "loading": "Préparation…",
     "payStripe": "Payer avec Stripe",
     "preparePaypal": "Continuer avec PayPal",
+    "payManual": "Commander sans paiement (test)",
+    "manualNotice": "Stripe et PayPal ne sont pas encore configurés. Tu peux commander en mode test : la commande sera confirmée et le suivi livraison (étiquette) suivra le processus normal.",
     "paymentError": "Le paiement n'a pas pu être démarré. Vérifie la configuration.",
     "paypalNotConfigured": "PayPal n'est pas configuré (NEXT_PUBLIC_PAYPAL_CLIENT_ID manquant).",
+    "stripeNotConfigured": "Stripe n'est pas configuré (NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY manquant).",
     "carriers": {
       "laposte": {
-        "label": "La Poste — domicile",
-        "hint": "Livraison à l'adresse indiquée"
+        "label": "Colissimo — domicile",
+        "hint": "Confie à La Poste, réception à ton adresse"
       },
       "mondial_relay": {
         "label": "Mondial Relay — Point Relais",
         "hint": "Retrait dans un Point Relais près de chez toi"
+      },
+      "pickup": {
+        "label": "Retrait sur place",
+        "hint": "Tu viens chercher ta commande toi-même"
       }
     },
     "relayTitle": "Choisir un Point Relais",
@@ -38,7 +51,19 @@
     "relayMap": "Carte",
     "relaySelected": "Point Relais sélectionné : {{id}}",
     "relayRequired": "Sélectionne un Point Relais pour continuer.",
+    "authLoading": "Vérification de ta connexion…",
+    "profileLoading": "Chargement de ton adresse…",
+    "addressFromProfile": "Adresse enregistrée dans ton profil.",
+    "editAddress": "Modifier",
+    "useSavedAddress": "Utiliser l’adresse enregistrée",
+    "addressRequired": "Complète ton adresse de livraison.",
+    "phoneRequired": "Le téléphone est obligatoire pour Mondial Relay.",
+    "phoneRequiredPickup": "Le téléphone est obligatoire pour le retrait sur place.",
     "methods": {
+      "manual": {
+        "label": "Commande test",
+        "hint": "Sans Stripe / PayPal — pour valider le parcours"
+      },
       "stripe": {
         "label": "Stripe",
         "hint": "Carte bancaire sécurisée"

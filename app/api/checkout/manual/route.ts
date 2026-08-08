@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
+import { markOrderPaid } from "@/lib/application/checkout/mark-order-paid";
+import { isLivePaymentConfigured } from "@/lib/application/checkout/payments-configured";
 import { resolveOrderItemsFromCatalog } from "@/lib/application/checkout/resolve-order-items";
 import { userIdFromRequest } from "@/lib/application/checkout/request-user";
 import { resolveCheckoutShipping } from "@/lib/application/checkout/shipping-options";
-import { createPayPalOrder } from "@/lib/infrastructure/payments/paypal";
 import { createOrder } from "@/lib/infrastructure/supabase/orders";
 
-type PayPalCreateBody = {
+type ManualCheckoutBody = {
   email: string;
   currency: string;
   items: Array<{ slug?: string; quantity?: number }>;
@@ -23,7 +24,22 @@ type PayPalCreateBody = {
 };
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as PayPalCreateBody;
+  if (isLivePaymentConfigured()) {
+    return NextResponse.json(
+      {
+        error:
+          "Manual checkout disabled: Stripe or PayPal is configured",
+      },
+      { status: 403 },
+    );
+  }
+
+  const userId = await userIdFromRequest(request);
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = (await request.json()) as ManualCheckoutBody;
 
   if (!body.email || !body.items?.length || !body.shippingAddress) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
@@ -45,9 +61,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const userId = await userIdFromRequest(request);
-  const currency = body.currency || "EUR";
-  const shippingAddress =
+  const address =
     shipping.shippingCarrier === "pickup"
       ? {
           ...body.shippingAddress,
@@ -59,10 +73,10 @@ export async function POST(request: Request) {
 
   const { order, error } = await createOrder({
     email: body.email,
-    paymentMethod: "paypal",
-    currency,
+    paymentMethod: "manual",
+    currency: body.currency || "EUR",
     items: resolved.items,
-    shippingAddress,
+    shippingAddress: address,
     paymentStatus: "pending",
     status: "pending",
     userId,
@@ -72,26 +86,26 @@ export async function POST(request: Request) {
     total: resolved.total,
   });
 
-  const orderId = order?.id ?? `demo-${Date.now()}`;
-
-  if (!order && error !== "Supabase is not configured") {
-    return NextResponse.json({ error: error ?? "Order failed" }, { status: 500 });
-  }
-
-  const paypal = await createPayPalOrder({
-    orderId,
-    amount: {
-      currencyCode: currency,
-      value: resolved.total.toFixed(2),
-    },
-  });
-
-  if (!paypal.id) {
+  if (!order) {
     return NextResponse.json(
-      { error: paypal.error ?? "PayPal unavailable" },
+      { error: error ?? "Order failed" },
       { status: 500 },
     );
   }
 
-  return NextResponse.json({ paypalOrderId: paypal.id, orderId });
+  const paid = await markOrderPaid(order.id);
+  if (!paid) {
+    return NextResponse.json(
+      { error: "Order created but payment confirmation failed", orderId: order.id },
+      { status: 500 },
+    );
+  }
+
+  return NextResponse.json({
+    ok: true,
+    orderId: order.id,
+    paymentMethod: "manual",
+    shippingFee: resolved.shippingFee,
+    total: resolved.total,
+  });
 }

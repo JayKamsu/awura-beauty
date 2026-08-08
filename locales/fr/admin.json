@@ -30,14 +30,14 @@
     "carrier": "Transporteur",
     "relayPoint": "Code Point Relais",
     "generateLabel": "Générer l'étiquette",
-    "generateLaPosteLabel": "Générer étiquette La Poste",
+    "generateLaPosteLabel": "Générer étiquette Colissimo",
     "regenerateLabel": "Régénérer l'étiquette",
     "generating": "Génération…",
     "openLabel": "Ouvrir l'étiquette / suivi",
     "tracking": "Suivi",
     "labelSuccess": "Étiquette créée — suivi {{tracking}}",
     "labelError": "Impossible de générer l'étiquette",
-    "autoLabelHint": "Après paiement, l'étiquette est générée automatiquement si le client a choisi La Poste ou un Point Relais. Tu peux aussi générer / synchroniser manuellement ici.",
+    "autoLabelHint": "Après paiement, l'étiquette est générée automatiquement si le client a choisi Colissimo ou un Point Relais (pas pour le retrait sur place). Tu peux aussi générer / synchroniser manuellement ici.",
     "clientShippingChoice": "Choix client : {{carrier}} · Relais {{relay}}",
     "syncTracking": "Synchroniser les suivis",
     "syncTrackingLoading": "Synchronisation…",
@@ -100,12 +100,22 @@
       "dashboard": "Dashboard",
       "products": "Produits",
       "orders": "Commandes",
+      "shipping": "Livraison",
       "content": "Contenu",
       "pages": "Pages",
       "customers": "Clients",
       "notifications": "Notifications",
       "messages": "Messages"
     },
+    "shippingTitle": "Tarifs de livraison",
+    "shippingSubtitle": "Base Colissimo / Mondial Relay, seuil de gratuité, et retrait sur place.",
+    "shippingHint": "Total livraison = frais de base + somme des frais produit (sauf retrait = 0). Si le panier atteint le seuil, la livraison est offerte.",
+    "shippingEnabled": "Activé au checkout",
+    "shippingBaseFee": "Frais de base (€)",
+    "shippingFreeMin": "Livraison offerte dès (€)",
+    "shippingFeeLine": "Dont livraison : {{amount}}",
+    "pickupNoLabel": "Retrait sur place — pas d’étiquette à générer.",
+    "save": "Enregistrer",
     "pages": {
       "save": "Enregistrer la page",
       "moveUp": "Monter",
@@ -179,6 +189,7 @@
       "name": "Nom",
       "slug": "Slug",
       "price": "Prix",
+      "shipping_fee": "Supplément livraison (€ / unité)",
       "stock": "Stock",
       "short_description": "Description courte",
       "description": "Description",
@@ -199,8 +210,9 @@
       "email": "E-mail"
     },
     "carriers": {
-      "laposte": "La Poste / Colissimo",
-      "mondial_relay": "Mondial Relay"
+      "laposte": "Colissimo (domicile)",
+      "mondial_relay": "Mondial Relay",
+      "pickup": "Retrait sur place"
     }
   }
 }

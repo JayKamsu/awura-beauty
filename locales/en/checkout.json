@@ -3,7 +3,13 @@
     "title": "Checkout",
     "emptyCart": "Add products before checking out.",
     "shipping": "Address",
+    "contact": "Contact details",
     "shippingMethod": "Shipping method",
+    "shippingFee": "Shipping",
+    "shippingFree": "Free",
+    "freeShippingApplied": "Free shipping (threshold reached).",
+    "total": "Total",
+    "pickupNotice": "You’ll pick up your order in person. Please provide a phone number so we can reach you.",
     "payment": "Payment",
     "summary": "Summary",
     "email": "Email",
@@ -16,16 +22,23 @@
     "loading": "Preparing…",
     "payStripe": "Pay with Stripe",
     "preparePaypal": "Continue with PayPal",
+    "payManual": "Place order without payment (test)",
+    "manualNotice": "Stripe and PayPal are not configured yet. You can place a test order: it will be confirmed and shipping (label) will follow the normal process.",
     "paymentError": "Payment could not be started. Check configuration.",
     "paypalNotConfigured": "PayPal is not configured (missing NEXT_PUBLIC_PAYPAL_CLIENT_ID).",
+    "stripeNotConfigured": "Stripe is not configured (missing NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY).",
     "carriers": {
       "laposte": {
-        "label": "La Poste — home delivery",
-        "hint": "Delivered to the address below"
+        "label": "Colissimo — home delivery",
+        "hint": "Handed to La Poste, delivered to your address"
       },
       "mondial_relay": {
         "label": "Mondial Relay — Parcel shop",
         "hint": "Pick up at a nearby Parcel shop"
+      },
+      "pickup": {
+        "label": "Store pickup",
+        "hint": "Come collect your order yourself"
       }
     },
     "relayTitle": "Choose a Parcel shop",
@@ -38,7 +51,19 @@
     "relayMap": "Map",
     "relaySelected": "Selected Parcel shop: {{id}}",
     "relayRequired": "Select a Parcel shop to continue.",
+    "authLoading": "Checking your session…",
+    "profileLoading": "Loading your address…",
+    "addressFromProfile": "Address saved in your profile.",
+    "editAddress": "Edit",
+    "useSavedAddress": "Use saved address",
+    "addressRequired": "Please complete your shipping address.",
+    "phoneRequired": "Phone is required for Mondial Relay.",
+    "phoneRequiredPickup": "Phone is required for store pickup.",
     "methods": {
+      "manual": {
+        "label": "Test order",
+        "hint": "Without Stripe / PayPal — to validate the flow"
+      },
       "stripe": {
         "label": "Stripe",
         "hint": "Secure card payment"

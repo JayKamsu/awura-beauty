@@ -1,5 +1,11 @@
 import { getProductsBySlugs } from "@/lib/infrastructure/supabase/products";
 import type { OrderItem } from "@/lib/infrastructure/supabase/order-types";
+import type { ShippingCarrier } from "@/lib/infrastructure/supabase/order-types";
+import {
+  productLinesForQuote,
+  quoteShipping,
+  type ShippingQuote,
+} from "@/lib/application/checkout/quote-shipping";
 
 export type CartLineInput = {
   slug?: string;
@@ -8,15 +14,31 @@ export type CartLineInput = {
 
 const MAX_QTY = 20;
 
+export type ResolveCartResult = {
+  items: OrderItem[];
+  subtotal: number;
+  shippingFee: number;
+  total: number;
+  quote: ShippingQuote | null;
+  error: string | null;
+};
+
 /**
- * Reconstruit les lignes de commande depuis le catalogue (prix serveur).
- * Ignore unit_price / name / image envoyés par le client.
+ * Reconstruit les lignes + total (produits + livraison) depuis le catalogue.
  */
 export async function resolveOrderItemsFromCatalog(
   lines: CartLineInput[],
-): Promise<{ items: OrderItem[]; total: number; error: string | null }> {
+  carrier?: ShippingCarrier,
+): Promise<ResolveCartResult> {
   if (!Array.isArray(lines) || lines.length === 0) {
-    return { items: [], total: 0, error: "Cart is empty" };
+    return {
+      items: [],
+      subtotal: 0,
+      shippingFee: 0,
+      total: 0,
+      quote: null,
+      error: "Cart is empty",
+    };
   }
 
   const normalized = lines
@@ -27,14 +49,24 @@ export async function resolveOrderItemsFromCatalog(
     .filter((line) => line.slug && line.quantity > 0);
 
   if (!normalized.length) {
-    return { items: [], total: 0, error: "Invalid cart lines" };
+    return {
+      items: [],
+      subtotal: 0,
+      shippingFee: 0,
+      total: 0,
+      quote: null,
+      error: "Invalid cart lines",
+    };
   }
 
   for (const line of normalized) {
     if (line.quantity > MAX_QTY) {
       return {
         items: [],
+        subtotal: 0,
+        shippingFee: 0,
         total: 0,
+        quote: null,
         error: `Quantity too high for ${line.slug}`,
       };
     }
@@ -48,12 +80,22 @@ export async function resolveOrderItemsFromCatalog(
   for (const line of normalized) {
     const product = bySlug.get(line.slug);
     if (!product) {
-      return { items: [], total: 0, error: `Unknown product: ${line.slug}` };
+      return {
+        items: [],
+        subtotal: 0,
+        shippingFee: 0,
+        total: 0,
+        quote: null,
+        error: `Unknown product: ${line.slug}`,
+      };
     }
     if (product.stock < line.quantity) {
       return {
         items: [],
+        subtotal: 0,
+        shippingFee: 0,
         total: 0,
+        quote: null,
         error: `Insufficient stock for ${product.slug}`,
       };
     }
@@ -67,10 +109,44 @@ export async function resolveOrderItemsFromCatalog(
     });
   }
 
-  const total = items.reduce(
-    (sum, item) => sum + item.unit_price * item.quantity,
-    0,
-  );
+  const subtotal = Math.round(
+    items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0) * 100,
+  ) / 100;
 
-  return { items, total: Math.round(total * 100) / 100, error: null };
+  if (!carrier) {
+    return {
+      items,
+      subtotal,
+      shippingFee: 0,
+      total: subtotal,
+      quote: null,
+      error: null,
+    };
+  }
+
+  const quote = await quoteShipping({
+    carrier,
+    subtotal,
+    lines: productLinesForQuote(products, normalized),
+  });
+
+  if ("error" in quote) {
+    return {
+      items,
+      subtotal,
+      shippingFee: 0,
+      total: subtotal,
+      quote: null,
+      error: quote.error,
+    };
+  }
+
+  return {
+    items,
+    subtotal: quote.subtotal,
+    shippingFee: quote.shippingFee,
+    total: quote.total,
+    quote,
+    error: null,
+  };
 }

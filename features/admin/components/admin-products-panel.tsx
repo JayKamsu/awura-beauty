@@ -29,6 +29,7 @@ const emptyForm = {
   category: "soin",
   is_new: false,
   stock: 10,
+  shipping_fee: 0,
 };
 
 const fieldClass =
@@ -105,6 +106,7 @@ export function AdminProductsPanel() {
       category: form.category,
       is_new: form.is_new,
       stock: Number(form.stock),
+      shipping_fee: Number(form.shipping_fee) || 0,
     };
 
     const response = await adminFetch("/api/admin/products", {
@@ -139,6 +141,7 @@ export function AdminProductsPanel() {
       category: product.category,
       is_new: product.is_new,
       stock: product.stock,
+      shipping_fee: product.shipping_fee ?? 0,
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -175,6 +178,7 @@ export function AdminProductsPanel() {
               ["name", "text"],
               ["slug", "text"],
               ["price", "number"],
+              ["shipping_fee", "number"],
               ["stock", "number"],
               ["short_description", "text"],
               ["image_url", "text"],

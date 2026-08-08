@@ -4,14 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/features/cart/context/cart-provider";
 import { usePreferences } from "@/components/providers/preferences-provider";
+import { useAuth } from "@/features/auth/context/auth-provider";
+import { useCart } from "@/features/cart/context/cart-provider";
 import { formatPrice } from "@/lib/format/price";
 
 export function CartPageContent() {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();
+  const { user, loading: authLoading } = useAuth();
   const { items, subtotal, setQuantity, removeItem, itemCount } = useCart();
+
+  const checkoutHref = user
+    ? "/commande"
+    : `/compte/connexion?redirect=${encodeURIComponent("/commande")}`;
 
   if (itemCount === 0) {
     return (
@@ -89,9 +95,12 @@ export function CartPageContent() {
           <p className="font-serif text-3xl text-primary">
             {formatPrice(subtotal, currency, i18n.language)}
           </p>
+          {!authLoading && !user ? (
+            <p className="mt-2 text-sm text-muted">{t("cart.loginRequired")}</p>
+          ) : null}
         </div>
-        <Button href="/commande" size="lg">
-          {t("cart.checkout")}
+        <Button href={checkoutHref} size="lg">
+          {user ? t("cart.checkout") : t("cart.checkoutLogin")}
         </Button>
       </div>
     </main>

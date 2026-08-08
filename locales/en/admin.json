@@ -100,12 +100,22 @@
       "dashboard": "Dashboard",
       "products": "Products",
       "orders": "Orders",
+      "shipping": "Shipping",
       "content": "Content",
       "pages": "Pages",
       "customers": "Customers",
       "notifications": "Notifications",
       "messages": "Messages"
     },
+    "shippingTitle": "Shipping rates",
+    "shippingSubtitle": "Colissimo / Mondial Relay base fees, free threshold, and store pickup.",
+    "shippingHint": "Shipping total = base fee + sum of product fees (pickup = 0). Free shipping when the cart reaches the threshold.",
+    "shippingEnabled": "Enabled at checkout",
+    "shippingBaseFee": "Base fee (€)",
+    "shippingFreeMin": "Free shipping from (€)",
+    "shippingFeeLine": "Shipping included: {{amount}}",
+    "pickupNoLabel": "Store pickup — no label to generate.",
+    "save": "Save",
     "pages": {
       "save": "Save page",
       "moveUp": "Move up",
@@ -179,6 +189,7 @@
       "name": "Name",
       "slug": "Slug",
       "price": "Price",
+      "shipping_fee": "Shipping surcharge (€ / unit)",
       "stock": "Stock",
       "short_description": "Short description",
       "description": "Description",
@@ -199,8 +210,9 @@
       "email": "Email"
     },
     "carriers": {
-      "laposte": "La Poste / Colissimo",
-      "mondial_relay": "Mondial Relay"
+      "laposte": "Colissimo (home)",
+      "mondial_relay": "Mondial Relay",
+      "pickup": "Store pickup"
     }
   }
 }

@@ -7,7 +7,7 @@ export type OrderItem = {
   image_url: string;
 };
 
-export type PaymentMethod = "stripe" | "paypal";
+export type PaymentMethod = "stripe" | "paypal" | "manual";
 
 export type OrderStatus =
   | "pending"
@@ -22,7 +22,7 @@ export type ShippingStatus =
   | "in_transit"
   | "delivered";
 
-export type ShippingCarrier = "laposte" | "mondial_relay";
+export type ShippingCarrier = "laposte" | "mondial_relay" | "pickup";
 
 export type OrderRow = {
   id: string;
@@ -36,6 +36,7 @@ export type OrderRow = {
   tracking_number: string | null;
   label_url: string | null;
   relay_point_id: string | null;
+  shipping_fee: number;
   total: number;
   currency: string;
   items: OrderItem[];

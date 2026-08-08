@@ -1,6 +1,6 @@
 import type { ShippingStatus } from "@/lib/infrastructure/supabase/order-types";
 
-export type ShippingCarrier = "laposte" | "mondial_relay";
+export type ShippingCarrier = "laposte" | "mondial_relay" | "pickup";
 
 export type ShippingAddress = {
   fullName: string;

@@ -100,12 +100,22 @@
       "dashboard": "Panel",
       "products": "Productos",
       "orders": "Pedidos",
+      "shipping": "Envío",
       "content": "Contenido",
       "pages": "Páginas",
       "customers": "Clientes",
       "notifications": "Notificaciones",
       "messages": "Mensajes"
     },
+    "shippingTitle": "Tarifas de envío",
+    "shippingSubtitle": "Base Colissimo / Mondial Relay, umbral gratis y recogida en tienda.",
+    "shippingHint": "Total envío = tarifa base + suma de suplementos producto (recogida = 0). Envío gratis si el carrito alcanza el umbral.",
+    "shippingEnabled": "Activo en el checkout",
+    "shippingBaseFee": "Tarifa base (€)",
+    "shippingFreeMin": "Envío gratis desde (€)",
+    "shippingFeeLine": "Envío incluido: {{amount}}",
+    "pickupNoLabel": "Recogida en tienda — no hay etiqueta que generar.",
+    "save": "Guardar",
     "pages": {
       "save": "Guardar página",
       "moveUp": "Subir",
@@ -179,6 +189,7 @@
       "name": "Nombre",
       "slug": "Slug",
       "price": "Precio",
+      "shipping_fee": "Suplemento envío (€ / unidad)",
       "stock": "Stock",
       "short_description": "Descripción corta",
       "description": "Descripción",
@@ -199,8 +210,9 @@
       "email": "E-mail"
     },
     "carriers": {
-      "laposte": "La Poste / Colissimo",
-      "mondial_relay": "Mondial Relay"
+      "laposte": "Colissimo (domicilio)",
+      "mondial_relay": "Mondial Relay",
+      "pickup": "Recogida en tienda"
     }
   }
 }

@@ -24,7 +24,8 @@ create table if not exists public.products (
 
 alter table public.products
   add column if not exists ingredients_image_url text,
-  add column if not exists stock integer not null default 20;
+  add column if not exists stock integer not null default 20,
+  add column if not exists shipping_fee numeric(10, 2) not null default 0;
 
 alter table public.products enable row level security;
 
@@ -101,7 +102,7 @@ create table if not exists public.orders (
   user_id uuid references auth.users (id) on delete set null,
   email text not null,
   status text not null default 'pending',
-  payment_method text not null check (payment_method in ('stripe', 'paypal')),
+  payment_method text not null check (payment_method in ('stripe', 'paypal', 'manual')),
   payment_status text not null default 'pending',
   shipping_status text not null default 'preparing',
   shipping_carrier text,
@@ -119,7 +120,33 @@ alter table public.orders
   add column if not exists shipping_carrier text,
   add column if not exists tracking_number text,
   add column if not exists label_url text,
-  add column if not exists relay_point_id text;
+  add column if not exists relay_point_id text,
+  add column if not exists shipping_fee numeric(10, 2) not null default 0;
+
+-- ── Shipping rates ────────────────────────────────────────
+create table if not exists public.shipping_rates (
+  carrier text primary key
+    check (carrier in ('laposte', 'mondial_relay', 'pickup')),
+  enabled boolean not null default true,
+  base_fee numeric(10, 2) not null default 0,
+  free_shipping_min numeric(10, 2),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.shipping_rates enable row level security;
+
+drop policy if exists "Public can read shipping rates" on public.shipping_rates;
+create policy "Public can read shipping rates"
+  on public.shipping_rates for select
+  to anon, authenticated
+  using (true);
+
+insert into public.shipping_rates (carrier, enabled, base_fee, free_shipping_min)
+values
+  ('laposte', true, 5.90, 80),
+  ('mondial_relay', true, 4.50, 80),
+  ('pickup', true, 0, null)
+on conflict (carrier) do nothing;
 
 create index if not exists orders_user_id_idx on public.orders (user_id);
 create index if not exists orders_created_at_idx on public.orders (created_at desc);
@@ -244,8 +271,18 @@ create table if not exists public.profiles (
   first_name text not null default '',
   last_name text not null default '',
   phone text not null default '',
+  address_line1 text not null default '',
+  city text not null default '',
+  postal_code text not null default '',
+  country text not null default 'FR',
   updated_at timestamptz not null default now()
 );
+
+alter table public.profiles
+  add column if not exists address_line1 text not null default '',
+  add column if not exists city text not null default '',
+  add column if not exists postal_code text not null default '',
+  add column if not exists country text not null default 'FR';
 
 alter table public.profiles enable row level security;
 

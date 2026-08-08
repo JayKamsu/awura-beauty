@@ -6,7 +6,7 @@ create table if not exists public.orders (
   user_id uuid references auth.users (id) on delete set null,
   email text not null,
   status text not null default 'pending',
-  payment_method text not null check (payment_method in ('stripe', 'paypal')),
+  payment_method text not null check (payment_method in ('stripe', 'paypal', 'manual')),
   payment_status text not null default 'pending',
   shipping_status text not null default 'preparing',
   shipping_carrier text,

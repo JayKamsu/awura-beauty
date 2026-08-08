@@ -44,6 +44,8 @@ export type OrderPort = {
     status?: OrderRow["status"];
     relayPointId?: string | null;
     shippingCarrier?: ShippingCarrier | null;
+    shippingFee?: number;
+    total?: number;
     userId?: string | null;
   }) => Promise<{ order: OrderRow | null; error: string | null }>;
   listMyOrders: () => Promise<OrderRow[]>;

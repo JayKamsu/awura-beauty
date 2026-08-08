@@ -4,7 +4,7 @@ import {
   PayPalButtons,
   PayPalScriptProvider,
 } from "@paypal/react-paypal-js";
-import { useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -19,15 +19,37 @@ import type {
   PaymentMethod,
   ShippingCarrier,
 } from "@/lib/infrastructure/supabase/order-types";
+import {
+  isShippingProfileComplete,
+  profileFullName,
+} from "@/lib/infrastructure/supabase/profile-types";
+import {
+  getMyProfile,
+  updateMyProfile,
+} from "@/lib/infrastructure/supabase/profiles";
+
+const ALL_CARRIERS: ShippingCarrier[] = [
+  "laposte",
+  "mondial_relay",
+  "pickup",
+];
+
+type QuoteState = {
+  subtotal: number;
+  shippingFee: number;
+  total: number;
+  freeShippingApplied?: boolean;
+};
 
 export function CheckoutPageContent() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const { user, session } = useAuth();
+  const { user, session, loading: authLoading } = useAuth();
   const { currency } = usePreferences();
   const { items, subtotal, clearCart, itemCount } = useCart();
   const { locked: pending, run } = useActionLock();
   const paypalCaptureLock = useRef(false);
+  const profileLoaded = useRef(false);
 
   const authHeaders = (): HeadersInit => {
     const headers: Record<string, string> = {
@@ -39,22 +61,62 @@ export function CheckoutPageContent() {
     return headers;
   };
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("stripe");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("manual");
   const [shippingCarrier, setShippingCarrier] =
     useState<ShippingCarrier>("laposte");
+  const [enabledCarriers, setEnabledCarriers] =
+    useState<ShippingCarrier[]>(ALL_CARRIERS);
   const [selectedRelay, setSelectedRelay] = useState<RelayPoint | null>(null);
-  const [email, setEmail] = useState(user?.email ?? "");
+  const [quote, setQuote] = useState<QuoteState | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [line1, setLine1] = useState("");
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("FR");
+  const [addressComplete, setAddressComplete] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [paypalOrderId, setPaypalOrderId] = useState<string | null>(null);
   const [awuraOrderId, setAwuraOrderId] = useState<string | null>(null);
 
-  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      router.replace(
+        `/compte/connexion?redirect=${encodeURIComponent("/commande")}`,
+      );
+    }
+  }, [authLoading, user, router]);
+
+  useEffect(() => {
+    if (!user || profileLoaded.current) return;
+    profileLoaded.current = true;
+    setEmail(user.email ?? "");
+
+    void getMyProfile().then((profile) => {
+      if (profile) {
+        const name = profileFullName(profile);
+        if (name) setFullName(name);
+        if (profile.phone) setPhone(profile.phone);
+        if (profile.address_line1) setLine1(profile.address_line1);
+        if (profile.city) setCity(profile.city);
+        if (profile.postal_code) setPostalCode(profile.postal_code);
+        if (profile.country) setCountry(profile.country);
+        const complete = isShippingProfileComplete(profile);
+        setAddressComplete(complete);
+        setEditingAddress(!complete);
+      } else {
+        setAddressComplete(false);
+        setEditingAddress(true);
+      }
+      setProfileLoading(false);
+    });
+  }, [user]);
+
   const orderItems = useMemo(
     () =>
       items.map((item) => ({
@@ -68,11 +130,94 @@ export function CheckoutPageContent() {
     [items],
   );
 
+  const quoteItemsKey = useMemo(
+    () =>
+      JSON.stringify(
+        items.map((item) => ({ slug: item.slug, quantity: item.quantity })),
+      ),
+    [items],
+  );
+
+  useEffect(() => {
+    if (!items.length) return;
+    let cancelled = false;
+    setQuoteLoading(true);
+
+    const params = new URLSearchParams({
+      carrier: shippingCarrier,
+      items: quoteItemsKey,
+    });
+
+    void fetch(`/api/shipping/quote?${params.toString()}`)
+      .then(async (res) => {
+        const json = (await res.json()) as {
+          rates?: Array<{ carrier: ShippingCarrier; enabled: boolean }>;
+          subtotal?: number;
+          shippingFee?: number;
+          total?: number;
+          quote?: { freeShippingApplied?: boolean };
+          error?: string;
+        };
+        if (cancelled) return;
+        if (json.rates?.length) {
+          const enabled = json.rates
+            .filter((rate) => rate.enabled)
+            .map((rate) => rate.carrier)
+            .filter((carrier): carrier is ShippingCarrier =>
+              ALL_CARRIERS.includes(carrier),
+            );
+          if (enabled.length) {
+            setEnabledCarriers(enabled);
+            if (!enabled.includes(shippingCarrier)) {
+              setShippingCarrier(enabled[0]!);
+            }
+          }
+        }
+        if (!res.ok) {
+          setQuote({
+            subtotal,
+            shippingFee: 0,
+            total: subtotal,
+          });
+          return;
+        }
+        setQuote({
+          subtotal: Number(json.subtotal ?? subtotal),
+          shippingFee: Number(json.shippingFee ?? 0),
+          total: Number(json.total ?? subtotal),
+          freeShippingApplied: json.quote?.freeShippingApplied,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setQuote({ subtotal, shippingFee: 0, total: subtotal });
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setQuoteLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [shippingCarrier, quoteItemsKey, items.length, subtotal]);
+
+  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+  const stripePublishableKey =
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? "";
+  /** Bouton test tant que les clés publiques paiement sont absentes. */
+  const allowManualCheckout =
+    !stripePublishableKey && !paypalClientId?.trim();
+
   const shippingAddress = {
     fullName,
-    line1,
-    city,
-    postalCode,
+    line1:
+      shippingCarrier === "pickup"
+        ? line1.trim() || "Retrait sur place"
+        : line1,
+    city: shippingCarrier === "pickup" ? city.trim() || "—" : city,
+    postalCode:
+      shippingCarrier === "pickup" ? postalCode.trim() || "00000" : postalCode,
     country,
     phone: phone.trim() || undefined,
     email: email.trim() || undefined,
@@ -88,6 +233,29 @@ export function CheckoutPageContent() {
       shippingCarrier === "mondial_relay" ? selectedRelay?.id ?? null : null,
   });
 
+  const persistProfileAddress = async () => {
+    const parts = fullName.trim().split(/\s+/);
+    const firstName = parts[0] ?? "";
+    const lastName = parts.slice(1).join(" ") || firstName;
+    await updateMyProfile({
+      first_name: firstName,
+      last_name: lastName,
+      phone,
+      address_line1: line1,
+      city,
+      postal_code: postalCode,
+      country,
+    });
+  };
+
+  if (authLoading || (!user && itemCount > 0)) {
+    return (
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center gap-4 px-4 py-20 text-center">
+        <p className="text-muted">{t("checkout.authLoading")}</p>
+      </main>
+    );
+  }
+
   if (itemCount === 0) {
     return (
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center gap-6 px-4 py-20 text-center">
@@ -102,6 +270,31 @@ export function CheckoutPageContent() {
     "w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition focus:border-accent";
 
   const validateShipping = () => {
+    if (!fullName.trim() || !email.trim()) {
+      setError(t("checkout.addressRequired"));
+      setEditingAddress(true);
+      return false;
+    }
+
+    if (shippingCarrier === "pickup") {
+      if (!phone.trim()) {
+        setError(t("checkout.phoneRequiredPickup"));
+        setEditingAddress(true);
+        return false;
+      }
+      return true;
+    }
+
+    if (!line1.trim() || !city.trim() || !postalCode.trim()) {
+      setError(t("checkout.addressRequired"));
+      setEditingAddress(true);
+      return false;
+    }
+    if (shippingCarrier === "mondial_relay" && !phone.trim()) {
+      setError(t("checkout.phoneRequired"));
+      setEditingAddress(true);
+      return false;
+    }
     if (shippingCarrier === "mondial_relay" && !selectedRelay) {
       setError(t("checkout.relayRequired"));
       return false;
@@ -112,6 +305,7 @@ export function CheckoutPageContent() {
   const startStripe = async () => {
     setError(null);
     if (!validateShipping()) return;
+    await persistProfileAddress();
     const response = await fetch("/api/checkout/stripe", {
       method: "POST",
       headers: authHeaders(),
@@ -130,6 +324,7 @@ export function CheckoutPageContent() {
   const preparePayPal = async () => {
     setError(null);
     if (!validateShipping()) return;
+    await persistProfileAddress();
     const response = await fetch("/api/checkout/paypal/create", {
       method: "POST",
       headers: authHeaders(),
@@ -150,9 +345,36 @@ export function CheckoutPageContent() {
     setAwuraOrderId(json.orderId);
   };
 
+  const startManualCheckout = async () => {
+    setError(null);
+    if (!validateShipping()) return;
+    await persistProfileAddress();
+    const response = await fetch("/api/checkout/manual", {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(checkoutPayload()),
+    });
+    const json = (await response.json()) as {
+      orderId?: string;
+      error?: string;
+    };
+
+    if (!response.ok || !json.orderId) {
+      setError(json.error ?? t("checkout.paymentError"));
+      return;
+    }
+
+    clearCart();
+    router.push(`/commande/succes?orderId=${json.orderId}`);
+  };
+
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     void run(async () => {
+      if (paymentMethod === "manual") {
+        await startManualCheckout();
+        return;
+      }
       if (paymentMethod === "stripe") {
         await startStripe();
         return;
@@ -160,6 +382,12 @@ export function CheckoutPageContent() {
       await preparePayPal();
     });
   };
+
+  const showAddressForm = editingAddress || !addressComplete;
+  const needsFullAddress = shippingCarrier !== "pickup";
+  const displaySubtotal = quote?.subtotal ?? subtotal;
+  const displayShipping = quote?.shippingFee ?? 0;
+  const displayTotal = quote?.total ?? subtotal + displayShipping;
 
   return (
     <main className="mx-auto grid w-full max-w-6xl flex-1 gap-8 px-4 py-10 md:gap-10 md:px-6 md:py-14 lg:grid-cols-[1.2fr_0.8fr]">
@@ -177,12 +405,33 @@ export function CheckoutPageContent() {
             </li>
           ))}
         </ul>
-        <div className="mt-6 border-t border-border pt-4">
-          <p className="text-sm text-muted">{t("cart.subtotal")}</p>
-          <p className="font-serif text-3xl text-primary">
-            {formatPrice(subtotal, currency, i18n.language)}
-          </p>
-          <p className="mt-3 text-sm text-muted">
+        <div className="mt-6 space-y-2 border-t border-border pt-4 text-sm">
+          <div className="flex justify-between gap-3">
+            <span className="text-muted">{t("cart.subtotal")}</span>
+            <span className="text-primary">
+              {formatPrice(displaySubtotal, currency, i18n.language)}
+            </span>
+          </div>
+          <div className="flex justify-between gap-3">
+            <span className="text-muted">{t("checkout.shippingFee")}</span>
+            <span className="text-primary">
+              {quoteLoading
+                ? "…"
+                : displayShipping === 0
+                  ? t("checkout.shippingFree")
+                  : formatPrice(displayShipping, currency, i18n.language)}
+            </span>
+          </div>
+          {quote?.freeShippingApplied ? (
+            <p className="text-xs text-muted">{t("checkout.freeShippingApplied")}</p>
+          ) : null}
+          <div className="flex justify-between gap-3 border-t border-border pt-3">
+            <span className="font-medium text-primary">{t("checkout.total")}</span>
+            <span className="font-serif text-2xl text-primary">
+              {formatPrice(displayTotal, currency, i18n.language)}
+            </span>
+          </div>
+          <p className="pt-2 text-sm text-muted">
             {t(`checkout.carriers.${shippingCarrier}.label`)}
             {selectedRelay ? ` · ${selectedRelay.name}` : ""}
           </p>
@@ -194,8 +443,8 @@ export function CheckoutPageContent() {
 
         <section className="space-y-4">
           <h2 className="font-serif text-2xl text-primary">{t("checkout.shippingMethod")}</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {(["laposte", "mondial_relay"] as ShippingCarrier[]).map((carrier) => (
+          <div className="grid gap-3 sm:grid-cols-3">
+            {enabledCarriers.map((carrier) => (
               <button
                 key={carrier}
                 type="button"
@@ -228,81 +477,141 @@ export function CheckoutPageContent() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="font-serif text-2xl text-primary">{t("checkout.shipping")}</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="space-y-1.5 text-sm sm:col-span-2">
-              <span className="text-muted">{t("checkout.email")}</span>
-              <input
-                required
-                type="email"
-                className={fieldClass}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </label>
-            <label className="space-y-1.5 text-sm sm:col-span-2">
-              <span className="text-muted">{t("checkout.fullName")}</span>
-              <input
-                required
-                className={fieldClass}
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-              />
-            </label>
-            <label className="space-y-1.5 text-sm sm:col-span-2">
-              <span className="text-muted">{t("checkout.phone")}</span>
-              <input
-                required={shippingCarrier === "mondial_relay"}
-                type="tel"
-                className={fieldClass}
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                autoComplete="tel"
-              />
-            </label>
-            <label className="space-y-1.5 text-sm sm:col-span-2">
-              <span className="text-muted">{t("checkout.address")}</span>
-              <input
-                required
-                className={fieldClass}
-                value={line1}
-                onChange={(e) => setLine1(e.target.value)}
-              />
-            </label>
-            <label className="space-y-1.5 text-sm">
-              <span className="text-muted">{t("checkout.city")}</span>
-              <input
-                required
-                className={fieldClass}
-                value={city}
-                onChange={(e) => {
-                  setCity(e.target.value);
-                  setSelectedRelay(null);
-                }}
-              />
-            </label>
-            <label className="space-y-1.5 text-sm">
-              <span className="text-muted">{t("checkout.postalCode")}</span>
-              <input
-                required
-                className={fieldClass}
-                value={postalCode}
-                onChange={(e) => {
-                  setPostalCode(e.target.value);
-                  setSelectedRelay(null);
-                }}
-              />
-            </label>
-            <label className="space-y-1.5 text-sm sm:col-span-2">
-              <span className="text-muted">{t("checkout.country")}</span>
-              <input
-                required
-                className={fieldClass}
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-              />
-            </label>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <h2 className="font-serif text-2xl text-primary">
+              {shippingCarrier === "pickup"
+                ? t("checkout.contact")
+                : t("checkout.shipping")}
+            </h2>
+            {needsFullAddress && addressComplete && !editingAddress ? (
+              <button
+                type="button"
+                className="text-sm text-accent hover:text-accent-light"
+                onClick={() => setEditingAddress(true)}
+              >
+                {t("checkout.editAddress")}
+              </button>
+            ) : null}
           </div>
+
+          {shippingCarrier === "pickup" ? (
+            <p className="rounded-2xl bg-background-alt px-4 py-3 text-sm text-muted">
+              {t("checkout.pickupNotice")}
+            </p>
+          ) : null}
+
+          {profileLoading ? (
+            <p className="text-sm text-muted">{t("checkout.profileLoading")}</p>
+          ) : null}
+
+          {needsFullAddress && !showAddressForm && addressComplete ? (
+            <div className="rounded-2xl bg-background-alt px-4 py-4 text-sm text-muted">
+              <p className="font-medium text-primary">{fullName}</p>
+              <p>{email}</p>
+              <p>{phone}</p>
+              <p className="mt-2">
+                {line1}
+                <br />
+                {postalCode} {city}
+                <br />
+                {country}
+              </p>
+              <p className="mt-2 text-xs">{t("checkout.addressFromProfile")}</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="space-y-1.5 text-sm sm:col-span-2">
+                <span className="text-muted">{t("checkout.email")}</span>
+                <input
+                  required
+                  type="email"
+                  className={fieldClass}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </label>
+              <label className="space-y-1.5 text-sm sm:col-span-2">
+                <span className="text-muted">{t("checkout.fullName")}</span>
+                <input
+                  required
+                  className={fieldClass}
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              </label>
+              <label className="space-y-1.5 text-sm sm:col-span-2">
+                <span className="text-muted">{t("checkout.phone")}</span>
+                <input
+                  required={
+                    shippingCarrier === "mondial_relay" ||
+                    shippingCarrier === "pickup"
+                  }
+                  type="tel"
+                  className={fieldClass}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  autoComplete="tel"
+                />
+              </label>
+              {needsFullAddress ? (
+                <>
+                  <label className="space-y-1.5 text-sm sm:col-span-2">
+                    <span className="text-muted">{t("checkout.address")}</span>
+                    <input
+                      required
+                      className={fieldClass}
+                      value={line1}
+                      onChange={(e) => setLine1(e.target.value)}
+                    />
+                  </label>
+                  <label className="space-y-1.5 text-sm">
+                    <span className="text-muted">{t("checkout.city")}</span>
+                    <input
+                      required
+                      className={fieldClass}
+                      value={city}
+                      onChange={(e) => {
+                        setCity(e.target.value);
+                        setSelectedRelay(null);
+                      }}
+                    />
+                  </label>
+                  <label className="space-y-1.5 text-sm">
+                    <span className="text-muted">{t("checkout.postalCode")}</span>
+                    <input
+                      required
+                      className={fieldClass}
+                      value={postalCode}
+                      onChange={(e) => {
+                        setPostalCode(e.target.value);
+                        setSelectedRelay(null);
+                      }}
+                    />
+                  </label>
+                  <label className="space-y-1.5 text-sm sm:col-span-2">
+                    <span className="text-muted">{t("checkout.country")}</span>
+                    <input
+                      required
+                      className={fieldClass}
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                    />
+                  </label>
+                  {addressComplete ? (
+                    <div className="sm:col-span-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => setEditingAddress(false)}
+                      >
+                        {t("checkout.useSavedAddress")}
+                      </Button>
+                    </div>
+                  ) : null}
+                </>
+              ) : null}
+            </div>
+          )}
 
           {shippingCarrier === "mondial_relay" ? (
             <div className="space-y-3 rounded-3xl border border-border p-4 sm:p-5">
@@ -322,8 +631,17 @@ export function CheckoutPageContent() {
 
         <section className="space-y-4">
           <h2 className="font-serif text-2xl text-primary">{t("checkout.payment")}</h2>
+          {allowManualCheckout ? (
+            <p className="rounded-2xl bg-background-alt px-4 py-3 text-sm text-muted">
+              {t("checkout.manualNotice")}
+            </p>
+          ) : null}
           <div className="grid gap-3 sm:grid-cols-2">
-            {(["stripe", "paypal"] as PaymentMethod[]).map((method) => (
+            {(
+              (allowManualCheckout
+                ? ["manual", "stripe", "paypal"]
+                : ["stripe", "paypal"]) as PaymentMethod[]
+            ).map((method) => (
               <button
                 key={method}
                 type="button"
@@ -358,16 +676,28 @@ export function CheckoutPageContent() {
           </p>
         ) : null}
 
-        {paymentMethod === "stripe" ? (
+        {paymentMethod === "manual" ? (
           <Button type="submit" size="lg" pending={pending}>
-            {pending ? t("checkout.loading") : t("checkout.payStripe")}
+            {pending ? t("checkout.loading") : t("checkout.payManual")}
           </Button>
+        ) : paymentMethod === "stripe" ? (
+          stripePublishableKey ? (
+            <Button type="submit" size="lg" pending={pending}>
+              {pending ? t("checkout.loading") : t("checkout.payStripe")}
+            </Button>
+          ) : (
+            <p className="text-sm text-muted">{t("checkout.stripeNotConfigured")}</p>
+          )
         ) : (
           <div className="space-y-4">
             {!paypalOrderId ? (
-              <Button type="submit" size="lg" pending={pending}>
-                {pending ? t("checkout.loading") : t("checkout.preparePaypal")}
-              </Button>
+              paypalClientId ? (
+                <Button type="submit" size="lg" pending={pending}>
+                  {pending ? t("checkout.loading") : t("checkout.preparePaypal")}
+                </Button>
+              ) : (
+                <p className="text-sm text-muted">{t("checkout.paypalNotConfigured")}</p>
+              )
             ) : paypalClientId ? (
               <PayPalScriptProvider
                 options={{

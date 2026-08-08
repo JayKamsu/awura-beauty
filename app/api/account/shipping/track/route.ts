@@ -29,6 +29,7 @@ async function getOrderForAccount(orderId: string): Promise<OrderRow | null> {
         : null,
       label_url: data.label_url ? String(data.label_url) : null,
       relay_point_id: data.relay_point_id ? String(data.relay_point_id) : null,
+      shipping_fee: Number(data.shipping_fee ?? 0),
       total: Number(data.total ?? 0),
       currency: String(data.currency ?? "EUR"),
       items: (data.items as OrderRow["items"]) ?? [],

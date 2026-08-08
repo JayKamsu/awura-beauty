@@ -3,7 +3,13 @@
     "title": "Pedido",
     "emptyCart": "Añade productos antes de pagar.",
     "shipping": "Dirección",
+    "contact": "Datos de contacto",
     "shippingMethod": "Método de envío",
+    "shippingFee": "Envío",
+    "shippingFree": "Gratis",
+    "freeShippingApplied": "Envío gratis (umbral alcanzado).",
+    "total": "Total",
+    "pickupNotice": "Recogerás el pedido en persona. Indica un teléfono para contactarte.",
     "payment": "Pago",
     "summary": "Resumen",
     "email": "E-mail",
@@ -16,16 +22,23 @@
     "loading": "Preparando…",
     "payStripe": "Pagar con Stripe",
     "preparePaypal": "Continuar con PayPal",
+    "payManual": "Pedir sin pago (prueba)",
+    "manualNotice": "Stripe y PayPal aún no están configurados. Puedes hacer un pedido de prueba: se confirmará y el envío (etiqueta) seguirá el proceso normal.",
     "paymentError": "No se pudo iniciar el pago. Comprueba la configuración.",
     "paypalNotConfigured": "PayPal no está configurado (falta NEXT_PUBLIC_PAYPAL_CLIENT_ID).",
+    "stripeNotConfigured": "Stripe no está configurado (falta NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY).",
     "carriers": {
       "laposte": {
-        "label": "La Poste — domicilio",
-        "hint": "Entrega en la dirección indicada"
+        "label": "Colissimo — domicilio",
+        "hint": "Enviado con La Poste a tu dirección"
       },
       "mondial_relay": {
         "label": "Mondial Relay — Punto de recogida",
         "hint": "Recogida en un punto cercano"
+      },
+      "pickup": {
+        "label": "Recogida en tienda",
+        "hint": "Vienes a buscar el pedido tú mismo/a"
       }
     },
     "relayTitle": "Elegir un Point Relais",
@@ -38,7 +51,19 @@
     "relayMap": "Mapa",
     "relaySelected": "Punto seleccionado: {{id}}",
     "relayRequired": "Selecciona un Point Relais para continuar.",
+    "authLoading": "Comprobando tu sesión…",
+    "profileLoading": "Cargando tu dirección…",
+    "addressFromProfile": "Dirección guardada en tu perfil.",
+    "editAddress": "Editar",
+    "useSavedAddress": "Usar la dirección guardada",
+    "addressRequired": "Completa tu dirección de envío.",
+    "phoneRequired": "El teléfono es obligatorio para Mondial Relay.",
+    "phoneRequiredPickup": "El teléfono es obligatorio para la recogida en tienda.",
     "methods": {
+      "manual": {
+        "label": "Pedido de prueba",
+        "hint": "Sin Stripe / PayPal — para validar el flujo"
+      },
       "stripe": {
         "label": "Stripe",
         "hint": "Pago seguro con tarjeta"

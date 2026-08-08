@@ -11,6 +11,10 @@ function mapProfile(row: Record<string, unknown>): ProfileRow {
     first_name: String(row.first_name ?? ""),
     last_name: String(row.last_name ?? ""),
     phone: String(row.phone ?? ""),
+    address_line1: String(row.address_line1 ?? ""),
+    city: String(row.city ?? ""),
+    postal_code: String(row.postal_code ?? ""),
+    country: String(row.country ?? "FR") || "FR",
     updated_at: String(row.updated_at ?? new Date().toISOString()),
   };
 }
@@ -53,6 +57,10 @@ export async function updateMyProfile(
     first_name: input.first_name.trim(),
     last_name: input.last_name.trim(),
     phone: input.phone.trim(),
+    address_line1: input.address_line1.trim(),
+    city: input.city.trim(),
+    postal_code: input.postal_code.trim(),
+    country: (input.country.trim() || "FR").toUpperCase(),
     updated_at: new Date().toISOString(),
   };
 

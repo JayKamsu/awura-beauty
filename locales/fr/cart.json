@@ -6,6 +6,8 @@
     "quantity": "Qté",
     "remove": "Retirer",
     "subtotal": "Sous-total",
-    "checkout": "Passer commande"
+    "checkout": "Passer commande",
+    "checkoutLogin": "Se connecter pour commander",
+    "loginRequired": "Connecte-toi pour finaliser ta commande."
   }
 }

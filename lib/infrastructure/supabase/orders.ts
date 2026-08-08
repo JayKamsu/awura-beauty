@@ -24,6 +24,7 @@ function mapOrder(row: Record<string, unknown>): OrderRow {
     tracking_number: row.tracking_number ? String(row.tracking_number) : null,
     label_url: row.label_url ? String(row.label_url) : null,
     relay_point_id: row.relay_point_id ? String(row.relay_point_id) : null,
+    shipping_fee: Number(row.shipping_fee ?? 0),
     total: Number(row.total ?? 0),
     currency: String(row.currency ?? "EUR"),
     items: (row.items as OrderItem[]) ?? [],
@@ -43,6 +44,9 @@ export type CreateOrderInput = {
   status?: OrderRow["status"];
   relayPointId?: string | null;
   shippingCarrier?: ShippingCarrier | null;
+  shippingFee?: number;
+  /** Total TTC (produits + livraison). Si omis : somme items + shippingFee. */
+  total?: number;
   /** Préférer userId issu du Bearer côté API (pas de session cookie serveur). */
   userId?: string | null;
 };
@@ -53,10 +57,15 @@ export async function createOrder(
   const supabase = createAdminSupabaseClient() ?? createSupabaseClient();
   const userId =
     input.userId !== undefined ? input.userId : await getCurrentUserId();
-  const total = input.items.reduce(
+  const itemsTotal = input.items.reduce(
     (sum, item) => sum + item.unit_price * item.quantity,
     0,
   );
+  const shippingFee = Math.max(0, Number(input.shippingFee ?? 0));
+  const total =
+    input.total !== undefined
+      ? Number(input.total)
+      : Math.round((itemsTotal + shippingFee) * 100) / 100;
 
   if (!supabase) {
     return { order: null, error: "Supabase is not configured" };
@@ -73,6 +82,7 @@ export async function createOrder(
       shipping_status: "preparing",
       shipping_carrier: input.shippingCarrier ?? null,
       relay_point_id: input.relayPointId ?? null,
+      shipping_fee: shippingFee,
       total,
       currency: input.currency,
       items: input.items,

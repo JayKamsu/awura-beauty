@@ -174,7 +174,10 @@ export function AuthForm({
       {mode === "login" && allowSignup ? (
         <p className="text-center text-sm text-muted">
           {t("auth.noAccount")}{" "}
-          <Link href="/compte/inscription" className="text-accent hover:text-accent-light">
+          <Link
+            href={`/compte/inscription?redirect=${encodeURIComponent(redirectTo)}`}
+            className="text-accent hover:text-accent-light"
+          >
             {t("auth.signupLink")}
           </Link>
         </p>
@@ -183,7 +186,10 @@ export function AuthForm({
       {mode === "signup" ? (
         <p className="text-center text-sm text-muted">
           {t("auth.hasAccount")}{" "}
-          <Link href="/compte/connexion" className="text-accent hover:text-accent-light">
+          <Link
+            href={`/compte/connexion?redirect=${encodeURIComponent(redirectTo)}`}
+            className="text-accent hover:text-accent-light"
+          >
             {t("auth.loginLink")}
           </Link>
         </p>

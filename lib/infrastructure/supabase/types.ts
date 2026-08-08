@@ -19,6 +19,8 @@ export type ProductRow = {
   category: string;
   is_new: boolean;
   stock: number;
+  /** Supplément livraison unitaire (€), hors retrait sur place. */
+  shipping_fee: number;
   created_at?: string;
 };
 

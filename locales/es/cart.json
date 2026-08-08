@@ -6,6 +6,8 @@
     "quantity": "Cant.",
     "remove": "Eliminar",
     "subtotal": "Subtotal",
-    "checkout": "Finalizar compra"
+    "checkout": "Finalizar compra",
+    "checkoutLogin": "Inicia sesión para pedir",
+    "loginRequired": "Inicia sesión para completar tu pedido."
   }
 }

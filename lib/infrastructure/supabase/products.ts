@@ -53,6 +53,7 @@ function mapRow(row: Record<string, unknown>): ProductRow {
     category: String(row.category ?? "soin"),
     is_new: Boolean(row.is_new),
     stock: Number(row.stock ?? 0),
+    shipping_fee: Number(row.shipping_fee ?? 0),
     created_at: row.created_at ? String(row.created_at) : undefined,
   };
 }

@@ -21,6 +21,39 @@ type StripeCheckoutBody = {
   relayPointId?: string | null;
 };
 
+function normalizeAddress(
+  address: StripeCheckoutBody["shippingAddress"],
+  carrier: string,
+) {
+  if (carrier !== "pickup") return address;
+  return {
+    ...address,
+    line1: address.line1 || "Retrait sur place",
+    city: address.city || "—",
+    postalCode: address.postalCode || "00000",
+  };
+}
+
+function stripeLineItems(
+  resolved: Awaited<ReturnType<typeof resolveOrderItemsFromCatalog>>,
+) {
+  const lines = resolved.items.map((item) => ({
+    name: item.name,
+    quantity: item.quantity,
+    unitAmountCents: Math.round(item.unit_price * 100),
+    imageUrl: item.image_url.startsWith("http") ? item.image_url : undefined,
+  }));
+  if (resolved.shippingFee > 0) {
+    lines.push({
+      name: "Frais de livraison",
+      quantity: 1,
+      unitAmountCents: Math.round(resolved.shippingFee * 100),
+      imageUrl: undefined,
+    });
+  }
+  return lines;
+}
+
 export async function POST(request: Request) {
   const body = (await request.json()) as StripeCheckoutBody;
 
@@ -33,7 +66,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: shipping.error }, { status: 400 });
   }
 
-  const resolved = await resolveOrderItemsFromCatalog(body.items);
+  const resolved = await resolveOrderItemsFromCatalog(
+    body.items,
+    shipping.shippingCarrier,
+  );
   if (resolved.error || !resolved.items.length) {
     return NextResponse.json(
       { error: resolved.error ?? "Invalid cart" },
@@ -44,18 +80,24 @@ export async function POST(request: Request) {
   const userId = await userIdFromRequest(request);
   const currency = body.currency || "EUR";
   const origin = new URL(request.url).origin;
+  const shippingAddress = normalizeAddress(
+    body.shippingAddress,
+    shipping.shippingCarrier,
+  );
 
   const { order, error } = await container.orders.createOrder({
     email: body.email,
     paymentMethod: "stripe",
     currency,
     items: resolved.items,
-    shippingAddress: body.shippingAddress,
+    shippingAddress,
     paymentStatus: "pending",
     status: "pending",
     userId,
     shippingCarrier: shipping.shippingCarrier,
     relayPointId: shipping.relayPointId,
+    shippingFee: resolved.shippingFee,
+    total: resolved.total,
   });
 
   if (!order) {
@@ -67,14 +109,7 @@ export async function POST(request: Request) {
         currency,
         successUrl: `${origin}/commande/succes?orderId=${demoId}&session_id={CHECKOUT_SESSION_ID}`,
         cancelUrl: `${origin}/commande/annule`,
-        lineItems: resolved.items.map((item) => ({
-          name: item.name,
-          quantity: item.quantity,
-          unitAmountCents: Math.round(item.unit_price * 100),
-          imageUrl: item.image_url.startsWith("http")
-            ? item.image_url
-            : undefined,
-        })),
+        lineItems: stripeLineItems(resolved),
       });
 
       if (!session.url) {
@@ -95,12 +130,7 @@ export async function POST(request: Request) {
     currency,
     successUrl: `${origin}/commande/succes?orderId=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
     cancelUrl: `${origin}/commande/annule`,
-    lineItems: resolved.items.map((item) => ({
-      name: item.name,
-      quantity: item.quantity,
-      unitAmountCents: Math.round(item.unit_price * 100),
-      imageUrl: item.image_url.startsWith("http") ? item.image_url : undefined,
-    })),
+    lineItems: stripeLineItems(resolved),
   });
 
   if (!session.url) {

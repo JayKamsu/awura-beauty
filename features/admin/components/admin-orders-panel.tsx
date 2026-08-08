@@ -214,6 +214,17 @@ export function AdminOrdersPanel() {
                         i18n.language,
                       )}
                     </p>
+                    {order.shipping_fee > 0 ? (
+                      <p className="text-sm text-muted">
+                        {t("admin.shippingFeeLine", {
+                          amount: formatPrice(
+                            order.shipping_fee,
+                            order.currency || currency,
+                            i18n.language,
+                          ),
+                        })}
+                      </p>
+                    ) : null}
                     <p className="text-sm text-muted">{order.email}</p>
                     <span
                       className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${shippingBadgeClass(order.shipping_status)}`}
@@ -238,68 +249,83 @@ export function AdminOrdersPanel() {
                   </div>
 
                   <div className="w-full max-w-xs space-y-3 sm:w-auto">
-                    <label className="block space-y-1 text-sm">
-                      <span className="text-muted">{t("admin.carrier")}</span>
-                      <select
-                        className="w-full rounded-xl border border-border bg-background px-3 py-2"
-                        value={carrier}
-                        onChange={(e) =>
-                          setCarrierByOrder((prev) => ({
-                            ...prev,
-                            [order.id]: e.target.value as ShippingCarrier,
-                          }))
-                        }
-                      >
-                        <option value="laposte">{t("admin.carriers.laposte")}</option>
-                        <option value="mondial_relay">
-                          {t("admin.carriers.mondial_relay")}
-                        </option>
-                      </select>
-                    </label>
+                    {order.shipping_carrier === "pickup" ||
+                    carrier === "pickup" ? (
+                      <p className="rounded-xl bg-background-alt px-3 py-2 text-sm text-muted">
+                        {t("admin.pickupNoLabel")}
+                      </p>
+                    ) : (
+                      <>
+                        <label className="block space-y-1 text-sm">
+                          <span className="text-muted">{t("admin.carrier")}</span>
+                          <select
+                            className="w-full rounded-xl border border-border bg-background px-3 py-2"
+                            value={carrier}
+                            onChange={(e) =>
+                              setCarrierByOrder((prev) => ({
+                                ...prev,
+                                [order.id]: e.target.value as ShippingCarrier,
+                              }))
+                            }
+                          >
+                            <option value="laposte">
+                              {t("admin.carriers.laposte")}
+                            </option>
+                            <option value="mondial_relay">
+                              {t("admin.carriers.mondial_relay")}
+                            </option>
+                          </select>
+                        </label>
 
-                    {carrier === "mondial_relay" ? (
-                      <label className="block space-y-1 text-sm">
-                        <span className="text-muted">{t("admin.relayPoint")}</span>
-                        <input
-                          className="w-full rounded-xl border border-border bg-background px-3 py-2"
-                          value={
-                            relayByOrder[order.id] ?? order.relay_point_id ?? ""
-                          }
-                          onChange={(e) =>
-                            setRelayByOrder((prev) => ({
-                              ...prev,
-                              [order.id]: e.target.value,
-                            }))
-                          }
-                          placeholder={t("admin.relayPlaceholder")}
-                        />
-                      </label>
-                    ) : null}
+                        {carrier === "mondial_relay" ? (
+                          <label className="block space-y-1 text-sm">
+                            <span className="text-muted">
+                              {t("admin.relayPoint")}
+                            </span>
+                            <input
+                              className="w-full rounded-xl border border-border bg-background px-3 py-2"
+                              value={
+                                relayByOrder[order.id] ??
+                                order.relay_point_id ??
+                                ""
+                              }
+                              onChange={(e) =>
+                                setRelayByOrder((prev) => ({
+                                  ...prev,
+                                  [order.id]: e.target.value,
+                                }))
+                              }
+                              placeholder={t("admin.relayPlaceholder")}
+                            />
+                          </label>
+                        ) : null}
 
-                    <Button
-                      type="button"
-                      pending={pendingId === order.id}
-                      onClick={() => void createLabel(order, carrier)}
-                    >
-                      {pendingId === order.id
-                        ? t("admin.generating")
-                        : order.tracking_number
-                          ? t("admin.regenerateLabel")
-                          : carrier === "laposte"
-                            ? t("admin.generateLaPosteLabel")
-                            : t("admin.generateLabel")}
-                    </Button>
+                        <Button
+                          type="button"
+                          pending={pendingId === order.id}
+                          onClick={() => void createLabel(order, carrier)}
+                        >
+                          {pendingId === order.id
+                            ? t("admin.generating")
+                            : order.tracking_number
+                              ? t("admin.regenerateLabel")
+                              : carrier === "laposte"
+                                ? t("admin.generateLaPosteLabel")
+                                : t("admin.generateLabel")}
+                        </Button>
 
-                    {order.label_url ? (
-                      <a
-                        href={order.label_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="block text-sm text-accent hover:text-accent-light"
-                      >
-                        {t("admin.openLabel")}
-                      </a>
-                    ) : null}
+                        {order.label_url ? (
+                          <a
+                            href={order.label_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block text-sm text-accent hover:text-accent-light"
+                          >
+                            {t("admin.openLabel")}
+                          </a>
+                        ) : null}
+                      </>
+                    )}
                   </div>
                 </div>
 
