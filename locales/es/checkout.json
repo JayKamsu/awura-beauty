@@ -79,6 +79,15 @@
     "cancelBody": "No se realizó ningún cargo. Puedes intentarlo de nuevo cuando quieras.",
     "viewAccount": "Ver mi cuenta",
     "retry": "Volver al pedido",
-    "trackShipping": "Seguir mi envío"
+    "trackShipping": "Seguir mi envío",
+    "loyaltyTitle": "Fidelidad",
+    "loyaltyBalance": "Saldo: {{count}} pts",
+    "referralEligible": "Descuento referido −10 % aplicado en productos (1.er pedido).",
+    "referralDiscount": "Referido (−10 %)",
+    "pointsDiscount": "Puntos de fidelidad",
+    "pointsToEarn": "Ganarás {{count}} pts tras el pago.",
+    "usePoints": "Usar puntos",
+    "usePointsNone": "No usar puntos",
+    "usePointsOption": "{{points}} pts (−{{amount}})"
   }
 }

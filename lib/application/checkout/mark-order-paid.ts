@@ -1,3 +1,4 @@
+import { settleOrderLoyalty } from "@/lib/application/loyalty/settle-order-loyalty";
 import { maybeAutoCreateLabelAfterPaid } from "@/lib/application/shipping/create-order-label";
 import { notifyOrderPaid } from "@/lib/application/notifications/order-notify";
 import {
@@ -12,7 +13,8 @@ export async function markOrderPaid(orderId: string): Promise<boolean> {
   const order = await getOrderById(orderId);
   if (!order) return false;
   if (order.payment_status === "paid" || order.status === "paid") {
-    // Idempotent : tente quand même l’étiquette si absente
+    // Idempotent : tente quand même l’étiquette / fidélité si absents
+    await settleOrderLoyalty(order);
     await maybeAutoCreateLabelAfterPaid(orderId);
     return true;
   }
@@ -23,6 +25,8 @@ export async function markOrderPaid(orderId: string): Promise<boolean> {
   });
 
   if (ok) {
+    const paid = await getOrderById(orderId);
+    if (paid) await settleOrderLoyalty(paid);
     await notifyOrderPaid({
       userId: order.user_id,
       orderId: order.id,

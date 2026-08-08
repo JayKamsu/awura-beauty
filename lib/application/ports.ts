@@ -46,6 +46,10 @@ export type OrderPort = {
     shippingCarrier?: ShippingCarrier | null;
     shippingFee?: number;
     total?: number;
+    pointsEarned?: number;
+    pointsRedeemed?: number;
+    discountAmount?: number;
+    referralDiscountApplied?: boolean;
     userId?: string | null;
   }) => Promise<{ order: OrderRow | null; error: string | null }>;
   listMyOrders: () => Promise<OrderRow[]>;

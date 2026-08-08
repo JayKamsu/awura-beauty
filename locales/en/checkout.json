@@ -79,6 +79,15 @@
     "cancelBody": "No charge was made. You can try again anytime.",
     "viewAccount": "View my account",
     "retry": "Back to checkout",
-    "trackShipping": "Track my shipment"
+    "trackShipping": "Track my shipment",
+    "loyaltyTitle": "Loyalty",
+    "loyaltyBalance": "Balance: {{count}} pts",
+    "referralEligible": "Referral −10% applied on products (first order).",
+    "referralDiscount": "Referral (−10%)",
+    "pointsDiscount": "Loyalty points",
+    "pointsToEarn": "You’ll earn {{count}} pts after payment.",
+    "usePoints": "Use points",
+    "usePointsNone": "Don’t use points",
+    "usePointsOption": "{{points}} pts (−{{amount}})"
   }
 }

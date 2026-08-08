@@ -37,6 +37,10 @@ export type OrderRow = {
   label_url: string | null;
   relay_point_id: string | null;
   shipping_fee: number;
+  points_earned: number;
+  points_redeemed: number;
+  discount_amount: number;
+  referral_discount_applied: boolean;
   total: number;
   currency: string;
   items: OrderItem[];

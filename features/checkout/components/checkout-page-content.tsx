@@ -39,6 +39,13 @@ type QuoteState = {
   shippingFee: number;
   total: number;
   freeShippingApplied?: boolean;
+  referralDiscount?: number;
+  pointsDiscount?: number;
+  pointsRedeemed?: number;
+  pointsToEarn?: number;
+  balance?: number;
+  maxRedeemablePoints?: number;
+  referralEligible?: boolean;
 };
 
 export function CheckoutPageContent() {
@@ -69,6 +76,7 @@ export function CheckoutPageContent() {
   const [selectedRelay, setSelectedRelay] = useState<RelayPoint | null>(null);
   const [quote, setQuote] = useState<QuoteState | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
+  const [pointsToRedeem, setPointsToRedeem] = useState(0);
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -146,9 +154,12 @@ export function CheckoutPageContent() {
     const params = new URLSearchParams({
       carrier: shippingCarrier,
       items: quoteItemsKey,
+      pointsToRedeem: String(pointsToRedeem),
     });
 
-    void fetch(`/api/shipping/quote?${params.toString()}`)
+    void fetch(`/api/shipping/quote?${params.toString()}`, {
+      headers: authHeaders(),
+    })
       .then(async (res) => {
         const json = (await res.json()) as {
           rates?: Array<{ carrier: ShippingCarrier; enabled: boolean }>;
@@ -156,6 +167,15 @@ export function CheckoutPageContent() {
           shippingFee?: number;
           total?: number;
           quote?: { freeShippingApplied?: boolean };
+          loyalty?: {
+            referralDiscount?: number;
+            pointsDiscount?: number;
+            pointsRedeemed?: number;
+            pointsToEarn?: number;
+            balance?: number;
+            maxRedeemablePoints?: number;
+            referralEligible?: boolean;
+          };
           error?: string;
         };
         if (cancelled) return;
@@ -181,11 +201,22 @@ export function CheckoutPageContent() {
           });
           return;
         }
+        const maxPts = Number(json.loyalty?.maxRedeemablePoints ?? 0);
+        if (pointsToRedeem > maxPts) {
+          setPointsToRedeem(maxPts);
+        }
         setQuote({
           subtotal: Number(json.subtotal ?? subtotal),
           shippingFee: Number(json.shippingFee ?? 0),
           total: Number(json.total ?? subtotal),
           freeShippingApplied: json.quote?.freeShippingApplied,
+          referralDiscount: Number(json.loyalty?.referralDiscount ?? 0),
+          pointsDiscount: Number(json.loyalty?.pointsDiscount ?? 0),
+          pointsRedeemed: Number(json.loyalty?.pointsRedeemed ?? 0),
+          pointsToEarn: Number(json.loyalty?.pointsToEarn ?? 0),
+          balance: Number(json.loyalty?.balance ?? 0),
+          maxRedeemablePoints: maxPts,
+          referralEligible: Boolean(json.loyalty?.referralEligible),
         });
       })
       .catch(() => {
@@ -200,7 +231,7 @@ export function CheckoutPageContent() {
     return () => {
       cancelled = true;
     };
-  }, [shippingCarrier, quoteItemsKey, items.length, subtotal]);
+  }, [shippingCarrier, quoteItemsKey, items.length, subtotal, pointsToRedeem, session?.access_token]);
 
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const stripePublishableKey =
@@ -231,6 +262,7 @@ export function CheckoutPageContent() {
     shippingCarrier,
     relayPointId:
       shippingCarrier === "mondial_relay" ? selectedRelay?.id ?? null : null,
+    pointsToRedeem,
   });
 
   const persistProfileAddress = async () => {
@@ -422,8 +454,35 @@ export function CheckoutPageContent() {
                   : formatPrice(displayShipping, currency, i18n.language)}
             </span>
           </div>
+          {quote?.referralDiscount ? (
+            <div className="flex justify-between gap-3">
+              <span className="text-muted">{t("checkout.referralDiscount")}</span>
+              <span className="text-primary">
+                −
+                {formatPrice(
+                  quote.referralDiscount,
+                  currency,
+                  i18n.language,
+                )}
+              </span>
+            </div>
+          ) : null}
+          {quote?.pointsDiscount ? (
+            <div className="flex justify-between gap-3">
+              <span className="text-muted">{t("checkout.pointsDiscount")}</span>
+              <span className="text-primary">
+                −
+                {formatPrice(quote.pointsDiscount, currency, i18n.language)}
+              </span>
+            </div>
+          ) : null}
           {quote?.freeShippingApplied ? (
             <p className="text-xs text-muted">{t("checkout.freeShippingApplied")}</p>
+          ) : null}
+          {typeof quote?.pointsToEarn === "number" && quote.pointsToEarn > 0 ? (
+            <p className="text-xs text-muted">
+              {t("checkout.pointsToEarn", { count: quote.pointsToEarn })}
+            </p>
           ) : null}
           <div className="flex justify-between gap-3 border-t border-border pt-3">
             <span className="font-medium text-primary">{t("checkout.total")}</span>
@@ -440,6 +499,55 @@ export function CheckoutPageContent() {
 
       <form onSubmit={onSubmit} className="space-y-8 lg:order-1">
         <h1 className="font-serif text-3xl text-primary sm:text-4xl">{t("checkout.title")}</h1>
+
+        {(quote?.balance ?? 0) > 0 || quote?.referralEligible ? (
+          <section className="space-y-3 rounded-2xl border border-border p-4">
+            <h2 className="font-serif text-2xl text-primary">
+              {t("checkout.loyaltyTitle")}
+            </h2>
+            <p className="text-sm text-muted">
+              {t("checkout.loyaltyBalance", { count: quote?.balance ?? 0 })}
+            </p>
+            {quote?.referralEligible ? (
+              <p className="text-sm text-accent">
+                {t("checkout.referralEligible")}
+              </p>
+            ) : null}
+            {(quote?.maxRedeemablePoints ?? 0) >= 100 ? (
+              <label className="block space-y-1.5 text-sm">
+                <span className="text-muted">{t("checkout.usePoints")}</span>
+                <select
+                  className={fieldClass}
+                  value={pointsToRedeem}
+                  onChange={(e) =>
+                    setPointsToRedeem(Number(e.target.value) || 0)
+                  }
+                >
+                  <option value={0}>{t("checkout.usePointsNone")}</option>
+                  {Array.from(
+                    {
+                      length: Math.floor(
+                        (quote?.maxRedeemablePoints ?? 0) / 100,
+                      ),
+                    },
+                    (_, i) => (i + 1) * 100,
+                  ).map((pts) => (
+                    <option key={pts} value={pts}>
+                      {t("checkout.usePointsOption", {
+                        points: pts,
+                        amount: formatPrice(
+                          (pts / 100) * 5,
+                          currency,
+                          i18n.language,
+                        ),
+                      })}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+          </section>
+        ) : null}
 
         <section className="space-y-4">
           <h2 className="font-serif text-2xl text-primary">{t("checkout.shippingMethod")}</h2>

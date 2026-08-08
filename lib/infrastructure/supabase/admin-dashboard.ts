@@ -1,5 +1,6 @@
 import { listAllOrders } from "@/lib/infrastructure/supabase/orders";
 import { adminListProducts } from "@/lib/infrastructure/supabase/admin-products";
+import { getLoyaltyProfilesByIds } from "@/lib/infrastructure/supabase/loyalty";
 import type {
   OrderRow,
   PaymentMethod,
@@ -19,6 +20,7 @@ export type AdminCustomerOrderSummary = {
 
 export type AdminCustomer = {
   email: string;
+  userId: string | null;
   fullName: string | null;
   phone: string | null;
   city: string | null;
@@ -31,6 +33,9 @@ export type AdminCustomer = {
   preferredCarrier: ShippingCarrier | null;
   paymentMethods: PaymentMethod[];
   recentOrders: AdminCustomerOrderSummary[];
+  loyaltyPoints: number;
+  referralCode: string | null;
+  referredBy: string | null;
 };
 
 export type AdminDashboardStats = {
@@ -97,6 +102,15 @@ export async function listAdminCustomers(): Promise<AdminCustomer[]> {
     byEmail.set(email, list);
   }
 
+  const userIds = [
+    ...new Set(
+      orders
+        .map((order) => order.user_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+  const loyaltyByUser = await getLoyaltyProfilesByIds(userIds);
+
   const customers: AdminCustomer[] = [];
 
   for (const [, list] of byEmail) {
@@ -114,9 +128,13 @@ export async function listAdminCustomers(): Promise<AdminCustomer[]> {
     const methods = [
       ...new Set(sorted.map((order) => order.payment_method)),
     ] as PaymentMethod[];
+    const userId =
+      sorted.find((order) => order.user_id)?.user_id ?? null;
+    const loyalty = userId ? loyaltyByUser.get(userId) : undefined;
 
     customers.push({
       email: sorted[0].email,
+      userId,
       fullName: address?.fullName ?? null,
       phone: address?.phone ?? null,
       city: address?.city ?? null,
@@ -137,6 +155,9 @@ export async function listAdminCustomers(): Promise<AdminCustomer[]> {
         payment_status: order.payment_status,
         shipping_carrier: order.shipping_carrier,
       })),
+      loyaltyPoints: loyalty?.loyalty_points ?? 0,
+      referralCode: loyalty?.referral_code ?? null,
+      referredBy: loyalty?.referred_by ?? null,
     });
   }
 

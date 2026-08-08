@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { markOrderPaid } from "@/lib/application/checkout/mark-order-paid";
 import { isLivePaymentConfigured } from "@/lib/application/checkout/payments-configured";
-import { resolveOrderItemsFromCatalog } from "@/lib/application/checkout/resolve-order-items";
+import { resolveCheckoutCart } from "@/lib/application/checkout/resolve-checkout-cart";
 import { userIdFromRequest } from "@/lib/application/checkout/request-user";
 import { resolveCheckoutShipping } from "@/lib/application/checkout/shipping-options";
 import { createOrder } from "@/lib/infrastructure/supabase/orders";
@@ -21,6 +21,7 @@ type ManualCheckoutBody = {
   };
   shippingCarrier?: string;
   relayPointId?: string | null;
+  pointsToRedeem?: number;
 };
 
 export async function POST(request: Request) {
@@ -50,10 +51,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: shipping.error }, { status: 400 });
   }
 
-  const resolved = await resolveOrderItemsFromCatalog(
-    body.items,
-    shipping.shippingCarrier,
-  );
+  const resolved = await resolveCheckoutCart({
+    lines: body.items,
+    carrier: shipping.shippingCarrier,
+    userId,
+    pointsToRedeem: body.pointsToRedeem,
+  });
   if (resolved.error || !resolved.items.length) {
     return NextResponse.json(
       { error: resolved.error ?? "Invalid cart" },
@@ -84,6 +87,10 @@ export async function POST(request: Request) {
     relayPointId: shipping.relayPointId,
     shippingFee: resolved.shippingFee,
     total: resolved.total,
+    pointsEarned: resolved.loyalty.pointsToEarn,
+    pointsRedeemed: resolved.loyalty.pointsRedeemed,
+    discountAmount: resolved.loyalty.discountAmount,
+    referralDiscountApplied: resolved.loyalty.referralEligible,
   });
 
   if (!order) {

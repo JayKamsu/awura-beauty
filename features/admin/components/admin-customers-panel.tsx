@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import { AdminEmptyState } from "@/features/admin/components/admin-empty-state";
 import { AdminFeedback } from "@/features/admin/components/admin-feedback";
 import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
@@ -25,15 +26,24 @@ export function AdminCustomersPanel() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
   const [expandedEmail, setExpandedEmail] = useState<string | null>(null);
+  const [adjustDelta, setAdjustDelta] = useState("100");
+  const [adjustNote, setAdjustNote] = useState("");
+  const [adjustPending, setAdjustPending] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    tone: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  const load = async () => {
+    const res = await adminFetch("/api/admin/customers");
+    if (!res.ok) throw new Error("failed");
+    const json = (await res.json()) as { customers?: AdminCustomer[] };
+    setCustomers(json.customers ?? []);
+  };
 
   useEffect(() => {
-    void adminFetch("/api/admin/customers")
-      .then(async (res) => {
-        if (!res.ok) throw new Error("failed");
-        return res.json() as Promise<{ customers?: AdminCustomer[] }>;
-      })
-      .then((json) => {
-        setCustomers(json.customers ?? []);
+    void load()
+      .then(() => {
         setLoading(false);
         setError(false);
       })
@@ -53,6 +63,7 @@ export function AdminCustomersPanel() {
         customer.phone ?? "",
         customer.city ?? "",
         customer.country ?? "",
+        customer.referralCode ?? "",
       ]
         .join(" ")
         .toLowerCase();
@@ -71,6 +82,59 @@ export function AdminCustomersPanel() {
     pageSafe * PAGE_SIZE + PAGE_SIZE,
   );
 
+  const adjustPoints = async (customer: AdminCustomer) => {
+    if (!customer.userId) {
+      setFeedback({
+        tone: "error",
+        message: t("admin.loyaltyNoUser"),
+      });
+      return;
+    }
+    const delta = Math.trunc(Number(adjustDelta));
+    if (!Number.isFinite(delta) || delta === 0) {
+      setFeedback({
+        tone: "error",
+        message: t("admin.loyaltyInvalidDelta"),
+      });
+      return;
+    }
+    setAdjustPending(true);
+    setFeedback(null);
+    const response = await adminFetch("/api/admin/loyalty/adjust", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: customer.userId,
+        delta,
+        note: adjustNote,
+      }),
+    });
+    const json = (await response.json()) as {
+      error?: string;
+      balance?: number;
+    };
+    setAdjustPending(false);
+    if (!response.ok) {
+      setFeedback({
+        tone: "error",
+        message: json.error ?? t("admin.saveError"),
+      });
+      return;
+    }
+    setCustomers((prev) =>
+      prev.map((row) =>
+        row.email === customer.email
+          ? { ...row, loyaltyPoints: json.balance ?? row.loyaltyPoints + delta }
+          : row,
+      ),
+    );
+    setFeedback({
+      tone: "success",
+      message: t("admin.loyaltyAdjusted", { balance: json.balance ?? "—" }),
+    });
+    setAdjustNote("");
+  };
+
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-8 md:px-6">
       <AdminPageHeader
@@ -80,6 +144,9 @@ export function AdminCustomersPanel() {
 
       {error ? (
         <AdminFeedback tone="error" message={t("admin.saveError")} />
+      ) : null}
+      {feedback ? (
+        <AdminFeedback tone={feedback.tone} message={feedback.message} />
       ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -112,7 +179,7 @@ export function AdminCustomersPanel() {
                     {t("admin.customerPhone")}
                   </th>
                   <th className="px-3 py-2 font-medium">
-                    {t("admin.customerCity")}
+                    {t("admin.loyaltyPoints")}
                   </th>
                   <th className="px-3 py-2 font-medium">
                     {t("admin.ordersCount")}
@@ -154,10 +221,13 @@ export function AdminCustomersPanel() {
                         <td className="whitespace-nowrap px-3 py-2 text-muted">
                           {customer.phone ?? "—"}
                         </td>
-                        <td className="px-3 py-2 text-muted">
-                          {[customer.city, customer.country]
-                            .filter(Boolean)
-                            .join(", ") || "—"}
+                        <td className="whitespace-nowrap px-3 py-2 text-primary">
+                          {customer.loyaltyPoints}
+                          {customer.referralCode ? (
+                            <span className="ml-1 text-xs text-muted">
+                              · {customer.referralCode}
+                            </span>
+                          ) : null}
                         </td>
                         <td className="px-3 py-2 text-muted">
                           {customer.ordersCount}
@@ -197,7 +267,7 @@ export function AdminCustomersPanel() {
                       {open ? (
                         <tr className="border-t border-border bg-background-alt/40">
                           <td colSpan={8} className="px-3 py-3">
-                            <div className="grid gap-4 md:grid-cols-2">
+                            <div className="grid gap-4 lg:grid-cols-3">
                               <div className="space-y-1 text-sm text-muted">
                                 <p>
                                   <span className="text-primary">
@@ -222,18 +292,24 @@ export function AdminCustomersPanel() {
                                 </p>
                                 <p>
                                   <span className="text-primary">
-                                    {t("admin.customerPaymentMethods")}
+                                    {t("admin.loyaltyPoints")}
+                                  </span>
+                                  : {customer.loyaltyPoints}
+                                </p>
+                                <p>
+                                  <span className="text-primary">
+                                    {t("admin.loyaltyReferralCode")}
+                                  </span>
+                                  : {customer.referralCode ?? "—"}
+                                </p>
+                                <p>
+                                  <span className="text-primary">
+                                    {t("admin.customerCity")}
                                   </span>
                                   :{" "}
-                                  {customer.paymentMethods.length > 0
-                                    ? customer.paymentMethods
-                                        .map((method) =>
-                                          t(
-                                            `checkout.methods.${method}.label`,
-                                          ),
-                                        )
-                                        .join(", ")
-                                    : "—"}
+                                  {[customer.city, customer.country]
+                                    .filter(Boolean)
+                                    .join(", ") || "—"}
                                 </p>
                               </div>
                               <div>
@@ -264,15 +340,45 @@ export function AdminCustomersPanel() {
                                           `account.status.shipping.${order.shipping_status}`,
                                         )}
                                       </span>
-                                      <span>
-                                        {new Intl.DateTimeFormat(
-                                          toIntlLocale(i18n.language),
-                                          { dateStyle: "short" },
-                                        ).format(new Date(order.created_at))}
-                                      </span>
                                     </li>
                                   ))}
                                 </ul>
+                              </div>
+                              <div className="space-y-2 rounded-xl border border-border bg-background p-3">
+                                <p className="text-sm font-medium text-primary">
+                                  {t("admin.loyaltyAdjustTitle")}
+                                </p>
+                                <input
+                                  type="number"
+                                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+                                  value={adjustDelta}
+                                  onChange={(e) =>
+                                    setAdjustDelta(e.target.value)
+                                  }
+                                  placeholder={t(
+                                    "admin.loyaltyAdjustDeltaPlaceholder",
+                                  )}
+                                />
+                                <input
+                                  type="text"
+                                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+                                  value={adjustNote}
+                                  onChange={(e) =>
+                                    setAdjustNote(e.target.value)
+                                  }
+                                  placeholder={t(
+                                    "admin.loyaltyAdjustNotePlaceholder",
+                                  )}
+                                />
+                                <Button
+                                  type="button"
+                                  size="md"
+                                  pending={adjustPending}
+                                  disabled={!customer.userId}
+                                  onClick={() => void adjustPoints(customer)}
+                                >
+                                  {t("admin.loyaltyAdjustSubmit")}
+                                </Button>
                               </div>
                             </div>
                           </td>

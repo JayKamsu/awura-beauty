@@ -9,6 +9,7 @@
     "nav": {
       "profile": "Profil",
       "orders": "Commandes",
+      "loyalty": "Fidélité",
       "diagnostics": "Diagnostics",
       "messages": "Messages",
       "security": "Sécurité"
@@ -79,6 +80,35 @@
     "passwordSaving": "Mise à jour…",
     "passwordChanged": "Mot de passe mis à jour.",
     "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères.",
-    "passwordMismatch": "Les mots de passe ne correspondent pas."
+    "passwordMismatch": "Les mots de passe ne correspondent pas.",
+    "loyalty": {
+      "title": "Fidélité & parrainage",
+      "loading": "Chargement…",
+      "balanceLabel": "Solde de points",
+      "balanceValue": "{{count}} pts",
+      "rules": "1 € d’achats = 1 point. 100 points = 5 € de réduction. Parrainage : −10 % sur ta 1re commande, puis +100 pts pour toi et +200 pts pour ton parrain.",
+      "referralTitle": "Parrainer une amie",
+      "referralBody": "Partage ton lien : elle bénéficie de −10 % sur sa première commande, et vous gagnez toutes les deux des points après son paiement.",
+      "yourCode": "Ton code :",
+      "copyLink": "Copier le lien",
+      "copied": "Lien copié",
+      "historyTitle": "Historique",
+      "historyEmpty": "Aucun mouvement pour le moment.",
+      "reasons": {
+        "order_earn": "Points commande",
+        "order_redeem": "Utilisation de points",
+        "referral_referrer": "Bonus parrainage (parrain)",
+        "referral_referee": "Bonus parrainage (filleule)",
+        "admin_adjust": "Ajustement"
+      },
+      "errors": {
+        "generic": "Impossible d’appliquer le code parrain.",
+        "invalid_code": "Code parrain invalide.",
+        "self_referral": "Tu ne peux pas utiliser ton propre code.",
+        "already_referred": "Un parrain est déjà enregistré.",
+        "code_required": "Indique un code parrain.",
+        "profile_missing": "Profil introuvable."
+      }
+    }
   }
 }

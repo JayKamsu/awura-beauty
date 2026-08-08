@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { resolveOrderItemsFromCatalog } from "@/lib/application/checkout/resolve-order-items";
+import {
+  resolveCheckoutCart,
+  stripeLinesWithDiscount,
+} from "@/lib/application/checkout/resolve-checkout-cart";
 import { userIdFromRequest } from "@/lib/application/checkout/request-user";
 import { resolveCheckoutShipping } from "@/lib/application/checkout/shipping-options";
 import { container } from "@/lib/application/container";
@@ -19,6 +22,7 @@ type StripeCheckoutBody = {
   };
   shippingCarrier?: string;
   relayPointId?: string | null;
+  pointsToRedeem?: number;
 };
 
 function normalizeAddress(
@@ -34,26 +38,6 @@ function normalizeAddress(
   };
 }
 
-function stripeLineItems(
-  resolved: Awaited<ReturnType<typeof resolveOrderItemsFromCatalog>>,
-) {
-  const lines = resolved.items.map((item) => ({
-    name: item.name,
-    quantity: item.quantity,
-    unitAmountCents: Math.round(item.unit_price * 100),
-    imageUrl: item.image_url.startsWith("http") ? item.image_url : undefined,
-  }));
-  if (resolved.shippingFee > 0) {
-    lines.push({
-      name: "Frais de livraison",
-      quantity: 1,
-      unitAmountCents: Math.round(resolved.shippingFee * 100),
-      imageUrl: undefined,
-    });
-  }
-  return lines;
-}
-
 export async function POST(request: Request) {
   const body = (await request.json()) as StripeCheckoutBody;
 
@@ -66,10 +50,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: shipping.error }, { status: 400 });
   }
 
-  const resolved = await resolveOrderItemsFromCatalog(
-    body.items,
-    shipping.shippingCarrier,
-  );
+  const userId = await userIdFromRequest(request);
+  const resolved = await resolveCheckoutCart({
+    lines: body.items,
+    carrier: shipping.shippingCarrier,
+    userId,
+    pointsToRedeem: body.pointsToRedeem,
+  });
   if (resolved.error || !resolved.items.length) {
     return NextResponse.json(
       { error: resolved.error ?? "Invalid cart" },
@@ -77,12 +64,29 @@ export async function POST(request: Request) {
     );
   }
 
-  const userId = await userIdFromRequest(request);
   const currency = body.currency || "EUR";
   const origin = new URL(request.url).origin;
   const shippingAddress = normalizeAddress(
     body.shippingAddress,
     shipping.shippingCarrier,
+  );
+
+  const loyaltyFields = {
+    pointsEarned: resolved.loyalty.pointsToEarn,
+    pointsRedeemed: resolved.loyalty.pointsRedeemed,
+    discountAmount: resolved.loyalty.discountAmount,
+    referralDiscountApplied: resolved.loyalty.referralEligible,
+  };
+
+  const lineItems = stripeLinesWithDiscount(
+    resolved.items.map((item) => ({
+      name: item.name,
+      quantity: item.quantity,
+      unitAmountCents: Math.round(item.unit_price * 100),
+      imageUrl: item.image_url.startsWith("http") ? item.image_url : undefined,
+    })),
+    resolved.loyalty.discountAmount,
+    resolved.shippingFee,
   );
 
   const { order, error } = await container.orders.createOrder({
@@ -98,6 +102,7 @@ export async function POST(request: Request) {
     relayPointId: shipping.relayPointId,
     shippingFee: resolved.shippingFee,
     total: resolved.total,
+    ...loyaltyFields,
   });
 
   if (!order) {
@@ -109,7 +114,7 @@ export async function POST(request: Request) {
         currency,
         successUrl: `${origin}/commande/succes?orderId=${demoId}&session_id={CHECKOUT_SESSION_ID}`,
         cancelUrl: `${origin}/commande/annule`,
-        lineItems: stripeLineItems(resolved),
+        lineItems,
       });
 
       if (!session.url) {
@@ -130,7 +135,7 @@ export async function POST(request: Request) {
     currency,
     successUrl: `${origin}/commande/succes?orderId=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
     cancelUrl: `${origin}/commande/annule`,
-    lineItems: stripeLineItems(resolved),
+    lineItems,
   });
 
   if (!session.url) {

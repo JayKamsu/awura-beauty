@@ -79,6 +79,15 @@
     "cancelBody": "Aucun prélèvement n'a été effectué. Tu peux réessayer quand tu veux.",
     "viewAccount": "Voir mon compte",
     "retry": "Retour à la commande",
-    "trackShipping": "Suivre ma livraison"
+    "trackShipping": "Suivre ma livraison",
+    "loyaltyTitle": "Fidélité",
+    "loyaltyBalance": "Solde : {{count}} pts",
+    "referralEligible": "Réduction parrainage −10 % appliquée sur les produits (1re commande).",
+    "referralDiscount": "Parrainage (−10 %)",
+    "pointsDiscount": "Points fidélité",
+    "pointsToEarn": "Tu gagneras {{count}} pts après paiement.",
+    "usePoints": "Utiliser des points",
+    "usePointsNone": "Ne pas utiliser de points",
+    "usePointsOption": "{{points}} pts (−{{amount}})"
   }
 }

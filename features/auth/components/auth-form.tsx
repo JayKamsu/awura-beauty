@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, type FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { Button } from "@/components/ui/button";
+import { REF_STORAGE_KEY } from "@/features/account/components/account-loyalty-section";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { resolvePostLoginPath } from "@/features/auth/lib/resolve-post-login-path";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
@@ -24,18 +25,52 @@ export function AuthForm({
   showForgotPassword = true,
 }: AuthFormProps) {
   const { t } = useTranslation();
-  const { signIn, signUp, signInWithGoogle, configured } = useAuth();
+  const { signIn, signUp, signInWithGoogle, session, configured } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { locked, run } = useActionLock();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (mode !== "signup") return;
+    const fromQuery = searchParams.get("ref")?.trim().toUpperCase() ?? "";
+    if (fromQuery) {
+      setReferralCode(fromQuery);
+      window.localStorage.setItem(REF_STORAGE_KEY, fromQuery);
+    }
+  }, [mode, searchParams]);
+
+  const persistReferralCode = () => {
+    const code = referralCode.trim().toUpperCase();
+    if (code) window.localStorage.setItem(REF_STORAGE_KEY, code);
+  };
+
+  const attachReferralIfNeeded = async (accessToken: string | undefined) => {
+    const code =
+      referralCode.trim().toUpperCase() ||
+      window.localStorage.getItem(REF_STORAGE_KEY) ||
+      "";
+    if (!code || !accessToken) return;
+    await fetch("/api/account/loyalty/referral", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ code }),
+    });
+    window.localStorage.removeItem(REF_STORAGE_KEY);
+  };
 
   const onGoogle = () => {
     void run(async () => {
       setError(null);
       setInfo(null);
+      if (mode === "signup") persistReferralCode();
       const message = await signInWithGoogle(redirectTo);
       if (message) setError(message);
       // Sinon redirection navigateur vers Google — le verrou se libère au finally
@@ -60,6 +95,7 @@ export function AuthForm({
         return;
       }
 
+      persistReferralCode();
       const result = await signUp(email, password);
 
       if (result.error) {
@@ -72,6 +108,7 @@ export function AuthForm({
         return;
       }
 
+      await attachReferralIfNeeded(result.accessToken ?? undefined);
       setInfo(t("auth.signupSuccess"));
       router.push(redirectTo);
       router.refresh();
@@ -134,6 +171,20 @@ export function AuthForm({
           autoComplete={mode === "login" ? "current-password" : "new-password"}
         />
       </label>
+
+      {mode === "signup" ? (
+        <label className="block space-y-1.5 text-sm">
+          <span className="text-muted">{t("auth.referralCode")}</span>
+          <input
+            type="text"
+            className={fieldClass}
+            value={referralCode}
+            onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+            autoComplete="off"
+            placeholder={t("auth.referralCodePlaceholder")}
+          />
+        </label>
+      ) : null}
 
       {mode === "login" && showForgotPassword ? (
         <p className="text-right text-sm">

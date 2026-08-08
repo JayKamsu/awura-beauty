@@ -68,6 +68,21 @@ export type {
 export type { RelayPoint, ShippingMethod } from "@/lib/domain/shipping";
 
 export {
+  POINTS_PER_EURO,
+  REDEEM_STEP_POINTS,
+  REDEEM_STEP_EURO,
+  REFERRAL_FIRST_ORDER_PERCENT,
+  REFERRAL_REFERRER_BONUS,
+  REFERRAL_REFEREE_BONUS,
+  pointsFromSubtotal,
+  discountFromPoints,
+  clampRedeemablePoints,
+  firstOrderDiscountAmount,
+  buildOrderTotals,
+} from "@/lib/domain/loyalty";
+export type { LoyaltyReason } from "@/lib/domain/loyalty";
+
+export {
   DEFAULT_ABOUT_SECTIONS,
   DEFAULT_HOME_SECTIONS,
   PAGE_FIELD_KEYS,

@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
-import { resolveOrderItemsFromCatalog } from "@/lib/application/checkout/resolve-order-items";
+import { resolveCheckoutCart } from "@/lib/application/checkout/resolve-checkout-cart";
+import { userIdFromRequest } from "@/lib/application/checkout/request-user";
 import type { ShippingCarrier } from "@/lib/infrastructure/supabase/order-types";
 import { listShippingRates } from "@/lib/infrastructure/supabase/shipping-rates";
 
 const CARRIERS: ShippingCarrier[] = ["laposte", "mondial_relay", "pickup"];
 
-/** Liste des modes activés + devis pour un panier. */
+/** Liste des modes activés + devis pour un panier (fidélité si Bearer). */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const carrierRaw = searchParams.get("carrier") ?? "";
   const itemsRaw = searchParams.get("items") ?? "[]";
+  const pointsRaw = searchParams.get("pointsToRedeem") ?? "0";
 
   let items: Array<{ slug?: string; quantity?: number }> = [];
   try {
@@ -29,10 +31,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Invalid carrier" }, { status: 400 });
   }
 
-  const resolved = await resolveOrderItemsFromCatalog(
-    items,
-    carrierRaw as ShippingCarrier,
-  );
+  const userId = await userIdFromRequest(request);
+  const pointsToRedeem = Math.max(0, Math.floor(Number(pointsRaw) || 0));
+  const resolved = await resolveCheckoutCart({
+    lines: items,
+    carrier: carrierRaw as ShippingCarrier,
+    userId,
+    pointsToRedeem,
+  });
 
   if (resolved.error && !resolved.items.length) {
     return NextResponse.json({ error: resolved.error }, { status: 400 });
@@ -44,5 +50,6 @@ export async function GET(request: Request) {
     subtotal: resolved.subtotal,
     shippingFee: resolved.shippingFee,
     total: resolved.total,
+    loyalty: resolved.loyalty,
   });
 }

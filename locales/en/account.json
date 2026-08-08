@@ -9,6 +9,7 @@
     "nav": {
       "profile": "Profile",
       "orders": "Orders",
+      "loyalty": "Loyalty",
       "diagnostics": "Diagnostics",
       "messages": "Messages",
       "security": "Security"
@@ -79,6 +80,35 @@
     "passwordSaving": "Updating…",
     "passwordChanged": "Password updated.",
     "passwordTooShort": "Password must be at least 6 characters.",
-    "passwordMismatch": "Passwords do not match."
+    "passwordMismatch": "Passwords do not match.",
+    "loyalty": {
+      "title": "Loyalty & referrals",
+      "loading": "Loading…",
+      "balanceLabel": "Points balance",
+      "balanceValue": "{{count}} pts",
+      "rules": "€1 spent = 1 point. 100 points = €5 off. Referral: −10% on your first order, then +100 pts for you and +200 pts for your referrer.",
+      "referralTitle": "Refer a friend",
+      "referralBody": "Share your link: she gets −10% on her first order, and you both earn points after her payment.",
+      "yourCode": "Your code:",
+      "copyLink": "Copy link",
+      "copied": "Link copied",
+      "historyTitle": "History",
+      "historyEmpty": "No activity yet.",
+      "reasons": {
+        "order_earn": "Order points",
+        "order_redeem": "Points redeemed",
+        "referral_referrer": "Referral bonus (referrer)",
+        "referral_referee": "Referral bonus (friend)",
+        "admin_adjust": "Adjustment"
+      },
+      "errors": {
+        "generic": "Unable to apply referral code.",
+        "invalid_code": "Invalid referral code.",
+        "self_referral": "You can’t use your own code.",
+        "already_referred": "A referrer is already set.",
+        "code_required": "Enter a referral code.",
+        "profile_missing": "Profile not found."
+      }
+    }
   }
 }

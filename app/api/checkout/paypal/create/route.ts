@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolveOrderItemsFromCatalog } from "@/lib/application/checkout/resolve-order-items";
+import { resolveCheckoutCart } from "@/lib/application/checkout/resolve-checkout-cart";
 import { userIdFromRequest } from "@/lib/application/checkout/request-user";
 import { resolveCheckoutShipping } from "@/lib/application/checkout/shipping-options";
 import { createPayPalOrder } from "@/lib/infrastructure/payments/paypal";
@@ -20,6 +20,7 @@ type PayPalCreateBody = {
   };
   shippingCarrier?: string;
   relayPointId?: string | null;
+  pointsToRedeem?: number;
 };
 
 export async function POST(request: Request) {
@@ -34,10 +35,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: shipping.error }, { status: 400 });
   }
 
-  const resolved = await resolveOrderItemsFromCatalog(
-    body.items,
-    shipping.shippingCarrier,
-  );
+  const userId = await userIdFromRequest(request);
+  const resolved = await resolveCheckoutCart({
+    lines: body.items,
+    carrier: shipping.shippingCarrier,
+    userId,
+    pointsToRedeem: body.pointsToRedeem,
+  });
   if (resolved.error || !resolved.items.length) {
     return NextResponse.json(
       { error: resolved.error ?? "Invalid cart" },
@@ -45,7 +49,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const userId = await userIdFromRequest(request);
   const currency = body.currency || "EUR";
   const shippingAddress =
     shipping.shippingCarrier === "pickup"
@@ -70,6 +73,10 @@ export async function POST(request: Request) {
     relayPointId: shipping.relayPointId,
     shippingFee: resolved.shippingFee,
     total: resolved.total,
+    pointsEarned: resolved.loyalty.pointsToEarn,
+    pointsRedeemed: resolved.loyalty.pointsRedeemed,
+    discountAmount: resolved.loyalty.discountAmount,
+    referralDiscountApplied: resolved.loyalty.referralEligible,
   });
 
   const orderId = order?.id ?? `demo-${Date.now()}`;

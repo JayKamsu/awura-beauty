@@ -25,6 +25,10 @@ function mapOrder(row: Record<string, unknown>): OrderRow {
     label_url: row.label_url ? String(row.label_url) : null,
     relay_point_id: row.relay_point_id ? String(row.relay_point_id) : null,
     shipping_fee: Number(row.shipping_fee ?? 0),
+    points_earned: Number(row.points_earned ?? 0),
+    points_redeemed: Number(row.points_redeemed ?? 0),
+    discount_amount: Number(row.discount_amount ?? 0),
+    referral_discount_applied: Boolean(row.referral_discount_applied),
     total: Number(row.total ?? 0),
     currency: String(row.currency ?? "EUR"),
     items: (row.items as OrderItem[]) ?? [],
@@ -47,6 +51,10 @@ export type CreateOrderInput = {
   shippingFee?: number;
   /** Total TTC (produits + livraison). Si omis : somme items + shippingFee. */
   total?: number;
+  pointsEarned?: number;
+  pointsRedeemed?: number;
+  discountAmount?: number;
+  referralDiscountApplied?: boolean;
   /** Préférer userId issu du Bearer côté API (pas de session cookie serveur). */
   userId?: string | null;
 };
@@ -83,6 +91,13 @@ export async function createOrder(
       shipping_carrier: input.shippingCarrier ?? null,
       relay_point_id: input.relayPointId ?? null,
       shipping_fee: shippingFee,
+      points_earned: Math.max(0, Math.floor(Number(input.pointsEarned ?? 0))),
+      points_redeemed: Math.max(
+        0,
+        Math.floor(Number(input.pointsRedeemed ?? 0)),
+      ),
+      discount_amount: Math.max(0, Number(input.discountAmount ?? 0)),
+      referral_discount_applied: Boolean(input.referralDiscountApplied),
       total,
       currency: input.currency,
       items: input.items,

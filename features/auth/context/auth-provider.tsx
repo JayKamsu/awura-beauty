@@ -25,6 +25,7 @@ import { getSupabaseEnv } from "@/lib/infrastructure/supabase/client";
 export type SignUpResult = {
   error: string | null;
   needsEmailConfirmation: boolean;
+  accessToken?: string | null;
 };
 
 type AuthContextValue = {
@@ -88,7 +89,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = useCallback(async (email: string, password: string) => {
     const result = await signUpWithEmail(email, password);
     if (result.error?.message) {
-      return { error: result.error.message, needsEmailConfirmation: false };
+      return {
+        error: result.error.message,
+        needsEmailConfirmation: false,
+        accessToken: null,
+      };
     }
     if (result.session) {
       setSession(result.session);
@@ -97,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {
       error: null,
       needsEmailConfirmation: Boolean(result.needsEmailConfirmation),
+      accessToken: result.session?.access_token ?? null,
     };
   }, []);
 
