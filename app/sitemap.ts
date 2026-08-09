@@ -22,7 +22,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${base}${path || "/"}`,
     lastModified: now,
     changeFrequency: path === "" || path === "/boutique" ? "daily" : "weekly",
-    priority: path === "" ? 1 : path === "/boutique" ? 0.9 : 0.7,
+    priority:
+      path === ""
+        ? 1
+        : path === "/boutique"
+          ? 0.95
+          : path === "/diagnostic-capillaire"
+            ? 0.9
+            : path === "/a-propos"
+              ? 0.8
+              : 0.7,
   }));
 
   const [productSlugs, articleSlugs, tutorialSlugs] = await Promise.all([

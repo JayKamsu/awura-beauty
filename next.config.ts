@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    return [{ source: "/favicon.ico", destination: "/favicon.png" }];
+    return [{ source: "/favicon.ico", destination: "/icon" }];
   },
   async headers() {
     return [

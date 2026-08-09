@@ -1,12 +1,12 @@
 import { ImageResponse } from "next/og";
 import { resolveTransparentBrandLogo } from "@/lib/seo/brand-icon";
 
-export const size = { width: 64, height: 64 };
+export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 export const runtime = "nodejs";
 
-/** Favicon onglet : logo Awura fond transparent. */
-export default async function Icon() {
+/** Icône Apple Touch — logo transparent sur fond clair charte. */
+export default async function AppleIcon() {
   const logo = await resolveTransparentBrandLogo();
 
   return new ImageResponse(
@@ -18,14 +18,15 @@ export default async function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "transparent",
+          background: "#FAF3EC",
+          borderRadius: 36,
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={logo.src}
-          width={58}
-          height={58}
+          width={140}
+          height={140}
           alt=""
           style={{ objectFit: "contain" }}
         />

@@ -5,24 +5,50 @@ import {
   SITE_TAGLINE,
   absoluteUrl,
 } from "@/lib/site";
+import { BRAND_LOGOS } from "@/lib/brand";
 
 export function organizationJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": `${absoluteUrl("/")}#organization`,
     name: SITE_NAME,
+    alternateName: ["Awura", "AwuraBeauty", "Awura Beauty France"],
+    legalName: SITE_NAME,
     url: absoluteUrl("/"),
-    logo: absoluteUrl("/images/brand/logo-orange.png"),
+    logo: {
+      "@type": "ImageObject",
+      url: absoluteUrl(BRAND_LOGOS.black),
+      caption: `${SITE_NAME} logo`,
+    },
+    image: absoluteUrl(BRAND_LOGOS.black),
     email: CONTACT_EMAIL,
     description: SITE_DESCRIPTION,
+    slogan: SITE_TAGLINE,
     foundingDate: "2024",
     areaServed: ["FR", "EU"],
+    brand: {
+      "@type": "Brand",
+      name: SITE_NAME,
+      alternateName: ["Awura", "AwuraBeauty"],
+      logo: absoluteUrl(BRAND_LOGOS.black),
+    },
     knowsAbout: [
       "soins capillaires naturels",
       "cheveux texturés",
       "cheveux afro",
+      "cheveux crépus",
+      "cheveux métissés",
       "routine capillaire",
+      "diagnostic capillaire",
+      "cosmétique naturelle",
     ],
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer service",
+      email: CONTACT_EMAIL,
+      availableLanguage: ["fr", "en", "es"],
+    },
     sameAs: [] as string[],
   };
 }
@@ -31,19 +57,65 @@ export function websiteJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": `${absoluteUrl("/")}#website`,
     name: SITE_NAME,
+    alternateName: ["Awura", "AwuraBeauty", "awurabeauty.com"],
     url: absoluteUrl("/"),
     description: SITE_TAGLINE,
     inLanguage: ["fr", "en", "es"],
     publisher: {
-      "@type": "Organization",
-      name: SITE_NAME,
+      "@id": `${absoluteUrl("/")}#organization`,
     },
     potentialAction: {
       "@type": "SearchAction",
-      target: `${absoluteUrl("/recherche")}?q={search_term_string}`,
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${absoluteUrl("/recherche")}?q={search_term_string}`,
+      },
       "query-input": "required name=search_term_string",
     },
+  };
+}
+
+/** FAQ homepage — enrichit Google + citations IA. */
+export function faqJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "Qu'est-ce qu'Awura Beauty ?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Awura Beauty est une marque française de soins capillaires naturels et premium, conçus pour les cheveux texturés, afro, crépus et métissés. Boutique en ligne sur awurabeauty.com.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Pour quels types de cheveux sont faits les produits Awura Beauty ?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Les soins Awura Beauty sont pensés pour les cheveux texturés : afro, crépus, bouclés et métissés. Ils hydratent, démêlent, fortifient et subliment la fibre.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Awura Beauty propose-t-il un diagnostic capillaire ?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Oui. Un diagnostic en ligne gratuit (routine + recommandations produits) et un diagnostic présentiel avec trichogramme sont disponibles sur /diagnostic-capillaire.",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "Où acheter Awura Beauty ?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Sur la boutique officielle https://awurabeauty.com/boutique. Contact : Care@awurabeauty.com.",
+        },
+      },
+    ],
   };
 }
 
@@ -108,7 +180,7 @@ export function articleJsonLd(post: {
       name: SITE_NAME,
       logo: {
         "@type": "ImageObject",
-        url: absoluteUrl("/images/brand/logo-orange.png"),
+        url: absoluteUrl(BRAND_LOGOS.black),
       },
     },
     mainEntityOfPage: absoluteUrl(path),

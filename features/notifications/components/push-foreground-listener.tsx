@@ -31,7 +31,7 @@ export function PushForegroundListener() {
 
         const notification = new Notification(title, {
           body,
-          icon: "/favicon.png",
+          icon: "/icon",
           data: { link },
         });
 

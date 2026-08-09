@@ -13,10 +13,15 @@ export const SITE_DESCRIPTION =
 
 export const SITE_KEYWORDS = [
   "Awura Beauty",
+  "AwuraBeauty",
+  "Awura",
+  "awurabeauty.com",
   "soins capillaires naturels",
+  "soins cheveux afro",
   "cheveux texturés",
   "cheveux afro",
   "cheveux crépus",
+  "cheveux bouclés",
   "cheveux métissés",
   "beurre capillaire",
   "masque capillaire",
@@ -24,7 +29,9 @@ export const SITE_KEYWORDS = [
   "lotion repousse",
   "savon solide cheveux",
   "routine capillaire afro",
+  "diagnostic capillaire",
   "cosmétique naturelle France",
+  "marque afro hair France",
 ] as const;
 
 export const CONTACT_EMAIL =

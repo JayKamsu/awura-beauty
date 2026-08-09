@@ -7,6 +7,7 @@ import {
   absoluteUrl,
   getSiteUrl,
 } from "@/lib/site";
+import { BRAND_LOGOS } from "@/lib/brand";
 
 type BuildMetadataInput = {
   title?: string;
@@ -26,7 +27,7 @@ export function buildPageMetadata({
   noIndex = false,
 }: BuildMetadataInput = {}): Metadata {
   const url = absoluteUrl(path);
-  const ogImage = absoluteUrl(image || "/images/brand/logo-orange.png");
+  const ogImage = absoluteUrl(image || BRAND_LOGOS.black);
   const fullTitle = title ? `${title} · ${SITE_NAME}` : `${SITE_NAME} — ${SITE_TAGLINE}`;
 
   return {
@@ -83,6 +84,11 @@ export function buildPageMetadata({
 }
 
 export function rootMetadata(): Metadata {
+  // Token public Search Console (balise meta). Surcharge possible via env.
+  const googleVerification =
+    process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim() ||
+    "ulugKK_si80ZM209r2iNgEwmYKmIjxDwLouE3Objj28";
+
   return {
     ...buildPageMetadata({ path: "/" }),
     title: {
@@ -91,15 +97,15 @@ export function rootMetadata(): Metadata {
     },
     applicationName: SITE_NAME,
     category: "shopping",
+    // Favicon / onglet : route App Router /icon (logo transparent)
     icons: {
       icon: [
-        { url: "/favicon.png", sizes: "32x32", type: "image/png" },
-        { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-        { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
-        { url: "/images/brand/logo-orange.png", type: "image/png" },
+        { url: "/icon", type: "image/png", sizes: "64x64" },
+        { url: BRAND_LOGOS.black, type: "image/png" },
       ],
-      apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
-      shortcut: "/favicon.png",
+      apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
+      shortcut: "/icon",
     },
+    verification: { google: googleVerification },
   };
 }

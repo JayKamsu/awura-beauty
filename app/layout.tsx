@@ -5,7 +5,7 @@ import { SiteShell } from "@/components/layout/site-shell";
 import { JsonLd } from "@/components/seo/json-ld";
 import { I18nProvider } from "@/components/providers/i18n-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/json-ld";
+import { organizationJsonLd, websiteJsonLd, faqJsonLd } from "@/lib/seo/json-ld";
 import { rootMetadata } from "@/lib/seo/metadata";
 import "./globals.css";
 
@@ -28,6 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <JsonLd data={organizationJsonLd()} />
         <JsonLd data={websiteJsonLd()} />
+        <JsonLd data={faqJsonLd()} />
         <ThemeProvider>
           <I18nProvider>
             <SiteShell>{children}</SiteShell>
