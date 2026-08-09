@@ -81,10 +81,12 @@
     },
     "diagnostic": {
       "title": "Diagnostic Capillaire Personnalisé",
+      "tagline": "Comprendre. Adapter. Transformer.",
       "subtitle": "Quelques informations pour préparer un conseil vraiment adapté à ta couronne.",
       "submit": "Réserver mon diagnostic",
       "success": "Merci ! Nous te recontactons rapidement pour confirmer ton créneau.",
       "fields": {
+        "fullName": "Prénom / Nom",
         "firstName": "Prénom",
         "lastName": "Nom",
         "email": "E-mail",

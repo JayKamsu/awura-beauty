@@ -81,10 +81,12 @@
     },
     "diagnostic": {
       "title": "Diagnóstico Capilar Personalizado",
+      "tagline": "Comprender. Adaptar. Transformar.",
       "subtitle": "Algunos datos para preparar un consejo realmente adaptado a tu corona.",
       "submit": "Reservar mi diagnóstico",
       "success": "¡Gracias! Te contactaremos pronto para confirmar tu cita.",
       "fields": {
+        "fullName": "Nombre / Apellido",
         "firstName": "Nombre",
         "lastName": "Apellido",
         "email": "E-mail",

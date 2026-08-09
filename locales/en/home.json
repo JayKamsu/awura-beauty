@@ -81,10 +81,12 @@
     },
     "diagnostic": {
       "title": "Personalized Hair Diagnostic",
+      "tagline": "Understand. Adapt. Transform.",
       "subtitle": "A few details so we can prepare advice tailored to your crown.",
       "submit": "Book my diagnostic",
       "success": "Thank you! We'll get back to you shortly to confirm your slot.",
       "fields": {
+        "fullName": "First & last name",
         "firstName": "First name",
         "lastName": "Last name",
         "email": "Email",
