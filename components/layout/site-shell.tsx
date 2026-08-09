@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import { SkipLink } from "@/components/a11y/skip-link";
 import { BrandSettingsProvider, useBrandSettings } from "@/components/brand/brand-settings-provider";
 import { DuafePattern } from "@/components/brand/duafe-pattern";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
@@ -23,12 +24,19 @@ function PublicShell({ children }: { children: ReactNode }) {
 
   return (
     <>
+      <SkipLink />
       <div className="relative flex min-h-full flex-1 flex-col">
         <DuafePattern enabled={settings.showDuafePattern} />
         <div className="relative z-[1] flex min-h-full flex-1 flex-col">
           <AnnouncementBar />
           <Header />
-          <div className="flex flex-1 flex-col pb-20 lg:pb-0">{children}</div>
+          <div
+            id="main-content"
+            tabIndex={-1}
+            className="flex flex-1 flex-col outline-none pb-20 lg:pb-0"
+          >
+            {children}
+          </div>
           <Footer />
           <MobileBottomNav />
         </div>

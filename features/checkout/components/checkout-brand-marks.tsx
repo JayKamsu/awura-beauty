@@ -62,9 +62,9 @@ export function ColissimoMark({ className, title = "Colissimo" }: MarkProps) {
     <BrandImg
       src="/images/shipping/colissimo.svg"
       title={title}
-      className={className}
-      width={120}
-      height={28}
+      className={className ?? "h-8 w-auto object-contain object-left"}
+      width={200}
+      height={48}
     />
   );
 }
@@ -78,9 +78,9 @@ export function MondialRelayMark({
     <BrandImg
       src="/images/shipping/mondial-relay.svg"
       title={title}
-      className={className}
-      width={120}
-      height={28}
+      className={className ?? "h-8 w-auto object-contain object-left"}
+      width={220}
+      height={48}
     />
   );
 }

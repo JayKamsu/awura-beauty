@@ -3,6 +3,7 @@
 /*
   Design system Awura Beauty — charte officielle (docs/design-system/).
   Tokens sémantiques pour Tailwind ; hex bruts --awura-* pour référence.
+  Contrastes calés WCAG 2.2 AA (texte normal ≥ 4.5:1).
 */
 
 :root {
@@ -24,35 +25,45 @@
   --awura-background: var(--awura-beige-sand);
   --awura-background-alt: #f0e8d8;
   --awura-primary: var(--awura-green-forest);
-  --awura-accent: var(--awura-gold-warm);
-  --awura-accent-light: var(--awura-green-sage);
+  /* Or un peu plus soutenu : lisible sur sable (≥ 4.5:1) */
+  --awura-accent: #b56f12;
+  --awura-accent-light: #6f8a66;
   --awura-foreground: var(--awura-black-ebony);
-  --awura-muted: #5a6b5c;
+  --awura-muted: #4a5c4e;
   --awura-border: #d4c4a8;
+  /* Bandes marque (footer, engagements) — toujours Vert Forêt */
+  --awura-brand: var(--awura-green-forest);
+  --awura-on-brand: var(--awura-white);
 }
 
 /* Dark — dérivé charte (forêt + or + sable) */
 .dark {
   --awura-background: #0a281f;
   --awura-background-alt: #143d2e;
-  --awura-primary: var(--awura-green-sage);
-  --awura-accent: var(--awura-gold-warm);
-  --awura-accent-light: #f0b06a;
+  /* Primary boutons : sauge claire sur fond sombre */
+  --awura-primary: #c5d6bb;
+  /* Or plus clair pour contraste sur fond forêt */
+  --awura-accent: #f0a84a;
+  --awura-accent-light: #d4e0cd;
   --awura-foreground: var(--awura-beige-sand);
-  --awura-muted: #a6bb9a;
+  --awura-muted: #b7c9ae;
   --awura-border: #2a4a3c;
+  --awura-brand: var(--awura-green-forest);
+  --awura-on-brand: var(--awura-white);
 }
 
 /* Univers Enfant — activer via data-awura-universe="child" sur un wrapper */
 [data-awura-universe="child"] {
   --awura-background: var(--awura-cream-light);
   --awura-background-alt: var(--awura-peach-soft);
-  --awura-primary: #3d7a4a;
-  --awura-accent: #e8a07a;
-  --awura-accent-light: var(--awura-green-pastel);
+  --awura-primary: #2f6b3c;
+  --awura-accent: #c46a3a;
+  --awura-accent-light: #5a9a66;
   --awura-foreground: #2a3d2e;
-  --awura-muted: #6b7d6e;
+  --awura-muted: #5a6d5c;
   --awura-border: #e0d0c0;
+  --awura-brand: #2f6b3c;
+  --awura-on-brand: var(--awura-white);
 }
 
 @theme inline {
@@ -64,6 +75,8 @@
   --color-foreground: var(--awura-foreground);
   --color-muted: var(--awura-muted);
   --color-border: var(--awura-border);
+  --color-brand: var(--awura-brand);
+  --color-on-brand: var(--awura-on-brand);
   --font-sans: var(--font-awura-sans);
   --font-serif: var(--font-awura-sans);
 }
@@ -79,4 +92,26 @@ body {
 .font-serif {
   font-family: var(--font-awura-sans), ui-sans-serif, sans-serif;
   font-weight: 800;
+}
+
+/* Focus clavier visible (WCAG 2.4.7) */
+:focus-visible {
+  outline: 2px solid var(--awura-accent);
+  outline-offset: 2px;
+}
+
+/* Réduction des animations (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

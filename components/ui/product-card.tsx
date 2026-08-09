@@ -95,7 +95,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
               alt={product.name}
               fill
               className="object-cover transition duration-500 [@media(hover:hover)]:group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 20vw"
+              sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 20vw"
             />
           </span>
           {hasIngredientsImage ? (
@@ -112,7 +112,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                 alt={t("shop.ingredientAlt", { name: product.name })}
                 fill
                 className="object-cover"
-                sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 20vw"
+                sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 20vw"
               />
             </span>
           ) : null}
@@ -137,21 +137,23 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <h3 className="font-serif text-xl text-primary">
+      <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
+        <h3 className="font-serif text-base leading-snug text-primary sm:text-xl">
           <Link href={href} className="transition hover:text-accent">
             {product.name}
           </Link>
         </h3>
-        <p className="text-sm text-muted">{product.shortDescription}</p>
-        <div className="mt-auto flex items-center justify-between gap-3 pt-3">
-          <p className="font-medium text-primary">
+        <p className="line-clamp-2 text-xs text-muted sm:text-sm">
+          {product.shortDescription}
+        </p>
+        <div className="mt-auto flex items-center justify-between gap-2 pt-2 sm:gap-3 sm:pt-3">
+          <p className="text-sm font-medium text-primary sm:text-base">
             {formatPrice(product.price, currency, i18n.language)}
           </p>
           <button
             type="button"
             onClick={handleAdd}
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-background transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-background transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:size-11"
             aria-label={t("shop.addToCart", { name: product.name })}
           >
             <svg

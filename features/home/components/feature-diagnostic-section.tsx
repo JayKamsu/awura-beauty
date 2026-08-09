@@ -2,20 +2,22 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/features/auth/context/auth-provider";
 import {
   cmsOr,
   usePageCmsFields,
 } from "@/features/cms/context/page-cms-context";
+import { writeDiagnosticLead } from "@/features/diagnostic/lib/lead-storage";
 import { HOME_IMAGES } from "@/features/home/data/content";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
+import { getMyProfile } from "@/lib/infrastructure/supabase/profiles";
+import { profileFullName } from "@/lib/infrastructure/supabase/profile-types";
 
 const fieldClass =
   "w-full rounded-xl border border-border/80 bg-background px-3.5 py-3 text-sm text-foreground outline-none transition placeholder:text-muted/70 focus:border-accent focus:ring-2 focus:ring-accent/20";
-
-const LEAD_STORAGE_KEY = "awura-diagnostic-lead";
 
 /**
  * Bloc diagnostic accueil — formulaire + feuillage (maquette Luxury Organic).
@@ -23,6 +25,7 @@ const LEAD_STORAGE_KEY = "awura-diagnostic-lead";
 export function FeatureDiagnosticSection() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { user } = useAuth();
   const cms = usePageCmsFields("feature");
   const { locked: pending, run } = useActionLock();
   const leafImage = cmsOr(cms, "image_url", HOME_IMAGES.feature);
@@ -33,7 +36,42 @@ export function FeatureDiagnosticSection() {
   const [hairType, setHairType] = useState("");
   const [concern, setConcern] = useState("");
   const [goal, setGoal] = useState("");
-  const [slot, setSlot] = useState("");
+  const [profileFilled, setProfileFilled] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      if (!user) {
+        setProfileFilled(false);
+        return;
+      }
+      let nextName = "";
+      const nextEmail = user.email ?? "";
+      let nextPhone = "";
+      const profile = await getMyProfile();
+      if (cancelled) return;
+      if (profile) {
+        nextName = profileFullName(profile);
+        if (profile.phone.trim()) nextPhone = profile.phone.trim();
+      }
+      const metaName =
+        typeof user.user_metadata?.full_name === "string"
+          ? user.user_metadata.full_name
+          : typeof user.user_metadata?.name === "string"
+            ? user.user_metadata.name
+            : "";
+      if (!nextName && metaName) nextName = metaName;
+      setFullName(nextName);
+      setEmail(nextEmail);
+      setPhone(nextPhone);
+      setProfileFilled(
+        Boolean(nextName.trim() && nextEmail.trim() && nextPhone.trim()),
+      );
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const hairTypes = t("home.diagnostic.options.hairType", {
     returnObjects: true,
@@ -49,7 +87,7 @@ export function FeatureDiagnosticSection() {
     event.preventDefault();
     void run(async () => {
       const [firstName, ...rest] = fullName.trim().split(/\s+/);
-      const lead = {
+      writeDiagnosticLead({
         firstName: firstName || fullName.trim(),
         lastName: rest.join(" "),
         email: email.trim(),
@@ -57,13 +95,7 @@ export function FeatureDiagnosticSection() {
         hairType,
         concern,
         goal,
-        slot,
-      };
-      try {
-        window.sessionStorage.setItem(LEAD_STORAGE_KEY, JSON.stringify(lead));
-      } catch {
-        /* ignore */
-      }
+      });
       router.push("/diagnostic-capillaire?mode=physical");
     });
   };
@@ -88,40 +120,58 @@ export function FeatureDiagnosticSection() {
             onSubmit={onSubmit}
             className="grid gap-3 sm:grid-cols-2 sm:gap-4"
           >
-            <label className="block space-y-1.5 text-sm sm:col-span-2">
-              <span className="sr-only">{t("home.diagnostic.fields.fullName")}</span>
-              <input
-                required
-                className={fieldClass}
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder={t("home.diagnostic.fields.fullName")}
-                autoComplete="name"
-              />
-            </label>
-            <label className="block space-y-1.5 text-sm">
-              <span className="sr-only">{t("home.diagnostic.fields.email")}</span>
-              <input
-                required
-                type="email"
-                className={fieldClass}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t("home.diagnostic.fields.email")}
-                autoComplete="email"
-              />
-            </label>
-            <label className="block space-y-1.5 text-sm">
-              <span className="sr-only">{t("home.diagnostic.fields.phone")}</span>
-              <input
-                type="tel"
-                className={fieldClass}
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder={t("home.diagnostic.fields.phone")}
-                autoComplete="tel"
-              />
-            </label>
+            {profileFilled ? (
+              <div className="rounded-2xl border border-border/60 bg-background px-4 py-3 text-sm sm:col-span-2">
+                <p className="font-medium text-primary">{fullName}</p>
+                <p className="text-muted">
+                  {email}
+                  {phone ? ` · ${phone}` : null}
+                </p>
+              </div>
+            ) : (
+              <>
+                <label className="block space-y-1.5 text-sm sm:col-span-2">
+                  <span className="sr-only">
+                    {t("home.diagnostic.fields.fullName")}
+                  </span>
+                  <input
+                    required
+                    className={fieldClass}
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder={t("home.diagnostic.fields.fullName")}
+                    autoComplete="name"
+                  />
+                </label>
+                <label className="block space-y-1.5 text-sm">
+                  <span className="sr-only">
+                    {t("home.diagnostic.fields.email")}
+                  </span>
+                  <input
+                    required
+                    type="email"
+                    className={fieldClass}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={t("home.diagnostic.fields.email")}
+                    autoComplete="email"
+                  />
+                </label>
+                <label className="block space-y-1.5 text-sm">
+                  <span className="sr-only">
+                    {t("home.diagnostic.fields.phone")}
+                  </span>
+                  <input
+                    type="tel"
+                    className={fieldClass}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder={t("home.diagnostic.fields.phone")}
+                    autoComplete="tel"
+                  />
+                </label>
+              </>
+            )}
             <label className="block space-y-1.5 text-sm">
               <span className="sr-only">{t("home.diagnostic.fields.hairType")}</span>
               <select
@@ -180,31 +230,6 @@ export function FeatureDiagnosticSection() {
                   : null}
               </select>
             </label>
-            <label className="relative block space-y-1.5 text-sm sm:col-span-2">
-              <span className="sr-only">{t("home.diagnostic.fields.slot")}</span>
-              <input
-                type="datetime-local"
-                className={`${fieldClass} pr-11`}
-                value={slot}
-                onChange={(e) => setSlot(e.target.value)}
-                placeholder={t("home.diagnostic.fields.slot")}
-              />
-              <span
-                className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-accent"
-                aria-hidden
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="size-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                >
-                  <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
-                  <path d="M8 3.5v3M16 3.5v3M3.5 10h17" />
-                </svg>
-              </span>
-            </label>
             <div className="sm:col-span-2">
               <Button type="submit" size="lg" className="w-full" pending={pending}>
                 {cmsOr(cms, "cta_label", t("home.diagnostic.submit"))}
@@ -232,7 +257,7 @@ export function FeatureDiagnosticSection() {
             aria-hidden
           >
             <Image
-              src="/images/ingredients/ingredient-2.jpg"
+              src="/images/ingredients/ingredient-1.jpg"
               alt=""
               fill
               className="object-cover scale-110"
@@ -254,13 +279,12 @@ export function FeatureDiagnosticSection() {
         </div>
       </div>
 
-      {/* Feuillage mobile */}
       <div
         className="pointer-events-none absolute -right-10 bottom-0 h-40 w-40 opacity-40 lg:hidden"
         aria-hidden
       >
         <Image
-          src="/images/ingredients/plants-foliage.jpg"
+          src="/images/ingredients/ingredient-1.jpg"
           alt=""
           fill
           className="rounded-full object-cover"
@@ -270,5 +294,3 @@ export function FeatureDiagnosticSection() {
     </section>
   );
 }
-
-export { LEAD_STORAGE_KEY };

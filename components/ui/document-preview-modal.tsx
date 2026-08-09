@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 
 type DocumentPreviewModalProps = {
   title: string;
@@ -19,6 +20,9 @@ export function DocumentPreviewModal({
   onClose,
 }: DocumentPreviewModalProps) {
   const { t } = useTranslation();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(true, dialogRef);
+
   const lower = url.toLowerCase();
   const isImage =
     lower.includes(".png") ||
@@ -27,24 +31,33 @@ export function DocumentPreviewModal({
     lower.includes(".webp");
 
   useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
   }, [onClose]);
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-lg">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        tabIndex={-1}
+        className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-lg outline-none"
+      >
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
           <div>
             <p className="font-serif text-lg text-primary">{title}</p>
@@ -55,7 +68,7 @@ export function DocumentPreviewModal({
               href={url}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-primary px-4 py-2 text-sm font-medium uppercase text-primary transition hover:bg-primary/10"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-primary px-4 py-2 text-sm font-medium uppercase text-primary transition hover:bg-primary/10"
             >
               {t("common.openInNewTab")}
             </a>

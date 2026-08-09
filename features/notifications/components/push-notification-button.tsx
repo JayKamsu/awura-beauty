@@ -7,10 +7,11 @@ import { useAuth } from "@/features/auth/context/auth-provider";
 import { usePushSubscription } from "@/features/notifications/hooks/use-push-subscription";
 import { useLiveRefresh } from "@/lib/hooks/use-live-refresh";
 import type { InboxNotification } from "@/lib/infrastructure/supabase/notifications-inbox";
+import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 
 const iconClass =
-  "relative inline-flex size-11 items-center justify-center rounded-xl text-foreground transition hover:bg-background-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+  "relative inline-flex size-10 items-center justify-center rounded-xl text-foreground transition hover:bg-background-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:size-11";
 
 const REFRESH_EVENT = "awura:notifications-refresh";
 
@@ -45,6 +46,9 @@ export function PushNotificationButton({
   const [unread, setUnread] = useState(0);
   const [loading, setLoading] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const inboxRef = useRef<HTMLDivElement>(null);
+  const showInbox = open && permission !== "denied";
+  useFocusTrap(showInbox, inboxRef);
 
   const load = useCallback(
     async (opts?: { silent?: boolean }) => {
@@ -172,7 +176,6 @@ export function PushNotificationButton({
   };
 
   const showDeniedHelp = open && permission === "denied";
-  const showInbox = open && permission !== "denied";
 
   return (
     <div ref={rootRef} className="relative">
@@ -225,9 +228,12 @@ export function PushNotificationButton({
 
       {showInbox ? (
         <div
-          className="fixed inset-x-3 top-[4.5rem] z-50 mx-auto flex max-h-[min(28rem,70vh)] w-auto max-w-md flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-lg sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-[22rem]"
+          ref={inboxRef}
+          className="fixed inset-x-3 top-[4.5rem] z-50 mx-auto flex max-h-[min(28rem,70vh)] w-auto max-w-md flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-lg outline-none sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-[22rem]"
           role="dialog"
+          aria-modal="true"
           aria-label={t("support.push.inboxTitle")}
+          tabIndex={-1}
         >
           <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5">
             <p className="font-serif text-lg text-primary">

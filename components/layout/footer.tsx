@@ -43,37 +43,43 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto bg-primary text-background">
+    <footer className="mt-auto bg-brand text-on-brand">
       <div className="mx-auto flex max-w-7xl flex-col items-start gap-8 px-4 pt-12 md:px-6">
         <Link href="/" aria-label={t("header.brand")} className="inline-flex">
-          <BrandLogo tone="on-dark" className="h-16 w-auto sm:h-20" sizes="200px" />
+          <BrandLogo tone="on-dark" className="h-14 w-auto sm:h-20" sizes="200px" />
         </Link>
       </div>
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4 md:px-6">
         {FOOTER_BLOCKS.map((block) => (
           <div key={block.key} className="space-y-3">
-            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-background/10 text-accent-light">
-              <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.75">
+            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-on-brand/10 text-accent">
+              <svg
+                viewBox="0 0 24 24"
+                className="size-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              >
                 {block.icon}
               </svg>
             </div>
-            <h2 className="font-serif text-xl tracking-wide">
+            <h2 className="font-serif text-xl tracking-wide text-on-brand">
               {t(`footer.${block.key}.title`)}
             </h2>
-            <p className="text-sm leading-relaxed text-background/80">
+            <p className="text-sm leading-relaxed text-on-brand/85">
               {t(`footer.${block.key}.description`)}
             </p>
             {block.key === "customerService" ? (
               <div className="space-y-1 text-sm">
                 <a
                   href={`mailto:${CONTACT_EMAIL}`}
-                  className="block text-accent-light transition hover:text-background"
+                  className="block font-medium text-on-brand underline decoration-accent decoration-2 underline-offset-4 transition hover:text-accent"
                 >
                   {CONTACT_EMAIL}
                 </a>
                 <Link
                   href="/contact"
-                  className="block text-background/80 underline-offset-4 hover:text-background hover:underline"
+                  className="block text-on-brand/85 underline-offset-4 hover:text-on-brand hover:underline"
                 >
                   {t("footer.contactLink")}
                 </Link>
@@ -82,7 +88,7 @@ export function Footer() {
           </div>
         ))}
       </div>
-      <div className="border-t border-background/15 px-4 py-4 text-center text-xs text-background/70 md:px-6">
+      <div className="border-t border-on-brand/20 px-4 py-4 pb-[calc(1rem+4.5rem)] text-center text-xs text-on-brand/75 md:px-6 lg:pb-4">
         © {year} {t("footer.brand")} — {t("footer.rights")}
       </div>
     </footer>

@@ -852,7 +852,12 @@ export function CheckoutPageContent() {
         </section>
 
         {error ? (
-          <p className="text-sm text-accent" role="alert">
+          <p
+            id="checkout-error"
+            className="text-sm text-accent"
+            role="alert"
+            aria-live="assertive"
+          >
             {error}
           </p>
         ) : null}

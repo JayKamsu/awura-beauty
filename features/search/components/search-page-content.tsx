@@ -23,36 +23,40 @@ export function SearchPageContent({
   const total = products.length + posts.length;
 
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-4 py-14 md:px-6">
-      <header className="mx-auto max-w-2xl space-y-4 text-center">
-        <h1 className="font-serif text-4xl text-primary md:text-5xl">
-          {t("search.title")}
-        </h1>
-        <p className="text-muted">{t("search.subtitle")}</p>
-        <SearchForm initialQuery={query} />
+    <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 pb-6 pt-4 sm:gap-10 sm:py-10 md:px-6 md:py-14">
+      <header className="space-y-3 sm:mx-auto sm:max-w-2xl sm:space-y-4 sm:text-center">
+        <div className="space-y-1 sm:space-y-2">
+          <h1 className="font-serif text-2xl text-primary sm:text-4xl md:text-5xl">
+            {t("search.title")}
+          </h1>
+          <p className="text-sm text-muted sm:text-base">{t("search.subtitle")}</p>
+        </div>
+        <SearchForm initialQuery={query} autoFocus={!hasQuery} />
       </header>
 
       {!hasQuery ? (
-        <p className="py-10 text-center text-muted">{t("search.idle")}</p>
+        <p className="py-8 text-center text-sm text-muted sm:py-10 sm:text-base">
+          {t("search.idle")}
+        </p>
       ) : total === 0 ? (
-        <p className="py-10 text-center text-muted">
+        <p className="py-8 text-center text-sm text-muted sm:py-10 sm:text-base">
           {t("search.empty", { query })}
         </p>
       ) : (
-        <div className="space-y-12">
+        <div className="space-y-8 sm:space-y-12">
           <p className="text-sm text-muted">
             {t("search.resultsCount", { count: total })}
           </p>
 
           {products.length > 0 ? (
-            <section className="space-y-6" aria-labelledby="search-products">
+            <section className="space-y-4 sm:space-y-6" aria-labelledby="search-products">
               <h2
                 id="search-products"
-                className="font-serif text-3xl text-primary"
+                className="font-serif text-2xl text-primary sm:text-3xl"
               >
                 {t("search.productsHeading")}
               </h2>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -61,11 +65,14 @@ export function SearchPageContent({
           ) : null}
 
           {posts.length > 0 ? (
-            <section className="space-y-6" aria-labelledby="search-posts">
-              <h2 id="search-posts" className="font-serif text-3xl text-primary">
+            <section className="space-y-4 sm:space-y-6" aria-labelledby="search-posts">
+              <h2
+                id="search-posts"
+                className="font-serif text-2xl text-primary sm:text-3xl"
+              >
                 {t("search.postsHeading")}
               </h2>
-              <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <ul className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {posts.map((post) => {
                   const href =
                     post.kind === "tutorial"
@@ -86,8 +93,8 @@ export function SearchPageContent({
                             sizes="(max-width: 768px) 100vw, 33vw"
                           />
                         </Link>
-                        <div className="flex flex-1 flex-col gap-2 p-5">
-                          <h3 className="font-serif text-xl text-primary">
+                        <div className="flex flex-1 flex-col gap-2 p-4 sm:p-5">
+                          <h3 className="font-serif text-lg text-primary sm:text-xl">
                             <Link href={href} className="hover:text-accent">
                               {post.title}
                             </Link>

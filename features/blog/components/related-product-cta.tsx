@@ -13,26 +13,26 @@ export function RelatedProductCta({ product }: RelatedProductCtaProps) {
   const { t } = useTranslation();
 
   return (
-    <aside className="rounded-[2rem] bg-primary px-6 py-8 text-background md:px-8">
-      <p className="text-sm uppercase tracking-[0.18em] text-accent-light">
+    <aside className="rounded-[2rem] bg-brand px-6 py-8 text-on-brand md:px-8">
+      <p className="text-sm uppercase tracking-[0.18em] text-accent">
         {t("blog.relatedProduct.eyebrow")}
       </p>
-      <h2 className="mt-3 font-serif text-3xl text-accent-light">
+      <h2 className="mt-3 font-serif text-3xl text-on-brand">
         {product.name}
       </h2>
-      <p className="mt-3 max-w-xl text-background/85">
+      <p className="mt-3 max-w-xl text-on-brand/85">
         {product.short_description}
       </p>
       <div className="mt-6">
         <Button
           href={`/boutique/${product.slug}`}
           variant="accent-outline"
-          className="border-accent-light text-accent-light hover:bg-accent-light/10"
+          className="border-accent text-accent hover:bg-accent/10"
         >
           {t("blog.relatedProduct.cta")}
         </Button>
       </div>
-      <p className="mt-4 text-sm text-background/70">
+      <p className="mt-4 text-sm text-on-brand/75">
         <Link href={`/boutique/${product.slug}`} className="underline-offset-2 hover:underline">
           {t("blog.relatedProduct.linkLabel", { name: product.name })}
         </Link>

@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 import { useTranslation } from "react-i18next";
 import { usePreferences } from "@/components/providers/preferences-provider";
+import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import {
   type AppCurrency,
   type AppLocale,
@@ -13,23 +14,117 @@ import {
 } from "@/lib/i18n/config";
 
 const iconClass =
-  "inline-flex size-11 items-center justify-center rounded-xl text-foreground transition hover:bg-background-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+  "inline-flex size-10 items-center justify-center rounded-xl text-foreground transition hover:bg-background-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:size-11";
 
-/**
- * Bouton paramètres header : langue, devise, thème (remplace les selects).
- */
-export function PreferencesSettingsButton() {
+type PreferencesPanelProps = {
+  id?: string;
+  className?: string;
+  hideTitle?: boolean;
+};
+
+/** Contenu langue / devise / thème (réutilisable header + menu mobile). */
+export function PreferencesPanel({
+  id,
+  className,
+  hideTitle = false,
+}: PreferencesPanelProps) {
   const { t } = useTranslation();
   const { locale, currency, setLocale, setCurrency } = usePreferences();
   const { resolvedTheme, setTheme } = useTheme();
-  const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const panelId = useId();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const isDark = mounted && resolvedTheme === "dark";
+
+  return (
+    <div id={id} className={className}>
+      {!hideTitle ? (
+        <p className="font-serif text-lg text-primary">{t("header.settings")}</p>
+      ) : null}
+
+      <fieldset className={hideTitle ? "space-y-2" : "mt-4 space-y-2"}>
+        <legend className="text-xs font-medium uppercase tracking-wide text-muted">
+          {t("header.language")}
+        </legend>
+        <div className="flex flex-wrap gap-1.5">
+          {supportedLocales.map((code) => {
+            const active = locale === code;
+            return (
+              <button
+                key={code}
+                type="button"
+                onClick={() => setLocale(code as AppLocale)}
+                className={`min-h-11 min-w-12 rounded-xl px-3 text-sm transition ${
+                  active
+                    ? "bg-primary text-background"
+                    : "bg-background-alt text-foreground"
+                }`}
+                aria-pressed={active}
+              >
+                {localeDisplayNames[code]}
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
+
+      <fieldset className="mt-4 space-y-2">
+        <legend className="text-xs font-medium uppercase tracking-wide text-muted">
+          {t("header.currency")}
+        </legend>
+        <div className="flex flex-wrap gap-1.5">
+          {supportedCurrencies.map((code) => {
+            const active = currency === code;
+            return (
+              <button
+                key={code}
+                type="button"
+                onClick={() => setCurrency(code as AppCurrency)}
+                className={`min-h-11 min-w-12 rounded-xl px-3 text-sm transition ${
+                  active
+                    ? "bg-primary text-background"
+                    : "bg-background-alt text-foreground"
+                }`}
+                aria-pressed={active}
+              >
+                {code}
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
+
+      <div className="mt-4 border-t border-border pt-4">
+        <button
+          type="button"
+          disabled={!mounted}
+          onClick={() => setTheme(isDark ? "light" : "dark")}
+          className="flex min-h-11 w-full items-center justify-between rounded-xl bg-background-alt px-3 text-sm text-foreground transition hover:bg-background-alt/80"
+        >
+          <span>{t("header.theme")}</span>
+          <span className="font-medium text-foreground">
+            {isDark ? t("header.themeDark") : t("header.themeLight")}
+          </span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Bouton paramètres header : langue, devise, thème.
+ * Desktop = popover ; mobile = bottom sheet.
+ */
+export function PreferencesSettingsButton() {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const panelId = useId();
+  useFocusTrap(open, dialogRef);
 
   useEffect(() => {
     if (!open) return;
@@ -47,7 +142,15 @@ export function PreferencesSettingsButton() {
     };
   }, [open]);
 
-  const isDark = mounted && resolvedTheme === "dark";
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    const isMobile = window.matchMedia("(max-width: 1023px)").matches;
+    if (isMobile) document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
 
   return (
     <div ref={rootRef} className="relative">
@@ -74,82 +177,47 @@ export function PreferencesSettingsButton() {
       </button>
 
       {open ? (
-        <div
-          id={panelId}
-          role="dialog"
-          aria-label={t("header.settings")}
-          className="absolute right-0 z-50 mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-border bg-background p-4 shadow-lg"
-        >
-          <p className="font-serif text-lg text-primary">
-            {t("header.settings")}
-          </p>
-
-          <fieldset className="mt-4 space-y-2">
-            <legend className="text-xs font-medium uppercase tracking-wide text-muted">
-              {t("header.language")}
-            </legend>
-            <div className="flex flex-wrap gap-1.5">
-              {supportedLocales.map((code) => {
-                const active = locale === code;
-                return (
-                  <button
-                    key={code}
-                    type="button"
-                    onClick={() => setLocale(code as AppLocale)}
-                    className={`min-h-10 min-w-12 rounded-xl px-3 text-sm transition ${
-                      active
-                        ? "bg-primary text-background"
-                        : "bg-background-alt text-muted hover:text-foreground"
-                    }`}
-                    aria-pressed={active}
-                  >
-                    {localeDisplayNames[code]}
-                  </button>
-                );
-              })}
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-50 bg-foreground/40 lg:hidden"
+            aria-label={t("common.close")}
+            onClick={() => setOpen(false)}
+          />
+          <div
+            ref={dialogRef}
+            id={panelId}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("header.settings")}
+            tabIndex={-1}
+            className="fixed inset-x-0 bottom-0 z-50 max-h-[min(85vh,36rem)] overflow-y-auto rounded-t-3xl border border-border bg-background p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl outline-none lg:absolute lg:inset-auto lg:right-0 lg:bottom-auto lg:mt-2 lg:max-h-none lg:w-[min(18rem,calc(100vw-2rem))] lg:overflow-visible lg:rounded-2xl lg:p-4 lg:pb-4 lg:shadow-lg"
+          >
+            <div className="mb-3 flex items-center justify-between lg:hidden">
+              <p className="font-serif text-xl text-primary">
+                {t("header.settings")}
+              </p>
+              <button
+                type="button"
+                className="inline-flex size-11 items-center justify-center rounded-xl text-foreground hover:bg-background-alt"
+                aria-label={t("common.close")}
+                onClick={() => setOpen(false)}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="size-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                >
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </button>
             </div>
-          </fieldset>
-
-          <fieldset className="mt-4 space-y-2">
-            <legend className="text-xs font-medium uppercase tracking-wide text-muted">
-              {t("header.currency")}
-            </legend>
-            <div className="flex flex-wrap gap-1.5">
-              {supportedCurrencies.map((code) => {
-                const active = currency === code;
-                return (
-                  <button
-                    key={code}
-                    type="button"
-                    onClick={() => setCurrency(code as AppCurrency)}
-                    className={`min-h-10 min-w-12 rounded-xl px-3 text-sm transition ${
-                      active
-                        ? "bg-primary text-background"
-                        : "bg-background-alt text-muted hover:text-foreground"
-                    }`}
-                    aria-pressed={active}
-                  >
-                    {code}
-                  </button>
-                );
-              })}
-            </div>
-          </fieldset>
-
-          <div className="mt-4 border-t border-border pt-4">
-            <button
-              type="button"
-              disabled={!mounted}
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-              className="flex min-h-11 w-full items-center justify-between rounded-xl bg-background-alt px-3 text-sm text-foreground transition hover:bg-background-alt/80"
-            >
-              <span>{t("header.theme")}</span>
-              <span className="text-muted">
-                {isDark ? t("header.themeDark") : t("header.themeLight")}
-              </span>
-            </button>
+            <PreferencesPanel hideTitle className="lg:hidden" />
+            <PreferencesPanel className="hidden lg:block" />
           </div>
-        </div>
+        </>
       ) : null}
     </div>
   );

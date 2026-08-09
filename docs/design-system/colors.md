@@ -49,12 +49,16 @@ Source : `app/globals.css`. Utiliser les utilitaires Tailwind, jamais d’hex en
 | --- | --- | --- | --- |
 | `background` | Beige Sable `#E6D9C1` | Vert Forêt profond `#0A281F` | Fond page |
 | `background-alt` | Sable clair `#F0E8D8` | Forêt `#143D2E` | Sections |
-| `primary` | Vert Forêt `#0F3D2E` | Sauge `#A6BB9A` | Boutons, barres, titres forts |
-| `accent` | Doré Chaud `#E59136` | Doré Chaud `#E59136` | CTA, liens, éclat |
-| `accent-light` | Vert Sauge `#A6BB9A` | Or clair `#F0B06A` | Secondaire |
+| `primary` | Vert Forêt `#0F3D2E` | Sauge claire `#C5D6BB` | Boutons, barres, titres forts |
+| `accent` | Or soutenu `#B56F12` (AA sur sable) | Or clair `#F0A84A` | CTA, liens, éclat |
+| `accent-light` | Sauge foncée `#6F8A66` | Sauge claire `#D4E0CD` | Secondaire |
+| `brand` | Vert Forêt `#0F3D2E` | Vert Forêt `#0F3D2E` | Bandes marque (footer…) |
+| `on-brand` | Blanc `#FFFFFF` | Blanc `#FFFFFF` | Texte sur `brand` |
 | `foreground` | Ébène `#1A1A1A` | Sable `#E6D9C1` | Texte |
-| `muted` | `#5A6B5C` | `#A6BB9A` | Secondaire |
+| `muted` | `#4A5C4E` | `#B7C9AE` | Secondaire |
 | `border` | `#D4C4A8` | `#2A4A3C` | Bordures |
+
+> Contraste texte : viser **WCAG 2.2 AA** (≥ 4.5:1). Les bandes `bg-brand` utilisent toujours `text-on-brand` (jamais `text-accent-light` sur sauge).
 
 ## Règle
 

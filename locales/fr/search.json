@@ -1,11 +1,12 @@
 {
   "search": {
     "title": "Recherche",
-    "subtitle": "Trouve un soin, un article ou un tutoriel Awura Beauty.",
+    "subtitle": "Soins, articles et tutoriels Awura Beauty.",
     "placeholder": "Ex. beurre, démêlant, curl…",
     "submit": "Rechercher",
+    "submitShort": "OK",
     "queryLabel": "Recherche",
-    "productsHeading": "Produits",
+    "productsHeading": "Soins",
     "postsHeading": "Articles & tutoriels",
     "empty": "Aucun résultat pour « {{query}} ». Essaie un autre mot-clé.",
     "idle": "Saisis un mot-clé pour lancer la recherche.",

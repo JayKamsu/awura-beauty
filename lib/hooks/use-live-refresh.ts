@@ -19,7 +19,10 @@ export function useLiveRefresh(
   { intervalMs = 20_000, enabled = true }: UseLiveRefreshOptions = {},
 ) {
   const refreshRef = useRef(refresh);
-  refreshRef.current = refresh;
+
+  useEffect(() => {
+    refreshRef.current = refresh;
+  }, [refresh]);
 
   useEffect(() => {
     if (!enabled) return;

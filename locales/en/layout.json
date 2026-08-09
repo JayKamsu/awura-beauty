@@ -20,7 +20,8 @@
     "mainLabel": "Main navigation",
     "mobileLabel": "Mobile navigation",
     "bottomLabel": "Quick navigation",
-    "moreTitle": "More"
+    "moreTitle": "More",
+    "skipToContent": "Skip to content"
   },
   "header": {
     "brand": "AWURA BEAUTY",

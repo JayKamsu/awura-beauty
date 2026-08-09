@@ -17,7 +17,7 @@ import {
 } from "@/lib/navigation";
 
 const iconClass =
-  "inline-flex size-11 items-center justify-center rounded-xl text-foreground transition hover:bg-background-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+  "inline-flex size-10 items-center justify-center rounded-xl text-foreground transition hover:bg-background-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:size-11";
 
 export function Header() {
   const { t } = useTranslation();
@@ -38,8 +38,8 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4 md:px-6">
-        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-1.5 px-3 py-2.5 sm:gap-4 sm:px-4 sm:py-4 md:px-6">
+        <div className="flex min-w-0 items-center gap-1 sm:gap-3">
           <button
             type="button"
             className={`${iconClass} lg:hidden`}
@@ -63,7 +63,7 @@ export function Header() {
             aria-label={t("header.brand")}
             className="inline-flex min-w-0 items-center transition opacity-95 hover:opacity-100"
           >
-            <BrandLogo tone="auto" className="h-10 w-auto sm:h-11 md:h-12" priority />
+            <BrandLogo tone="auto" className="h-9 w-auto max-w-[9.5rem] object-contain object-left sm:h-11 sm:max-w-none md:h-12" priority />
           </Link>
         </div>
 
@@ -95,7 +95,7 @@ export function Header() {
           ) : null}
         </nav>
 
-        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+        <div className="flex shrink-0 items-center gap-0 sm:gap-1">
           <PreferencesSettingsButton />
 
           {/* Compte / panier : desktop (sur mobile → bottom bar) */}
@@ -119,7 +119,9 @@ export function Header() {
             )}
           </span>
 
-          <PushNotificationButton hrefWhenEnabled="/compte#commandes" />
+          <span className="hidden sm:inline-flex">
+            <PushNotificationButton hrefWhenEnabled="/compte#commandes" />
+          </span>
 
           <HeaderIcon href="/recherche" label={t("header.search")}>
             <circle cx="11" cy="11" r="6.5" />
@@ -145,7 +147,7 @@ export function Header() {
       </div>
 
       {open ? (
-        <div className="border-t border-border bg-background px-4 py-4 lg:hidden">
+        <div className="max-h-[min(70vh,28rem)] overflow-y-auto border-t border-border bg-background px-4 py-4 lg:hidden">
           <nav className="flex flex-col gap-1" aria-label={t("nav.mobileLabel")}>
             <p className="px-3 pb-2 text-xs font-medium uppercase tracking-[0.14em] text-muted">
               {t("nav.moreTitle")}

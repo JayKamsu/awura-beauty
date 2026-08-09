@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 
 type AdminModalProps = {
   title: string;
@@ -19,6 +20,8 @@ export function AdminModal({
   footer,
 }: AdminModalProps) {
   const { t } = useTranslation();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(true, dialogRef);
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -36,16 +39,23 @@ export function AdminModal({
   return (
     <div
       className="fixed inset-0 z-[60] flex items-stretch justify-center bg-foreground/40 sm:items-center sm:p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="flex h-full w-full max-w-3xl flex-col overflow-hidden bg-background shadow-lg sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:border sm:border-border">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-modal-title"
+        tabIndex={-1}
+        className="flex h-full w-full max-w-3xl flex-col overflow-hidden bg-background shadow-lg outline-none sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:border sm:border-border"
+      >
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
-          <h2 className="min-w-0 truncate font-serif text-xl text-primary">
+          <h2
+            id="admin-modal-title"
+            className="min-w-0 truncate font-serif text-xl text-primary"
+          >
             {title}
           </h2>
           <Button

@@ -1,16 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 40" role="img" aria-label="Mondial Relay">
-  <rect width="220" height="40" rx="6" fill="#E30613"/>
-  <g fill="#FFFFFF">
-    <path d="M14 11h5.2l3.4 8.2L26 11h5.2v18h-4.4V17.2L23.4 29h-3.6l-3.4-11.8V29H14V11z"/>
-    <path d="M35.5 11h12.4v3.6h-8v3.4h7.2v3.4h-7.2v4h8.2V29H35.5V11z"/>
-    <path d="M52.2 11h5l3.8 12.6L64.8 11h5l-6.2 18h-5l-6.4-18z"/>
-    <path d="M73.5 11h4.8v18h-4.8V11z"/>
-    <path d="M82.2 11h5.2l7.2 11.4V11h4.8v18h-5.2l-7.2-11.4V29h-4.8V11z"/>
-    <path d="M103 11h4.8v14.4h8.2V29H103V11z"/>
-    <path d="M120 11h4.8v18H120V11z"/>
-    <path d="M129.2 11h5.2l3.8 12.6L142 11h5l-6.2 18h-5l-6.6-18z"/>
-    <rect x="154" y="11" width="4.8" height="18" rx="1"/>
-    <path d="M163.5 11h5.2l7.2 11.4V11h4.8v18h-5.2l-7.2-11.4V29h-4.8V11z"/>
-    <path d="M184.5 11H197v3.6h-7.7v3.4h6.8v3.4h-6.8v4H197V29h-12.5V11z"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" role="img" aria-label="Mondial Relay">
+  <rect width="220" height="48" rx="8" fill="#E30613"/>
+  <!-- Pastille MR -->
+  <circle cx="28" cy="24" r="14" fill="#FFFFFF"/>
+  <text x="28" y="29" text-anchor="middle" fill="#E30613" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="800">MR</text>
+  <text x="52" y="22" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">Mondial</text>
+  <text x="52" y="38" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">Relay</text>
 </svg>

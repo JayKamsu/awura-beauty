@@ -38,13 +38,13 @@ export function AboutCommitmentsSection() {
   });
 
   return (
-    <section className="bg-primary text-background">
+    <section className="bg-brand text-on-brand">
       <div className="mx-auto max-w-7xl space-y-10 px-4 py-14 md:px-6 lg:py-16">
         <div className="mx-auto max-w-2xl space-y-3 text-center">
-          <h2 className="font-serif text-3xl tracking-wide sm:text-4xl">
+          <h2 className="font-serif text-3xl tracking-wide text-on-brand sm:text-4xl">
             {cmsOr(cms, "title", t("about.commitments.title"))}
           </h2>
-          <p className="text-background/80">
+          <p className="text-on-brand/85">
             {cmsOr(cms, "subtitle", t("about.commitments.subtitle"))}
           </p>
         </div>
@@ -52,7 +52,7 @@ export function AboutCommitmentsSection() {
         <div className="grid gap-8 sm:grid-cols-3">
           {items.map((item) => (
             <div key={item.key} className="space-y-4 text-center sm:text-left">
-              <div className="mx-auto inline-flex size-11 items-center justify-center rounded-2xl bg-background/10 text-accent-light sm:mx-0">
+              <div className="mx-auto inline-flex size-11 items-center justify-center rounded-2xl bg-on-brand/10 text-accent sm:mx-0">
                 <svg
                   viewBox="0 0 24 24"
                   className="size-5"
@@ -63,8 +63,10 @@ export function AboutCommitmentsSection() {
                   {COMMITMENT_ICONS[item.key]}
                 </svg>
               </div>
-              <h3 className="font-serif text-xl tracking-wide">{item.title}</h3>
-              <p className="text-sm leading-relaxed text-background/80">
+              <h3 className="font-serif text-xl tracking-wide text-on-brand">
+                {item.title}
+              </h3>
+              <p className="text-sm leading-relaxed text-on-brand/85">
                 {item.description}
               </p>
             </div>
