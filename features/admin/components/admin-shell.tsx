@@ -33,7 +33,7 @@ const MOBILE_QUICK_NAV = [
   { href: "/admin", key: "dashboard" },
   { href: "/admin/commandes", key: "orders" },
   { href: "/admin/messages", key: "messages" },
-  { href: "/admin/produits", key: "products" },
+  { href: "/admin/diagnostic", key: "diagnostic" },
 ] as const;
 
 function NavIcon({ name }: { name: (typeof MOBILE_QUICK_NAV)[number]["key"] | "more" }) {
@@ -51,11 +51,11 @@ function NavIcon({ name }: { name: (typeof MOBILE_QUICK_NAV)[number]["key"] | "m
           <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z" />
         </svg>
       );
-    case "products":
+    case "diagnostic":
       return (
         <svg {...common}>
-          <path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5v-7z" />
-          <path d="M12 12v8M4 8.5l8 3.5 8-3.5" />
+          <circle cx="12" cy="12" r="7.25" />
+          <path d="M12 8.5v4.2l2.5 1.5" />
         </svg>
       );
     case "orders":

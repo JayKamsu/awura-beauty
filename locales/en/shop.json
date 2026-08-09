@@ -61,7 +61,13 @@
       "demelage": "Detangling",
       "soin": "Care",
       "pousse": "Growth",
-      "nettoyage": "Cleanse"
-    }
+      "nettoyage": "Cleanse",
+      "routine": "Routine"
+    },
+    "gammeBannerTitle": "Complete range — €100",
+    "gammeBannerBody": "All 5 Awura products + free in-person diagnostic.",
+    "gammeBannerCta": "See the offer",
+    "gammeOfferBadge": "Free in-person diagnostic",
+    "gammeCompareHint": "Instead of €130.50 individually"
   }
 }

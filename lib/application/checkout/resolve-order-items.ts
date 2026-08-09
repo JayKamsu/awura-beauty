@@ -6,6 +6,10 @@ import {
   quoteShipping,
   type ShippingQuote,
 } from "@/lib/application/checkout/quote-shipping";
+import {
+  GAMME_COMPLETE_COMPONENT_SLUGS,
+  isGammeCompleteSlug,
+} from "@/lib/domain/bundle";
 
 export type CartLineInput = {
   slug?: string;
@@ -72,7 +76,15 @@ export async function resolveOrderItemsFromCatalog(
     }
   }
 
-  const slugs = [...new Set(normalized.map((line) => line.slug))];
+  const needsComponents = normalized.some((line) =>
+    isGammeCompleteSlug(line.slug),
+  );
+  const slugs = [
+    ...new Set([
+      ...normalized.map((line) => line.slug),
+      ...(needsComponents ? [...GAMME_COMPLETE_COMPONENT_SLUGS] : []),
+    ]),
+  ];
   const products = await getProductsBySlugs(slugs);
   const bySlug = new Map(products.map((product) => [product.slug, product]));
 
@@ -89,7 +101,32 @@ export async function resolveOrderItemsFromCatalog(
         error: `Unknown product: ${line.slug}`,
       };
     }
-    if (product.stock < line.quantity) {
+
+    if (isGammeCompleteSlug(line.slug)) {
+      for (const componentSlug of GAMME_COMPLETE_COMPONENT_SLUGS) {
+        const component = bySlug.get(componentSlug);
+        if (!component) {
+          return {
+            items: [],
+            subtotal: 0,
+            shippingFee: 0,
+            total: 0,
+            quote: null,
+            error: `Missing bundle component: ${componentSlug}`,
+          };
+        }
+        if (component.stock < line.quantity) {
+          return {
+            items: [],
+            subtotal: 0,
+            shippingFee: 0,
+            total: 0,
+            quote: null,
+            error: `Insufficient stock for gamme (${component.slug})`,
+          };
+        }
+      }
+    } else if (product.stock < line.quantity) {
       return {
         items: [],
         subtotal: 0,
@@ -99,6 +136,7 @@ export async function resolveOrderItemsFromCatalog(
         error: `Insufficient stock for ${product.slug}`,
       };
     }
+
     items.push({
       product_id: product.id,
       slug: product.slug,
@@ -109,9 +147,11 @@ export async function resolveOrderItemsFromCatalog(
     });
   }
 
-  const subtotal = Math.round(
-    items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0) * 100,
-  ) / 100;
+  const subtotal =
+    Math.round(
+      items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0) *
+        100,
+    ) / 100;
 
   if (!carrier) {
     return {

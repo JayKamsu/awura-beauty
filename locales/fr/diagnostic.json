@@ -71,6 +71,8 @@
       "contactFromAccount": "Préremplies depuis ton compte — tu peux les modifier si besoin.",
       "editContact": "Modifier",
       "payCta": "Payer {{price}} et réserver",
+      "bookFreeCta": "Réserver gratuitement (offert avec la gamme)",
+      "freeWithGamme": "Diagnostic offert — {{count}} créneau(x) inclus avec ta gamme complète",
       "bookError": "Impossible de démarrer le paiement. Réessaie.",
       "successTitle": "Rendez-vous confirmé",
       "successBody": "Merci ! Ton RDV est réservé. Après l’analyse au trichogramme, ton bilan et ta routine personnalisée arriveront dans ton compte.",

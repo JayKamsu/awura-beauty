@@ -61,7 +61,13 @@
       "demelage": "Démêlage",
       "soin": "Soin",
       "pousse": "Pousse",
-      "nettoyage": "Nettoyage"
-    }
+      "nettoyage": "Nettoyage",
+      "routine": "Routine"
+    },
+    "gammeBannerTitle": "Gamme complète — 100 €",
+    "gammeBannerBody": "Les 5 soins Awura + diagnostic présentiel offert.",
+    "gammeBannerCta": "Voir l’offre",
+    "gammeOfferBadge": "Diagnostic présentiel offert",
+    "gammeCompareHint": "Au lieu de 130,50 € à l’unité"
   }
 }

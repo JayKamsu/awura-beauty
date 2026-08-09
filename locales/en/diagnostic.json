@@ -71,6 +71,8 @@
       "contactFromAccount": "Pre-filled from your account — you can edit if needed.",
       "editContact": "Edit",
       "payCta": "Pay {{price}} and book",
+      "bookFreeCta": "Book for free (included with the full range)",
+      "freeWithGamme": "Diagnostic included — {{count}} free slot(s) from your full range purchase",
       "bookError": "Unable to start payment. Please try again.",
       "successTitle": "Appointment confirmed",
       "successBody": "Thank you! Your appointment is booked. After the trichogram analysis, your report and personalized routine will appear in your account.",

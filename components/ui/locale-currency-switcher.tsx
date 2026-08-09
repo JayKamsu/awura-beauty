@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTheme } from "next-themes";
 import { useTranslation } from "react-i18next";
 import { usePreferences } from "@/components/providers/preferences-provider";
@@ -116,20 +117,35 @@ export function PreferencesPanel({
 
 /**
  * Bouton paramètres header : langue, devise, thème.
- * Desktop = popover ; mobile = bottom sheet.
+ * Mobile = bottom sheet en portal (évite le clip du header backdrop-blur).
+ * Desktop = popover ancré.
  */
 export function PreferencesSettingsButton() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [portalReady, setPortalReady] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
   useFocusTrap(open, dialogRef);
 
   useEffect(() => {
+    setPortalReady(true);
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setIsDesktop(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
     if (!open) return;
     const onPointer = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (rootRef.current?.contains(target)) return;
+      if (dialogRef.current?.contains(target)) return;
+      setOpen(false);
     };
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
@@ -143,14 +159,60 @@ export function PreferencesSettingsButton() {
   }, [open]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || isDesktop) return;
     const prev = document.body.style.overflow;
-    const isMobile = window.matchMedia("(max-width: 1023px)").matches;
-    if (isMobile) document.body.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [open]);
+  }, [open, isDesktop]);
+
+  const mobileSheet =
+    open && !isDesktop && portalReady
+      ? createPortal(
+          <>
+            <button
+              type="button"
+              className="fixed inset-0 z-[60] bg-foreground/40"
+              aria-label={t("common.close")}
+              onClick={() => setOpen(false)}
+            />
+            <div
+              ref={dialogRef}
+              id={panelId}
+              role="dialog"
+              aria-modal="true"
+              aria-label={t("header.settings")}
+              tabIndex={-1}
+              className="fixed inset-x-0 bottom-0 z-[70] max-h-[min(85dvh,36rem)] overflow-y-auto rounded-t-3xl border border-border bg-background p-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl outline-none"
+            >
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <p className="font-serif text-xl text-primary">
+                  {t("header.settings")}
+                </p>
+                <button
+                  type="button"
+                  className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-foreground hover:bg-background-alt"
+                  aria-label={t("common.close")}
+                  onClick={() => setOpen(false)}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="size-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                  >
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
+              </div>
+              <PreferencesPanel hideTitle />
+            </div>
+          </>,
+          document.body,
+        )
+      : null;
 
   return (
     <div ref={rootRef} className="relative">
@@ -176,48 +238,19 @@ export function PreferencesSettingsButton() {
         </svg>
       </button>
 
-      {open ? (
-        <>
-          <button
-            type="button"
-            className="fixed inset-0 z-50 bg-foreground/40 lg:hidden"
-            aria-label={t("common.close")}
-            onClick={() => setOpen(false)}
-          />
-          <div
-            ref={dialogRef}
-            id={panelId}
-            role="dialog"
-            aria-modal="true"
-            aria-label={t("header.settings")}
-            tabIndex={-1}
-            className="fixed inset-x-0 bottom-0 z-50 max-h-[min(85vh,36rem)] overflow-y-auto rounded-t-3xl border border-border bg-background p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl outline-none lg:absolute lg:inset-auto lg:right-0 lg:bottom-auto lg:mt-2 lg:max-h-none lg:w-[min(18rem,calc(100vw-2rem))] lg:overflow-visible lg:rounded-2xl lg:p-4 lg:pb-4 lg:shadow-lg"
-          >
-            <div className="mb-3 flex items-center justify-between lg:hidden">
-              <p className="font-serif text-xl text-primary">
-                {t("header.settings")}
-              </p>
-              <button
-                type="button"
-                className="inline-flex size-11 items-center justify-center rounded-xl text-foreground hover:bg-background-alt"
-                aria-label={t("common.close")}
-                onClick={() => setOpen(false)}
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="size-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                >
-                  <path d="M6 6l12 12M18 6L6 18" />
-                </svg>
-              </button>
-            </div>
-            <PreferencesPanel hideTitle className="lg:hidden" />
-            <PreferencesPanel className="hidden lg:block" />
-          </div>
-        </>
+      {mobileSheet}
+
+      {open && isDesktop ? (
+        <div
+          ref={dialogRef}
+          id={panelId}
+          role="dialog"
+          aria-label={t("header.settings")}
+          tabIndex={-1}
+          className="absolute right-0 top-full z-[70] mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-border bg-background p-4 shadow-lg outline-none"
+        >
+          <PreferencesPanel />
+        </div>
       ) : null}
     </div>
   );

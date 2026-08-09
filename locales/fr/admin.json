@@ -11,7 +11,7 @@
     "paymentsTitle": "Paiements",
     "paymentsSubtitle": "État Stripe / PayPal, suivi des paiements et actions admin.",
     "diagnosticTitle": "Diagnostic capillaire",
-    "diagnosticSubtitle": "Questions, tarifs, disponibilités RDV et historique.",
+    "diagnosticSubtitle": "Diagnostics en ligne, RDV présentiel, questions et tarifs.",
     "ordersSubtitle": "Liste dense : filtre, recherche, reçus et suivi — détail à la demande.",
     "productsTitle": "Gestion des produits",
     "productsSubtitle": "Liste des produits, création en modal, et gestion des catégories.",
@@ -358,11 +358,23 @@
     },
     "diagnostic": {
       "tabs": {
+        "online": "Diagnostics en ligne",
         "questions": "Questions",
         "pricing": "Tarifs",
         "availability": "Disponibilités",
         "appointments": "RDV",
         "history": "Historique"
+      },
+      "onlineHint": "Résultats du questionnaire en ligne (enregistrés automatiquement quand la cliente est connectée). Onglet RDV pour le présentiel.",
+      "onlineSection": "En ligne ({{count}})",
+      "physicalResultsSection": "Résultats présentiels ({{count}})",
+      "historyEmpty": "Aucun diagnostic en ligne pour le moment.",
+      "appointmentsEmpty": "Aucun rendez-vous pour le moment.",
+      "linkedAccount": "Compte lié",
+      "anonymous": "Sans compte",
+      "channel": {
+        "online": "En ligne",
+        "physical": "Présentiel"
       },
       "questionsHint": "Active ou désactive les questions. Les textes et scores sont en base (seed SQL) ; réapplique la migration pour réinitialiser.",
       "options": "options",

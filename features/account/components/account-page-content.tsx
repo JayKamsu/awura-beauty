@@ -26,15 +26,6 @@ const SECTIONS = [
   { id: "securite", key: "account.nav.security" },
 ] as const;
 
-function initialsFromEmail(email: string): string {
-  const local = email.split("@")[0] ?? "";
-  const parts = local.split(/[._-]+/).filter(Boolean);
-  if (parts.length >= 2) {
-    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
-  }
-  return local.slice(0, 2).toUpperCase() || "AW";
-}
-
 export function AccountPageContent() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -147,49 +138,26 @@ export function AccountPageContent() {
     : undefined;
 
   const email = user.email ?? "";
-  const initials = initialsFromEmail(email);
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 pb-20 pt-10 md:gap-10 md:px-6 md:pt-14">
-      <header className="relative overflow-hidden rounded-3xl bg-primary px-6 py-8 text-background md:px-10 md:py-10">
-        <div
-          className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full bg-accent/25 blur-2xl"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute -bottom-24 left-1/3 size-64 rounded-full bg-accent-light/20 blur-3xl"
-          aria-hidden
-        />
-        <div className="relative z-[1] flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-4">
-            <div
-              className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-background/15 font-serif text-lg tracking-wide text-background ring-1 ring-background/25 md:size-16 md:text-xl"
-              aria-hidden
-            >
-              {initials}
-            </div>
-            <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-accent-light">
-                Awura Beauty
-              </p>
-              <h1 className="font-serif text-3xl md:text-4xl">{t("account.title")}</h1>
-              <p className="max-w-xl text-sm text-background/80 md:text-base">
-                {t("account.subtitle")}
-              </p>
-              <p className="text-sm text-background/70">
-                {t("account.welcome", { email })}
-              </p>
-            </div>
-          </div>
-          <Button
-            type="button"
-            variant="accent-outline"
-            className="border-background/40 text-background hover:bg-background/10"
-            onClick={() => void logout()}
-          >
-            {t("account.logout")}
-          </Button>
+      <header className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1">
+          <h1 className="font-serif text-3xl text-primary md:text-4xl">
+            {t("account.title")}
+          </h1>
+          {email ? (
+            <p className="text-sm text-muted">{email}</p>
+          ) : null}
         </div>
+        <Button
+          type="button"
+          variant="primary-outline"
+          className="self-start sm:self-auto"
+          onClick={() => void logout()}
+        >
+          {t("account.logout")}
+        </Button>
       </header>
 
       <nav

@@ -4,6 +4,10 @@ import { userIdFromRequest } from "@/lib/application/checkout/request-user";
 import { container } from "@/lib/application/container";
 import { listAvailableDiagnosticSlots } from "@/lib/application/diagnostic/slots";
 import {
+  consumeDiagnosticEntitlement,
+  findAvailableDiagnosticEntitlement,
+} from "@/lib/infrastructure/supabase/diagnostic-entitlements";
+import {
   createAppointment,
   getDiagnosticSettings,
   updateAppointment,
@@ -42,17 +46,27 @@ export async function POST(request: Request) {
     from.toISOString(),
     to.toISOString(),
   );
-  const stillOpen = slots.some((s) => s.startsAt === new Date(startsAt).toISOString() || s.startsAt === startsAt);
-  // Compare by time proximity (ISO may differ by ms formatting)
+  const stillOpen = slots.some(
+    (s) =>
+      s.startsAt === new Date(startsAt).toISOString() || s.startsAt === startsAt,
+  );
   const match = slots.find(
-    (s) => Math.abs(new Date(s.startsAt).getTime() - new Date(startsAt).getTime()) < 1000,
+    (s) =>
+      Math.abs(new Date(s.startsAt).getTime() - new Date(startsAt).getTime()) <
+      1000,
   );
   if (!match && !stillOpen) {
     return NextResponse.json({ error: "Slot unavailable" }, { status: 409 });
   }
 
   const userId = await userIdFromRequest(request);
-  const amountCents = settings.physicalPriceCents;
+  const entitlement = await findAvailableDiagnosticEntitlement({
+    userId,
+    email,
+  });
+  const freeWithGamme = Boolean(entitlement);
+  const amountCents = freeWithGamme ? 0 : settings.physicalPriceCents;
+
   const appointment = await createAppointment({
     userId,
     email,
@@ -63,6 +77,7 @@ export async function POST(request: Request) {
     answers,
     amountCents,
     currency: settings.currency,
+    status: freeWithGamme ? "confirmed" : "pending_payment",
   });
 
   if (!appointment) {
@@ -73,11 +88,32 @@ export async function POST(request: Request) {
   }
 
   const origin = new URL(request.url).origin;
+  const successPath = `${origin}/diagnostic-capillaire/rdv/succes?appointmentId=${appointment.id}`;
+
+  if (freeWithGamme && entitlement) {
+    const consumed = await consumeDiagnosticEntitlement({
+      entitlementId: entitlement.id,
+      appointmentId: appointment.id,
+    });
+    if (!consumed) {
+      await updateAppointment(appointment.id, { status: "cancelled" });
+      return NextResponse.json(
+        { error: "Entitlement unavailable" },
+        { status: 409 },
+      );
+    }
+    return NextResponse.json({
+      appointmentId: appointment.id,
+      url: successPath,
+      free: true,
+    });
+  }
+
   const checkout = await container.payments.createStripeCheckout({
     orderId: `diag-${appointment.id}`,
     customerEmail: email,
     currency: settings.currency,
-    successUrl: `${origin}/diagnostic-capillaire/rdv/succes?appointmentId=${appointment.id}&session_id={CHECKOUT_SESSION_ID}`,
+    successUrl: `${successPath}&session_id={CHECKOUT_SESSION_ID}`,
     cancelUrl: `${origin}/diagnostic-capillaire?mode=physical&cancelled=1`,
     metadata: {
       appointmentId: appointment.id,
@@ -109,5 +145,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     appointmentId: appointment.id,
     url: checkout.url,
+    free: false,
   });
 }

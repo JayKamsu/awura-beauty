@@ -1,6 +1,8 @@
 import { settleOrderLoyalty } from "@/lib/application/loyalty/settle-order-loyalty";
 import { maybeAutoCreateLabelAfterPaid } from "@/lib/application/shipping/create-order-label";
 import { notifyOrderPaid } from "@/lib/application/notifications/order-notify";
+import { gammeCompleteUnitsInOrder } from "@/lib/domain/bundle";
+import { grantDiagnosticEntitlements } from "@/lib/infrastructure/supabase/diagnostic-entitlements";
 import {
   claimOrderPaid,
   getOrderById,
@@ -18,6 +20,7 @@ export async function markOrderPaid(orderId: string): Promise<boolean> {
 
   if (result.claimed && result.order) {
     await settleOrderLoyalty(result.order);
+    await grantGammeDiagnosticEntitlements(result.order);
     await notifyOrderPaid({
       userId: result.order.user_id,
       orderId: result.order.id,
@@ -35,4 +38,20 @@ export async function markOrderPaid(orderId: string): Promise<boolean> {
   }
 
   return false;
+}
+
+async function grantGammeDiagnosticEntitlements(order: {
+  id: string;
+  user_id: string | null;
+  email: string;
+  items: Array<{ slug: string; quantity: number }>;
+}) {
+  const units = gammeCompleteUnitsInOrder(order.items);
+  if (units <= 0) return;
+  await grantDiagnosticEntitlements({
+    userId: order.user_id,
+    email: order.email,
+    orderId: order.id,
+    count: units,
+  });
 }

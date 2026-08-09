@@ -11,7 +11,7 @@
     "paymentsTitle": "Payments",
     "paymentsSubtitle": "Stripe / PayPal status, payment tracking and admin actions.",
     "diagnosticTitle": "Hair diagnostic",
-    "diagnosticSubtitle": "Questions, pricing, appointment availability and history.",
+    "diagnosticSubtitle": "Online diagnostics, in-person appointments, questions and pricing.",
     "ordersSubtitle": "Dense list: filter, search, receipts and tracking — expand for details.",
     "productsTitle": "Product management",
     "productsSubtitle": "Product list, create/edit in a modal, and category management.",
@@ -358,11 +358,23 @@
     },
     "diagnostic": {
       "tabs": {
+        "online": "Online diagnostics",
         "questions": "Questions",
         "pricing": "Pricing",
         "availability": "Availability",
         "appointments": "Appointments",
         "history": "History"
+      },
+      "onlineHint": "Results from the online questionnaire (saved automatically when the customer is signed in). Use Appointments for in-person.",
+      "onlineSection": "Online ({{count}})",
+      "physicalResultsSection": "In-person results ({{count}})",
+      "historyEmpty": "No online diagnostics yet.",
+      "appointmentsEmpty": "No appointments yet.",
+      "linkedAccount": "Linked account",
+      "anonymous": "No account",
+      "channel": {
+        "online": "Online",
+        "physical": "In person"
       },
       "questionsHint": "Enable or disable questions. Copy and scores live in the database (SQL seed).",
       "options": "options",

@@ -19,6 +19,7 @@ const FALLBACK_LABELS: Record<string, { fr: string; en: string; es: string }> = 
   soin: { fr: "Soin", en: "Care", es: "Cuidado" },
   pousse: { fr: "Pousse", en: "Growth", es: "Crecimiento" },
   nettoyage: { fr: "Nettoyage", en: "Cleansing", es: "Limpieza" },
+  routine: { fr: "Routine", en: "Routine", es: "Rutina" },
 };
 
 let demoCategories: ProductCategory[] = PRODUCT_CATEGORIES.map((slug, index) => {

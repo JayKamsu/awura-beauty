@@ -71,6 +71,8 @@
       "contactFromAccount": "Rellenados desde tu cuenta — puedes editarlos si hace falta.",
       "editContact": "Modificar",
       "payCta": "Pagar {{price}} y reservar",
+      "bookFreeCta": "Reservar gratis (incluido con la gama completa)",
+      "freeWithGamme": "Diagnóstico ofrecido — {{count}} franja(s) incluidas con tu gama completa",
       "bookError": "No se pudo iniciar el pago. Inténtalo de nuevo.",
       "successTitle": "Cita confirmada",
       "successBody": "¡Gracias! Tu cita está reservada. Tras el tricograma, tu informe y rutina personalizada aparecerán en tu cuenta.",

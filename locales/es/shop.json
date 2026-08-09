@@ -61,7 +61,13 @@
       "demelage": "Desenredado",
       "soin": "Cuidado",
       "pousse": "Crecimiento",
-      "nettoyage": "Limpieza"
-    }
+      "nettoyage": "Limpieza",
+      "routine": "Rutina"
+    },
+    "gammeBannerTitle": "Gama completa — 100 €",
+    "gammeBannerBody": "Los 5 cuidados Awura + diagnóstico presencial ofrecido.",
+    "gammeBannerCta": "Ver la oferta",
+    "gammeOfferBadge": "Diagnóstico presencial ofrecido",
+    "gammeCompareHint": "En lugar de 130,50 € por separado"
   }
 }

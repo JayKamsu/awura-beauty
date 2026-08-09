@@ -114,6 +114,29 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     qr_url: "",
     universe: "adult",
   },
+  {
+    id: "00000000-0000-4000-8000-000000000006",
+    slug: "gamme-complete",
+    name: "Gamme complète Awura",
+    price: 100,
+    short_description:
+      "Les 5 soins Awura + diagnostic présentiel offert — routine complète pour ta couronne.",
+    description:
+      "La gamme complète Awura Beauty réunit le savon solide, le démêlant nourrissant, le masque capillaire, la lotion active repousse et le beurre capillaire. Offre exclusive à 100 € (au lieu de 130,50 €) : un diagnostic capillaire présentiel (trichogramme) est offert après ton achat — réserve ton créneau depuis Diagnostic Capillaire → présentiel.",
+    ingredients:
+      "Les formules des 5 soins Awura : actifs botaniques, beurres et huiles sélectionnés pour cheveux texturés, afro et métissés.",
+    usage:
+      "Suis la routine recommandée (wash day + entre-deux). Après l’achat, réserve ton diagnostic présentiel gratuit via Diagnostic Capillaire — présentiel.",
+    image_url: "/images/products/produit-1-beurre.jpg",
+    ingredients_image_url: "/images/ingredients/ingredient-1.jpg",
+    lifestyle_image_url: "/images/lifestyle/cheveux-pot.jpg",
+    category: "routine",
+    is_new: true,
+    stock: 4,
+    shipping_fee: 0,
+    qr_url: "",
+    universe: "adult",
+  },
 ];
 
 export const PRODUCT_CATEGORIES = [
@@ -122,4 +145,5 @@ export const PRODUCT_CATEGORIES = [
   "soin",
   "pousse",
   "nettoyage",
+  "routine",
 ] as const;

@@ -11,20 +11,21 @@ import type {
   DiagnosticAppointment,
   DiagnosticAvailabilityRule,
   DiagnosticQuestion,
-  DiagnosticRecord,
   DiagnosticSettings,
   DiagnosticSlotOverride,
 } from "@/lib/domain/diagnostic";
+import type { AdminDiagnosticListItem } from "@/lib/infrastructure/supabase/diagnostic-admin";
 import { AWURA_PRODUCT_SLUGS } from "@/lib/application/diagnostic/recommend";
+import { AdminEmptyState } from "@/features/admin/components/admin-empty-state";
 
-type Tab = "questions" | "pricing" | "availability" | "appointments" | "history";
+type Tab = "online" | "appointments" | "questions" | "pricing" | "availability";
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0] as const;
 
 export function AdminDiagnosticPanel() {
   const { t, i18n } = useTranslation();
   const adminFetch = useAdminFetch();
-  const [tab, setTab] = useState<Tab>("questions");
+  const [tab, setTab] = useState<Tab>("online");
   const [feedback, setFeedback] = useState<{
     tone: "success" | "error";
     message: string;
@@ -34,7 +35,7 @@ export function AdminDiagnosticPanel() {
   const [rules, setRules] = useState<DiagnosticAvailabilityRule[]>([]);
   const [overrides, setOverrides] = useState<DiagnosticSlotOverride[]>([]);
   const [appointments, setAppointments] = useState<DiagnosticAppointment[]>([]);
-  const [history, setHistory] = useState<DiagnosticRecord[]>([]);
+  const [history, setHistory] = useState<AdminDiagnosticListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [overrideForm, setOverrideForm] = useState({
     startsAt: "",
@@ -71,7 +72,9 @@ export function AdminDiagnosticPanel() {
     const apJson = (await apRes.json()) as {
       appointments?: DiagnosticAppointment[];
     };
-    const hJson = (await hRes.json()) as { diagnostics?: DiagnosticRecord[] };
+    const hJson = (await hRes.json()) as {
+      diagnostics?: AdminDiagnosticListItem[];
+    };
     setQuestions(qJson.questions ?? []);
     setSettings(sJson.settings ?? null);
     setRules(aJson.rules ?? []);
@@ -237,12 +240,15 @@ export function AdminDiagnosticPanel() {
   };
 
   const tabs: { id: Tab; label: string }[] = [
+    { id: "online", label: t("admin.diagnostic.tabs.online") },
+    { id: "appointments", label: t("admin.diagnostic.tabs.appointments") },
     { id: "questions", label: t("admin.diagnostic.tabs.questions") },
     { id: "pricing", label: t("admin.diagnostic.tabs.pricing") },
     { id: "availability", label: t("admin.diagnostic.tabs.availability") },
-    { id: "appointments", label: t("admin.diagnostic.tabs.appointments") },
-    { id: "history", label: t("admin.diagnostic.tabs.history") },
   ];
+
+  const onlineHistory = history.filter((row) => row.channel === "online");
+  const physicalHistory = history.filter((row) => row.channel !== "online");
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-4 py-8 md:px-6">
@@ -254,13 +260,13 @@ export function AdminDiagnosticPanel() {
         <AdminFeedback tone={feedback.tone} message={feedback.message} />
       ) : null}
 
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {tabs.map((item) => (
           <button
             key={item.id}
             type="button"
             onClick={() => setTab(item.id)}
-            className={`inline-flex min-h-8 items-center rounded-lg px-2.5 text-xs transition ${
+            className={`inline-flex min-h-10 shrink-0 items-center rounded-lg px-3 text-sm transition ${
               tab === item.id
                 ? "bg-primary text-background"
                 : "border border-border text-muted hover:border-accent"
@@ -693,6 +699,13 @@ export function AdminDiagnosticPanel() {
           </div>
 
           <div className="overflow-x-auto rounded-2xl border border-border">
+            {appointments.length === 0 ? (
+              <div className="p-6">
+                <AdminEmptyState
+                  message={t("admin.diagnostic.appointmentsEmpty")}
+                />
+              </div>
+            ) : (
             <table className="min-w-full text-left text-sm">
               <thead className="bg-background-alt text-xs uppercase text-muted">
                 <tr>
@@ -717,6 +730,7 @@ export function AdminDiagnosticPanel() {
                     </td>
                     <td className="px-3 py-2">{a.status}</td>
                     <td className="px-3 py-2 text-right">
+                      <div className="flex flex-wrap justify-end gap-2">
                       <Button
                         type="button"
                         size="md"
@@ -769,45 +783,124 @@ export function AdminDiagnosticPanel() {
                           {t("admin.diagnostic.cancel")}
                         </Button>
                       ) : null}
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            )}
           </div>
         </div>
       ) : null}
 
-      {!loading && tab === "history" ? (
-        <div className="space-y-3">
-          {history.map((row) => (
-            <article
-              key={row.id}
-              className="rounded-2xl border border-border p-4 text-sm"
-            >
-              <p className="font-medium text-primary">
-                {row.channel} ·{" "}
-                {row.profile.title || t(row.profile.titleKey)} ·{" "}
-                {new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
-                  dateStyle: "medium",
-                }).format(new Date(row.created_at))}
-              </p>
-              {row.profile.scalpAnalysis ? (
-                <p className="mt-1 text-sm text-primary">
-                  {t("admin.diagnostic.scalpAnalysis")}:{" "}
-                  {row.profile.scalpAnalysis}
-                </p>
-              ) : null}
-              <p className="mt-1 text-muted">
-                {row.profile.detailedFeedback ||
-                  row.profile.summary ||
-                  t(row.profile.summaryKey)}
-              </p>
-              <p className="mt-2 text-xs text-muted">
-                {row.recommended_product_slugs.join(", ")}
-              </p>
-            </article>
-          ))}
+      {!loading && tab === "online" ? (
+        <div className="space-y-6">
+          <p className="text-sm text-muted">
+            {t("admin.diagnostic.onlineHint")}
+          </p>
+
+          <section className="space-y-3">
+            <h3 className="font-serif text-xl text-primary">
+              {t("admin.diagnostic.onlineSection", {
+                count: onlineHistory.length,
+              })}
+            </h3>
+            {onlineHistory.length === 0 ? (
+              <AdminEmptyState message={t("admin.diagnostic.historyEmpty")} />
+            ) : (
+              <ul className="space-y-3">
+                {onlineHistory.map((row) => (
+                  <li
+                    key={row.id}
+                    className="rounded-2xl border border-border p-4 text-sm"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0 space-y-1">
+                        <p className="font-medium text-primary">
+                          {row.profile.title || t(row.profile.titleKey)}
+                        </p>
+                        <p className="text-xs text-muted">
+                          {new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          }).format(new Date(row.created_at))}
+                          {row.customerEmail
+                            ? ` · ${row.customerEmail}`
+                            : row.user_id
+                              ? ` · ${t("admin.diagnostic.linkedAccount")}`
+                              : ` · ${t("admin.diagnostic.anonymous")}`}
+                          {row.customerName ? ` · ${row.customerName}` : ""}
+                        </p>
+                      </div>
+                      <span className="rounded-xl bg-primary/10 px-2.5 py-1 text-xs text-primary">
+                        {t("admin.diagnostic.channel.online")}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-muted">
+                      {row.profile.detailedFeedback ||
+                        row.profile.summary ||
+                        t(row.profile.summaryKey)}
+                    </p>
+                    {row.recommended_product_slugs.length > 0 ? (
+                      <p className="mt-2 text-xs text-muted">
+                        {row.recommended_product_slugs.join(", ")}
+                      </p>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          {physicalHistory.length > 0 ? (
+            <section className="space-y-3 border-t border-border pt-5">
+              <h3 className="font-serif text-xl text-primary">
+                {t("admin.diagnostic.physicalResultsSection", {
+                  count: physicalHistory.length,
+                })}
+              </h3>
+              <ul className="space-y-3">
+                {physicalHistory.map((row) => (
+                  <li
+                    key={row.id}
+                    className="rounded-2xl border border-border p-4 text-sm"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0 space-y-1">
+                        <p className="font-medium text-primary">
+                          {row.profile.title || t(row.profile.titleKey)}
+                        </p>
+                        <p className="text-xs text-muted">
+                          {new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          }).format(new Date(row.created_at))}
+                          {row.customerEmail
+                            ? ` · ${row.customerEmail}`
+                            : ""}
+                        </p>
+                      </div>
+                      <span className="rounded-xl bg-primary/10 px-2.5 py-1 text-xs text-primary">
+                        {t("admin.diagnostic.channel.physical")}
+                      </span>
+                    </div>
+                    {row.profile.scalpAnalysis ? (
+                      <p className="mt-2 text-sm text-primary">
+                        {t("admin.diagnostic.scalpAnalysis")}:{" "}
+                        {row.profile.scalpAnalysis}
+                      </p>
+                    ) : null}
+                    <p className="mt-1 text-muted">
+                      {row.profile.detailedFeedback ||
+                        row.profile.summary ||
+                        t(row.profile.summaryKey)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
         </div>
       ) : null}
     </main>

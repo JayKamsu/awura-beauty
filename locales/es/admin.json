@@ -11,7 +11,7 @@
     "paymentsTitle": "Pagos",
     "paymentsSubtitle": "Estado Stripe / PayPal, seguimiento de pagos y acciones admin.",
     "diagnosticTitle": "Diagnóstico capilar",
-    "diagnosticSubtitle": "Preguntas, tarifas, disponibilidad de citas e historial.",
+    "diagnosticSubtitle": "Diagnósticos online, citas presenciales, preguntas y precios.",
     "ordersSubtitle": "Lista densa: filtro, búsqueda, recibos y seguimiento — detalle bajo demanda.",
     "productsTitle": "Gestión de productos",
     "productsSubtitle": "Lista de productos, creación en modal y gestión de categorías.",
@@ -358,11 +358,23 @@
     },
     "diagnostic": {
       "tabs": {
+        "online": "Diagnósticos online",
         "questions": "Preguntas",
         "pricing": "Precios",
         "availability": "Disponibilidad",
         "appointments": "Citas",
         "history": "Historial"
+      },
+      "onlineHint": "Resultados del cuestionario online (guardados automáticamente si la clienta está conectada). Usa Citas para el presencial.",
+      "onlineSection": "Online ({{count}})",
+      "physicalResultsSection": "Resultados presenciales ({{count}})",
+      "historyEmpty": "Todavía no hay diagnósticos online.",
+      "appointmentsEmpty": "Todavía no hay citas.",
+      "linkedAccount": "Cuenta vinculada",
+      "anonymous": "Sin cuenta",
+      "channel": {
+        "online": "Online",
+        "physical": "Presencial"
       },
       "questionsHint": "Activa o desactiva preguntas. Textos y scores viven en la base (seed SQL).",
       "options": "opciones",

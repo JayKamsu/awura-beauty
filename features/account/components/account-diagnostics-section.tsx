@@ -9,7 +9,6 @@ import {
   accountPanelClass,
 } from "@/features/account/components/account-section";
 import { useAuth } from "@/features/auth/context/auth-provider";
-import { listMyDiagnostics } from "@/lib/infrastructure/supabase/diagnostics";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import type {
   DiagnosticAppointment,
@@ -28,21 +27,40 @@ export function AccountDiagnosticsSection() {
   useEffect(() => {
     let mounted = true;
     void (async () => {
-      const diagnostics = await listMyDiagnostics();
-      let nextAppointments: AppointmentRow[] = [];
-      if (session?.access_token) {
-        const res = await fetch("/api/account/diagnostic/appointments", {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        });
-        if (res.ok) {
-          const json = (await res.json()) as {
-            appointments?: AppointmentRow[];
-          };
-          nextAppointments = json.appointments ?? [];
+      if (!session?.access_token) {
+        if (mounted) {
+          setItems([]);
+          setAppointments([]);
+          setLoading(false);
         }
+        return;
       }
+
+      setLoading(true);
+      const headers = { Authorization: `Bearer ${session.access_token}` };
+      const [diagRes, apptRes] = await Promise.all([
+        fetch("/api/account/diagnostic", { headers }),
+        fetch("/api/account/diagnostic/appointments", { headers }),
+      ]);
+
+      let nextItems: DiagnosticRecord[] = [];
+      let nextAppointments: AppointmentRow[] = [];
+
+      if (diagRes.ok) {
+        const json = (await diagRes.json()) as {
+          diagnostics?: DiagnosticRecord[];
+        };
+        nextItems = json.diagnostics ?? [];
+      }
+      if (apptRes.ok) {
+        const json = (await apptRes.json()) as {
+          appointments?: AppointmentRow[];
+        };
+        nextAppointments = json.appointments ?? [];
+      }
+
       if (!mounted) return;
-      setItems(diagnostics);
+      setItems(nextItems);
       setAppointments(nextAppointments);
       setLoading(false);
     })();
@@ -73,7 +91,7 @@ export function AccountDiagnosticsSection() {
           </Button>
         </div>
       ) : (
-        <>
+        <div className="space-y-8">
           {appointments.length > 0 ? (
             <div className="space-y-3">
               <h3 className="font-serif text-xl text-primary">
@@ -98,7 +116,11 @@ export function AccountDiagnosticsSection() {
                         })}
                       </p>
                       {a.videoPath ? (
-                        <Button href={a.videoPath} size="md" variant="primary-outline">
+                        <Button
+                          href={a.videoPath}
+                          size="md"
+                          variant="primary-outline"
+                        >
                           {t("account.diagnosticsJoinVideo")}
                         </Button>
                       ) : null}
@@ -127,7 +149,7 @@ export function AccountDiagnosticsSection() {
                   return (
                     <li key={item.id} className={`${accountPanelClass} space-y-3`}>
                       <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
+                        <div className="min-w-0">
                           <p className="font-serif text-xl text-primary">
                             {title}
                           </p>
@@ -226,7 +248,7 @@ export function AccountDiagnosticsSection() {
               </ul>
             </div>
           ) : null}
-        </>
+        </div>
       )}
     </AccountSection>
   );

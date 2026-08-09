@@ -33,7 +33,8 @@ export type ProductCategory =
   | "demelage"
   | "pousse"
   | "nettoyage"
-  | "soin";
+  | "soin"
+  | "routine";
 
 export type ListProductsParams = {
   category?: string | null;

@@ -21,7 +21,11 @@ export type {
   BlogPost,
   BlogPostKind,
 } from "./blog-types";
-export { listMyDiagnostics, saveHairDiagnostic } from "./diagnostics";
+export {
+  listDiagnosticsForUserId,
+  listMyDiagnostics,
+  saveHairDiagnostic,
+} from "./diagnostics";
 export type { SaveDiagnosticInput } from "./diagnostics";
 export type {
   DiagnosticAnswers,

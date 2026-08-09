@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import { useCart } from "@/features/cart/context/cart-provider";
 import { formatPrice } from "@/lib/format/price";
+import { isGammeCompleteSlug } from "@/lib/domain/bundle";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
 type ProductPurchasePanelProps = {
@@ -23,7 +24,7 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
   const lowStock = product.stock > 0 && product.stock <= 5;
   const outOfStock = product.stock <= 0;
   const categoryKey = `shop.categories.${product.category}`;
-
+  const isGamme = isGammeCompleteSlug(product.slug);
   const handleAdd = () => {
     if (outOfStock) return;
     addItem(
@@ -66,6 +67,11 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
               {t("shop.newBadge")}
             </span>
           ) : null}
+          {isGamme ? (
+            <span className="rounded-md bg-accent/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
+              {t("shop.gammeOfferBadge")}
+            </span>
+          ) : null}
         </div>
 
         <div className="space-y-3">
@@ -77,9 +83,14 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
           </p>
         </div>
 
-        <p className="font-serif text-3xl text-primary">
-          {formatPrice(product.price, currency, i18n.language)}
-        </p>
+        <div className="space-y-1">
+          <p className="font-serif text-3xl text-primary">
+            {formatPrice(product.price, currency, i18n.language)}
+          </p>
+          {isGamme ? (
+            <p className="text-sm text-muted">{t("shop.gammeCompareHint")}</p>
+          ) : null}
+        </div>
 
         <p
           className={`text-sm ${
@@ -150,6 +161,12 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
       </div>
 
       <ul className="space-y-3 border-t border-border pt-8 text-sm text-muted">
+        {isGamme ? (
+          <li className="flex gap-3 font-medium text-primary">
+            <span className="mt-1 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
+            {t("shop.gammeOfferBadge")}
+          </li>
+        ) : null}
         <li className="flex gap-3">
           <span className="mt-1 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
           {t("shop.trustNatural")}

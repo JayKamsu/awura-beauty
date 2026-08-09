@@ -1,5 +1,9 @@
 import { createSupabaseClient } from "@/lib/infrastructure/supabase/client";
 import { FALLBACK_PRODUCTS } from "@/lib/infrastructure/supabase/fallback-products";
+import {
+  GAMME_COMPLETE_COMPONENT_SLUGS,
+  isGammeCompleteSlug,
+} from "@/lib/domain/bundle";
 import type {
   ListProductsParams,
   ListProductsResult,
@@ -144,6 +148,7 @@ export async function listProducts(
 
 export async function getProductBySlug(slug: string): Promise<ProductRow | null> {
   const supabase = createSupabaseClient();
+  let product: ProductRow | null = null;
 
   if (supabase) {
     const { data, error } = await supabase
@@ -153,11 +158,29 @@ export async function getProductBySlug(slug: string): Promise<ProductRow | null>
       .maybeSingle();
 
     if (!error && data) {
-      return mapRow(data as Record<string, unknown>);
+      product = mapRow(data as Record<string, unknown>);
     }
   }
 
-  return FALLBACK_PRODUCTS.find((product) => product.slug === slug) ?? null;
+  if (!product) {
+    product = FALLBACK_PRODUCTS.find((row) => row.slug === slug) ?? null;
+  }
+
+  if (!product) return null;
+
+  if (isGammeCompleteSlug(product.slug)) {
+    const components = await getProductsBySlugs([
+      ...GAMME_COMPLETE_COMPONENT_SLUGS,
+    ]);
+    if (components.length === GAMME_COMPLETE_COMPONENT_SLUGS.length) {
+      product = {
+        ...product,
+        stock: Math.min(...components.map((row) => row.stock)),
+      };
+    }
+  }
+
+  return product;
 }
 
 export async function getRelatedProducts(

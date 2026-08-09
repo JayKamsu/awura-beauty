@@ -52,6 +52,14 @@ export type {
   TrackingResult,
 } from "@/lib/infrastructure/shipping/types";
 
+export {
+  GAMME_COMPLETE_SLUG,
+  GAMME_COMPLETE_PRICE_EUR,
+  GAMME_COMPLETE_COMPONENT_SLUGS,
+  isGammeCompleteSlug,
+  gammeCompleteUnitsInOrder,
+} from "@/lib/domain/bundle";
+
 export { mapCarrierStatusToShippingStatus } from "@/lib/infrastructure/shipping/types";
 
 export type NotificationChannel = "push" | "email" | "in_app";

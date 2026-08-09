@@ -58,6 +58,7 @@ export function DiagnosticPhysicalFlow({
   const [editingContact, setEditingContact] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingQuiz, setLoadingQuiz] = useState(true);
+  const [freeEntitlements, setFreeEntitlements] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,11 +95,26 @@ export function DiagnosticPhysicalFlow({
       );
       setContactReady(complete);
       setEditingContact(!complete);
+
+      const entitlementUrl = nextEmail
+        ? `/api/diagnostic/entitlement?email=${encodeURIComponent(nextEmail)}`
+        : "/api/diagnostic/entitlement";
+      const entitlementRes = await fetch(entitlementUrl, {
+        headers: session?.access_token
+          ? { Authorization: `Bearer ${session.access_token}` }
+          : undefined,
+      });
+      if (!cancelled && entitlementRes.ok) {
+        const entitlementJson = (await entitlementRes.json()) as {
+          available?: number;
+        };
+        setFreeEntitlements(Math.max(0, Number(entitlementJson.available ?? 0)));
+      }
     })();
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [user, session?.access_token]);
 
   useEffect(() => {
     let cancelled = false;
@@ -302,20 +318,28 @@ export function DiagnosticPhysicalFlow({
             {t("diagnostic.physical.slotsTitle")}
           </h2>
           <p className="text-muted">{t("diagnostic.physical.slotsSubtitle")}</p>
-          <p className="text-sm text-muted">
-            {t("diagnostic.physical.priceLabel", {
-              price: formatPrice(
-                settings.physicalPriceCents / 100,
-                settings.currency,
-                i18n.language,
-              ),
-              compare: formatPrice(
-                settings.physicalCompareCents / 100,
-                settings.currency,
-                i18n.language,
-              ),
-            })}
-          </p>
+          {freeEntitlements > 0 ? (
+            <p className="text-sm font-medium text-primary">
+              {t("diagnostic.physical.freeWithGamme", {
+                count: freeEntitlements,
+              })}
+            </p>
+          ) : (
+            <p className="text-sm text-muted">
+              {t("diagnostic.physical.priceLabel", {
+                price: formatPrice(
+                  settings.physicalPriceCents / 100,
+                  settings.currency,
+                  i18n.language,
+                ),
+                compare: formatPrice(
+                  settings.physicalCompareCents / 100,
+                  settings.currency,
+                  i18n.language,
+                ),
+              })}
+            </p>
+          )}
         </div>
 
         {slots.length === 0 ? (
@@ -516,13 +540,15 @@ export function DiagnosticPhysicalFlow({
           {t("diagnostic.back")}
         </Button>
         <Button type="submit" size="lg" pending={pending}>
-          {t("diagnostic.physical.payCta", {
-            price: formatPrice(
-              settings.physicalPriceCents / 100,
-              settings.currency,
-              i18n.language,
-            ),
-          })}
+          {freeEntitlements > 0
+            ? t("diagnostic.physical.bookFreeCta")
+            : t("diagnostic.physical.payCta", {
+                price: formatPrice(
+                  settings.physicalPriceCents / 100,
+                  settings.currency,
+                  i18n.language,
+                ),
+              })}
         </Button>
       </div>
     </form>

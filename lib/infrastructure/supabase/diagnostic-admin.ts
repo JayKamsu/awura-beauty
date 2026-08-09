@@ -489,6 +489,7 @@ export async function createAppointment(input: {
   answers: Record<string, string>;
   amountCents: number;
   currency: string;
+  status?: DiagnosticAppointmentStatus;
 }): Promise<DiagnosticAppointment | null> {
   const supabase = createAdminSupabaseClient() ?? createSupabaseClient();
   if (!supabase) return null;
@@ -501,7 +502,7 @@ export async function createAppointment(input: {
       phone: input.phone,
       starts_at: input.startsAt,
       ends_at: input.endsAt,
-      status: "pending_payment",
+      status: input.status ?? "pending_payment",
       answers: input.answers,
       amount_cents: input.amountCents,
       currency: input.currency,
@@ -541,7 +542,12 @@ export async function updateAppointment(
   return mapAppointment(data as Record<string, unknown>);
 }
 
-export async function listAllHairDiagnostics(): Promise<DiagnosticRecord[]> {
+export type AdminDiagnosticListItem = DiagnosticRecord & {
+  customerEmail: string | null;
+  customerName: string | null;
+};
+
+export async function listAllHairDiagnostics(): Promise<AdminDiagnosticListItem[]> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return [];
   const { data } = await supabase
@@ -549,7 +555,46 @@ export async function listAllHairDiagnostics(): Promise<DiagnosticRecord[]> {
     .select("*")
     .order("created_at", { ascending: false })
     .limit(200);
-  return (data ?? []).map((row) => mapDiagnosticRecord(row as Record<string, unknown>));
+
+  const rows = (data ?? []).map((row) =>
+    mapDiagnosticRecord(row as Record<string, unknown>),
+  );
+  const userIds = [
+    ...new Set(rows.map((r) => r.user_id).filter((id): id is string => Boolean(id))),
+  ];
+
+  const emailByUser = new Map<string, string>();
+  const nameByUser = new Map<string, string>();
+
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, first_name, last_name")
+      .in("id", userIds);
+    for (const p of profiles ?? []) {
+      const row = p as {
+        id: string;
+        first_name?: string;
+        last_name?: string;
+      };
+      const name = [row.first_name, row.last_name].filter(Boolean).join(" ").trim();
+      if (name) nameByUser.set(row.id, name);
+    }
+
+    await Promise.all(
+      userIds.map(async (id) => {
+        const { data: userData } = await supabase.auth.admin.getUserById(id);
+        const email = userData.user?.email;
+        if (email) emailByUser.set(id, email);
+      }),
+    );
+  }
+
+  return rows.map((row) => ({
+    ...row,
+    customerEmail: row.user_id ? emailByUser.get(row.user_id) ?? null : null,
+    customerName: row.user_id ? nameByUser.get(row.user_id) ?? null : null,
+  }));
 }
 
 export function mapDiagnosticRecord(

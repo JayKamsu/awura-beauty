@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     routine,
     products,
     diagnosticId: saved.id,
-    saved: !saved.error,
+    saved: Boolean(saved.id) && !saved.error,
     linkedToUser: Boolean(userId),
   });
 }
