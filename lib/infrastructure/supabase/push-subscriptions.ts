@@ -81,6 +81,41 @@ export async function listAdminPushTokens(): Promise<string[]> {
     .filter(Boolean);
 }
 
+export async function listPushUserIds(): Promise<string[]> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("push_subscriptions")
+    .select("user_id")
+    .not("user_id", "is", null);
+  if (error || !data) return [];
+  return Array.from(
+    new Set(
+      data
+        .map((row) => (row as { user_id: string | null }).user_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  );
+}
+
+export async function listAdminPushUserIds(): Promise<string[]> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("push_subscriptions")
+    .select("user_id")
+    .eq("is_admin", true)
+    .not("user_id", "is", null);
+  if (error || !data) return [];
+  return Array.from(
+    new Set(
+      data
+        .map((row) => (row as { user_id: string | null }).user_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  );
+}
+
 export async function deletePushTokens(tokens: string[]): Promise<void> {
   if (!tokens.length) return;
   const supabase = createAdminSupabaseClient();

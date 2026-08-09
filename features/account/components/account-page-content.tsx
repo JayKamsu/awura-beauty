@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { AccountProfileSection } from "@/features/account/components/account-pro
 import { AccountSecuritySection } from "@/features/account/components/account-security-section";
 import { useAdminAccess } from "@/features/admin/hooks/use-admin-access";
 import { useAuth } from "@/features/auth/context/auth-provider";
+import { useLiveRefresh } from "@/lib/hooks/use-live-refresh";
 import { listMyOrders } from "@/lib/infrastructure/supabase/orders";
 import type { OrderRow } from "@/lib/infrastructure/supabase/order-types";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
@@ -39,24 +40,28 @@ export function AccountPageContent() {
     }
   }, [adminLoading, isAdmin, loading, router, user]);
 
-  useEffect(() => {
-    if (!user || isAdmin) {
-      setOrders([]);
-      return;
-    }
-
-    let mounted = true;
-    setOrdersLoading(true);
-    void listMyOrders().then((data) => {
-      if (!mounted) return;
+  const loadOrders = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!user || isAdmin) {
+        setOrders([]);
+        return;
+      }
+      if (!opts?.silent) setOrdersLoading(true);
+      const data = await listMyOrders();
       setOrders(data);
       setOrdersLoading(false);
-    });
+    },
+    [isAdmin, user],
+  );
 
-    return () => {
-      mounted = false;
-    };
-  }, [isAdmin, user]);
+  useEffect(() => {
+    void loadOrders();
+  }, [loadOrders]);
+
+  useLiveRefresh(() => loadOrders({ silent: true }), {
+    enabled: Boolean(user) && !isAdmin,
+    intervalMs: 20_000,
+  });
 
   if (loading || (user && adminLoading) || (user && isAdmin)) {
     return (

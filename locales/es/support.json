@@ -18,11 +18,31 @@
       "enableShort": "Notificaciones",
       "enabled": "Notificaciones activadas",
       "enabling": "Activando…",
+      "enableError": "No se pudieron activar las notificaciones. Inténtalo de nuevo o comprueba que el sitio use HTTPS y que las notificaciones no estén bloqueadas.",
       "later": "Más tarde",
       "guestHint": "También puedes suscribirte sin cuenta.",
       "blocked": "Notificaciones bloqueadas",
       "blockedTitle": "Notificaciones bloqueadas",
-      "blockedBody": "Permite las notificaciones de Awura Beauty en la configuración del navegador."
+      "blockedBody": "Permite las notificaciones de Awura Beauty en la configuración del navegador.",
+      "inboxTitle": "Notificaciones",
+      "empty": "Ninguna notificación por ahora.",
+      "loading": "Cargando…",
+      "markAllRead": "Marcar todo leído",
+      "clearAll": "Borrar todo",
+      "delete": "Eliminar",
+      "loginForInbox": "Inicia sesión para ver tus notificaciones."
+    },
+    "pwa": {
+      "title": "Instalar Awura Beauty",
+      "body": "Añade la app en tu ordenador o móvil para un acceso rápido fuera del navegador.",
+      "install": "Instalar",
+      "installing": "Instalando…",
+      "installed": "Aplicación ya instalada en este dispositivo.",
+      "later": "Más tarde",
+      "manualHint": "Si no aparece el botón, abre el menú del navegador y elige « Instalar aplicación » / « Añadir a pantalla de inicio ».",
+      "iosStep1": "Abre el menú Compartir (cuadrado con flecha).",
+      "iosStep2": "Elige « Añadir a pantalla de inicio ».",
+      "iosStep3": "Confirma « Añadir » — Awura Beauty aparece como una app."
     }
   }
 }

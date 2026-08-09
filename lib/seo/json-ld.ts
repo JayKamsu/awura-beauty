@@ -18,10 +18,10 @@ export function organizationJsonLd() {
     url: absoluteUrl("/"),
     logo: {
       "@type": "ImageObject",
-      url: absoluteUrl(BRAND_LOGOS.black),
+      url: absoluteUrl(BRAND_LOGOS.orange),
       caption: `${SITE_NAME} logo`,
     },
-    image: absoluteUrl(BRAND_LOGOS.black),
+    image: absoluteUrl(BRAND_LOGOS.orange),
     email: CONTACT_EMAIL,
     description: SITE_DESCRIPTION,
     slogan: SITE_TAGLINE,
@@ -31,7 +31,7 @@ export function organizationJsonLd() {
       "@type": "Brand",
       name: SITE_NAME,
       alternateName: ["Awura", "AwuraBeauty"],
-      logo: absoluteUrl(BRAND_LOGOS.black),
+      logo: absoluteUrl(BRAND_LOGOS.orange),
     },
     knowsAbout: [
       "soins capillaires naturels",
@@ -180,7 +180,7 @@ export function articleJsonLd(post: {
       name: SITE_NAME,
       logo: {
         "@type": "ImageObject",
-        url: absoluteUrl(BRAND_LOGOS.black),
+        url: absoluteUrl(BRAND_LOGOS.orange),
       },
     },
     mainEntityOfPage: absoluteUrl(path),

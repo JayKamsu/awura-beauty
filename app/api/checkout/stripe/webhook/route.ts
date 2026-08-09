@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { markOrderPaid } from "@/lib/application/checkout/mark-order-paid";
 import { getStripeClient } from "@/lib/infrastructure/payments/stripe";
+import { claimWebhookEvent } from "@/lib/infrastructure/supabase/webhook-events";
 
 export const runtime = "nodejs";
 
@@ -32,6 +33,11 @@ export async function POST(request: Request) {
     event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
   } catch {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+  }
+
+  const isNew = await claimWebhookEvent("stripe", event.id);
+  if (!isNew) {
+    return NextResponse.json({ received: true, duplicate: true });
   }
 
   if (event.type === "checkout.session.completed") {

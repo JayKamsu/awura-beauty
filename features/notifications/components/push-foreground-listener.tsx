@@ -49,6 +49,8 @@ export function PushForegroundListener() {
             router.push(link.startsWith("/") ? link : "/");
           }
         };
+
+        window.dispatchEvent(new Event("awura:notifications-refresh"));
       });
     });
 

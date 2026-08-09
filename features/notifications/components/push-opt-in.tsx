@@ -15,6 +15,7 @@ export function PushOptIn() {
   const { locked: pending, run } = useActionLock();
   const { permission, configured, enable } = usePushSubscription();
   const [visible, setVisible] = useState(false);
+  const [errorKey, setErrorKey] = useState<"blocked" | "failed" | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -28,8 +29,14 @@ export function PushOptIn() {
 
   const onEnable = () => {
     void run(async () => {
-      const ok = await enable();
-      if (ok) setVisible(false);
+      setErrorKey(null);
+      const result = await enable();
+      if (result.ok) {
+        setVisible(false);
+        return;
+      }
+      if (result.reason === "blocked") setErrorKey("blocked");
+      else if (result.reason !== "unsupported") setErrorKey("failed");
     });
   };
 
@@ -39,6 +46,16 @@ export function PushOptIn() {
         {t("support.push.title")}
       </p>
       <p className="mt-1 text-sm text-muted">{t("support.push.body")}</p>
+      {errorKey === "blocked" ? (
+        <p className="mt-2 text-sm text-accent" role="alert">
+          {t("support.push.blockedBody")}
+        </p>
+      ) : null}
+      {errorKey === "failed" ? (
+        <p className="mt-2 text-sm text-accent" role="alert">
+          {t("support.push.enableError")}
+        </p>
+      ) : null}
       <div className="mt-3 flex flex-wrap gap-2">
         <Button type="button" size="md" pending={pending} onClick={onEnable}>
           {pending ? t("support.push.enabling") : t("support.push.enable")}

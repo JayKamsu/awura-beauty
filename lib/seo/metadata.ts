@@ -27,7 +27,7 @@ export function buildPageMetadata({
   noIndex = false,
 }: BuildMetadataInput = {}): Metadata {
   const url = absoluteUrl(path);
-  const ogImage = absoluteUrl(image || BRAND_LOGOS.black);
+  const ogImage = absoluteUrl(image || BRAND_LOGOS.orange);
   const fullTitle = title ? `${title} · ${SITE_NAME}` : `${SITE_NAME} — ${SITE_TAGLINE}`;
 
   return {
@@ -101,7 +101,7 @@ export function rootMetadata(): Metadata {
     icons: {
       icon: [
         { url: "/icon", type: "image/png", sizes: "64x64" },
-        { url: BRAND_LOGOS.black, type: "image/png" },
+        { url: BRAND_LOGOS.orange, type: "image/png" },
       ],
       apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
       shortcut: "/icon",

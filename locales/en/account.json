@@ -31,6 +31,7 @@
     "profileSaved": "Profile updated.",
     "profileSaveError": "Unable to save profile.",
     "profileUpdatedAt": "Last updated: {{date}}",
+    "pwaTitle": "Awura Beauty app",
     "ordersTitle": "Order history",
     "ordersLoading": "Loading orders…",
     "noOrders": "No orders yet.",

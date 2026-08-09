@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AdminEmptyState } from "@/features/admin/components/admin-empty-state";
 import { AdminFeedback } from "@/features/admin/components/admin-feedback";
@@ -9,6 +9,7 @@ import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
 import { formatPrice } from "@/lib/format/price";
 import { usePreferences } from "@/components/providers/preferences-provider";
+import { useLiveRefresh } from "@/lib/hooks/use-live-refresh";
 import type { AdminDashboardStats } from "@/lib/infrastructure/supabase/admin-dashboard";
 
 const QUICK_LINKS = [
@@ -26,26 +27,23 @@ export function AdminDashboardPanel() {
   const [stats, setStats] = useState<AdminDashboardStats | null>(null);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    void adminFetch("/api/admin/dashboard")
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Forbidden");
-        return res.json() as Promise<AdminDashboardStats>;
-      })
-      .then((json) => {
-        if (!cancelled) {
-          setStats(json);
-          setError(false);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setError(true);
-      });
-    return () => {
-      cancelled = true;
-    };
+  const load = useCallback(async () => {
+    try {
+      const res = await adminFetch("/api/admin/dashboard");
+      if (!res.ok) throw new Error("Forbidden");
+      const json = (await res.json()) as AdminDashboardStats;
+      setStats(json);
+      setError(false);
+    } catch {
+      setError(true);
+    }
   }, [adminFetch]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  useLiveRefresh(load, { intervalMs: 20_000 });
 
   if (error) {
     return (

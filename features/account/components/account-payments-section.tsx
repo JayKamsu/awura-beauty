@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { usePushSubscription } from "@/features/notifications/hooks/use-push-subscription";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
+import { useState } from "react";
 
 const METHODS = ["stripe", "paypal"] as const;
 
@@ -11,10 +12,15 @@ export function AccountPaymentsSection() {
   const { t } = useTranslation();
   const { locked: pending, run } = useActionLock();
   const { permission, enabled, configured, enable } = usePushSubscription();
+  const [errorKey, setErrorKey] = useState<"blocked" | "failed" | null>(null);
 
   const onEnablePush = () => {
     void run(async () => {
-      await enable();
+      setErrorKey(null);
+      const result = await enable();
+      if (result.ok) return;
+      if (result.reason === "blocked") setErrorKey("blocked");
+      else if (result.reason !== "unsupported") setErrorKey("failed");
     });
   };
 
@@ -70,9 +76,21 @@ export function AccountPaymentsSection() {
             <p className="text-muted">{t("support.push.blockedBody")}</p>
           </div>
         ) : (
-          <Button type="button" size="md" pending={pending} onClick={onEnablePush}>
-            {pending ? t("support.push.enabling") : t("support.push.enable")}
-          </Button>
+          <>
+            <Button type="button" size="md" pending={pending} onClick={onEnablePush}>
+              {pending ? t("support.push.enabling") : t("support.push.enable")}
+            </Button>
+            {errorKey === "blocked" ? (
+              <p className="text-sm text-accent" role="alert">
+                {t("support.push.blockedBody")}
+              </p>
+            ) : null}
+            {errorKey === "failed" ? (
+              <p className="text-sm text-accent" role="alert">
+                {t("support.push.enableError")}
+              </p>
+            ) : null}
+          </>
         )}
       </div>
 

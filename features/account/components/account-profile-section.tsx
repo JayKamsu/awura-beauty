@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { PwaInstallControls } from "@/features/pwa/components/pwa-install-controls";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 import { getMyProfile, updateMyProfile } from "@/lib/infrastructure/supabase/profiles";
 import type { ProfileRow } from "@/lib/infrastructure/supabase/profile-types";
@@ -191,6 +192,13 @@ export function AccountProfileSection({
           ) : null}
         </form>
       )}
+
+      <div className="space-y-2 border-t border-border pt-5">
+        <h3 className="text-sm font-medium text-primary">
+          {t("account.pwaTitle")}
+        </h3>
+        <PwaInstallControls variant="inline" />
+      </div>
     </section>
   );
 }

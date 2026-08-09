@@ -13,8 +13,13 @@ export type PushPermissionState =
   | "granted"
   | "denied";
 
+export type PushEnableResult =
+  | { ok: true }
+  | { ok: false; reason: "unsupported" | "blocked" | "failed" };
+
 export function usePushSubscription() {
-  const [permission, setPermission] = useState<PushPermissionState>("unsupported");
+  const [permission, setPermission] =
+    useState<PushPermissionState>("unsupported");
   const [enabled, setEnabled] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -34,13 +39,21 @@ export function usePushSubscription() {
     refresh();
   }, [refresh]);
 
-  const enable = useCallback(async (): Promise<boolean> => {
+  const enable = useCallback(async (): Promise<PushEnableResult> => {
     setBusy(true);
     try {
+      if (!isFirebaseClientConfigured()) {
+        refresh();
+        return { ok: false, reason: "unsupported" };
+      }
+
       const token = await requestWebPushToken();
       if (!token) {
         refresh();
-        return false;
+        const denied =
+          typeof Notification !== "undefined" &&
+          Notification.permission === "denied";
+        return { ok: false, reason: denied ? "blocked" : "failed" };
       }
 
       const session = await getSession();
@@ -59,11 +72,25 @@ export function usePushSubscription() {
       });
 
       refresh();
-      return res.ok;
+      if (!res.ok) {
+        return { ok: false, reason: "failed" };
+      }
+      setEnabled(true);
+      return { ok: true };
+    } catch {
+      refresh();
+      return { ok: false, reason: "failed" };
     } finally {
       setBusy(false);
     }
   }, [refresh]);
 
-  return { permission, enabled, busy, enable, refresh, configured: isFirebaseClientConfigured() };
+  return {
+    permission,
+    enabled,
+    busy,
+    enable,
+    refresh,
+    configured: isFirebaseClientConfigured(),
+  };
 }

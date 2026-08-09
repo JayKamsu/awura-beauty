@@ -12,6 +12,7 @@ import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
 import { formatPrice } from "@/lib/format/price";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import { usePreferences } from "@/components/providers/preferences-provider";
+import { useLiveRefresh } from "@/lib/hooks/use-live-refresh";
 import type {
   OrderRow,
   PaymentMethod,
@@ -72,8 +73,8 @@ export function AdminPaymentsPanel() {
     message: string;
   } | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) setLoading(true);
     const [statusRes, ordersRes] = await Promise.all([
       adminFetch("/api/admin/payments/status"),
       adminFetch("/api/admin/orders"),
@@ -88,6 +89,8 @@ export function AdminPaymentsPanel() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useLiveRefresh(() => load({ silent: true }), { intervalMs: 15_000 });
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

@@ -22,8 +22,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
+  if (body.orderId.startsWith("demo-")) {
+    return NextResponse.json({ ok: true, orderId: body.orderId });
+  }
+
+  const order = await getOrderById(body.orderId);
+  if (!order) {
+    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  }
+
+  // Déjà payée (retry navigateur / double clic) — ne pas re-capturer
+  if (order.payment_status === "paid" || order.status === "paid") {
+    return NextResponse.json({ ok: true, orderId: body.orderId, alreadyPaid: true });
+  }
+
+  if (order.payment_method !== "paypal") {
+    return NextResponse.json({ error: "Invalid payment method" }, { status: 400 });
+  }
+
   const capture = await capturePayPalOrder(body.paypalOrderId);
   if (!capture.ok) {
+    // Capture déjà faite côté PayPal → tenter de marquer payé si montant cohérent
+    const refreshed = await getOrderById(body.orderId);
+    if (
+      refreshed &&
+      (refreshed.payment_status === "paid" || refreshed.status === "paid")
+    ) {
+      return NextResponse.json({ ok: true, orderId: body.orderId, alreadyPaid: true });
+    }
     return NextResponse.json(
       { error: capture.error ?? "Capture failed" },
       { status: 500 },
@@ -38,19 +64,6 @@ export async function POST(request: Request) {
       { error: "PayPal order mismatch" },
       { status: 400 },
     );
-  }
-
-  if (body.orderId.startsWith("demo-")) {
-    return NextResponse.json({ ok: true, orderId: body.orderId });
-  }
-
-  const order = await getOrderById(body.orderId);
-  if (!order) {
-    return NextResponse.json({ error: "Order not found" }, { status: 404 });
-  }
-
-  if (order.payment_method !== "paypal") {
-    return NextResponse.json({ error: "Invalid payment method" }, { status: 400 });
   }
 
   if (!amountsMatch(order.total, capture.amountValue)) {

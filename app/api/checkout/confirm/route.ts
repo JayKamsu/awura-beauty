@@ -56,6 +56,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Amount mismatch" }, { status: 400 });
     }
 
+    if (order.payment_status === "paid" || order.status === "paid") {
+      return NextResponse.json({ ok: true, alreadyPaid: true });
+    }
+
     const ok = await markOrderPaid(body.orderId);
     return NextResponse.json({ ok });
   } catch {

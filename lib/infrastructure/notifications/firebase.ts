@@ -11,11 +11,14 @@ import {
   isFirebaseAdminConfigured,
 } from "@/lib/infrastructure/notifications/firebase-admin";
 import { absoluteUrl } from "@/lib/site";
+import { createInboxNotifications } from "@/lib/infrastructure/supabase/notifications-inbox";
 import {
   deletePushTokens,
   listAdminPushTokens,
+  listAdminPushUserIds,
   listAllPushTokens,
   listPushTokensForUser,
+  listPushUserIds,
 } from "@/lib/infrastructure/supabase/push-subscriptions";
 
 function resolveLink(link?: string): string | undefined {
@@ -46,12 +49,39 @@ async function resolveTokens(payload: NotificationPayload): Promise<string[]> {
   return [];
 }
 
+async function resolveInboxUserIds(
+  payload: NotificationPayload,
+): Promise<string[]> {
+  if (payload.userId) return [payload.userId];
+  if (payload.data?.audience === "admin") return listAdminPushUserIds();
+  if (payload.data?.broadcast === "true") return listPushUserIds();
+  return [];
+}
+
+async function persistInbox(payload: NotificationPayload, link?: string) {
+  const userIds = await resolveInboxUserIds(payload);
+  if (!userIds.length) return;
+  await createInboxNotifications({
+    userIds,
+    title: payload.title,
+    body: payload.body,
+    link: link ?? "",
+  });
+}
+
 export const firebaseNotificationAdapter: NotificationPort = {
   configured: isFirebaseAdminConfigured,
 
   async send(payload: NotificationPayload) {
-    if (payload.channel !== "push") {
+    if (payload.channel !== "push" && payload.channel !== "in_app") {
       return { ok: true, stub: true };
+    }
+
+    const link = resolveLink(payload.data?.link);
+    await persistInbox(payload, link);
+
+    if (payload.channel === "in_app") {
+      return { ok: true };
     }
 
     const tokens = await resolveTokens(payload);
@@ -76,7 +106,6 @@ export const firebaseNotificationAdapter: NotificationPort = {
       return { ok: true };
     }
 
-    const link = resolveLink(payload.data?.link);
     const data: Record<string, string> = { ...(payload.data ?? {}) };
     if (link) data.link = link;
 

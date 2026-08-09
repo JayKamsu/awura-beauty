@@ -31,6 +31,7 @@
     "profileSaved": "Profil mis à jour.",
     "profileSaveError": "Impossible d’enregistrer le profil.",
     "profileUpdatedAt": "Dernière mise à jour : {{date}}",
+    "pwaTitle": "Application Awura Beauty",
     "ordersTitle": "Historique des commandes",
     "ordersLoading": "Chargement des commandes…",
     "noOrders": "Aucune commande pour le moment.",

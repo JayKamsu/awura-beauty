@@ -134,6 +134,47 @@ export async function updateOrderPayment(
   return !error;
 }
 
+/**
+ * Passe la commande en payée seulement si elle ne l’est pas déjà.
+ * Retourne true uniquement sur la première transition (anti double notif / webhook+confirm).
+ */
+export async function claimOrderPaid(orderId: string): Promise<{
+  claimed: boolean;
+  alreadyPaid: boolean;
+  order: OrderRow | null;
+}> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return { claimed: false, alreadyPaid: false, order: null };
+  }
+
+  const { data, error } = await supabase
+    .from("orders")
+    .update({
+      payment_status: "paid",
+      status: "paid",
+    })
+    .eq("id", orderId)
+    .neq("payment_status", "paid")
+    .select("*")
+    .maybeSingle();
+
+  if (!error && data) {
+    return {
+      claimed: true,
+      alreadyPaid: false,
+      order: mapOrder(data as Record<string, unknown>),
+    };
+  }
+
+  const current = await getOrderById(orderId);
+  const alreadyPaid = Boolean(
+    current &&
+      (current.payment_status === "paid" || current.status === "paid"),
+  );
+  return { claimed: false, alreadyPaid, order: current };
+}
+
 export async function updateOrderShipping(
   orderId: string,
   payload: {

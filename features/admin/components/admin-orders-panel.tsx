@@ -18,6 +18,7 @@ import type {
 import { formatPrice } from "@/lib/format/price";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import { usePreferences } from "@/components/providers/preferences-provider";
+import { useLiveRefresh } from "@/lib/hooks/use-live-refresh";
 
 const STATUS_FILTERS = [
   "all",
@@ -72,8 +73,8 @@ export function AdminOrdersPanel() {
     subtitle?: string | null;
   } | null>(null);
 
-  const loadOrders = useCallback(async () => {
-    setLoading(true);
+  const loadOrders = useCallback(async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) setLoading(true);
     const response = await adminFetch("/api/admin/orders");
     const json = (await response.json()) as { orders?: OrderRow[] };
     setOrders(json.orders ?? []);
@@ -83,6 +84,8 @@ export function AdminOrdersPanel() {
   useEffect(() => {
     void loadOrders();
   }, [loadOrders]);
+
+  useLiveRefresh(() => loadOrders({ silent: true }), { intervalMs: 15_000 });
 
   useEffect(() => {
     if (!focusOrderId || loading) return;

@@ -11,6 +11,7 @@ import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { PushForegroundListener } from "@/features/notifications/components/push-foreground-listener";
 import { PushNavigateListener } from "@/features/notifications/components/push-navigate-listener";
 import { PushOptIn } from "@/features/notifications/components/push-opt-in";
+import { PwaInstallControls } from "@/features/pwa/components/pwa-install-controls";
 import { SupportChatWidget } from "@/features/support-chat/components/support-chat-widget";
 
 type SiteShellProps = {
@@ -35,6 +36,7 @@ function PublicShell({ children }: { children: ReactNode }) {
       <PushForegroundListener />
       <PushNavigateListener />
       <PushOptIn />
+      <PwaInstallControls variant="banner" />
       <SupportChatWidget />
     </>
   );

@@ -37,6 +37,9 @@ fetch(self.location.origin + "/api/push/firebase-config")
 self.addEventListener("message", (event) => {
   if (event.data?.type === "FIREBASE_CONFIG" && event.data.config) {
     initMessaging(event.data.config);
+    if (event.ports && event.ports[0]) {
+      event.ports[0].postMessage({ type: "FIREBASE_READY" });
+    }
   }
 });
 
