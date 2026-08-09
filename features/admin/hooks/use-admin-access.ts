@@ -37,8 +37,14 @@ export function useAdminAccess(): AdminAccess {
 
     setLoading(true);
     void adminFetch("/api/admin/me")
-      .then((res) => {
-        if (!cancelled) setApiAdmin(res.ok);
+      .then(async (res) => {
+        if (cancelled) return;
+        if (!res.ok) {
+          setApiAdmin(false);
+          return;
+        }
+        const json = (await res.json()) as { ok?: boolean };
+        setApiAdmin(Boolean(json.ok));
       })
       .catch(() => {
         if (!cancelled) setApiAdmin(false);

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildPaymentReceiptHtml } from "@/lib/application/checkout/payment-receipt";
+import { isOrderPaid } from "@/lib/application/checkout/payment-status";
 import { getUserFromAccessToken } from "@/lib/infrastructure/supabase/admin-auth";
 import { getOrderById } from "@/lib/infrastructure/supabase/orders";
 
@@ -32,7 +33,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  if (order.payment_status !== "paid" && order.status !== "paid") {
+  // Aligné sur l’UI : payée OU processing (après expédition).
+  if (!isOrderPaid(order)) {
     return NextResponse.json(
       { error: "Receipt available after payment" },
       { status: 400 },

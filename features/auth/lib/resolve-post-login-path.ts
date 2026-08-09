@@ -18,7 +18,9 @@ export async function resolvePostLoginPath(
     const res = await fetch("/api/admin/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (res.ok) return "/admin";
+    if (!res.ok) return preferredPath;
+    const json = (await res.json()) as { ok?: boolean };
+    if (json.ok) return "/admin";
   } catch {
     // ignore — fallback client
   }

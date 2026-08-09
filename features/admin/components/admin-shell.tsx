@@ -139,7 +139,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
           setAdminEmail(null);
           return;
         }
-        const json = (await res.json()) as { email?: string | null };
+        const json = (await res.json()) as {
+          ok?: boolean;
+          email?: string | null;
+        };
+        if (!json.ok) {
+          setGate("forbidden");
+          setAdminEmail(null);
+          return;
+        }
         setAdminEmail(json.email ?? user.email ?? null);
         setGate("ok");
       })
