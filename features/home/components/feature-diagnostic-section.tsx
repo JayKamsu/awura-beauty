@@ -3,10 +3,17 @@
 import Image from "next/image";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import {
+  cmsOr,
+  usePageCmsFields,
+} from "@/features/cms/context/page-cms-context";
 import { HOME_IMAGES } from "@/features/home/data/content";
 
 export function FeatureDiagnosticSection() {
   const { t } = useTranslation();
+  const cms = usePageCmsFields("feature");
+  const image = cmsOr(cms, "image_url", HOME_IMAGES.feature);
+  const ctaLabel = cms.cta_label?.trim();
 
   return (
     <section className="bg-background">
@@ -14,13 +21,13 @@ export function FeatureDiagnosticSection() {
         <div className="relative flex flex-col justify-between gap-10 bg-primary px-6 py-14 text-background md:px-10 lg:py-16">
           <div className="relative z-10 max-w-md space-y-5">
             <p className="text-sm uppercase tracking-[0.2em] text-accent-light">
-              {t("home.feature.eyebrow")}
+              {cmsOr(cms, "subtitle", t("home.feature.eyebrow"))}
             </p>
             <h2 className="font-serif text-3xl text-accent-light sm:text-4xl">
-              {t("home.feature.title")}
+              {cmsOr(cms, "title", t("home.feature.title"))}
             </h2>
             <p className="leading-relaxed text-background/85">
-              {t("home.feature.description")}
+              {cmsOr(cms, "body", t("home.feature.description"))}
             </p>
             <div className="flex flex-wrap gap-3">
               <Button
@@ -42,7 +49,7 @@ export function FeatureDiagnosticSection() {
           <div className="relative z-10 mx-auto w-full max-w-xs">
             <div className="relative aspect-square overflow-hidden rounded-full border-4 border-background/20">
               <Image
-                src={HOME_IMAGES.feature}
+                src={image}
                 alt={t("home.feature.imageAlt")}
                 fill
                 className="object-cover"
@@ -61,7 +68,7 @@ export function FeatureDiagnosticSection() {
             <li>{t("home.feature.sidePhysical")}</li>
           </ul>
           <Button href="/diagnostic-capillaire" size="lg">
-            {t("home.feature.cta")}
+            {ctaLabel || t("home.feature.cta")}
           </Button>
         </div>
       </div>

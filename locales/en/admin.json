@@ -29,6 +29,7 @@
     "manageContent": "Manage blog",
     "managePages": "Manage pages",
     "manageCustomers": "Manage customers",
+    "manageMessages": "View messages",
     "loading": "Loading…",
     "empty": "No orders to process.",
     "carrier": "Carrier",
@@ -179,10 +180,11 @@
     },
     "shippingTitle": "Shipping rates",
     "shippingSubtitle": "Colissimo / Mondial Relay base fees, free threshold, and store pickup.",
-    "shippingHint": "Shipping total = base fee + sum of product fees (pickup = 0). Free shipping when the cart reaches the threshold.",
+    "shippingHint": "Shipping total = base fee + sum of product fees (pickup = 0). When the cart reaches the free-shipping threshold, shipping is free. That threshold also appears in the top site banner.",
     "shippingEnabled": "Enabled at checkout",
     "shippingBaseFee": "Base fee (€)",
     "shippingFreeMin": "Free shipping from (€)",
+    "shippingFreeMinHint": "Empty = no free shipping / banner ignores this carrier. The site banner uses the lowest threshold among enabled carriers.",
     "shippingFeeLine": "Shipping included: {{amount}}",
     "pickupNoLabel": "Store pickup — no label to generate.",
     "markPickupReady": "Mark ready for pickup (notifies customer)",
@@ -210,13 +212,19 @@
     },
     "pages": {
       "save": "Save page",
+      "help": "Pick Home or About, then “Edit texts & photos” to change titles, copy and images. Leave a field empty to keep the site default.",
       "moveUp": "Move up",
       "moveDown": "Move down",
       "visible": "Visible",
       "hidden": "Hidden",
-      "editDetails": "Edit details",
+      "editDetails": "Edit texts & photos",
       "hideDetails": "Hide details",
       "uploadImage": "Upload image",
+      "uploadImageToBlock": "Add image to text (image:… line)",
+      "clearImage": "Remove image",
+      "imageAppended": "Image URL added to the text. Move it into the right block if needed.",
+      "blocksHint": "Item lists: one block = title + text, separated by a --- line. For an item photo, add image:URL inside the block.",
+      "blocksPlaceholder": "Title 1\nText 1\n---\nTitle 2\nText 2\nimage:https://…",
       "locales": {
         "fr": "Français",
         "en": "English",
@@ -224,10 +232,10 @@
       },
       "fields": {
         "title": "Title",
-        "subtitle": "Subtitle",
+        "subtitle": "Subtitle / eyebrow",
         "body": "Body",
-        "image_url": "Image URL",
-        "cta_label": "CTA label"
+        "image_url": "Main image",
+        "cta_label": "Button label"
       },
       "keys": {
         "home": "Home",
@@ -244,6 +252,18 @@
         "mission": "Mission",
         "commitments": "Commitments",
         "cta": "Call to action"
+      },
+      "sectionHints": {
+        "hero": "Title, subtitle, photo and diagnostic button",
+        "promises": "4 promises in the Body field (--- blocks)",
+        "bestsellers": "Section title (products managed under Products)",
+        "ingredients": "Section title and intro",
+        "feature": "Copy + photo for the diagnostic block",
+        "testimonials": "Title + 3 reviews (--- blocks, optional image:)",
+        "story": "Awura story + photo",
+        "mission": "Title + 4 missions (--- blocks)",
+        "commitments": "Title + 3 commitments (--- blocks)",
+        "cta": "Final title, text and button"
       }
     },
     "notifications": {

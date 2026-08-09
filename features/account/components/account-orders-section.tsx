@@ -6,6 +6,10 @@ import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { DocumentPreviewModal } from "@/components/ui/document-preview-modal";
+import {
+  AccountSection,
+  accountPanelClass,
+} from "@/features/account/components/account-section";
 import { ShippingTimeline } from "@/features/account/components/shipping-timeline";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { usePreferences } from "@/components/providers/preferences-provider";
@@ -123,13 +127,11 @@ export function AccountOrdersSection({
   };
 
   return (
-    <section id="commandes" className="space-y-6">
-      <h2 className="font-serif text-3xl text-primary">{t("account.ordersTitle")}</h2>
-
+    <AccountSection id="commandes" title={t("account.ordersTitle")}>
       {ordersLoading ? (
         <p className="text-muted">{t("account.ordersLoading")}</p>
       ) : orders.length === 0 ? (
-        <div className="rounded-2xl bg-background-alt p-8 text-center">
+        <div className={`${accountPanelClass} p-8 text-center`}>
           <p className="text-muted">{t("account.noOrders")}</p>
           <Button href="/boutique" className="mt-4">
             {t("cart.continueShopping")}
@@ -146,10 +148,10 @@ export function AccountOrdersSection({
               <article
                 id={`order-${order.id}`}
                 key={order.id}
-                className={`space-y-4 rounded-2xl border p-5 ${
+                className={`space-y-4 rounded-2xl p-5 ring-1 ${
                   focusOrderId === order.id
-                    ? "border-accent bg-accent/5"
-                    : "border-border"
+                    ? "bg-accent/10 ring-accent"
+                    : "bg-background/70 ring-border/50"
                 }`}
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -207,7 +209,7 @@ export function AccountOrdersSection({
                   </div>
                 </div>
 
-                <div className="rounded-xl bg-background-alt p-4">
+                <div className="rounded-xl bg-background-alt/80 p-4">
                   <p className="mb-3 font-medium text-primary">
                     {t("account.shippingTimeline")}
                   </p>
@@ -268,7 +270,7 @@ export function AccountOrdersSection({
                 </div>
 
                 {address ? (
-                  <div className="rounded-xl border border-border p-4 text-sm">
+                  <div className={`${accountPanelClass} text-sm`}>
                     <p className="mb-1 font-medium text-primary">
                       {t("account.shippingAddress")}
                     </p>
@@ -290,7 +292,7 @@ export function AccountOrdersSection({
                   </div>
                 ) : null}
 
-                <ul className="space-y-2 border-t border-border pt-4 text-sm text-muted">
+                <ul className="space-y-2 border-t border-border/70 pt-4 text-sm text-muted">
                   {order.items.map((item) => (
                     <li
                       key={`${order.id}-${item.slug}`}
@@ -331,6 +333,6 @@ export function AccountOrdersSection({
           }}
         />
       ) : null}
-    </section>
+    </AccountSection>
   );
 }

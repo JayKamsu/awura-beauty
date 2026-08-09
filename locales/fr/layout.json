@@ -1,6 +1,6 @@
 {
   "announcement": {
-    "freeShipping": "Livraison offerte dès 80€ d'achat"
+    "freeShipping": "Livraison offerte dès {{amount}} d'achat"
   },
   "common": {
     "close": "Fermer",
@@ -32,6 +32,10 @@
     "cart": "Panier",
     "themeToLight": "Passer en mode clair",
     "themeToDark": "Passer en mode sombre",
+    "settings": "Paramètres",
+    "theme": "Thème",
+    "themeLight": "Clair",
+    "themeDark": "Sombre",
     "language": "Langue",
     "currency": "Devise"
   },

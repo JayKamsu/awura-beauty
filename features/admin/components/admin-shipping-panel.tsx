@@ -176,6 +176,11 @@ export function AdminShippingPanel() {
                       )
                     }
                   />
+                  {rate.carrier !== "pickup" ? (
+                    <span className="block text-xs text-muted">
+                      {t("admin.shippingFreeMinHint")}
+                    </span>
+                  ) : null}
                 </label>
               </div>
             </article>

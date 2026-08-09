@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import {
+  AccountSection,
+  accountPanelClass,
+} from "@/features/account/components/account-section";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { listMyDiagnostics } from "@/lib/infrastructure/supabase/diagnostics";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
@@ -50,20 +54,19 @@ export function AccountDiagnosticsSection() {
   const empty = !loading && items.length === 0 && appointments.length === 0;
 
   return (
-    <section id="diagnostics" className="space-y-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <h2 className="font-serif text-3xl text-primary">
-          {t("account.diagnosticsTitle")}
-        </h2>
+    <AccountSection
+      id="diagnostics"
+      title={t("account.diagnosticsTitle")}
+      action={
         <Button href="/diagnostic-capillaire" variant="primary-outline" size="md">
           {t("account.diagnosticsNew")}
         </Button>
-      </div>
-
+      }
+    >
       {loading ? (
         <p className="text-muted">{t("account.diagnosticsLoading")}</p>
       ) : empty ? (
-        <div className="rounded-2xl bg-background-alt p-8 text-center">
+        <div className={`${accountPanelClass} p-8 text-center`}>
           <p className="text-muted">{t("account.diagnosticsEmpty")}</p>
           <Button href="/diagnostic-capillaire" className="mt-4">
             {t("account.diagnosticsNew")}
@@ -80,7 +83,7 @@ export function AccountDiagnosticsSection() {
                 {appointments.map((a) => (
                   <li
                     key={a.id}
-                    className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-border p-4"
+                    className={`flex flex-wrap items-start justify-between gap-3 ${accountPanelClass}`}
                   >
                     <div className="space-y-2">
                       <p className="font-medium text-primary">
@@ -100,7 +103,7 @@ export function AccountDiagnosticsSection() {
                         </Button>
                       ) : null}
                     </div>
-                    <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs text-primary">
+                    <span className="rounded-xl bg-primary/10 px-2.5 py-1 text-xs text-primary">
                       {t("account.diagnosticsPhysical")}
                     </span>
                   </li>
@@ -122,10 +125,7 @@ export function AccountDiagnosticsSection() {
                     item.profile.summary ||
                     t(item.profile.summaryKey);
                   return (
-                    <li
-                      key={item.id}
-                      className="space-y-3 rounded-2xl border border-border p-5"
-                    >
+                    <li key={item.id} className={`${accountPanelClass} space-y-3`}>
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
                           <p className="font-serif text-xl text-primary">
@@ -141,7 +141,7 @@ export function AccountDiagnosticsSection() {
                             ).format(new Date(item.created_at))}
                           </p>
                         </div>
-                        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs text-primary">
+                        <span className="rounded-xl bg-primary/10 px-2.5 py-1 text-xs text-primary">
                           {item.channel === "physical"
                             ? t("account.diagnosticsPhysical")
                             : t("account.diagnosticsOnline")}
@@ -153,13 +153,13 @@ export function AccountDiagnosticsSection() {
                           <p className="text-sm font-medium text-primary">
                             {t("account.diagnosticsScalpAnalysis")}
                           </p>
-                          <p className="text-sm text-muted whitespace-pre-wrap">
+                          <p className="whitespace-pre-wrap text-sm text-muted">
                             {item.profile.scalpAnalysis}
                           </p>
                         </div>
                       ) : null}
 
-                      <p className="text-sm text-muted whitespace-pre-wrap">
+                      <p className="whitespace-pre-wrap text-sm text-muted">
                         {summary}
                       </p>
 
@@ -211,7 +211,7 @@ export function AccountDiagnosticsSection() {
                               <li key={slug}>
                                 <Link
                                   href={`/boutique/${slug}`}
-                                  className="inline-flex rounded-full border border-border px-3 py-1 text-xs text-accent hover:border-accent"
+                                  className="inline-flex rounded-xl border border-border px-3 py-1 text-xs text-accent hover:border-accent"
                                 >
                                   {slug.replaceAll("-", " ")}
                                 </Link>
@@ -228,6 +228,6 @@ export function AccountDiagnosticsSection() {
           ) : null}
         </>
       )}
-    </section>
+    </AccountSection>
   );
 }

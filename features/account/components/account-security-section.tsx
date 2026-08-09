@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import {
+  AccountSection,
+  accountFieldClass,
+} from "@/features/account/components/account-section";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
-
-const fieldClass =
-  "w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none transition focus:border-accent";
 
 export function AccountSecuritySection() {
   const { t } = useTranslation();
@@ -46,10 +47,11 @@ export function AccountSecuritySection() {
   };
 
   return (
-    <section id="securite" className="space-y-4 rounded-2xl border border-border p-6">
-      <h2 className="font-serif text-2xl text-primary">{t("account.securityTitle")}</h2>
-      <p className="text-sm text-muted">{t("account.securitySubtitle")}</p>
-
+    <AccountSection
+      id="securite"
+      title={t("account.securityTitle")}
+      subtitle={t("account.securitySubtitle")}
+    >
       <form onSubmit={onSubmit} className="max-w-md space-y-4">
         <label className="block space-y-1.5 text-sm">
           <span className="text-muted">{t("account.newPassword")}</span>
@@ -57,7 +59,7 @@ export function AccountSecuritySection() {
             required
             type="password"
             minLength={6}
-            className={fieldClass}
+            className={accountFieldClass}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="new-password"
@@ -69,7 +71,7 @@ export function AccountSecuritySection() {
             required
             type="password"
             minLength={6}
-            className={fieldClass}
+            className={accountFieldClass}
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             autoComplete="new-password"
@@ -98,6 +100,6 @@ export function AccountSecuritySection() {
           {t("auth.forgotPasswordLink")}
         </Link>
       </p>
-    </section>
+    </AccountSection>
   );
 }

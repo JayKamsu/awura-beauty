@@ -3,10 +3,15 @@
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ui/product-card";
+import {
+  cmsOr,
+  usePageCmsFields,
+} from "@/features/cms/context/page-cms-context";
 import { BESTSELLERS } from "@/features/home/data/content";
 
 export function BestsellersSection() {
   const { t } = useTranslation();
+  const cms = usePageCmsFields("bestsellers");
 
   return (
     <section className="bg-background">
@@ -14,12 +19,14 @@ export function BestsellersSection() {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-xl space-y-3">
             <h2 className="font-serif text-3xl text-primary sm:text-4xl">
-              {t("home.bestsellers.title")}
+              {cmsOr(cms, "title", t("home.bestsellers.title"))}
             </h2>
-            <p className="text-muted">{t("home.bestsellers.subtitle")}</p>
+            <p className="text-muted">
+              {cmsOr(cms, "subtitle", t("home.bestsellers.subtitle"))}
+            </p>
           </div>
           <Button href="/boutique" variant="primary-outline" size="md">
-            {t("home.bestsellers.seeAll")}
+            {cmsOr(cms, "cta_label", t("home.bestsellers.seeAll"))}
           </Button>
         </div>
 

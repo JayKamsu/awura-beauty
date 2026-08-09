@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import {
+  AccountSection,
+  accountPanelClass,
+} from "@/features/account/components/account-section";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import type { LoyaltyLedgerEntry } from "@/lib/infrastructure/supabase/loyalty";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
@@ -90,26 +94,24 @@ export function AccountLoyaltySection() {
   };
 
   return (
-    <section id="fidelite" className="space-y-5">
-      <h2 className="font-serif text-3xl text-primary">
-        {t("account.loyalty.title")}
-      </h2>
-
+    <AccountSection id="fidelite" title={t("account.loyalty.title")}>
       {loading ? (
         <p className="text-muted">{t("account.loyalty.loading")}</p>
       ) : (
         <>
-          <div className="rounded-2xl border border-border p-5">
-            <p className="text-sm text-muted">{t("account.loyalty.balanceLabel")}</p>
-            <p className="font-serif text-4xl text-primary">
+          <div className={`${accountPanelClass} bg-primary text-background`}>
+            <p className="text-sm text-background/75">
+              {t("account.loyalty.balanceLabel")}
+            </p>
+            <p className="mt-1 font-serif text-4xl">
               {t("account.loyalty.balanceValue", { count: balance })}
             </p>
-            <p className="mt-2 text-sm text-muted">
+            <p className="mt-3 text-sm text-background/75">
               {t("account.loyalty.rules")}
             </p>
           </div>
 
-          <div className="space-y-3 rounded-2xl border border-border p-5">
+          <div className={`${accountPanelClass} space-y-3`}>
             <h3 className="font-medium text-primary">
               {t("account.loyalty.referralTitle")}
             </h3>
@@ -129,7 +131,12 @@ export function AccountLoyaltySection() {
                 <code className="max-w-full truncate rounded-xl bg-background-alt px-3 py-2 text-xs text-muted">
                   {referralLink}
                 </code>
-                <Button type="button" variant="primary-outline" size="md" onClick={() => void copyLink()}>
+                <Button
+                  type="button"
+                  variant="primary-outline"
+                  size="md"
+                  onClick={() => void copyLink()}
+                >
                   {copied
                     ? t("account.loyalty.copied")
                     : t("account.loyalty.copyLink")}
@@ -143,7 +150,7 @@ export function AccountLoyaltySection() {
             ) : null}
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <h3 className="font-medium text-primary">
               {t("account.loyalty.historyTitle")}
             </h3>
@@ -152,11 +159,11 @@ export function AccountLoyaltySection() {
                 {t("account.loyalty.historyEmpty")}
               </p>
             ) : (
-              <ul className="divide-y divide-border rounded-2xl border border-border">
+              <ul className="divide-y divide-border/70 overflow-hidden rounded-2xl bg-background/70 ring-1 ring-border/50">
                 {ledger.map((entry) => (
                   <li
                     key={entry.id}
-                    className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
+                    className="flex flex-wrap items-center justify-between gap-2 px-4 py-3.5 text-sm"
                   >
                     <span className="text-muted">
                       {t(`account.loyalty.reasons.${entry.reason}`)}
@@ -182,7 +189,7 @@ export function AccountLoyaltySection() {
           </div>
         </>
       )}
-    </section>
+    </AccountSection>
   );
 }
 

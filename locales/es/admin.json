@@ -29,6 +29,7 @@
     "manageContent": "Gestionar el blog",
     "managePages": "Gestionar páginas",
     "manageCustomers": "Gestionar clientes",
+    "manageMessages": "Ver mensajes",
     "loading": "Cargando…",
     "empty": "Ningún pedido que tratar.",
     "carrier": "Transportista",
@@ -179,10 +180,11 @@
     },
     "shippingTitle": "Tarifas de envío",
     "shippingSubtitle": "Base Colissimo / Mondial Relay, umbral gratis y recogida en tienda.",
-    "shippingHint": "Total envío = tarifa base + suma de suplementos producto (recogida = 0). Envío gratis si el carrito alcanza el umbral.",
+    "shippingHint": "Total envío = tarifa base + suma de suplementos producto (recogida = 0). Si el carrito alcanza el umbral « Envío gratis desde », el envío es gratis. Ese umbral también aparece en la franja superior del sitio.",
     "shippingEnabled": "Activo en el checkout",
     "shippingBaseFee": "Tarifa base (€)",
     "shippingFreeMin": "Envío gratis desde (€)",
+    "shippingFreeMinHint": "Vacío = sin oferta / la franja ignora este transportista. La franja del sitio usa el umbral más bajo de los transportistas activos.",
     "shippingFeeLine": "Envío incluido: {{amount}}",
     "pickupNoLabel": "Recogida en tienda — no hay etiqueta que generar.",
     "markPickupReady": "Marcar lista para recogida (notifica al cliente)",
@@ -210,13 +212,19 @@
     },
     "pages": {
       "save": "Guardar página",
+      "help": "Elige Inicio o Sobre nosotros, luego « Editar textos y fotos » para cambiar títulos, textos e imágenes. Deja un campo vacío para conservar el texto por defecto.",
       "moveUp": "Subir",
       "moveDown": "Bajar",
       "visible": "Visible",
       "hidden": "Oculto",
-      "editDetails": "Editar detalles",
+      "editDetails": "Editar textos y fotos",
       "hideDetails": "Ocultar detalles",
       "uploadImage": "Subir imagen",
+      "uploadImageToBlock": "Añadir imagen al texto (línea image:…)",
+      "clearImage": "Quitar imagen",
+      "imageAppended": "URL de imagen añadida al texto. Muévela al bloque correcto si hace falta.",
+      "blocksHint": "Listas de ítems: un bloque = título + texto, separados por una línea ---. Para una foto, añade image:URL en el bloque.",
+      "blocksPlaceholder": "Título 1\nTexto 1\n---\nTítulo 2\nTexto 2\nimage:https://…",
       "locales": {
         "fr": "Français",
         "en": "English",
@@ -224,10 +232,10 @@
       },
       "fields": {
         "title": "Título",
-        "subtitle": "Subtítulo",
+        "subtitle": "Subtítulo / eyebrow",
         "body": "Texto",
-        "image_url": "URL de imagen",
-        "cta_label": "Etiqueta CTA"
+        "image_url": "Imagen principal",
+        "cta_label": "Etiqueta del botón"
       },
       "keys": {
         "home": "Inicio",
@@ -244,6 +252,18 @@
         "mission": "Misión",
         "commitments": "Compromisos",
         "cta": "Llamada a la acción"
+      },
+      "sectionHints": {
+        "hero": "Título, subtítulo, foto y botón diagnóstico",
+        "promises": "4 promesas en el campo Texto (bloques ---)",
+        "bestsellers": "Título de sección (productos en Productos)",
+        "ingredients": "Título e intro de sección",
+        "feature": "Textos + foto del bloque diagnóstico",
+        "testimonials": "Título + 3 reseñas (bloques --- con image: opcional)",
+        "story": "Historia Awura + foto",
+        "mission": "Título + 4 misiones (bloques ---)",
+        "commitments": "Título + 3 compromisos (bloques ---)",
+        "cta": "Título, texto y botón final"
       }
     },
     "notifications": {

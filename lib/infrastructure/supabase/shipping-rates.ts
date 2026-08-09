@@ -90,3 +90,23 @@ export async function upsertShippingRates(
   if (error) return { ok: false, error: error.message };
   return { ok: true, error: null };
 }
+
+/**
+ * Seuil « livraison offerte » affiché en public (bandeau).
+ * Prend le plus bas parmi les transporteurs activés (hors retrait).
+ */
+export async function getPublicFreeShippingMin(): Promise<number | null> {
+  const rates = await listShippingRates();
+  const mins = rates
+    .filter(
+      (rate) =>
+        rate.enabled &&
+        rate.carrier !== "pickup" &&
+        rate.free_shipping_min !== null &&
+        rate.free_shipping_min > 0,
+    )
+    .map((rate) => rate.free_shipping_min as number);
+
+  if (!mins.length) return null;
+  return Math.min(...mins);
+}

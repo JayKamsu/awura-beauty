@@ -1,6 +1,7 @@
 {
   "account": {
     "title": "Mi cuenta",
+    "subtitle": "Perfil, pedidos, fidelidad y diagnósticos — tu espacio Awura.",
     "welcome": "Conectada como {{email}}",
     "loading": "Cargando la cuenta…",
     "loginRequired": "Inicia sesión para ver tus pedidos y el estado del envío.",

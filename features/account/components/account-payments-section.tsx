@@ -1,10 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import {
+  AccountSection,
+  accountPanelClass,
+} from "@/features/account/components/account-section";
 import { usePushSubscription } from "@/features/notifications/hooks/use-push-subscription";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
-import { useState } from "react";
 
 const METHODS = ["stripe", "paypal"] as const;
 
@@ -25,24 +29,18 @@ export function AccountPaymentsSection() {
   };
 
   return (
-    <section id="paiements" className="space-y-6 rounded-2xl border border-border p-6">
-      <div className="space-y-2">
-        <h2 className="font-serif text-2xl text-primary">
-          {t("account.payments.title")}
-        </h2>
-        <p className="text-sm text-muted">{t("account.payments.subtitle")}</p>
-      </div>
-
+    <AccountSection
+      id="paiements"
+      title={t("account.payments.title")}
+      subtitle={t("account.payments.subtitle")}
+    >
       <div className="space-y-3">
         <h3 className="text-sm font-medium text-primary">
           {t("account.payments.methodsTitle")}
         </h3>
         <ul className="grid gap-3 sm:grid-cols-2">
           {METHODS.map((method) => (
-            <li
-              key={method}
-              className="rounded-xl bg-background-alt px-4 py-3 text-sm"
-            >
+            <li key={method} className={`${accountPanelClass} text-sm`}>
               <p className="font-medium text-primary">
                 {t(`checkout.methods.${method}.label`)}
               </p>
@@ -55,7 +53,7 @@ export function AccountPaymentsSection() {
         <p className="text-sm text-muted">{t("account.payments.methodsHint")}</p>
       </div>
 
-      <div className="space-y-3 border-t border-border pt-5">
+      <div className={`${accountPanelClass} space-y-3`}>
         <h3 className="text-sm font-medium text-primary">
           {t("account.payments.notificationsTitle")}
         </h3>
@@ -94,13 +92,13 @@ export function AccountPaymentsSection() {
         )}
       </div>
 
-      <div className="space-y-2 border-t border-border pt-5 text-sm text-muted">
+      <div className={`${accountPanelClass} space-y-3 text-sm text-muted`}>
         <p>{t("account.payments.receiptHint")}</p>
         <p>{t("account.payments.refundHint")}</p>
         <Button href="/compte/messages" variant="primary-outline" size="md">
           {t("account.payments.contactSupport")}
         </Button>
       </div>
-    </section>
+    </AccountSection>
   );
 }

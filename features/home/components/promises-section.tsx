@@ -2,6 +2,10 @@
 
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  parseCmsBlocks,
+  usePageCmsFields,
+} from "@/features/cms/context/page-cms-context";
 
 const PROMISES = [
   {
@@ -30,17 +34,30 @@ const PROMISES = [
 
 export function PromisesSection() {
   const { t } = useTranslation();
+  const cms = usePageCmsFields("promises");
+  const blocks = parseCmsBlocks(cms.body);
+
+  const items = PROMISES.map((promise, index) => {
+    const block = blocks[index];
+    return {
+      key: promise.key,
+      icon: promise.icon,
+      title: block?.title || t(`home.promises.${promise.key}.title`),
+      description:
+        block?.body || t(`home.promises.${promise.key}.description`),
+    };
+  });
 
   return (
     <section className="bg-background-alt">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0 md:px-6 lg:py-16">
-        {PROMISES.map((promise, index) => (
+        {items.map((promise, index) => (
           <PromiseItem
             key={promise.key}
             icon={promise.icon}
-            title={t(`home.promises.${promise.key}.title`)}
-            description={t(`home.promises.${promise.key}.description`)}
-            showDivider={index < PROMISES.length - 1}
+            title={promise.title}
+            description={promise.description}
+            showDivider={index < items.length - 1}
           />
         ))}
       </div>

@@ -12,27 +12,28 @@ import { PushForegroundListener } from "@/features/notifications/components/push
 import { PushNavigateListener } from "@/features/notifications/components/push-navigate-listener";
 import { PushNotificationButton } from "@/features/notifications/components/push-notification-button";
 
+/** Nav latérale : du plus critique (ops quotidiennes) au moins fréquent (réglages). */
 const NAV = [
   { href: "/admin", key: "dashboard" },
-  { href: "/admin/produits", key: "products" },
-  { href: "/admin/marque", key: "brand" },
   { href: "/admin/commandes", key: "orders" },
-  { href: "/admin/paiements", key: "payments" },
-  { href: "/admin/diagnostic", key: "diagnostic" },
-  { href: "/admin/livraison", key: "shipping" },
-  { href: "/admin/contenu", key: "content" },
-  { href: "/admin/pages", key: "pages" },
-  { href: "/admin/notifications", key: "notifications" },
   { href: "/admin/messages", key: "messages" },
+  { href: "/admin/paiements", key: "payments" },
+  { href: "/admin/produits", key: "products" },
   { href: "/admin/clients", key: "customers" },
+  { href: "/admin/livraison", key: "shipping" },
+  { href: "/admin/diagnostic", key: "diagnostic" },
+  { href: "/admin/pages", key: "pages" },
+  { href: "/admin/contenu", key: "content" },
+  { href: "/admin/notifications", key: "notifications" },
+  { href: "/admin/marque", key: "brand" },
 ] as const;
 
 /** Raccourcis barre basse mobile (le reste via le menu). */
 const MOBILE_QUICK_NAV = [
   { href: "/admin", key: "dashboard" },
-  { href: "/admin/produits", key: "products" },
   { href: "/admin/commandes", key: "orders" },
   { href: "/admin/messages", key: "messages" },
+  { href: "/admin/produits", key: "products" },
 ] as const;
 
 function NavIcon({ name }: { name: (typeof MOBILE_QUICK_NAV)[number]["key"] | "more" }) {
@@ -246,13 +247,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
               {adminEmail}
             </p>
           ) : null}
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-xs text-muted">{t("support.push.enableShort")}</p>
-            <PushNotificationButton
-              variant="admin"
-              hrefWhenEnabled="/admin/notifications"
-            />
-          </div>
           <Button
             type="button"
             variant="primary-outline"

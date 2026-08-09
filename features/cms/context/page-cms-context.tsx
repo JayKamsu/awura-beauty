@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import type {
+  PageFieldKey,
   PageSectionConfig,
   PageSectionFields,
   PageSectionId,
@@ -56,3 +57,68 @@ export function cmsOr(
   const value = fields[key]?.trim();
   return value || fallback;
 }
+
+export type CmsContentBlock = {
+  title: string;
+  body: string;
+  image?: string;
+};
+
+/**
+ * Blocs multi-items édités dans le champ « Texte » admin.
+ * Séparateur : ligne `---`
+ * Format d’un bloc :
+ *   Titre
+ *   Corps (plusieurs lignes)
+ *   image:https://…   (optionnel)
+ */
+export function parseCmsBlocks(raw: string | undefined): CmsContentBlock[] {
+  const text = raw?.trim();
+  if (!text) return [];
+
+  return text
+    .split(/\n---\n/)
+    .map((chunk) => chunk.trim())
+    .filter(Boolean)
+    .map((chunk) => {
+      const lines = chunk.split("\n");
+      const title = (lines[0] ?? "").trim();
+      let image: string | undefined;
+      const bodyLines: string[] = [];
+      for (const line of lines.slice(1)) {
+        const trimmed = line.trim();
+        if (trimmed.toLowerCase().startsWith("image:")) {
+          image = trimmed.slice("image:".length).trim() || undefined;
+        } else {
+          bodyLines.push(line);
+        }
+      }
+      return {
+        title,
+        body: bodyLines.join("\n").trim(),
+        image,
+      };
+    })
+    .filter((block) => block.title || block.body || block.image);
+}
+
+/** Champs éditables par section (admin Pages). */
+export const SECTION_EDITABLE_FIELDS: Record<PageSectionId, PageFieldKey[]> = {
+  hero: ["title", "subtitle", "image_url", "cta_label"],
+  promises: ["body"],
+  bestsellers: ["title", "subtitle", "cta_label"],
+  ingredients: ["title", "subtitle", "body"],
+  feature: ["title", "subtitle", "body", "image_url", "cta_label"],
+  testimonials: ["title", "body"],
+  story: ["title", "subtitle", "body", "image_url"],
+  mission: ["title", "subtitle", "body"],
+  commitments: ["title", "subtitle", "body"],
+  cta: ["title", "body", "cta_label"],
+};
+
+export const SECTION_USES_BLOCKS: Partial<Record<PageSectionId, boolean>> = {
+  promises: true,
+  testimonials: true,
+  mission: true,
+  commitments: true,
+};

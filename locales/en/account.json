@@ -1,6 +1,7 @@
 {
   "account": {
     "title": "My account",
+    "subtitle": "Profile, orders, loyalty and diagnostics — your Awura space.",
     "welcome": "Signed in as {{email}}",
     "loading": "Loading account…",
     "loginRequired": "Sign in to view your orders and shipping status.",

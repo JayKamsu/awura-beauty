@@ -29,6 +29,7 @@
     "manageContent": "Gérer le blog",
     "managePages": "Gérer les pages",
     "manageCustomers": "Gérer les clients",
+    "manageMessages": "Voir les messages",
     "loading": "Chargement…",
     "empty": "Aucune commande à traiter.",
     "carrier": "Transporteur",
@@ -179,10 +180,11 @@
     },
     "shippingTitle": "Tarifs de livraison",
     "shippingSubtitle": "Base Colissimo / Mondial Relay, seuil de gratuité, et retrait sur place.",
-    "shippingHint": "Total livraison = frais de base + somme des frais produit (sauf retrait = 0). Si le panier atteint le seuil, la livraison est offerte.",
+    "shippingHint": "Total livraison = frais de base + somme des frais produit (sauf retrait = 0). Si le panier atteint le seuil « Livraison offerte dès », la livraison est offerte. Ce seuil s’affiche aussi dans le bandeau en haut du site.",
     "shippingEnabled": "Activé au checkout",
     "shippingBaseFee": "Frais de base (€)",
     "shippingFreeMin": "Livraison offerte dès (€)",
+    "shippingFreeMinHint": "Vide = pas d’offre / bandeau masqué pour ce transporteur. Le bandeau du site utilise le plus bas seuil des transporteurs activés.",
     "shippingFeeLine": "Dont livraison : {{amount}}",
     "pickupNoLabel": "Retrait sur place — pas d’étiquette à générer.",
     "markPickupReady": "Marquer prêt au retrait (notifie le client)",
@@ -210,13 +212,19 @@
     },
     "pages": {
       "save": "Enregistrer la page",
+      "help": "Choisis Accueil ou À propos, puis « Modifier les détails » pour changer titres, textes et photos. Laisse un champ vide pour garder le texte par défaut du site.",
       "moveUp": "Monter",
       "moveDown": "Descendre",
       "visible": "Visible",
       "hidden": "Masqué",
-      "editDetails": "Modifier les détails",
+      "editDetails": "Modifier textes & photos",
       "hideDetails": "Masquer les détails",
       "uploadImage": "Uploader une image",
+      "uploadImageToBlock": "Ajouter une image au texte (ligne image:…)",
+      "clearImage": "Retirer l’image",
+      "imageAppended": "URL image ajoutée dans le texte. Place-la dans le bon bloc si besoin.",
+      "blocksHint": "Liste d’items : un bloc = titre + texte, séparés par une ligne --- . Pour une photo d’item, ajoute une ligne image:URL dans le bloc.",
+      "blocksPlaceholder": "Titre 1\nTexte 1\n---\nTitre 2\nTexte 2\nimage:https://…",
       "locales": {
         "fr": "Français",
         "en": "English",
@@ -224,10 +232,10 @@
       },
       "fields": {
         "title": "Titre",
-        "subtitle": "Sous-titre",
+        "subtitle": "Sous-titre / eyebrow",
         "body": "Texte",
-        "image_url": "URL image",
-        "cta_label": "Libellé CTA"
+        "image_url": "Image principale",
+        "cta_label": "Libellé bouton"
       },
       "keys": {
         "home": "Accueil",
@@ -244,6 +252,18 @@
         "mission": "Mission",
         "commitments": "Engagements",
         "cta": "Appel à l'action"
+      },
+      "sectionHints": {
+        "hero": "Titre, sous-titre, photo et bouton diagnostic",
+        "promises": "4 promesses dans le champ Texte (blocs ---)",
+        "bestsellers": "Titre de section (produits gérés dans Produits)",
+        "ingredients": "Titre et intro de section",
+        "feature": "Textes + photo du bloc diagnostic",
+        "testimonials": "Titre + 3 avis (blocs --- avec image: optionnelle)",
+        "story": "Histoire Awura + photo",
+        "mission": "Titre + 4 missions (blocs ---)",
+        "commitments": "Titre + 3 engagements (blocs ---)",
+        "cta": "Titre, texte et bouton final"
       }
     },
     "notifications": {

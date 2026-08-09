@@ -13,11 +13,12 @@ import { useLiveRefresh } from "@/lib/hooks/use-live-refresh";
 import type { AdminDashboardStats } from "@/lib/infrastructure/supabase/admin-dashboard";
 
 const QUICK_LINKS = [
-  { href: "/admin/produits", key: "manageProducts" },
   { href: "/admin/commandes", key: "manageOrders" },
-  { href: "/admin/contenu", key: "manageContent" },
-  { href: "/admin/pages", key: "managePages" },
+  { href: "/admin/messages", key: "manageMessages" },
+  { href: "/admin/produits", key: "manageProducts" },
   { href: "/admin/clients", key: "manageCustomers" },
+  { href: "/admin/pages", key: "managePages" },
+  { href: "/admin/contenu", key: "manageContent" },
 ] as const;
 
 export function AdminDashboardPanel() {

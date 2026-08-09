@@ -1,6 +1,6 @@
 {
   "announcement": {
-    "freeShipping": "Envío gratis a partir de 80€ de compra"
+    "freeShipping": "Envío gratis a partir de {{amount}} de compra"
   },
   "common": {
     "close": "Cerrar",
@@ -32,6 +32,10 @@
     "cart": "Carrito",
     "themeToLight": "Cambiar a modo claro",
     "themeToDark": "Cambiar a modo oscuro",
+    "settings": "Ajustes",
+    "theme": "Tema",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
     "language": "Idioma",
     "currency": "Moneda"
   },

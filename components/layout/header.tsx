@@ -5,8 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { BrandLogo } from "@/components/ui/brand-logo";
-import { LocaleCurrencySwitcher } from "@/components/ui/locale-currency-switcher";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { PreferencesSettingsButton } from "@/components/ui/locale-currency-switcher";
 import { useAdminAccess } from "@/features/admin/hooks/use-admin-access";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { useCart } from "@/features/cart/context/cart-provider";
@@ -97,12 +96,7 @@ export function Header() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
-          <div className="hidden md:block">
-            <LocaleCurrencySwitcher />
-          </div>
-          <div className="hidden sm:block">
-            <ThemeToggle />
-          </div>
+          <PreferencesSettingsButton />
 
           {/* Compte / panier : desktop (sur mobile → bottom bar) */}
           <span className="hidden lg:inline-flex">
@@ -180,12 +174,6 @@ export function Header() {
               </Link>
             ) : null}
           </nav>
-          <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4 md:hidden">
-            <LocaleCurrencySwitcher />
-            <div className="sm:hidden">
-              <ThemeToggle />
-            </div>
-          </div>
         </div>
       ) : null}
     </header>

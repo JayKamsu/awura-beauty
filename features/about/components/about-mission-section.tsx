@@ -3,6 +3,11 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { MISSION_KEYS } from "@/features/about/data/content";
+import {
+  cmsOr,
+  parseCmsBlocks,
+  usePageCmsFields,
+} from "@/features/cms/context/page-cms-context";
 
 const MISSION_ICONS: Record<(typeof MISSION_KEYS)[number], ReactNode> = {
   expertise: (
@@ -21,21 +26,34 @@ const MISSION_ICONS: Record<(typeof MISSION_KEYS)[number], ReactNode> = {
 
 export function AboutMissionSection() {
   const { t } = useTranslation();
+  const cms = usePageCmsFields("mission");
+  const blocks = parseCmsBlocks(cms.body);
+
+  const items = MISSION_KEYS.map((key, index) => {
+    const block = blocks[index];
+    return {
+      key,
+      title: block?.title || t(`about.mission.items.${key}.title`),
+      body: block?.body || t(`about.mission.items.${key}.body`),
+    };
+  });
 
   return (
     <section className="bg-background-alt">
       <div className="mx-auto max-w-7xl space-y-12 px-4 py-16 md:px-6">
         <div className="mx-auto max-w-2xl space-y-4 text-center">
           <h2 className="font-serif text-3xl text-primary sm:text-4xl">
-            {t("about.mission.title")}
+            {cmsOr(cms, "title", t("about.mission.title"))}
           </h2>
-          <p className="leading-relaxed text-muted">{t("about.mission.subtitle")}</p>
+          <p className="leading-relaxed text-muted">
+            {cmsOr(cms, "subtitle", t("about.mission.subtitle"))}
+          </p>
         </div>
 
         <div className="grid gap-8 sm:grid-cols-2">
-          {MISSION_KEYS.map((key) => (
+          {items.map((item) => (
             <article
-              key={key}
+              key={item.key}
               className="space-y-4 rounded-3xl bg-background p-6 md:p-8"
             >
               <div className="inline-flex size-12 items-center justify-center text-accent">
@@ -46,15 +64,11 @@ export function AboutMissionSection() {
                   stroke="currentColor"
                   strokeWidth="1.5"
                 >
-                  {MISSION_ICONS[key]}
+                  {MISSION_ICONS[item.key]}
                 </svg>
               </div>
-              <h3 className="font-serif text-2xl text-primary">
-                {t(`about.mission.items.${key}.title`)}
-              </h3>
-              <p className="leading-relaxed text-muted">
-                {t(`about.mission.items.${key}.body`)}
-              </p>
+              <h3 className="font-serif text-2xl text-primary">{item.title}</h3>
+              <p className="leading-relaxed text-muted">{item.body}</p>
             </article>
           ))}
         </div>

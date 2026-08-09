@@ -2,23 +2,28 @@
 
 import Image from "next/image";
 import { useTranslation } from "react-i18next";
+import {
+  cmsOr,
+  usePageCmsFields,
+} from "@/features/cms/context/page-cms-context";
 import { CATALOG } from "@/features/home/data/content";
 
 export function IngredientsSection() {
   const { t } = useTranslation();
+  const cms = usePageCmsFields("ingredients");
 
   return (
     <section className="bg-background">
       <div className="mx-auto max-w-7xl space-y-10 px-4 py-16 md:px-6">
         <div className="max-w-2xl space-y-4">
           <p className="text-sm uppercase tracking-[0.18em] text-accent">
-            {t("home.ingredients.eyebrow")}
+            {cmsOr(cms, "subtitle", t("home.ingredients.eyebrow"))}
           </p>
           <h2 className="font-serif text-3xl text-primary sm:text-4xl">
-            {t("home.ingredients.title")}
+            {cmsOr(cms, "title", t("home.ingredients.title"))}
           </h2>
           <p className="leading-relaxed text-muted">
-            {t("home.ingredients.description")}
+            {cmsOr(cms, "body", t("home.ingredients.description"))}
           </p>
         </div>
 

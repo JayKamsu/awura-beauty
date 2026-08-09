@@ -1,10 +1,6 @@
 /**
- * Contenu de la page À propos.
- *
- * TODO: rendre éditable depuis l'admin
- * — Prévoir une table Supabase `about_content` (clé, locale, titre, corps, image_url, ordre)
- * — Remplacer ces constantes par un fetch via `/lib/connectors/supabase`
- * — Garder ce fichier comme fallback / seed tant que l'admin n'est pas branché
+ * Fallbacks images / clés À propos.
+ * Contenu éditable via Admin → Pages (CMS `page_sections`).
  */
 
 export const ABOUT_IMAGES = {
