@@ -78,7 +78,8 @@ export const BESTSELLERS = CATALOG;
 
 export const HOME_IMAGES = {
   hero: "/images/products/produit-1-beurre.jpg",
-  feature: "/images/products/produit-4-lotion.jpg",
+  /** Feuillage botanique (section diagnostic) */
+  feature: "/images/ingredients/plants-foliage.jpg",
   featureProduct: "/images/products/produit-4-lotion.jpg",
   avatars: [
     "/images/products/produit-1-beurre.jpg",

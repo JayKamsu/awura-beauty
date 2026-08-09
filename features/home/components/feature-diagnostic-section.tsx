@@ -232,7 +232,7 @@ export function FeatureDiagnosticSection() {
             aria-hidden
           >
             <Image
-              src="/images/ingredients/ingredient-1.jpg"
+              src="/images/ingredients/ingredient-2.jpg"
               alt=""
               fill
               className="object-cover scale-110"
@@ -260,7 +260,7 @@ export function FeatureDiagnosticSection() {
         aria-hidden
       >
         <Image
-          src="/images/ingredients/ingredient-1.jpg"
+          src="/images/ingredients/plants-foliage.jpg"
           alt=""
           fill
           className="rounded-full object-cover"
