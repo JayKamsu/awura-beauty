@@ -54,4 +54,43 @@ export type OrderRow = {
     email?: string;
   } | null;
   created_at: string;
+  received_at: string | null;
 };
+
+export type PaymentBadgeStatus = "paid" | "refunded" | "cancelled" | "pending";
+
+/**
+ * Statut paiement affiché (paid/refunded/cancelled/pending), dérivé de
+ * order.status ET order.payment_status. Source unique — le dashboard et
+ * l'écran Paiements doivent classer une commande de la même façon.
+ */
+export function paymentBadgeStatus(
+  order: Pick<OrderRow, "status" | "payment_status">,
+): PaymentBadgeStatus {
+  if (order.payment_status === "paid" || order.status === "paid") {
+    return "paid";
+  }
+  if (order.status === "refunded" || order.payment_status === "refunded") {
+    return "refunded";
+  }
+  if (order.status === "cancelled" || order.payment_status === "cancelled") {
+    return "cancelled";
+  }
+  return "pending";
+}
+
+/** Fenêtre de grâce avant qu'une commande "pending" jamais payée soit considérée abandonnée. */
+export const ABANDONED_PENDING_ORDER_MS = 2 * 60 * 60 * 1000;
+
+/**
+ * Commande créée au clic "Payer" (Stripe/PayPal ont besoin de l'ID avant
+ * paiement pour le webhook) mais jamais payée, au-delà de la fenêtre de
+ * grâce — panier abandonné, pas une vraie commande à traiter.
+ */
+export function isAbandonedPendingOrder(
+  order: Pick<OrderRow, "status" | "payment_status" | "created_at">,
+  now: number = Date.now(),
+): boolean {
+  if (paymentBadgeStatus(order) !== "pending") return false;
+  return now - new Date(order.created_at).getTime() > ABANDONED_PENDING_ORDER_MS;
+}

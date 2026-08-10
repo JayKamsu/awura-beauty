@@ -10,6 +10,7 @@ import {
   AccountSection,
   accountPanelClass,
 } from "@/features/account/components/account-section";
+import { OrderReceiptAndReview } from "@/features/account/components/order-receipt-and-review";
 import { ShippingTimeline } from "@/features/account/components/shipping-timeline";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { usePreferences } from "@/components/providers/preferences-provider";
@@ -318,6 +319,15 @@ export function AccountOrdersSection({
                         </ul>
                       ) : null}
                     </div>
+
+                    <OrderReceiptAndReview
+                      order={order}
+                      onOrderUpdate={(updated) =>
+                        onOrdersChange(
+                          orders.map((o) => (o.id === updated.id ? updated : o)),
+                        )
+                      }
+                    />
 
                     {address ? (
                       <div className={`${accountPanelClass} text-sm`}>

@@ -13,9 +13,10 @@ import { formatPrice } from "@/lib/format/price";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import { useLiveRefresh } from "@/lib/hooks/use-live-refresh";
-import type {
-  OrderRow,
-  PaymentMethod,
+import {
+  paymentBadgeStatus,
+  type OrderRow,
+  type PaymentMethod,
 } from "@/lib/infrastructure/supabase/order-types";
 
 type PaymentsStatus = {
@@ -73,18 +74,22 @@ export function AdminPaymentsPanel() {
     message: string;
   } | null>(null);
 
+  const [includeAbandoned, setIncludeAbandoned] = useState(false);
+
   const load = useCallback(async (opts?: { silent?: boolean }) => {
     if (!opts?.silent) setLoading(true);
     const [statusRes, ordersRes] = await Promise.all([
       adminFetch("/api/admin/payments/status"),
-      adminFetch("/api/admin/orders"),
+      adminFetch(
+        `/api/admin/orders${includeAbandoned ? "?includeAbandoned=1" : ""}`,
+      ),
     ]);
     const statusJson = (await statusRes.json()) as PaymentsStatus;
     const ordersJson = (await ordersRes.json()) as { orders?: OrderRow[] };
     if (statusRes.ok) setStatus(statusJson);
     setOrders(ordersJson.orders ?? []);
     setLoading(false);
-  }, [adminFetch]);
+  }, [adminFetch, includeAbandoned]);
 
   useEffect(() => {
     void load();
@@ -98,15 +103,7 @@ export function AdminPaymentsPanel() {
       if (methodFilter !== "all" && order.payment_method !== methodFilter) {
         return false;
       }
-      const payStatus =
-        order.payment_status === "paid" || order.status === "paid"
-          ? "paid"
-          : order.status === "refunded" || order.payment_status === "refunded"
-            ? "refunded"
-            : order.status === "cancelled" ||
-                order.payment_status === "cancelled"
-              ? "cancelled"
-              : "pending";
+      const payStatus = paymentBadgeStatus(order);
       if (statusFilter !== "all" && payStatus !== statusFilter) return false;
       if (!q) return true;
       return (
@@ -269,9 +266,19 @@ export function AdminPaymentsPanel() {
 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <AdminSearchField value={query} onChange={setQuery} />
-          <span className="text-xs text-muted">
-            {t("admin.ordersCountLabel", { count: filtered.length })}
-          </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="inline-flex items-center gap-2 text-sm text-muted">
+              <input
+                type="checkbox"
+                checked={includeAbandoned}
+                onChange={(e) => setIncludeAbandoned(e.target.checked)}
+              />
+              {t("admin.showAbandonedOrders")}
+            </label>
+            <span className="text-xs text-muted">
+              {t("admin.ordersCountLabel", { count: filtered.length })}
+            </span>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-1.5">
@@ -332,21 +339,10 @@ export function AdminPaymentsPanel() {
             </thead>
             <tbody>
               {filtered.slice(0, 100).map((order) => {
-                const paid =
-                  order.payment_status === "paid" || order.status === "paid";
-                const refunded =
-                  order.status === "refunded" ||
-                  order.payment_status === "refunded";
-                const cancelled =
-                  order.status === "cancelled" ||
-                  order.payment_status === "cancelled";
-                const badgeStatus = paid
-                  ? "paid"
-                  : refunded
-                    ? "refunded"
-                    : cancelled
-                      ? "cancelled"
-                      : "pending";
+                const badgeStatus = paymentBadgeStatus(order);
+                const paid = badgeStatus === "paid";
+                const refunded = badgeStatus === "refunded";
+                const cancelled = badgeStatus === "cancelled";
 
                 return (
                   <tr

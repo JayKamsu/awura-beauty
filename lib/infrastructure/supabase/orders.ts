@@ -35,6 +35,7 @@ function mapOrder(row: Record<string, unknown>): OrderRow {
     shipping_address:
       (row.shipping_address as OrderRow["shipping_address"]) ?? null,
     created_at: String(row.created_at ?? new Date().toISOString()),
+    received_at: row.received_at ? String(row.received_at) : null,
   };
 }
 
@@ -238,6 +239,30 @@ export async function listAllOrders(): Promise<OrderRow[]> {
 
   if (error || !data) return [];
   return data.map((row) => mapOrder(row as Record<string, unknown>));
+}
+
+/**
+ * Le client confirme avoir reçu sa commande. Idempotent — ne réécrit pas
+ * received_at si déjà posé (garde la date de la première confirmation).
+ */
+export async function markOrderReceived(
+  orderId: string,
+  userId: string,
+): Promise<OrderRow | null> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("orders")
+    .update({ received_at: new Date().toISOString(), shipping_status: "delivered" })
+    .eq("id", orderId)
+    .eq("user_id", userId)
+    .is("received_at", null)
+    .select("*")
+    .maybeSingle();
+
+  if (!error && data) return mapOrder(data as Record<string, unknown>);
+  return getOrderById(orderId);
 }
 
 export async function getOrderById(orderId: string): Promise<OrderRow | null> {

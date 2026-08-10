@@ -73,13 +73,17 @@ export function AdminOrdersPanel() {
     subtitle?: string | null;
   } | null>(null);
 
+  const [includeAbandoned, setIncludeAbandoned] = useState(false);
+
   const loadOrders = useCallback(async (opts?: { silent?: boolean }) => {
     if (!opts?.silent) setLoading(true);
-    const response = await adminFetch("/api/admin/orders");
+    const response = await adminFetch(
+      `/api/admin/orders${includeAbandoned ? "?includeAbandoned=1" : ""}`,
+    );
     const json = (await response.json()) as { orders?: OrderRow[] };
     setOrders(json.orders ?? []);
     setLoading(false);
-  }, [adminFetch]);
+  }, [adminFetch, includeAbandoned]);
 
   useEffect(() => {
     void loadOrders();
@@ -298,15 +302,25 @@ export function AdminOrdersPanel() {
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <AdminSearchField value={query} onChange={setQuery} />
-        <Button
-          type="button"
-          variant="primary-outline"
-          size="md"
-          pending={syncing}
-          onClick={() => void syncTracking()}
-        >
-          {syncing ? t("admin.syncTrackingLoading") : t("admin.syncTracking")}
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="inline-flex items-center gap-2 text-sm text-muted">
+            <input
+              type="checkbox"
+              checked={includeAbandoned}
+              onChange={(e) => setIncludeAbandoned(e.target.checked)}
+            />
+            {t("admin.showAbandonedOrders")}
+          </label>
+          <Button
+            type="button"
+            variant="primary-outline"
+            size="md"
+            pending={syncing}
+            onClick={() => void syncTracking()}
+          >
+            {syncing ? t("admin.syncTrackingLoading") : t("admin.syncTracking")}
+          </Button>
+        </div>
       </div>
 
       <div

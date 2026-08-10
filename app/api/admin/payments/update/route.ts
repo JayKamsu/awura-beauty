@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { adjustOrderStock } from "@/lib/application/checkout/adjust-order-stock";
 import { markOrderPaid } from "@/lib/application/checkout/mark-order-paid";
 import { notifyOrderRefunded } from "@/lib/application/notifications/order-notify";
 import { requireAdminFromRequest } from "@/lib/infrastructure/supabase/admin-auth";
@@ -6,7 +7,10 @@ import {
   getOrderById,
   updateOrderPayment,
 } from "@/lib/infrastructure/supabase/orders";
-import type { OrderStatus } from "@/lib/infrastructure/supabase/order-types";
+import {
+  paymentBadgeStatus,
+  type OrderStatus,
+} from "@/lib/infrastructure/supabase/order-types";
 
 type Action = "mark_paid" | "mark_refunded" | "mark_cancelled";
 
@@ -56,9 +60,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   }
 
+  const wasPaid = paymentBadgeStatus(order) === "paid";
+
   const ok = await updateOrderPayment(orderId, patch);
   if (!ok) {
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
+  }
+
+  // Restaure le stock uniquement si la commande avait bien été décomptée (payée avant).
+  if (wasPaid && (action === "mark_refunded" || action === "mark_cancelled")) {
+    await adjustOrderStock(order.items, 1);
   }
 
   if (action === "mark_refunded") {

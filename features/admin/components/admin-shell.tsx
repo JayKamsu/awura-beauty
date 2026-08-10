@@ -20,6 +20,7 @@ const NAV = [
   { href: "/admin/paiements", key: "payments" },
   { href: "/admin/produits", key: "products" },
   { href: "/admin/clients", key: "customers" },
+  { href: "/admin/avis", key: "reviews" },
   { href: "/admin/livraison", key: "shipping" },
   { href: "/admin/diagnostic", key: "diagnostic" },
   { href: "/admin/pages", key: "pages" },

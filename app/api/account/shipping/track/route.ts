@@ -41,6 +41,7 @@ async function getOrderForAccount(orderId: string): Promise<OrderRow | null> {
       shipping_address:
         (data.shipping_address as OrderRow["shipping_address"]) ?? null,
       created_at: String(data.created_at),
+      received_at: data.received_at ? String(data.received_at) : null,
     };
   }
 

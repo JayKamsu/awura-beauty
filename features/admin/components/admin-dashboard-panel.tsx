@@ -1,8 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  BreakdownDonut,
+  RevenueTrendChart,
+  TopProductsBars,
+  toMethodBreakdownEntries,
+  toStatusBreakdownEntries,
+} from "@/features/admin/components/admin-dashboard-charts";
 import { AdminEmptyState } from "@/features/admin/components/admin-empty-state";
 import { AdminFeedback } from "@/features/admin/components/admin-feedback";
 import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
@@ -14,12 +21,57 @@ import type { AdminDashboardStats } from "@/lib/infrastructure/supabase/admin-da
 
 const QUICK_LINKS = [
   { href: "/admin/commandes", key: "manageOrders" },
+  { href: "/admin/paiements", key: "managePayments" },
   { href: "/admin/messages", key: "manageMessages" },
   { href: "/admin/produits", key: "manageProducts" },
   { href: "/admin/clients", key: "manageCustomers" },
   { href: "/admin/pages", key: "managePages" },
   { href: "/admin/contenu", key: "manageContent" },
 ] as const;
+
+function deltaFrom(current: number, previous: number) {
+  if (previous === 0) return current === 0 ? 0 : null;
+  return (current - previous) / previous;
+}
+
+function StatTile({
+  label,
+  value,
+  delta,
+  deltaLabel,
+  action,
+}: {
+  label: string;
+  value: ReactNode;
+  delta?: number | null;
+  deltaLabel?: string;
+  action?: ReactNode;
+}) {
+  const { t } = useTranslation();
+  const showDelta = typeof delta === "number";
+  const positive = showDelta && delta > 0;
+  const negative = showDelta && delta < 0;
+
+  return (
+    <div className="rounded-2xl bg-background-alt px-5 py-5">
+      <p className="text-xs uppercase tracking-wide text-muted">{label}</p>
+      <p className="mt-2 font-serif text-3xl text-primary">{value}</p>
+      {showDelta ? (
+        <p
+          className={`mt-1.5 text-xs font-medium ${
+            positive ? "text-primary" : negative ? "text-accent" : "text-muted"
+          }`}
+        >
+          {positive ? "↑ " : negative ? "↓ " : ""}
+          {Math.abs(delta * 100).toFixed(0)}% {deltaLabel}
+        </p>
+      ) : deltaLabel ? (
+        <p className="mt-1.5 text-xs text-muted">{t("admin.dashboard.noComparison")}</p>
+      ) : null}
+      {action ? <div className="mt-3">{action}</div> : null}
+    </div>
+  );
+}
 
 export function AdminDashboardPanel() {
   const { t, i18n } = useTranslation();
@@ -62,6 +114,9 @@ export function AdminDashboardPanel() {
     );
   }
 
+  const revenueDelta = deltaFrom(stats.revenueToday, stats.revenueYesterday);
+  const ordersDelta = deltaFrom(stats.ordersThisWeek, stats.ordersPreviousWeek);
+
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
       <AdminPageHeader
@@ -69,36 +124,81 @@ export function AdminDashboardPanel() {
         subtitle={t("admin.dashboardSubtitle")}
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl bg-background-alt px-5 py-5">
-          <p className="text-xs uppercase tracking-wide text-muted">
-            {t("admin.ordersToday")}
-          </p>
-          <p className="mt-2 font-serif text-3xl text-primary">{stats.ordersToday}</p>
-        </div>
-        <div className="rounded-2xl bg-background-alt px-5 py-5">
-          <p className="text-xs uppercase tracking-wide text-muted">
-            {t("admin.revenueToday")}
-          </p>
-          <p className="mt-2 font-serif text-3xl text-primary">
-            {formatPrice(stats.revenueToday, currency, i18n.language)}
-          </p>
-        </div>
-        <div className="rounded-2xl bg-background-alt px-5 py-5">
-          <p className="text-xs uppercase tracking-wide text-muted">
-            {t("admin.lowStock")}
-          </p>
-          <p className="mt-2 font-serif text-3xl text-primary">
-            {stats.lowStockProducts.length}
-          </p>
-          <Link
-            href="/admin/produits"
-            className="mt-3 inline-block text-sm text-accent hover:text-accent-light"
-          >
-            {t("admin.viewLowStock")}
-          </Link>
-        </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatTile
+          label={t("admin.dashboard.revenueToday")}
+          value={formatPrice(stats.revenueToday, currency, i18n.language)}
+          delta={revenueDelta}
+          deltaLabel={t("admin.dashboard.vsYesterday")}
+        />
+        <StatTile
+          label={t("admin.dashboard.ordersToday")}
+          value={stats.ordersToday}
+          delta={ordersDelta}
+          deltaLabel={t("admin.dashboard.vsPreviousWeek")}
+        />
+        <StatTile
+          label={t("admin.dashboard.averageOrder30d")}
+          value={formatPrice(stats.averageOrderValue30d, currency, i18n.language)}
+        />
+        <StatTile
+          label={t("admin.lowStock")}
+          value={stats.lowStockProducts.length}
+          action={
+            <Link
+              href="/admin/produits"
+              className="text-sm text-accent hover:text-accent-light"
+            >
+              {t("admin.viewLowStock")}
+            </Link>
+          }
+        />
       </div>
+
+      <section className="space-y-3 rounded-2xl border border-border p-4 sm:p-5">
+        <h2 className="font-serif text-xl text-primary">
+          {t("admin.dashboard.revenueTrendTitle")}
+        </h2>
+        <RevenueTrendChart data={stats.dailySeries14d} currency={currency} />
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section className="space-y-3 rounded-2xl border border-border p-4 sm:p-5">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-serif text-xl text-primary">
+              {t("admin.dashboard.statusBreakdownTitle")}
+            </h2>
+            <Link
+              href="/admin/paiements"
+              className="shrink-0 text-sm text-accent hover:text-accent-light"
+            >
+              {t("admin.dashboard.seeAllPayments")}
+            </Link>
+          </div>
+          <p className="text-xs text-muted">{t("admin.paymentsStatusHint")}</p>
+          <BreakdownDonut
+            entries={toStatusBreakdownEntries(stats.statusBreakdown30d, t)}
+            emptyMessage={t("admin.dashboard.breakdownEmpty")}
+          />
+        </section>
+
+        <section className="space-y-3 rounded-2xl border border-border p-4 sm:p-5">
+          <h2 className="font-serif text-xl text-primary">
+            {t("admin.dashboard.methodBreakdownTitle")}
+          </h2>
+          <BreakdownDonut
+            entries={toMethodBreakdownEntries(stats.methodBreakdown30d, t)}
+            emptyMessage={t("admin.dashboard.breakdownEmpty")}
+          />
+        </section>
+      </div>
+
+      <section className="space-y-3 rounded-2xl border border-border p-4 sm:p-5">
+        <h2 className="font-serif text-xl text-primary">
+          {t("admin.dashboard.topProductsTitle")}
+        </h2>
+        <TopProductsBars products={stats.topProducts30d} currency={currency} />
+      </section>
 
       <section className="space-y-3">
         <h2 className="font-serif text-2xl text-primary">{t("admin.quickLinks")}</h2>

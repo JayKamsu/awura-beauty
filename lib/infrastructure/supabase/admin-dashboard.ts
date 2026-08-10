@@ -1,10 +1,13 @@
 import { listAllOrders } from "@/lib/infrastructure/supabase/orders";
 import { adminListProducts } from "@/lib/infrastructure/supabase/admin-products";
 import { getLoyaltyProfilesByIds } from "@/lib/infrastructure/supabase/loyalty";
-import type {
-  OrderRow,
-  PaymentMethod,
-  ShippingCarrier,
+import {
+  isAbandonedPendingOrder,
+  paymentBadgeStatus,
+  type OrderRow,
+  type PaymentBadgeStatus,
+  type PaymentMethod,
+  type ShippingCarrier,
 } from "@/lib/infrastructure/supabase/order-types";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
@@ -38,17 +41,60 @@ export type AdminCustomer = {
   referredBy: string | null;
 };
 
+export type AdminDashboardDailyPoint = {
+  date: string;
+  revenue: number;
+  orders: number;
+};
+
+export type AdminDashboardStatusBreakdown = Record<PaymentBadgeStatus, number>;
+
+export type AdminDashboardMethodBreakdown = Record<PaymentMethod, number>;
+
+export type AdminDashboardTopProduct = {
+  productId: string;
+  name: string;
+  quantitySold: number;
+  revenue: number;
+};
+
 export type AdminDashboardStats = {
   ordersToday: number;
   revenueToday: number;
+  ordersYesterday: number;
+  revenueYesterday: number;
+  ordersThisWeek: number;
+  revenueThisWeek: number;
+  ordersPreviousWeek: number;
+  revenuePreviousWeek: number;
+  averageOrderValue30d: number;
+  paidConversionRate30d: number;
   lowStockProducts: ProductRow[];
   recentOrders: OrderRow[];
+  dailySeries14d: AdminDashboardDailyPoint[];
+  statusBreakdown30d: AdminDashboardStatusBreakdown;
+  methodBreakdown30d: AdminDashboardMethodBreakdown;
+  topProducts30d: AdminDashboardTopProduct[];
 };
 
 function startOfToday() {
   const date = new Date();
   date.setHours(0, 0, 0, 0);
   return date;
+}
+
+function daysAgo(n: number) {
+  const date = startOfToday();
+  date.setDate(date.getDate() - n);
+  return date;
+}
+
+function dateKey(iso: string) {
+  return iso.slice(0, 10);
+}
+
+function sumTotal(orders: OrderRow[]) {
+  return orders.reduce((sum, order) => sum + order.total, 0);
 }
 
 function mostFrequent<T extends string>(values: T[]): T | null {
@@ -71,28 +117,119 @@ function mostFrequent<T extends string>(values: T[]): T | null {
 export async function getAdminDashboardStats(
   lowStockThreshold = 5,
 ): Promise<AdminDashboardStats> {
-  const [orders, products] = await Promise.all([
+  const [allOrders, products] = await Promise.all([
     listAllOrders(),
     adminListProducts(),
   ]);
+  // Paniers abandonnés (jamais payés) : hors KPI, ils ne sont pas des ventes ni de vraies commandes à traiter.
+  const orders = allOrders.filter((order) => !isAbandonedPendingOrder(order));
 
   const today = startOfToday();
+  const yesterday = daysAgo(1);
+  const startOfWeek = daysAgo(7);
+  const startOfPreviousWeek = daysAgo(14);
+  const start30d = daysAgo(30);
+  const start14d = daysAgo(14);
+
   const todaysOrders = orders.filter(
     (order) => new Date(order.created_at) >= today,
   );
+  const yesterdaysOrders = orders.filter((order) => {
+    const created = new Date(order.created_at);
+    return created >= yesterday && created < today;
+  });
+  const thisWeekOrders = orders.filter(
+    (order) => new Date(order.created_at) >= startOfWeek,
+  );
+  const previousWeekOrders = orders.filter((order) => {
+    const created = new Date(order.created_at);
+    return created >= startOfPreviousWeek && created < startOfWeek;
+  });
+  const orders30d = orders.filter(
+    (order) => new Date(order.created_at) >= start30d,
+  );
+  const paid30d = orders30d.filter(
+    (order) => paymentBadgeStatus(order) === "paid",
+  );
+
+  const dailyBuckets = new Map<string, AdminDashboardDailyPoint>();
+  for (let i = 13; i >= 0; i--) {
+    const key = dateKey(daysAgo(i).toISOString());
+    dailyBuckets.set(key, { date: key, revenue: 0, orders: 0 });
+  }
+  for (const order of orders) {
+    if (new Date(order.created_at) < start14d) continue;
+    const key = dateKey(order.created_at);
+    const bucket = dailyBuckets.get(key);
+    if (!bucket) continue;
+    bucket.orders += 1;
+    bucket.revenue += order.total;
+  }
+
+  const statusBreakdown30d: AdminDashboardStatusBreakdown = {
+    paid: 0,
+    pending: 0,
+    refunded: 0,
+    cancelled: 0,
+  };
+  const methodBreakdown30d: AdminDashboardMethodBreakdown = {
+    stripe: 0,
+    paypal: 0,
+    manual: 0,
+  };
+  for (const order of orders30d) {
+    statusBreakdown30d[paymentBadgeStatus(order)] += 1;
+    methodBreakdown30d[order.payment_method] += 1;
+  }
+
+  const productTotals = new Map<string, AdminDashboardTopProduct>();
+  for (const order of paid30d) {
+    for (const item of order.items) {
+      const entry = productTotals.get(item.product_id) ?? {
+        productId: item.product_id,
+        name: item.name,
+        quantitySold: 0,
+        revenue: 0,
+      };
+      entry.quantitySold += item.quantity;
+      entry.revenue += item.unit_price * item.quantity;
+      productTotals.set(item.product_id, entry);
+    }
+  }
+  const topProducts30d = [...productTotals.values()]
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 5);
 
   return {
     ordersToday: todaysOrders.length,
-    revenueToday: todaysOrders.reduce((sum, order) => sum + order.total, 0),
+    revenueToday: sumTotal(todaysOrders),
+    ordersYesterday: yesterdaysOrders.length,
+    revenueYesterday: sumTotal(yesterdaysOrders),
+    ordersThisWeek: thisWeekOrders.length,
+    revenueThisWeek: sumTotal(thisWeekOrders),
+    ordersPreviousWeek: previousWeekOrders.length,
+    revenuePreviousWeek: sumTotal(previousWeekOrders),
+    averageOrderValue30d: orders30d.length
+      ? sumTotal(orders30d) / orders30d.length
+      : 0,
+    paidConversionRate30d: orders30d.length
+      ? paid30d.length / orders30d.length
+      : 0,
     lowStockProducts: products.filter(
       (product) => product.stock <= lowStockThreshold,
     ),
     recentOrders: orders.slice(0, 5),
+    dailySeries14d: [...dailyBuckets.values()],
+    statusBreakdown30d,
+    methodBreakdown30d,
+    topProducts30d,
   };
 }
 
 export async function listAdminCustomers(): Promise<AdminCustomer[]> {
-  const orders = await listAllOrders();
+  const orders = (await listAllOrders()).filter(
+    (order) => !isAbandonedPendingOrder(order),
+  );
   const byEmail = new Map<string, OrderRow[]>();
 
   for (const order of orders) {

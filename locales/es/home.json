@@ -139,5 +139,12 @@
         }
       }
     }
+  },
+  "reviews": {
+    "title": "Opiniones de clientas",
+    "subtitle": "Notas y comentarios dejados por clientas tras recibir su pedido.",
+    "empty": "Aún no hay opiniones.",
+    "ratingLabel": "{{rating}} / 5",
+    "seeProduct": "Ver producto"
   }
 }

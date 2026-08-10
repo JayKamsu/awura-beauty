@@ -139,5 +139,12 @@
         }
       }
     }
+  },
+  "reviews": {
+    "title": "Customer reviews",
+    "subtitle": "Ratings and comments left by customers after receiving their order.",
+    "empty": "No reviews yet.",
+    "ratingLabel": "{{rating}} / 5",
+    "seeProduct": "View product"
   }
 }

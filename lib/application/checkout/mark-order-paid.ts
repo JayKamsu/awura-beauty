@@ -1,3 +1,4 @@
+import { adjustOrderStock } from "@/lib/application/checkout/adjust-order-stock";
 import { settleOrderLoyalty } from "@/lib/application/loyalty/settle-order-loyalty";
 import { maybeAutoCreateLabelAfterPaid } from "@/lib/application/shipping/create-order-label";
 import { notifyOrderPaid } from "@/lib/application/notifications/order-notify";
@@ -19,6 +20,7 @@ export async function markOrderPaid(orderId: string): Promise<boolean> {
   const result = await claimOrderPaid(orderId);
 
   if (result.claimed && result.order) {
+    await adjustOrderStock(result.order.items, -1);
     await settleOrderLoyalty(result.order);
     await grantGammeDiagnosticEntitlements(result.order);
     await notifyOrderPaid({
