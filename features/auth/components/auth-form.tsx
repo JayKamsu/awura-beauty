@@ -11,6 +11,7 @@ import { useAuth } from "@/features/auth/context/auth-provider";
 import { resolvePostLoginPath } from "@/features/auth/lib/resolve-post-login-path";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 
+/** Props du formulaire d'authentification, partagé entre connexion et inscription. */
 type AuthFormProps = {
   mode: "login" | "signup";
   redirectTo?: string;
@@ -18,6 +19,7 @@ type AuthFormProps = {
   showForgotPassword?: boolean;
 };
 
+/** Formulaire de connexion/inscription (email + Google), avec rattachement du code de parrainage à l'inscription. */
 export function AuthForm({
   mode,
   redirectTo = "/compte",

@@ -3,10 +3,12 @@
 import { useTranslation } from "react-i18next";
 import { ProductCard, type ProductCardData } from "@/components/ui/product-card";
 
+/** Props de la grille produits. */
 type ProductGridProps = {
   products: ProductCardData[];
 };
 
+/** Grille de cartes produits pour la boutique, avec message si aucun résultat. */
 export function ProductGrid({ products }: ProductGridProps) {
   const { t } = useTranslation();
 

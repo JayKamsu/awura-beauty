@@ -26,6 +26,7 @@ const SECTIONS = [
   { id: "securite", key: "account.nav.security" },
 ] as const;
 
+/** Page « Mon compte » : redirige les admins, sinon assemble profil, commandes, fidélité, diagnostics et sécurité. */
 export function AccountPageContent() {
   const { t, i18n } = useTranslation();
   const router = useRouter();

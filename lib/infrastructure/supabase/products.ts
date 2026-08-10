@@ -73,6 +73,7 @@ function mapRow(row: Record<string, unknown>): ProductRow {
   };
 }
 
+/** Liste paginée des produits avec filtres catégorie/univers ; retombe sur le catalogue local si Supabase échoue ou est vide. */
 export async function listProducts(
   params: ListProductsParams = {},
 ): Promise<ListProductsResult> {
@@ -146,6 +147,7 @@ export async function listProducts(
   };
 }
 
+/** Récupère un produit par slug (Supabase puis fallback local) ; pour la Gamme Complète, le stock affiché est le minimum des composants. */
 export async function getProductBySlug(slug: string): Promise<ProductRow | null> {
   const supabase = createSupabaseClient();
   let product: ProductRow | null = null;
@@ -183,6 +185,7 @@ export async function getProductBySlug(slug: string): Promise<ProductRow | null>
   return product;
 }
 
+/** Produits liés : même catégorie en priorité, sinon n'importe quels autres produits en complément. */
 export async function getRelatedProducts(
   product: ProductRow,
   limit = 4,
@@ -220,6 +223,7 @@ export async function getRelatedProducts(
   return FALLBACK_PRODUCTS.filter((item) => item.id !== product.id).slice(0, limit);
 }
 
+/** Tous les slugs produits (génération de routes statiques), Supabase puis fallback local. */
 export async function listAllProductSlugs(): Promise<string[]> {
   const supabase = createSupabaseClient();
   if (supabase) {
@@ -231,6 +235,7 @@ export async function listAllProductSlugs(): Promise<string[]> {
   return FALLBACK_PRODUCTS.map((product) => product.slug);
 }
 
+/** Récupère plusieurs produits par slugs, en conservant l'ordre demandé. */
 export async function getProductsBySlugs(
   slugs: string[],
 ): Promise<ProductRow[]> {

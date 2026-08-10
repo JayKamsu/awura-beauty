@@ -13,6 +13,7 @@ import { DEFAULT_SITE_BRAND } from "@/lib/domain/site-brand";
 const fieldClass =
   "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent";
 
+/** Panneau admin pour configurer l'identité de marque : logos, QR code par défaut et univers enfant. */
 export function AdminBrandPanel() {
   const { t } = useTranslation();
   const adminFetch = useAdminFetch();

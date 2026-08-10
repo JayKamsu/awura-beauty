@@ -1,9 +1,12 @@
 /** Paramètres marque / design gérables en admin. */
 
+/** Univers produit ciblé (catalogue adulte vs enfant). */
 export type ProductUniverse = "adult" | "child";
 
+/** Destination par défaut du QR code affiché en boutique/emballage. */
 export type QrDefaultMode = "tutorials" | "product" | "diagnostic" | "custom";
 
+/** Réglages de marque/design éditables en admin (logos, univers enfant, QR). */
 export type SiteBrandSettings = {
   duafeUrl: string;
   logoLightUrl: string;

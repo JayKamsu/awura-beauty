@@ -24,6 +24,7 @@ const MISSION_ICONS: Record<(typeof MISSION_KEYS)[number], ReactNode> = {
   ),
 };
 
+/** Section « À propos » présentant les piliers de la mission de la marque. */
 export function AboutMissionSection() {
   const { t } = useTranslation();
   const cms = usePageCmsFields("mission");

@@ -5,6 +5,7 @@ import {
 } from "@/lib/infrastructure/supabase/diagnostic-admin";
 import type { DiagnosticLocale } from "@/lib/domain/diagnostic";
 
+/** Retourne les questions du diagnostic capillaire (canal + locale) et les réglages associés. */
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const channel =

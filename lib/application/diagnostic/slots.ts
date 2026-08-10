@@ -49,6 +49,7 @@ export async function listAvailableDiagnosticSlots(
   });
 }
 
+/** Logique pure de génération des créneaux (règles hebdo + overrides − RDV pris), sans accès réseau. */
 export function computeSlots(input: {
   fromIso: string;
   toIso: string;

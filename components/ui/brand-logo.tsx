@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useBrandSettings } from "@/components/brand/brand-settings-provider";
 import { BRAND_LOGOS } from "@/lib/brand";
 
+/** Variante de coloris du logo selon le fond sur lequel il est affiché. */
 export type BrandLogoTone = "auto" | "on-light" | "on-dark" | "accent";
 
 type BrandLogoProps = {
@@ -39,6 +40,7 @@ function resolveSrc(
     : overrides.light || BRAND_LOGOS.black;
 }
 
+/** Affiche le logo de la marque, adapté au thème clair/sombre et aux réglages admin. */
 export function BrandLogo({
   tone = "auto",
   className = "h-10 w-auto",

@@ -6,6 +6,7 @@ type BlogIndexHeaderProps = {
   variant: "articles" | "tutorials";
 };
 
+/** En-tête de section blog/tutoriels avec titre et sous-titre localisés selon la variante. */
 export function BlogIndexHeader({ variant }: BlogIndexHeaderProps) {
   const { t } = useTranslation();
 

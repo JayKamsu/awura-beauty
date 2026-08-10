@@ -3,6 +3,7 @@
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { useCallback } from "react";
 
+/** Fournit un `fetch` qui joint automatiquement le token de session aux appels des API admin. */
 export function useAdminFetch() {
   const { session } = useAuth();
   const token = session?.access_token;

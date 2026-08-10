@@ -25,6 +25,7 @@ export function rateLimitResponse(
   );
 }
 
+/** Config des limites de débit par route sensible (checkout, support, push, admin, shipping). */
 export const RATE_LIMITS = {
   checkoutWrite: { name: "checkout:write", limit: 12, windowMs: 60_000 },
   checkoutConfirm: { name: "checkout:confirm", limit: 30, windowMs: 60_000 },

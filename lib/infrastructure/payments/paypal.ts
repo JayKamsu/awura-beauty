@@ -1,8 +1,10 @@
+/** Montant formaté pour l'API PayPal (devise + valeur en chaîne décimale). */
 export type PayPalAmount = {
   currencyCode: string;
   value: string;
 };
 
+/** Récupère un token OAuth PayPal (client credentials), null si non configuré ou échec. */
 export async function getPayPalAccessToken(): Promise<string | null> {
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const secret = process.env.PAYPAL_CLIENT_SECRET;
@@ -26,6 +28,7 @@ export async function getPayPalAccessToken(): Promise<string | null> {
   return json.access_token ?? null;
 }
 
+/** Crée une commande PayPal (intent CAPTURE), liée à l'ID de commande Awura via reference_id/custom_id. */
 export async function createPayPalOrder(input: {
   orderId: string;
   amount: PayPalAmount;
@@ -65,6 +68,7 @@ export async function createPayPalOrder(input: {
   return { id: json.id ?? null, error: null };
 }
 
+/** Résultat de capture d'une commande PayPal (statut + montant + lien vers la commande Awura). */
 export type PayPalCaptureResult = {
   ok: boolean;
   error: string | null;
@@ -74,6 +78,7 @@ export type PayPalCaptureResult = {
   currencyCode?: string | null;
 };
 
+/** Capture les fonds d'une commande PayPal approuvée ; considère payé si statut COMPLETED/CAPTURED. */
 export async function capturePayPalOrder(
   paypalOrderId: string,
 ): Promise<PayPalCaptureResult> {

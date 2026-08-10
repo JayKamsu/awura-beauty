@@ -19,6 +19,7 @@ import {
 const iconClass =
   "inline-flex size-10 items-center justify-center rounded-xl text-foreground transition hover:bg-background-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:size-11";
 
+/** En-tête du site : logo, navigation principale et accès rapide au compte/panier. */
 export function Header() {
   const { t } = useTranslation();
   const pathname = usePathname();

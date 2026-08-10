@@ -39,6 +39,7 @@ type ButtonAsLink = BaseProps & {
   href: string;
 };
 
+/** Props du bouton, soit un `<button>` natif soit un lien selon la présence de `href`. */
 export type ButtonProps = ButtonAsButton | ButtonAsLink;
 
 function cx(...parts: Array<string | false | undefined>) {
@@ -58,6 +59,7 @@ function buttonClasses(
   );
 }
 
+/** Bouton stylé de l'application, rendu comme `<button>` ou comme lien selon les props. */
 export function Button(props: ButtonProps) {
   const variant = props.variant ?? "primary";
   const size = props.size ?? "md";

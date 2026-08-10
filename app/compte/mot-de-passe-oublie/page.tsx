@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 
+/** Page "Mot de passe oublié" : formulaire d'envoi du lien de réinitialisation par e-mail. */
 export default function MotDePasseOubliePage() {
   const { t } = useTranslation();
   const { requestPasswordReset, configured } = useAuth();

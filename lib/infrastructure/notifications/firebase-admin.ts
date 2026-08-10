@@ -12,6 +12,7 @@ function privateKey(): string | undefined {
   return raw.replace(/\\n/g, "\n");
 }
 
+/** Vérifie que les credentials Firebase Admin (env) sont présents avant tout appel serveur. */
 export function isFirebaseAdminConfigured(): boolean {
   return Boolean(
     process.env.FIREBASE_PROJECT_ID &&
@@ -20,6 +21,7 @@ export function isFirebaseAdminConfigured(): boolean {
   );
 }
 
+/** App Firebase Admin singleton (réutilise l'instance existante pour éviter une double init). */
 export function getFirebaseAdminApp(): App | null {
   if (!isFirebaseAdminConfigured()) return null;
   const existing = getApps()[0];
@@ -34,6 +36,7 @@ export function getFirebaseAdminApp(): App | null {
   });
 }
 
+/** Client FCM prêt à l'emploi, ou null si Firebase Admin n'est pas configuré. */
 export function getFirebaseMessaging(): Messaging | null {
   const app = getFirebaseAdminApp();
   if (!app) return null;

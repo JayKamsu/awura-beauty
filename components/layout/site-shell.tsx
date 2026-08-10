@@ -50,6 +50,7 @@ function PublicShell({ children }: { children: ReactNode }) {
   );
 }
 
+/** Structure racine de la mise en page : choisit l'habillage admin ou public et fournit les réglages de marque. */
 export function SiteShell({ children }: SiteShellProps) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");

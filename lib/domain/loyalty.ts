@@ -10,6 +10,7 @@ export const REFERRAL_FIRST_ORDER_PERCENT = 10;
 export const REFERRAL_REFERRER_BONUS = 200;
 export const REFERRAL_REFEREE_BONUS = 100;
 
+/** Motif d'un mouvement de points fidélité (historique/audit). */
 export type LoyaltyReason =
   | "order_earn"
   | "order_redeem"
@@ -55,12 +56,14 @@ export function clampRedeemablePoints(input: {
   return Math.min(requested, maxByBalance, maxBySubtotal);
 }
 
+/** Remise de bienvenue (% sous-total) sur la 1re commande d'un filleul. */
 export function firstOrderDiscountAmount(productSubtotal: number): number {
   return roundMoney(
     Math.max(0, productSubtotal) * (REFERRAL_FIRST_ORDER_PERCENT / 100),
   );
 }
 
+/** Calcule remise totale et total final d'une commande (parrainage + points cumulés, jamais négatifs). */
 export function buildOrderTotals(input: {
   productSubtotal: number;
   shippingFee: number;

@@ -17,11 +17,13 @@ type ProductPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+/** Génère statiquement les slugs de tous les produits pour le pré-rendu. */
 export async function generateStaticParams() {
   const slugs = await listAllProductSlugs();
   return slugs.map((slug) => ({ slug }));
 }
 
+/** Construit les métadonnées SEO du produit à partir de son slug, avec fallback si introuvable. */
 export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
@@ -37,6 +39,10 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Page produit : affiche la galerie, le panneau d'achat, les détails et les produits liés,
+ * avec le JSON-LD produit et fil d'Ariane pour le SEO.
+ */
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);

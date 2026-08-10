@@ -17,6 +17,7 @@ const TESTIMONIALS = [
   { key: "lea", image: HOME_IMAGES.testimonials[2] },
 ] as const;
 
+/** Section « témoignages » de la page d'accueil : avis clients avec notation et lien vers tous les avis. */
 export function TestimonialsSection() {
   const { t } = useTranslation();
   const cms = usePageCmsFields("testimonials");

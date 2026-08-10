@@ -6,6 +6,7 @@ import {
 import type { ShippingCarrier } from "@/lib/infrastructure/supabase/order-types";
 import type { CartLineInput } from "@/lib/application/checkout/resolve-order-items";
 
+/** Résultat combiné catalogue + livraison + fidélité, prêt pour la création de commande. */
 export type CheckoutResolveResult = Awaited<
   ReturnType<typeof resolveOrderItemsFromCatalog>
 > & {

@@ -8,6 +8,7 @@ import {
   updateOrderShipping,
 } from "@/lib/infrastructure/supabase/orders";
 
+/** Résultat de création d'étiquette : succès avec suivi/URL ou message d'erreur. */
 export type CreateOrderLabelResult =
   | {
       ok: true;

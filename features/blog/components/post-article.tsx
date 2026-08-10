@@ -15,6 +15,7 @@ type PostArticleProps = {
   backHref: "/blog" | "/tutoriels";
 };
 
+/** Affiche un article de blog ou tutoriel complet, avec image de couverture et produit associé optionnel. */
 export function PostArticle({
   post,
   relatedProduct,

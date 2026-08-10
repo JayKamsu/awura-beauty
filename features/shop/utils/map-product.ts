@@ -1,6 +1,7 @@
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 import type { ProductCardData } from "@/components/ui/product-card";
 
+/** Convertit une ligne produit (base de données) en données de carte produit pour l'affichage. */
 export function toProductCardData(product: ProductRow): ProductCardData {
   return {
     id: product.id,

@@ -1,3 +1,4 @@
+/** Identifiant d'une section de page CMS (home / about). */
 export type PageSectionId =
   | "hero"
   | "promises"
@@ -10,8 +11,10 @@ export type PageSectionId =
   | "commitments"
   | "cta";
 
+/** Locale gérable en admin pour le contenu CMS des pages. */
 export type PageLocale = "fr" | "en" | "es";
 
+/** Clé de champ éditable pour une section CMS. */
 export type PageFieldKey =
   | "title"
   | "subtitle"
@@ -22,6 +25,7 @@ export type PageFieldKey =
 /** Champs CMS pour une locale (valeurs vides = fallback i18n front). */
 export type PageSectionFields = Partial<Record<PageFieldKey, string>>;
 
+/** Configuration d'une section de page (activation, position, contenu CMS). */
 export type PageSectionConfig = {
   id: PageSectionId;
   enabled: boolean;
@@ -34,6 +38,7 @@ export type PageSectionConfig = {
   fields?: PageSectionFields;
 };
 
+/** Mise en page complète d'une page (liste ordonnée de sections). */
 export type PageLayout = {
   pageKey: string;
   sections: PageSectionConfig[];
@@ -66,6 +71,7 @@ export const DEFAULT_ABOUT_SECTIONS: PageSectionConfig[] = [
   { id: "cta", enabled: true, position: 3 },
 ];
 
+/** Layout par défaut (fallback) pour une page si aucune config admin n'est enregistrée. */
 export function defaultLayoutFor(pageKey: string): PageLayout {
   if (pageKey === "about") {
     return { pageKey: "about", sections: DEFAULT_ABOUT_SECTIONS };
@@ -73,6 +79,7 @@ export function defaultLayoutFor(pageKey: string): PageLayout {
   return { pageKey: "home", sections: DEFAULT_HOME_SECTIONS };
 }
 
+/** Type guard : vérifie qu'une valeur brute (DB/admin) est un identifiant de section valide. */
 export function isPageSectionId(value: string): value is PageSectionId {
   return (
     value === "hero" ||

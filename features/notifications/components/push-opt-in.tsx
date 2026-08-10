@@ -9,6 +9,7 @@ import { useActionLock } from "@/lib/hooks/use-action-lock";
 
 const DISMISS_KEY = "awura-push-dismissed";
 
+/** Bandeau d'invitation à activer les notifications push, avec option « plus tard » mémorisée dans le localStorage. */
 export function PushOptIn() {
   const { t } = useTranslation();
   const { user } = useAuth();

@@ -9,6 +9,7 @@ type RelatedProductCtaProps = {
   product: ProductRow;
 };
 
+/** Encart d'appel à l'action mettant en avant un produit lié au contenu de l'article. */
 export function RelatedProductCta({ product }: RelatedProductCtaProps) {
   const { t } = useTranslation();
 

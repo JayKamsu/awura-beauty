@@ -4,16 +4,19 @@ import Image from "next/image";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+/** Image de galerie produit, avec étiquette optionnelle (produit / ingrédients / lifestyle). */
 type GalleryImage = {
   src: string;
   alt: string;
   labelKey?: "shop.galleryProduct" | "shop.galleryIngredients" | "shop.galleryLifestyle";
 };
 
+/** Props de la galerie produit. */
 type ProductGalleryProps = {
   images: GalleryImage[];
 };
 
+/** Galerie produit avec image principale et vignettes cliquables (dédoublonne les images par URL). */
 export function ProductGallery({ images }: ProductGalleryProps) {
   const unique = images.filter(
     (item, index, list) =>

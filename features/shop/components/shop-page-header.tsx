@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { GAMME_COMPLETE_SLUG } from "@/lib/domain/bundle";
 
+/** En-tête de la page boutique : titre, sous-titre et bannière promotionnelle pour la gamme complète. */
 export function ShopPageHeader() {
   const { t } = useTranslation();
 

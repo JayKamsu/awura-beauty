@@ -22,6 +22,7 @@ import {
 } from "@/lib/infrastructure/supabase/auth";
 import { getSupabaseEnv } from "@/lib/infrastructure/supabase/client";
 
+/** Résultat d'une tentative d'inscription : erreur éventuelle, besoin de confirmation email, token d'accès. */
 export type SignUpResult = {
   error: string | null;
   needsEmailConfirmation: boolean;
@@ -43,6 +44,7 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+/** Fournit l'état d'authentification Supabase (session, utilisateur) et les actions associées à toute l'app. */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -157,6 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+/** Accès à l'état et aux actions d'authentification ; doit être utilisé sous `AuthProvider`. */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

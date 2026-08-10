@@ -64,6 +64,7 @@ function NavIcon({
   }
 }
 
+/** Barre de navigation fixe en bas d'écran pour les affichages mobiles. */
 export function MobileBottomNav() {
   const { t } = useTranslation();
   const pathname = usePathname();

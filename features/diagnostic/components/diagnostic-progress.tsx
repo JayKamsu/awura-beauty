@@ -7,6 +7,7 @@ type DiagnosticProgressProps = {
   totalSteps: number;
 };
 
+/** Barre de progression affichant l'étape courante du questionnaire diagnostic. */
 export function DiagnosticProgress({
   stepIndex,
   totalSteps,

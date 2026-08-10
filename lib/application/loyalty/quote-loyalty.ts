@@ -11,6 +11,7 @@ import {
   userHasPaidOrder,
 } from "@/lib/infrastructure/supabase/loyalty";
 
+/** Résultat du calcul des réductions (parrainage + points) et totaux appliqués à un panier. */
 export type LoyaltyQuote = {
   balance: number;
   referralEligible: boolean;

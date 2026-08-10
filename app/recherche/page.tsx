@@ -10,6 +10,7 @@ type RecherchePageProps = {
   searchParams: Promise<{ q?: string }>;
 };
 
+/** Page "Recherche" : filtre produits et articles du blog selon la requête `q`. */
 export default async function RecherchePage({ searchParams }: RecherchePageProps) {
   const params = await searchParams;
   const query = (params.q ?? "").trim();

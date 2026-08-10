@@ -7,6 +7,7 @@ import {
   type ProductCategory,
 } from "@/lib/infrastructure/supabase/product-categories";
 
+/** Props des filtres de la boutique. */
 type ShopFiltersProps = {
   activeCategory: string;
   categories: ProductCategory[];
@@ -24,6 +25,7 @@ function buildHref(category: string, universe: string) {
   return qs ? `/boutique?${qs}` : "/boutique";
 }
 
+/** Filtres de la boutique par catégorie et, si activé, par univers (adulte/enfant), via des liens de navigation. */
 export function ShopFilters({
   activeCategory,
   categories,

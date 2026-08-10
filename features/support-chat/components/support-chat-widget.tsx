@@ -10,6 +10,7 @@ import { useActionLock } from "@/lib/hooks/use-action-lock";
 import { getSession } from "@/lib/infrastructure/supabase/auth";
 import { createSupabaseClient } from "@/lib/infrastructure/supabase/client";
 
+/** Widget flottant de chat support, repliable, avec messages en temps réel via Supabase Realtime. */
 export function SupportChatWidget() {
   const { t } = useTranslation();
   const { user, loading } = useAuth();

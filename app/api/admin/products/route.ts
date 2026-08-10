@@ -7,6 +7,7 @@ import {
   type ProductInput,
 } from "@/lib/infrastructure/supabase/admin-products";
 
+/** Liste tous les produits — admin uniquement. */
 export async function GET(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -14,6 +15,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ products });
 }
 
+/** Crée ou met à jour un produit — admin uniquement. */
 export async function POST(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -26,6 +28,7 @@ export async function POST(request: Request) {
   return NextResponse.json({ product: result.product });
 }
 
+/** Supprime un produit par id — admin uniquement. */
 export async function DELETE(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;

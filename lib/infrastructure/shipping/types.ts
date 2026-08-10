@@ -43,6 +43,7 @@ export type TrackingResult = {
   events: TrackingEvent[];
 };
 
+/** Normalise un code statut transporteur (La Poste / Mondial Relay) vers le statut d'expédition interne. */
 export function mapCarrierStatusToShippingStatus(
   carrier: ShippingCarrier,
   code: string,

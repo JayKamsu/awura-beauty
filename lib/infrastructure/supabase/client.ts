@@ -9,6 +9,7 @@ let adminBrowserClient: SupabaseClient | null = null;
  */
 const ADMIN_AUTH_STORAGE_KEY = "sb-admin-auth-token";
 
+/** Lit les variables d'env Supabase publiques et indique si elles sont complètes. */
 export function getSupabaseEnv() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -59,7 +60,7 @@ function createAdminBrowserClient(url: string, anonKey: string): SupabaseClient 
   return adminBrowserClient;
 }
 
-/** Client service_role (serveur uniquement) — bypass RLS pour l'admin. */
+/** Client service_role (jamais côté navigateur) — contourne les policies RLS ; à réserver aux traitements serveur de confiance. */
 export function createSupabaseServiceClient(): SupabaseClient | null {
   if (typeof window !== "undefined") return null;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

@@ -11,6 +11,7 @@ function bearer(request: Request): string | null {
   return header.slice("Bearer ".length);
 }
 
+/** Récupère (ou crée) la conversation support de l'utilisateur connecté et ses messages. */
 export async function GET(request: Request) {
   const token = bearer(request);
   if (!token) {
@@ -32,6 +33,7 @@ export async function GET(request: Request) {
   });
 }
 
+/** Envoie un message client dans une conversation support existante. */
 export async function POST(request: Request) {
   const token = bearer(request);
   if (!token) {

@@ -3,6 +3,7 @@ import { requireAdminFromRequest } from "@/lib/infrastructure/supabase/admin-aut
 import { isAbandonedPendingOrder } from "@/lib/infrastructure/supabase/order-types";
 import { listAllOrders } from "@/lib/infrastructure/supabase/orders";
 
+/** Liste toutes les commandes ; masque les commandes abandonnées sauf si `includeAbandoned=1` (admin). */
 export async function GET(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;

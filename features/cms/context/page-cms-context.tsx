@@ -23,6 +23,7 @@ const PageCmsContext = createContext<PageCmsContextValue>({
   getFields: () => ({}),
 });
 
+/** Fournit les sections CMS d'une page (contenus admin) au reste de l'arbre React. */
 export function PageCmsProvider({
   sections,
   children,
@@ -44,6 +45,7 @@ export function PageCmsProvider({
   );
 }
 
+/** Récupère les champs CMS édités pour une section de page donnée. */
 export function usePageCmsFields(sectionId: PageSectionId): PageSectionFields {
   return useContext(PageCmsContext).getFields(sectionId);
 }
@@ -58,6 +60,7 @@ export function cmsOr(
   return value || fallback;
 }
 
+/** Bloc de contenu individuel issu du parsing du champ « Texte » admin. */
 export type CmsContentBlock = {
   title: string;
   body: string;

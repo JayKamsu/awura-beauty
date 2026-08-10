@@ -3,6 +3,7 @@ import {
   createSupabaseClient,
 } from "@/lib/infrastructure/supabase/client";
 
+/** Droit à un diagnostic capillaire offert, accordé après l'achat de la gamme complète. */
 export type DiagnosticEntitlement = {
   id: string;
   userId: string | null;
@@ -100,6 +101,7 @@ export async function findAvailableDiagnosticEntitlement(input: {
   return mapEntitlement(data as Record<string, unknown>);
 }
 
+/** Marque une entitlement comme consommée en la liant au rendez-vous pris. Idempotent : n'aboutit que si elle était encore "available", évite la double consommation en cas d'appels concurrents. */
 export async function consumeDiagnosticEntitlement(input: {
   entitlementId: string;
   appointmentId: string;
@@ -122,6 +124,7 @@ export async function consumeDiagnosticEntitlement(input: {
   return Boolean(!error && data);
 }
 
+/** Nombre d'entitlements disponibles pour un utilisateur (ou son email si non connecté). */
 export async function countAvailableDiagnosticEntitlements(input: {
   userId: string | null;
   email?: string;

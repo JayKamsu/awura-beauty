@@ -7,6 +7,7 @@ import { AuthForm } from "@/features/auth/components/auth-form";
 import { useAdminAccess } from "@/features/admin/hooks/use-admin-access";
 import { useAuth } from "@/features/auth/context/auth-provider";
 
+/** Page de connexion admin ; redirige automatiquement vers /admin si l'utilisateur est déjà admin connecté. */
 export function AdminConnexionContent() {
   const { t } = useTranslation();
   const router = useRouter();

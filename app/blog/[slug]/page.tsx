@@ -13,11 +13,13 @@ type BlogPostPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+/** Génère statiquement les slugs de tous les articles de blog pour le pré-rendu. */
 export async function generateStaticParams() {
   const slugs = await listBlogSlugs("article");
   return slugs.map((slug) => ({ slug }));
 }
 
+/** Construit les métadonnées SEO de l'article à partir de son slug, avec fallback si introuvable. */
 export async function generateMetadata({
   params,
 }: BlogPostPageProps): Promise<Metadata> {
@@ -35,6 +37,7 @@ export async function generateMetadata({
   });
 }
 
+/** Page d'un article de blog : affiche l'article avec son JSON-LD (article + fil d'Ariane) ou 404 si introuvable. */
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
   const post = await getBlogPostBySlug(slug);

@@ -9,11 +9,13 @@ import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import type { OrderReviewRow } from "@/lib/infrastructure/supabase/order-reviews";
 import type { OrderRow } from "@/lib/infrastructure/supabase/order-types";
 
+/** Props du bloc reçu/avis : la commande concernée et le callback de synchronisation après mise à jour. */
 type OrderReceiptAndReviewProps = {
   order: OrderRow;
   onOrderUpdate: (order: OrderRow) => void;
 };
 
+/** Permet au client de confirmer la réception d'une commande livrée puis de noter les produits reçus. */
 export function OrderReceiptAndReview({
   order,
   onOrderUpdate,

@@ -8,6 +8,7 @@ import { usePreferences } from "@/components/providers/preferences-provider";
 import { formatPrice } from "@/lib/format/price";
 import { useCart } from "@/features/cart/context/cart-provider";
 
+/** Données produit nécessaires à l'affichage d'une carte dans une grille boutique. */
 export type ProductCardData = {
   id: string;
   slug: string;
@@ -30,6 +31,7 @@ function isCoarsePointer(): boolean {
   return window.matchMedia("(hover: none), (pointer: coarse)").matches;
 }
 
+/** Carte produit avec visuel, prix et ajout rapide au panier. */
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();

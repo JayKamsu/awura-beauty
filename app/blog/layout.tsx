@@ -9,6 +9,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/blog",
 });
 
+/** Layout de la page "Blog" : ne fait que rendre les enfants (métadonnées SEO uniquement). */
 export default function Layout({ children }: { children: ReactNode }) {
   return children;
 }

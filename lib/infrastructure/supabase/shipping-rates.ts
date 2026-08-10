@@ -4,6 +4,7 @@ import {
 } from "@/lib/infrastructure/supabase/client";
 import type { ShippingCarrier } from "@/lib/infrastructure/supabase/order-types";
 
+/** Tarif de livraison par transporteur, avec seuil de gratuité optionnel. */
 export type ShippingRateRow = {
   carrier: ShippingCarrier;
   enabled: boolean;
@@ -49,6 +50,7 @@ function mapRate(row: Record<string, unknown>): ShippingRateRow {
   };
 }
 
+/** Tarifs de livraison par transporteur ; retombe sur des valeurs par défaut si Supabase est vide/indisponible. */
 export async function listShippingRates(): Promise<ShippingRateRow[]> {
   const supabase = createSupabaseClient();
   if (!supabase) return DEFAULT_RATES;
@@ -62,6 +64,7 @@ export async function listShippingRates(): Promise<ShippingRateRow[]> {
   return data.map((row) => mapRate(row as Record<string, unknown>));
 }
 
+/** Met à jour (upsert) les tarifs de livraison admin, par transporteur. */
 export async function upsertShippingRates(
   rates: Array<{
     carrier: ShippingCarrier;

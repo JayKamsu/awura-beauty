@@ -11,6 +11,7 @@ import {
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 
+/** Section Mon compte permettant au client de changer son mot de passe. */
 export function AccountSecuritySection() {
   const { t } = useTranslation();
   const { changePassword } = useAuth();

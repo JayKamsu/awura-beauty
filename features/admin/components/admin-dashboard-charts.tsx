@@ -26,6 +26,7 @@ function niceMax(value: number) {
   return step * magnitude;
 }
 
+/** Courbe d'évolution du chiffre d'affaires quotidien, avec tooltip interactif au survol. */
 export function RevenueTrendChart({
   data,
   currency,
@@ -155,6 +156,7 @@ export function RevenueTrendChart({
 
 type BreakdownEntry = { key: string; label: string; count: number };
 
+/** Donut de répartition (statuts, moyens de paiement…) avec légende chiffrée. */
 export function BreakdownDonut({
   entries,
   emptyMessage,
@@ -245,6 +247,7 @@ export function BreakdownDonut({
   );
 }
 
+/** Classement en barres des produits les plus vendus par chiffre d'affaires. */
 export function TopProductsBars({
   products,
   currency,
@@ -291,6 +294,7 @@ export function TopProductsBars({
   );
 }
 
+/** Convertit la répartition des statuts de paiement en entrées affichables par le donut. */
 export function toStatusBreakdownEntries(
   breakdown: AdminDashboardStatusBreakdown,
   t: (key: string) => string,
@@ -302,6 +306,7 @@ export function toStatusBreakdownEntries(
   }));
 }
 
+/** Convertit la répartition des moyens de paiement en entrées affichables par le donut. */
 export function toMethodBreakdownEntries(
   breakdown: AdminDashboardMethodBreakdown,
   t: (key: string) => string,

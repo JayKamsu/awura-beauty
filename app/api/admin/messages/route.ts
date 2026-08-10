@@ -7,6 +7,7 @@ import {
 } from "@/lib/connectors/support-chat";
 import { requireAdminFromRequest } from "@/lib/infrastructure/supabase/admin-auth";
 
+/** Liste les messages d'une conversation, ou toutes les conversations si aucun id fourni (admin). */
 export async function GET(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -23,6 +24,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ conversations });
 }
 
+/** Envoie un message admin dans une conversation, ou change son statut ouvert/fermé (admin). */
 export async function POST(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;

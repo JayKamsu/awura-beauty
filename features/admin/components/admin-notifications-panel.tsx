@@ -22,6 +22,7 @@ const TEMPLATE_KEYS = [
 type TemplateKey = (typeof TEMPLATE_KEYS)[number] | "custom";
 type Audience = "all" | "one";
 
+/** Panneau admin pour envoyer des notifications push, à tous les abonnés ou à un client ciblé. */
 export function AdminNotificationsPanel() {
   const { t } = useTranslation();
   const adminFetch = useAdminFetch();

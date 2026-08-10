@@ -6,6 +6,7 @@ type RatingInputProps = {
   disabled?: boolean;
 };
 
+/** Sélecteur de note par étoiles cliquables, de 1 à 5. */
 export function RatingInput({ value, onChange, disabled }: RatingInputProps) {
   return (
     <div className="flex items-center gap-1" role="radiogroup" aria-label="Note">

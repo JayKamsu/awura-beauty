@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
+/** Métadonnées SEO de la section "Diagnostic capillaire". */
 export const metadata: Metadata = buildPageMetadata({
   title: "Diagnostic capillaire en ligne ou présentiel | Awura Beauty",
   description:
@@ -8,6 +9,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/diagnostic-capillaire",
 });
 
+/** Layout de la section "Diagnostic capillaire" : ne fait que transmettre les enfants, sans habillage propre. */
 export default function DiagnosticLayout({
   children,
 }: {

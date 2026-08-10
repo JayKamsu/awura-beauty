@@ -8,6 +8,7 @@ import {
   upsertSlotOverride,
 } from "@/lib/infrastructure/supabase/diagnostic-admin";
 
+/** Règles de disponibilité récurrentes + exceptions ponctuelles sur 60 jours (admin). */
 export async function GET(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -22,6 +23,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ rules, overrides });
 }
 
+/** Remplace l'ensemble des règles de disponibilité hebdomadaires (admin). */
 export async function PUT(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -44,6 +46,7 @@ export async function PUT(request: Request) {
   return NextResponse.json({ rules });
 }
 
+/** Crée ou met à jour une exception ponctuelle (créneau ouvert ou bloqué) (admin). */
 export async function POST(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -64,6 +67,7 @@ export async function POST(request: Request) {
   return NextResponse.json({ override });
 }
 
+/** Supprime une exception de créneau par id (admin). */
 export async function DELETE(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;

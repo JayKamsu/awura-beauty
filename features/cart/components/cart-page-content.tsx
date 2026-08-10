@@ -9,6 +9,7 @@ import { useAuth } from "@/features/auth/context/auth-provider";
 import { useCart } from "@/features/cart/context/cart-provider";
 import { formatPrice } from "@/lib/format/price";
 
+/** Page panier : liste des articles ajoutés, gestion des quantités et accès au tunnel de commande. */
 export function CartPageContent() {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();

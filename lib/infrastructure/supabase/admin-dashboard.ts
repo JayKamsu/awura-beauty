@@ -21,6 +21,7 @@ export type AdminCustomerOrderSummary = {
   shipping_carrier: ShippingCarrier | null;
 };
 
+/** Vue agrégée d'un client admin : reconstruite à partir de ses commandes (groupées par email), pas stockée telle quelle. */
 export type AdminCustomer = {
   email: string;
   userId: string | null;
@@ -58,6 +59,7 @@ export type AdminDashboardTopProduct = {
   revenue: number;
 };
 
+/** KPIs du dashboard admin : commandes/CA sur différentes fenêtres, hors paniers abandonnés jamais payés. */
 export type AdminDashboardStats = {
   ordersToday: number;
   revenueToday: number;
@@ -114,6 +116,7 @@ function mostFrequent<T extends string>(values: T[]): T | null {
   return best;
 }
 
+/** Calcule les statistiques du dashboard admin (CA, commandes, top produits...) en excluant les paniers jamais payés. */
 export async function getAdminDashboardStats(
   lowStockThreshold = 5,
 ): Promise<AdminDashboardStats> {
@@ -226,6 +229,7 @@ export async function getAdminDashboardStats(
   };
 }
 
+/** Reconstruit la liste des clients en regroupant les commandes par email (pas de table clients dédiée). */
 export async function listAdminCustomers(): Promise<AdminCustomer[]> {
   const orders = (await listAllOrders()).filter(
     (order) => !isAbandonedPendingOrder(order),

@@ -62,8 +62,10 @@ export {
 
 export { mapCarrierStatusToShippingStatus } from "@/lib/infrastructure/shipping/types";
 
+/** Canal de livraison d'une notification. */
 export type NotificationChannel = "push" | "email" | "in_app";
 
+/** Contenu générique d'une notification à envoyer (ciblage user/email + payload). */
 export type NotificationPayload = {
   userId?: string;
   email?: string;

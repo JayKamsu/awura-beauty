@@ -16,6 +16,7 @@ function bearer(request: Request) {
     : null;
 }
 
+/** Liste les notifications de la boîte de réception de l'utilisateur connecté. */
 export async function GET(request: Request) {
   const user = await getUserFromAccessToken(bearer(request));
   if (!user) {
@@ -30,6 +31,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ notifications, unread });
 }
 
+/** Marque une notification (ou toutes) comme lue pour l'utilisateur connecté. */
 export async function PATCH(request: Request) {
   const user = await getUserFromAccessToken(bearer(request));
   if (!user) {
@@ -52,6 +54,7 @@ export async function PATCH(request: Request) {
     : NextResponse.json({ error: "update failed" }, { status: 400 });
 }
 
+/** Supprime une notification (ou toutes) pour l'utilisateur connecté. */
 export async function DELETE(request: Request) {
   const user = await getUserFromAccessToken(bearer(request));
   if (!user) {

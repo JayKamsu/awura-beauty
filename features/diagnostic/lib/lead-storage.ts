@@ -1,6 +1,7 @@
 /** Lead capturé depuis l’accueil → consommé par le flux présentiel. */
 export const DIAGNOSTIC_LEAD_STORAGE_KEY = "awura-diagnostic-lead";
 
+/** Coordonnées et réponses d'un prospect capturées avant un rendez-vous présentiel. */
 export type DiagnosticLead = {
   firstName?: string;
   lastName?: string;
@@ -12,6 +13,7 @@ export type DiagnosticLead = {
   slot?: string;
 };
 
+/** Lit le lead diagnostic stocké en session, ou `null` si absent/corrompu. */
 export function readDiagnosticLead(): DiagnosticLead | null {
   if (typeof window === "undefined") return null;
   try {
@@ -24,6 +26,7 @@ export function readDiagnosticLead(): DiagnosticLead | null {
   }
 }
 
+/** Sauvegarde le lead diagnostic en sessionStorage ; échoue silencieusement (quota, navigation privée). */
 export function writeDiagnosticLead(lead: DiagnosticLead): void {
   if (typeof window === "undefined") return;
   try {
@@ -36,6 +39,7 @@ export function writeDiagnosticLead(lead: DiagnosticLead): void {
   }
 }
 
+/** Supprime le lead diagnostic stocké, typiquement une fois le rendez-vous confirmé. */
 export function clearDiagnosticLead(): void {
   if (typeof window === "undefined") return;
   try {
@@ -45,6 +49,7 @@ export function clearDiagnosticLead(): void {
   }
 }
 
+/** Concatène prénom et nom du lead pour affichage ; chaîne vide si aucun lead. */
 export function leadFullName(lead: DiagnosticLead | null): string {
   if (!lead) return "";
   return `${lead.firstName ?? ""} ${lead.lastName ?? ""}`.trim();

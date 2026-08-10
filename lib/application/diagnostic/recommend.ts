@@ -7,6 +7,7 @@ import type {
   DiagnosticRoutineStep,
 } from "@/lib/domain/diagnostic";
 
+/** Ordre canonique des produits Awura utilisé pour trier les routines suggérées. */
 export const AWURA_PRODUCT_SLUGS = [
   "savon-solide",
   "demelant-nourrissant",
@@ -143,6 +144,7 @@ function localeOf(lang?: string): DiagnosticLocale {
   return "fr";
 }
 
+/** Construit les étapes de routine (titre + usage localisés) pour les slugs recommandés, produits Awura en tête. */
 export function buildRoutineSteps(
   recommendedSlugs: string[],
   locale?: string,
@@ -168,10 +170,12 @@ export function buildRoutineSteps(
   });
 }
 
+/** Routine complète avec tous les produits Awura, pour les diagnostics sans recommandation ciblée. */
 export function buildFullAwuraRoutine(locale?: string): DiagnosticRoutineStep[] {
   return buildRoutineSteps([...AWURA_PRODUCT_SLUGS], locale);
 }
 
+/** Additionne les points par produit selon les réponses données à chaque question du diagnostic. */
 export function scoreFromQuestions(
   questions: DiagnosticQuestion[],
   answers: DiagnosticAnswerMap,
@@ -191,6 +195,7 @@ export function scoreFromQuestions(
   return scores;
 }
 
+/** Retient les slugs les mieux notés (score > 0), triés décroissant, limités à `limit`. */
 export function topSlugsFromScores(
   scores: Record<string, number>,
   limit = 5,
@@ -308,6 +313,7 @@ export function buildProcessPlan(
   ];
 }
 
+/** Texte de retour détaillé selon l'objectif principal détecté dans les réponses, avec repli sur hydratation. */
 export function buildDetailedFeedback(
   answers: DiagnosticAnswerMap,
   locale?: string,
@@ -323,6 +329,7 @@ export function buildDetailedFeedback(
   );
 }
 
+/** Assemble le profil diagnostic complet (titres, feedback, process, tags) à partir des réponses brutes. */
 export function buildProfileFromAnswers(
   answers: DiagnosticAnswerMap,
   locale?: string,
@@ -344,6 +351,7 @@ export function buildProfileFromAnswers(
   };
 }
 
+/** Nettoie les réponses brutes (trim, valeurs vides exclues) et gère la rétrocompatibilité des anciens noms de champs. */
 export function normalizeAnswerMap(
   answers: Record<string, unknown>,
 ): DiagnosticAnswerMap {

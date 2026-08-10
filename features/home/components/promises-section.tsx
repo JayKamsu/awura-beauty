@@ -32,6 +32,7 @@ const PROMISES = [
   },
 ] as const;
 
+/** Section « promesses » de la page d'accueil : met en avant les engagements de la marque (expertise, naturel, résultats, amour). */
 export function PromisesSection() {
   const { t } = useTranslation();
   const cms = usePageCmsFields("promises");

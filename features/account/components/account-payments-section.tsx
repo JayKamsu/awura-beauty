@@ -12,6 +12,7 @@ import { useActionLock } from "@/lib/hooks/use-action-lock";
 
 const METHODS = ["stripe", "paypal"] as const;
 
+/** Section Mon compte présentant les moyens de paiement acceptés et l'activation des notifications push. */
 export function AccountPaymentsSection() {
   const { t } = useTranslation();
   const { locked: pending, run } = useActionLock();

@@ -28,6 +28,7 @@ const emptyForm = {
 const fieldClass =
   "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent";
 
+/** Panneau admin pour créer, éditer et supprimer les articles de blog et tutoriels. */
 export function AdminContentPanel() {
   const { t } = useTranslation();
   const adminFetch = useAdminFetch();

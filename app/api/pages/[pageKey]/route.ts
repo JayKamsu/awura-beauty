@@ -9,6 +9,7 @@ function parseLocale(value: string | null): PageLocale {
   return "fr";
 }
 
+/** Retourne la mise en page (layout) publique d'une page CMS pour une locale donnée. */
 export async function GET(request: Request, { params }: Params) {
   const { pageKey } = await params;
   const locale = parseLocale(new URL(request.url).searchParams.get("locale"));

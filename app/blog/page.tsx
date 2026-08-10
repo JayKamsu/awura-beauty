@@ -2,6 +2,7 @@ import { BlogNavTabs, PostList } from "@/features/blog/components/post-list";
 import { listBlogPosts } from "@/lib/infrastructure/supabase";
 import { BlogIndexHeader } from "@/features/blog/components/blog-index-header";
 
+/** Page d'index du blog : liste les articles publiés avec les onglets de navigation du blog. */
 export default async function BlogPage() {
   const { posts } = await listBlogPosts("article");
 

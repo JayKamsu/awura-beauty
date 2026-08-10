@@ -64,6 +64,7 @@ type SelectFieldProps = Omit<
   children: ReactNode;
 };
 
+/** Liste déroulante accessible : label visible + erreur liée (WCAG 1.3.1 / 3.3.1). */
 export function SelectField({
   id,
   label,

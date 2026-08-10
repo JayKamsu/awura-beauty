@@ -16,6 +16,7 @@ const LABEL_MIME: Record<string, string> = {
   "image/jpeg": ".jpg",
 };
 
+/** Dossiers autorisés dans le bucket media public. */
 export type StorageFolder =
   | "products"
   | "blog"
@@ -59,6 +60,7 @@ export async function ensureMediaBucket(): Promise<{ ok: boolean; error?: string
   return { ok: true };
 }
 
+/** Upload une image publique (JPEG/PNG/WebP/GIF, max 5 Mo) dans le bucket media, sous un nom aléatoire. */
 export async function uploadPublicImage(
   file: File,
   folder: StorageFolder = "uploads",

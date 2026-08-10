@@ -1,3 +1,4 @@
+/** Ligne du profil utilisateur (coordonnées de livraison). */
 export type ProfileRow = {
   id: string;
   first_name: string;
@@ -10,6 +11,7 @@ export type ProfileRow = {
   updated_at: string;
 };
 
+/** Champs modifiables lors de la mise à jour du profil. */
 export type ProfileUpdateInput = {
   first_name: string;
   last_name: string;
@@ -45,6 +47,7 @@ export function isShippingProfileComplete(
   );
 }
 
+/** Nom complet affichable, construit à partir du prénom et du nom. */
 export function profileFullName(profile: Pick<ProfileRow, "first_name" | "last_name">) {
   return `${profile.first_name} ${profile.last_name}`.trim();
 }

@@ -26,6 +26,7 @@ function orderAccountHref(orderId: string) {
   return `/compte?order=${encodeURIComponent(orderId)}#commandes`;
 }
 
+/** Page de résultat après paiement : confirme la commande côté serveur en cas de succès, ou notifie l'annulation. */
 export function CheckoutResult({
   status,
   orderId,

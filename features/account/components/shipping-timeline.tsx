@@ -24,11 +24,13 @@ function stepIndex(status: ShippingStatus, pickup: boolean) {
   return 0;
 }
 
+/** Props de la frise de suivi de livraison : statut courant et transporteur. */
 type ShippingTimelineProps = {
   status: ShippingStatus;
   carrier?: ShippingCarrier | null;
 };
 
+/** Frise visuelle des étapes de livraison, adaptée au retrait en magasin ou à l'expédition classique. */
 export function ShippingTimeline({ status, carrier }: ShippingTimelineProps) {
   const { t } = useTranslation();
   const pickup = carrier === "pickup";

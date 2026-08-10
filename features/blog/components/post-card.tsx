@@ -11,6 +11,7 @@ type PostCardProps = {
   basePath?: "/blog" | "/tutoriels";
 };
 
+/** Carte cliquable présentant un aperçu d'un article ou tutoriel dans une liste. */
 export function PostCard({ post, basePath }: PostCardProps) {
   const { t, i18n } = useTranslation();
   const hrefBase =

@@ -5,6 +5,7 @@ import {
 import { PRODUCT_CATEGORIES } from "@/lib/infrastructure/supabase/fallback-products";
 import { getDemoProducts } from "@/lib/infrastructure/supabase/admin-store";
 
+/** Catégorie produit multilingue (fr/en/es) avec position d'affichage. */
 export type ProductCategory = {
   slug: string;
   label: string;
@@ -47,6 +48,7 @@ function mapRow(row: Record<string, unknown>): ProductCategory {
   };
 }
 
+/** Libellé de catégorie dans la langue demandée, avec repli sur le français si absent. */
 export function categoryDisplayLabel(
   category: ProductCategory,
   language?: string,
@@ -57,6 +59,7 @@ export function categoryDisplayLabel(
   return category.label;
 }
 
+/** Liste les catégories triées par position ; retombe sur les catégories démo si Supabase est vide/indisponible. */
 export async function listProductCategories(): Promise<ProductCategory[]> {
   const supabase = createSupabaseClient() ?? createAdminSupabaseClient();
   if (supabase) {
@@ -81,6 +84,7 @@ function slugify(raw: string): string {
     .slice(0, 48);
 }
 
+/** Crée une catégorie (slug dérivé du label si absent) ; position auto-incrémentée après la dernière existante. */
 export async function adminCreateCategory(input: {
   label: string;
   slug?: string;
@@ -131,6 +135,7 @@ export async function adminCreateCategory(input: {
   return { category };
 }
 
+/** Supprime une catégorie ; refuse si des produits l'utilisent encore (category_in_use). */
 export async function adminDeleteCategory(
   slug: string,
 ): Promise<{ ok: boolean; error?: string }> {

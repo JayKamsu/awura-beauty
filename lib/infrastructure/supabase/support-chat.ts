@@ -5,6 +5,7 @@ import {
 } from "@/lib/infrastructure/supabase/client";
 import { createClient } from "@supabase/supabase-js";
 
+/** Conversation de support client, avec dernier message et email pour l'affichage admin. */
 export type SupportConversation = {
   id: string;
   user_id: string;
@@ -15,6 +16,7 @@ export type SupportConversation = {
   customer_email?: string | null;
 };
 
+/** Message individuel d'une conversation de support (client ou admin). */
 export type SupportMessage = {
   id: string;
   conversation_id: string;
@@ -66,6 +68,7 @@ async function userIdFromToken(accessToken: string): Promise<string | null> {
   return data.user.id;
 }
 
+/** Récupère la conversation ouverte du client authentifié, ou en crée une nouvelle. */
 export async function getOrCreateMyConversation(
   accessToken: string,
 ): Promise<{ conversation: SupportConversation | null; error: string | null }> {
@@ -110,6 +113,7 @@ export async function getOrCreateMyConversation(
   };
 }
 
+/** Messages d'une conversation, réservés au client propriétaire (vérifie user_id avant de lire). */
 export async function listMyMessages(
   accessToken: string,
   conversationId: string,
@@ -139,6 +143,7 @@ export async function listMyMessages(
   return data.map((row) => mapMessage(row as Record<string, unknown>));
 }
 
+/** Envoie un message client sur sa propre conversation et rouvre celle-ci (status "open"). */
 export async function sendCustomerMessage(input: {
   accessToken: string;
   conversationId: string;
@@ -187,6 +192,7 @@ export async function sendCustomerMessage(input: {
   return { message: mapMessage(data as Record<string, unknown>), error: null };
 }
 
+/** Liste toutes les conversations (admin), enrichies du dernier message et de l'email client. */
 export async function adminListConversations(): Promise<SupportConversation[]> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return [];
@@ -227,6 +233,7 @@ export async function adminListConversations(): Promise<SupportConversation[]> {
   return enriched;
 }
 
+/** Messages d'une conversation, côté admin (aucune vérification de propriété). */
 export async function adminListMessages(
   conversationId: string,
 ): Promise<SupportMessage[]> {
@@ -243,6 +250,7 @@ export async function adminListMessages(
   return data.map((row) => mapMessage(row as Record<string, unknown>));
 }
 
+/** Envoie un message admin ; sender_id null pour l'admin de dev (pas d'utilisateur réel). */
 export async function adminSendMessage(input: {
   conversationId: string;
   adminUserId: string;
@@ -277,6 +285,7 @@ export async function adminSendMessage(input: {
   return { message: mapMessage(data as Record<string, unknown>), error: null };
 }
 
+/** Ouvre ou ferme une conversation de support (admin). */
 export async function adminSetConversationStatus(
   conversationId: string,
   status: "open" | "closed",

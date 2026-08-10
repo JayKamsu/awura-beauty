@@ -7,6 +7,7 @@ import {
   usePageCmsFields,
 } from "@/features/cms/context/page-cms-context";
 
+/** Bloc d'appel à l'action en fin de page « À propos », renvoyant vers le diagnostic capillaire. */
 export function AboutCtaSection() {
   const { t } = useTranslation();
   const cms = usePageCmsFields("cta");

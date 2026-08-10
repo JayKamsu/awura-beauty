@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { listAvailableDiagnosticSlots } from "@/lib/application/diagnostic/slots";
 import { getDiagnosticSettings } from "@/lib/infrastructure/supabase/diagnostic-admin";
 
+/** Liste les créneaux disponibles pour le diagnostic capillaire présentiel (fenêtre 21 jours par défaut). */
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const from = url.searchParams.get("from");

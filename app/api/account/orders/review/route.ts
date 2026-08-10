@@ -6,6 +6,7 @@ import {
   upsertOrderReview,
 } from "@/lib/infrastructure/supabase/order-reviews";
 
+/** Liste les avis laissés pour une commande, réservé au client propriétaire. */
 export async function GET(request: Request) {
   const userId = await userIdFromRequest(request);
   if (!userId) {
@@ -26,6 +27,10 @@ export async function GET(request: Request) {
   return NextResponse.json({ reviews });
 }
 
+/**
+ * Crée ou met à jour l'avis du client sur un produit de la commande.
+ * Nécessite que la commande soit confirmée reçue et que le produit en fasse partie.
+ */
 export async function POST(request: Request) {
   const userId = await userIdFromRequest(request);
   if (!userId) {

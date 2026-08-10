@@ -14,6 +14,7 @@ import type {
 } from "@/lib/domain/diagnostic";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+/** Données d'un diagnostic capillaire à persister, avec routine et lien optionnel vers un rendez-vous. */
 export type SaveDiagnosticInput = {
   answers: DiagnosticAnswers | DiagnosticAnswerMap;
   profile: DiagnosticProfile;
@@ -92,6 +93,7 @@ export async function saveHairDiagnostic(
   };
 }
 
+/** Diagnostics de l'utilisateur connecté (session navigateur, RLS filtre déjà par user_id). */
 export async function listMyDiagnostics(): Promise<DiagnosticRecord[]> {
   const userId = await getCurrentUserId();
   const supabase = createSupabaseClient();

@@ -33,6 +33,7 @@ export function buildDiagnosticResult(answers: DiagnosticAnswers): {
   };
 }
 
+/** Ordre des étapes du questionnaire diagnostic hardcodé (ancienne API). */
 export const DIAGNOSTIC_STEPS = [
   "hairType",
   "scalp",

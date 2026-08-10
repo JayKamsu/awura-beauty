@@ -34,6 +34,7 @@ export type ProductInput = Omit<ProductRow, "id" | "created_at"> & {
   id?: string;
 };
 
+/** Liste tous les produits côté admin (service_role) ; retombe sur les produits démo si Supabase n'est pas configuré. */
 export async function adminListProducts(): Promise<ProductRow[]> {
   const supabase = createAdminSupabaseClient();
   if (supabase) {
@@ -48,6 +49,7 @@ export async function adminListProducts(): Promise<ProductRow[]> {
   return getDemoProducts();
 }
 
+/** Crée ou met à jour un produit (selon la présence d'un id). Réservé à l'espace admin. */
 export async function adminUpsertProduct(
   input: ProductInput,
 ): Promise<{ product: ProductRow | null; error: string | null }> {
@@ -114,6 +116,7 @@ export async function adminUpsertProduct(
   return { product: created, error: null };
 }
 
+/** Supprime un produit par id. Réservé à l'espace admin. */
 export async function adminDeleteProduct(
   id: string,
 ): Promise<{ ok: boolean; error: string | null }> {

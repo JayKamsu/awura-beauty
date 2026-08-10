@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
+/** Props de la pagination de la boutique. */
 type ShopPaginationProps = {
   page: number;
   totalPages: number;
@@ -25,6 +26,7 @@ function buildHref(
   return query ? `/boutique?${query}` : "/boutique";
 }
 
+/** Pagination précédent/suivant de la boutique, préserve la catégorie et l'univers actifs dans l'URL ; masquée s'il n'y a qu'une page. */
 export function ShopPagination({
   page,
   totalPages,

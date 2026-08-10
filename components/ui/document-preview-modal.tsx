@@ -13,6 +13,7 @@ type DocumentPreviewModalProps = {
   onClose: () => void;
 };
 
+/** Fenêtre modale prévisualisant un document (image, PDF ou page) avec option d'ouverture en plein écran. */
 export function DocumentPreviewModal({
   title,
   url,

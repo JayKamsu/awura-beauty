@@ -27,6 +27,7 @@ function sortByDateDesc(posts: BlogPost[]) {
   );
 }
 
+/** Liste les articles publics (filtrables par type) ; retombe sur les posts de secours si Supabase est vide/indisponible. */
 export async function listBlogPosts(
   kind?: BlogPostKind,
 ): Promise<{ posts: BlogPost[]; source: "supabase" | "fallback" }> {
@@ -57,6 +58,7 @@ export async function listBlogPosts(
   return { posts: sortByDateDesc(posts), source: "fallback" };
 }
 
+/** Récupère un article public par son slug, avec repli sur les posts de secours si absent de Supabase. */
 export async function getBlogPostBySlug(
   slug: string,
 ): Promise<BlogPost | null> {
@@ -77,6 +79,7 @@ export async function getBlogPostBySlug(
   return FALLBACK_POSTS.find((post) => post.slug === slug) ?? null;
 }
 
+/** Slugs de tous les articles publics (ex. pour generateStaticParams). */
 export async function listBlogSlugs(kind?: BlogPostKind): Promise<string[]> {
   const { posts } = await listBlogPosts(kind);
   return posts.map((post) => post.slug);

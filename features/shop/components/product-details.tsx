@@ -8,6 +8,7 @@ import { useBrandSettings } from "@/components/brand/brand-settings-provider";
 import { resolveProductQrTarget } from "@/lib/application/brand/qr";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
+/** Props de la fiche produit. */
 type ProductDetailsProps = {
   product: ProductRow;
 };

@@ -22,6 +22,7 @@ type DiagnosticResultProps = {
   onRestart: () => void;
 };
 
+/** Affiche le profil capillaire, la routine et les produits recommandés à l'issue du diagnostic. */
 export function DiagnosticResult({
   profile,
   products,

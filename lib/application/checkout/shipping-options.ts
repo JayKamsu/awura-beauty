@@ -11,6 +11,7 @@ type ShippingBody = {
 
 const CARRIERS: ShippingCarrier[] = ["laposte", "mondial_relay", "pickup"];
 
+/** Valide et normalise les infos de livraison saisies au checkout (transporteur, point relais, téléphone). */
 export function resolveCheckoutShipping(body: ShippingBody):
   | { ok: true; shippingCarrier: ShippingCarrier; relayPointId: string | null }
   | { ok: false; error: string } {

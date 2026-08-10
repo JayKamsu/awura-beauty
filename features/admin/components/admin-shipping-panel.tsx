@@ -9,6 +9,7 @@ import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 import type { ShippingCarrier } from "@/lib/infrastructure/supabase/order-types";
 
+/** Brouillon de formulaire pour les tarifs de livraison par transporteur. */
 type RateForm = {
   carrier: ShippingCarrier;
   enabled: boolean;
@@ -18,6 +19,7 @@ type RateForm = {
 
 const CARRIERS: ShippingCarrier[] = ["laposte", "mondial_relay", "pickup"];
 
+/** Panneau admin pour configurer les frais de port et seuils de livraison gratuite par transporteur. */
 export function AdminShippingPanel() {
   const { t } = useTranslation();
   const adminFetch = useAdminFetch();

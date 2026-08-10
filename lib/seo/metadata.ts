@@ -18,6 +18,7 @@ type BuildMetadataInput = {
   noIndex?: boolean;
 };
 
+/** Construit les métadonnées Next.js (title, OG, Twitter, canonical) pour une page donnée. */
 export function buildPageMetadata({
   title,
   description = SITE_DESCRIPTION,
@@ -83,6 +84,7 @@ export function buildPageMetadata({
   };
 }
 
+/** Métadonnées racine du site (layout global) : titre par défaut, icônes, vérification Google Search Console. */
 export function rootMetadata(): Metadata {
   // Token public Search Console (balise meta). Surcharge possible via env.
   const googleVerification =

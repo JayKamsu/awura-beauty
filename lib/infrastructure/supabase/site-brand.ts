@@ -33,6 +33,7 @@ function mapRow(row: Record<string, unknown>): SiteBrandSettings {
   };
 }
 
+/** Réglages de marque du site (logos, univers enfant, QR par défaut) ; retombe sur DEFAULT_SITE_BRAND si Supabase est indisponible. */
 export async function getSiteBrandSettings(): Promise<SiteBrandSettings> {
   const supabase = createAdminSupabaseClient() ?? createSupabaseClient();
   if (!supabase) return DEFAULT_SITE_BRAND;
@@ -47,6 +48,7 @@ export async function getSiteBrandSettings(): Promise<SiteBrandSettings> {
   return mapRow(data as Record<string, unknown>);
 }
 
+/** Met à jour partiellement les réglages de marque (admin uniquement) et retourne l'état final. */
 export async function updateSiteBrandSettings(
   patch: Partial<SiteBrandSettings>,
 ): Promise<SiteBrandSettings | null> {

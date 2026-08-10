@@ -20,6 +20,10 @@ const SECTION_MAP: Partial<Record<PageSectionId, ReactNode>> = {
   cta: <AboutCtaSection />,
 };
 
+/**
+ * Page "À propos" : charge la configuration des sections depuis le CMS (avec fallback par défaut)
+ * puis affiche celles activées via le contexte CMS.
+ */
 export default function AboutPage() {
   const { i18n } = useTranslation();
   const [sections, setSections] =

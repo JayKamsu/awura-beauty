@@ -17,18 +17,22 @@ const CARRIER_LABEL: Record<ShippingCarrier, string> = {
   pickup: "retrait sur place",
 };
 
+/** Chemin de la page compte client, ancré sur la commande concernée. */
 export function orderAccountPath(orderId: string) {
   return `/compte?order=${encodeURIComponent(orderId)}#commandes`;
 }
 
+/** Chemin de la page admin commandes, filtré sur la commande concernée. */
 export function orderAdminPath(orderId: string) {
   return `/admin/commandes?order=${encodeURIComponent(orderId)}`;
 }
 
+/** URL absolue vers la commande dans le compte client, pour les notifs/emails. */
 export function orderAccountLink(orderId: string) {
   return absoluteUrl(orderAccountPath(orderId));
 }
 
+/** URL absolue vers la commande côté admin, pour les notifs internes. */
 export function orderAdminLink(orderId: string) {
   return absoluteUrl(orderAdminPath(orderId));
 }
@@ -39,6 +43,7 @@ type OrderNotifyBase = {
   trackingNumber?: string | null;
 };
 
+/** Notifie le client (paiement confirmé) et l'équipe admin (nouvelle commande) après un paiement réussi. */
 export async function notifyOrderPaid(input: OrderNotifyBase & {
   pickup?: boolean;
 }): Promise<void> {
@@ -59,6 +64,7 @@ export async function notifyOrderPaid(input: OrderNotifyBase & {
   });
 }
 
+/** Notifie le client qu'un remboursement a été enregistré sur sa commande. */
 export async function notifyOrderRefunded(input: OrderNotifyBase): Promise<void> {
   await notifyOrderUser({
     userId: input.userId,
@@ -68,6 +74,7 @@ export async function notifyOrderRefunded(input: OrderNotifyBase): Promise<void>
   });
 }
 
+/** Notifie le client d'un changement de statut de livraison ; no-op si le statut n'a pas réellement changé. */
 export async function notifyShippingStatusChange(input: OrderNotifyBase & {
   status: ShippingStatus;
   previousStatus?: ShippingStatus | null;
@@ -118,6 +125,7 @@ export async function notifyShippingStatusChange(input: OrderNotifyBase & {
   });
 }
 
+/** Notifie le client d'un changement de transporteur (avec Point Relais si Mondial Relay). */
 export async function notifyCarrierChanged(input: {
   userId: string | null | undefined;
   orderId: string;

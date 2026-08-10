@@ -22,6 +22,7 @@ const BrandContext = createContext<BrandContextValue>({
   loading: true,
 });
 
+/** Fournit les réglages de marque (chargés depuis l'API) à l'arbre de composants enfants. */
 export function BrandSettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<SiteBrandSettings>(DEFAULT_SITE_BRAND);
   const [loading, setLoading] = useState(true);
@@ -50,6 +51,7 @@ export function BrandSettingsProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** Accède aux réglages de marque courants et à leur état de chargement. */
 export function useBrandSettings() {
   return useContext(BrandContext);
 }

@@ -50,6 +50,7 @@ function slugify(raw: string): string {
     .slice(0, 64);
 }
 
+/** Panneau admin des produits : création, édition, gestion des catégories et upload d'images. */
 export function AdminProductsPanel() {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 import { CONTACT_EMAIL } from "@/lib/site";
 
+/** Page de contact : formulaire qui ouvre un e-mail pré-rempli vers l'adresse de contact. */
 export function ContactPageContent() {
   const { t } = useTranslation();
   const { locked, runSync } = useActionLock();

@@ -18,6 +18,10 @@ function withVideo(appointment: NonNullable<
   return { appointment, videoPath };
 }
 
+/**
+ * Confirme un rendez-vous diagnostic après paiement Stripe côté succès navigateur.
+ * Ne fait rien si déjà confirmé/terminé ; vérifie la session Stripe avant de mettre à jour.
+ */
 export async function POST(request: Request) {
   const body = (await request.json()) as {
     appointmentId?: string;

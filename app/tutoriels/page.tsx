@@ -2,6 +2,7 @@ import { BlogNavTabs, PostList } from "@/features/blog/components/post-list";
 import { BlogIndexHeader } from "@/features/blog/components/blog-index-header";
 import { listBlogPosts } from "@/lib/infrastructure/supabase";
 
+/** Page listant tous les tutoriels du blog. */
 export default async function TutorialsPage() {
   const { posts } = await listBlogPosts("tutorial");
 

@@ -7,6 +7,7 @@ import {
   type BlogPostInput,
 } from "@/lib/infrastructure/supabase/admin-blog";
 
+/** Liste tous les articles de blog — admin uniquement. */
 export async function GET(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -14,6 +15,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ posts });
 }
 
+/** Crée ou met à jour un article de blog — admin uniquement. */
 export async function POST(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -26,6 +28,7 @@ export async function POST(request: Request) {
   return NextResponse.json({ post: result.post });
 }
 
+/** Supprime un article de blog par id — admin uniquement. */
 export async function DELETE(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;

@@ -1,5 +1,6 @@
 import { createAdminSupabaseClient } from "@/lib/infrastructure/supabase/client";
 
+/** Notification en boîte de réception utilisateur (in-app), distincte des push notifications. */
 export type InboxNotification = {
   id: string;
   userId: string;
@@ -25,6 +26,7 @@ function mapRow(row: Record<string, unknown>): InboxNotification {
 /** Mémoire démo sans Supabase. */
 let demoStore: InboxNotification[] = [];
 
+/** Crée une notification pour plusieurs utilisateurs. Bascule sur un store en mémoire (démo) si Supabase n'est pas configuré. */
 export async function createInboxNotifications(input: {
   userIds: string[];
   title: string;
@@ -61,6 +63,7 @@ export async function createInboxNotifications(input: {
   ].slice(0, 200);
 }
 
+/** Notifications d'un utilisateur, les plus récentes d'abord. */
 export async function listInboxNotifications(
   userId: string,
   limit = 40,
@@ -81,6 +84,7 @@ export async function listInboxNotifications(
     .slice(0, limit);
 }
 
+/** Nombre de notifications non lues d'un utilisateur (badge). */
 export async function countUnreadInbox(userId: string): Promise<number> {
   const supabase = createAdminSupabaseClient();
   if (supabase) {
@@ -96,6 +100,7 @@ export async function countUnreadInbox(userId: string): Promise<number> {
     .length;
 }
 
+/** Marque une notification comme lue. Scopée par userId pour empêcher un utilisateur de modifier la notif d'un autre. */
 export async function markInboxRead(
   userId: string,
   id: string,
@@ -117,6 +122,7 @@ export async function markInboxRead(
   return true;
 }
 
+/** Marque toutes les notifications non lues d'un utilisateur comme lues. */
 export async function markAllInboxRead(userId: string): Promise<boolean> {
   const supabase = createAdminSupabaseClient();
   if (supabase) {
@@ -134,6 +140,7 @@ export async function markAllInboxRead(userId: string): Promise<boolean> {
   return true;
 }
 
+/** Supprime une notification. Scopée par userId pour empêcher un utilisateur de supprimer la notif d'un autre. */
 export async function deleteInboxNotification(
   userId: string,
   id: string,
@@ -153,6 +160,7 @@ export async function deleteInboxNotification(
   return true;
 }
 
+/** Supprime toutes les notifications d'un utilisateur (vider la boîte de réception). */
 export async function deleteAllInbox(userId: string): Promise<boolean> {
   const supabase = createAdminSupabaseClient();
   if (supabase) {

@@ -69,6 +69,7 @@ async function persistInbox(payload: NotificationPayload, link?: string) {
   });
 }
 
+/** Implémentation NotificationPort via FCM push + inbox in_app ; tombe en stub (log) si Firebase non configuré. */
 export const firebaseNotificationAdapter: NotificationPort = {
   configured: isFirebaseAdminConfigured,
 
@@ -148,6 +149,7 @@ export const firebaseNotificationAdapter: NotificationPort = {
   },
 };
 
+/** Envoie un push à tous les tokens enregistrés (diffusion large, ex. annonce). */
 export async function broadcastPush(input: {
   title: string;
   body: string;
@@ -172,6 +174,7 @@ export async function broadcastPush(input: {
   };
 }
 
+/** Notifie le client propriétaire d'une commande (no-op silencieux si pas d'userId). */
 export async function notifyOrderUser(input: {
   userId: string | null | undefined;
   title: string;
@@ -189,6 +192,7 @@ export async function notifyOrderUser(input: {
   });
 }
 
+/** Notifie tous les comptes admin (ex. nouvelle commande, alerte). */
 export async function notifyAdminUsers(input: {
   title: string;
   body: string;

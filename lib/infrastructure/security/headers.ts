@@ -13,6 +13,7 @@ function supabaseOrigin(): string | null {
   }
 }
 
+/** Construit la CSP autorisant Supabase/Stripe/PayPal/Firebase/Sentry/Google Auth/Jitsi. */
 export function buildContentSecurityPolicy(): string {
   const supabase = supabaseOrigin();
   const connect = [
@@ -102,6 +103,7 @@ export function buildContentSecurityPolicy(): string {
   return directives.join("; ");
 }
 
+/** Headers de sécurité HTTP baseline (framing, MIME sniffing, HSTS, CSP) à appliquer à toutes les réponses. */
 export function buildSecurityHeaders(): Array<{ key: string; value: string }> {
   return [
     { key: "X-DNS-Prefetch-Control", value: "on" },

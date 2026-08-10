@@ -6,6 +6,7 @@ import {
   listProductCategories,
 } from "@/lib/infrastructure/supabase/product-categories";
 
+/** Liste les catégories produit (admin). */
 export async function GET(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -13,6 +14,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ categories });
 }
 
+/** Crée une catégorie produit (admin). */
 export async function POST(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -35,6 +37,7 @@ export async function POST(request: Request) {
   return NextResponse.json({ category: result.category });
 }
 
+/** Supprime une catégorie produit par slug (admin). */
 export async function DELETE(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;

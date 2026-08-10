@@ -2,6 +2,7 @@ import { ReviewsHeader } from "@/features/reviews/components/reviews-header";
 import { ReviewsList } from "@/features/reviews/components/reviews-list";
 import { listPublicReviews } from "@/lib/infrastructure/supabase/order-reviews";
 
+/** Page "Avis clients" : récupère les avis publics et les affiche sous l'en-tête de la section. */
 export default async function AvisPage() {
   const reviews = await listPublicReviews();
 

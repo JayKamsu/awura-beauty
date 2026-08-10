@@ -20,6 +20,7 @@ type DiagnosticVideoRoomProps = {
   token?: string | null;
 };
 
+/** Salle de visioconférence (Jitsi) pour le rendez-vous diagnostic à distance. */
 export function DiagnosticVideoRoom({
   appointmentId,
   token,

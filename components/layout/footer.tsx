@@ -38,6 +38,7 @@ const FOOTER_BLOCKS = [
   },
 ] as const;
 
+/** Pied de page du site : logo, arguments clés et coordonnées de contact. */
 export function Footer() {
   const { t } = useTranslation();
   const year = new Date().getFullYear();

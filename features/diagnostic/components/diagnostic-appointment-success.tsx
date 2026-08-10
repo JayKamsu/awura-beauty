@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import type { DiagnosticAppointment } from "@/lib/domain/diagnostic";
 
+/** Confirme un rendez-vous diagnostic après paiement et propose l'accès à la visio si applicable. */
 export function DiagnosticAppointmentSuccess() {
   const { t, i18n } = useTranslation();
   const searchParams = useSearchParams();

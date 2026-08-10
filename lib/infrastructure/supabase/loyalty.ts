@@ -1,6 +1,7 @@
 import { createAdminSupabaseClient } from "@/lib/infrastructure/supabase/client";
 import type { LoyaltyReason } from "@/lib/domain/loyalty";
 
+/** Ligne d'historique de points fidélité (crédit ou débit), tracée pour audit et idempotence. */
 export type LoyaltyLedgerEntry = {
   id: string;
   user_id: string;
@@ -12,6 +13,7 @@ export type LoyaltyLedgerEntry = {
   created_at: string;
 };
 
+/** Solde de points et infos de parrainage d'un utilisateur. */
 export type LoyaltyProfile = {
   id: string;
   loyalty_points: number;
@@ -45,6 +47,7 @@ function mapLoyaltyProfile(row: Record<string, unknown>): LoyaltyProfile {
   };
 }
 
+/** Profil fidélité d'un utilisateur (service_role). */
 export async function getLoyaltyProfile(
   userId: string,
 ): Promise<LoyaltyProfile | null> {
@@ -61,6 +64,7 @@ export async function getLoyaltyProfile(
   return mapLoyaltyProfile(data as Record<string, unknown>);
 }
 
+/** Retourne le code de parrainage existant ou en génère un (retries en cas de collision). */
 export async function ensureReferralCode(
   userId: string,
 ): Promise<string | null> {
@@ -91,6 +95,7 @@ export async function ensureReferralCode(
   return again?.referral_code ?? null;
 }
 
+/** Retrouve le profil propriétaire d'un code de parrainage donné. */
 export async function findProfileByReferralCode(
   code: string,
 ): Promise<LoyaltyProfile | null> {
@@ -108,6 +113,7 @@ export async function findProfileByReferralCode(
   return mapLoyaltyProfile(data as Record<string, unknown>);
 }
 
+/** Lie un filleul à son parrain. Refuse l'auto-parrainage et n'écrase jamais un parrain déjà attaché (idempotent). */
 export async function attachReferrer(input: {
   userId: string;
   referrerId: string;
@@ -132,6 +138,7 @@ export async function attachReferrer(input: {
   return { ok: true };
 }
 
+/** Vérifie si l'utilisateur a au moins une commande payée, en excluant éventuellement la commande en cours (utile pour valider une récompense de parrainage). */
 export async function userHasPaidOrder(
   userId: string,
   options?: { excludeOrderId?: string },
@@ -154,6 +161,7 @@ export async function userHasPaidOrder(
   return others.length > 0;
 }
 
+/** Historique des mouvements de points fidélité d'un utilisateur, du plus récent au plus ancien. */
 export async function listLoyaltyLedger(
   userId: string,
   limit = 30,
@@ -236,6 +244,7 @@ export async function applyLoyaltyDelta(input: {
   return { ok: true, balance: next };
 }
 
+/** Marque le parrainage comme récompensé. Idempotent : n'écrit que si le champ était encore null, évite un double crédit. */
 export async function markReferralRewarded(
   userId: string,
 ): Promise<boolean> {
@@ -251,6 +260,7 @@ export async function markReferralRewarded(
   return !error;
 }
 
+/** Non implémenté : les profils n'ont pas d'email directement lié (nécessiterait une jointure auth indisponible côté client) — retourne toujours une map vide. */
 export async function listLoyaltyProfilesByEmails(
   emails: string[],
 ): Promise<Map<string, LoyaltyProfile & { email?: string }>> {
@@ -263,6 +273,7 @@ export async function listLoyaltyProfilesByEmails(
   return map;
 }
 
+/** Récupère plusieurs profils fidélité en une requête, indexés par id (admin, service_role requis). */
 export async function getLoyaltyProfilesByIds(
   ids: string[],
 ): Promise<Map<string, LoyaltyProfile>> {

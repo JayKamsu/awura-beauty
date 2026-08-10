@@ -2,6 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 
+/** En-tête de la page des avis clients (titre + sous-titre). */
 export function ReviewsHeader() {
   const { t } = useTranslation();
 

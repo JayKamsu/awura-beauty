@@ -25,6 +25,7 @@ function mapPost(row: Record<string, unknown>): BlogPost {
 
 export type BlogPostInput = Omit<BlogPost, "id"> & { id?: string };
 
+/** Liste tous les articles côté admin (service_role) ; retombe sur les posts démo si Supabase n'est pas configuré. */
 export async function adminListPosts(): Promise<BlogPost[]> {
   const supabase = createAdminSupabaseClient();
   if (supabase) {
@@ -39,6 +40,7 @@ export async function adminListPosts(): Promise<BlogPost[]> {
   return getDemoPosts();
 }
 
+/** Crée ou met à jour un article (selon la présence d'un id). Réservé à l'espace admin. */
 export async function adminUpsertPost(
   input: BlogPostInput,
 ): Promise<{ post: BlogPost | null; error: string | null }> {
@@ -93,6 +95,7 @@ export async function adminUpsertPost(
   return { post: created, error: null };
 }
 
+/** Supprime un article par id. Réservé à l'espace admin. */
 export async function adminDeletePost(
   id: string,
 ): Promise<{ ok: boolean; error: string | null }> {

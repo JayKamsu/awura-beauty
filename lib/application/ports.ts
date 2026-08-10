@@ -27,6 +27,7 @@ import type {
   ProfileUpdateInput,
 } from "@/lib/infrastructure/supabase/profile-types";
 
+/** Port catalogue produits (lecture). */
 export type CatalogPort = {
   listProducts: (params?: ListProductsParams) => Promise<ListProductsResult>;
   getProductBySlug: (slug: string) => Promise<ProductRow | null>;
@@ -35,6 +36,7 @@ export type CatalogPort = {
   listAllProductSlugs: () => Promise<string[]>;
 };
 
+/** Port commandes (création, lecture, mise à jour paiement/livraison). */
 export type OrderPort = {
   createOrder: (input: {
     email: string;
@@ -73,6 +75,7 @@ export type OrderPort = {
   ) => Promise<boolean>;
 };
 
+/** Port contenu éditorial (blog), avec source de repli si Supabase indisponible. */
 export type ContentPort = {
   listBlogPosts: (
     kind?: BlogPostKind,
@@ -81,6 +84,7 @@ export type ContentPort = {
   listBlogSlugs: (kind?: BlogPostKind) => Promise<string[]>;
 };
 
+/** Port diagnostics capillaires (sauvegarde + lecture des diagnostics du client courant). */
 export type DiagnosticPort = {
   saveHairDiagnostic: (input: {
     answers: DiagnosticAnswers;
@@ -94,6 +98,7 @@ export type DiagnosticPort = {
   listMyDiagnostics: () => Promise<DiagnosticRecord[]>;
 };
 
+/** Port profil du client connecté (lecture/mise à jour). */
 export type ProfilePort = {
   getMyProfile: () => Promise<ProfileRow | null>;
   updateMyProfile: (
@@ -101,6 +106,7 @@ export type ProfilePort = {
   ) => Promise<{ profile: ProfileRow | null; error: string | null }>;
 };
 
+/** Port paiement multi-fournisseurs (Stripe Checkout + PayPal). */
 export type PaymentPort = {
   createStripeCheckout: (input: {
     orderId: string;
@@ -134,6 +140,7 @@ export type PaymentPort = {
   }>;
 };
 
+/** Port transporteurs (création d'étiquette + suivi de colis). */
 export type ShippingPort = {
   createLabel: (
     carrier: ShippingCarrier,
@@ -145,6 +152,7 @@ export type ShippingPort = {
   ) => Promise<TrackingResult>;
 };
 
+/** Port notifications push, avec indicateur `configured` pour dégrader silencieusement si non configuré. */
 export type NotificationPort = {
   send: (
     payload: NotificationPayload,

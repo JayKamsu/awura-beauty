@@ -5,10 +5,12 @@ import { ProductCard } from "@/components/ui/product-card";
 import { toProductCardData } from "@/features/shop/utils/map-product";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
+/** Props des produits associés. */
 type RelatedProductsProps = {
   products: ProductRow[];
 };
 
+/** Section « produits associés » affichée en bas d'une fiche produit ; masquée si aucun produit à suggérer. */
 export function RelatedProducts({ products }: RelatedProductsProps) {
   const { t } = useTranslation();
 

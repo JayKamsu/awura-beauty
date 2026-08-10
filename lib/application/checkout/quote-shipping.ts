@@ -2,12 +2,14 @@ import { listShippingRates } from "@/lib/infrastructure/supabase/shipping-rates"
 import type { ShippingCarrier } from "@/lib/infrastructure/supabase/order-types";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
+/** Ligne panier réduite aux champs nécessaires au calcul des frais de port. */
 export type ShippingQuoteLine = {
   slug: string;
   quantity: number;
   shipping_fee: number;
 };
 
+/** Détail du calcul de livraison retourné par `quoteShipping`. */
 export type ShippingQuote = {
   carrier: ShippingCarrier;
   subtotal: number;
@@ -81,6 +83,7 @@ export async function quoteShipping(input: {
   };
 }
 
+/** Convertit des quantités panier en lignes de frais de port par produit, ignore les slugs inconnus. */
 export function productLinesForQuote(
   products: ProductRow[],
   quantities: Array<{ slug: string; quantity: number }>,

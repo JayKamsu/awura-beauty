@@ -4,6 +4,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { absoluteUrl } from "@/lib/site";
 
+/** Domaine du service Jitsi Meet public utilisé pour les visios diagnostic. */
 export const JITSI_DOMAIN = "meet.jit.si";
 
 function videoSecret(): string {
@@ -20,6 +21,7 @@ export function jitsiRoomName(appointmentId: string): string {
   return `AwuraBeautyDiag${compact}`;
 }
 
+/** URL de la salle Jitsi, avec le nom d'affichage encodé en fragment si fourni. */
 export function jitsiJoinUrl(
   appointmentId: string,
   displayName?: string,
@@ -32,6 +34,7 @@ export function jitsiJoinUrl(
   return `${base}#${params.toString()}`;
 }
 
+/** Jeton HMAC liant RDV + email, pour restreindre l'accès à la visio sans authentification complète. */
 export function createVideoAccessToken(
   appointmentId: string,
   email: string,
@@ -44,6 +47,7 @@ export function createVideoAccessToken(
     .slice(0, 40);
 }
 
+/** Vérifie le jeton d'accès visio en temps constant pour éviter les attaques par timing. */
 export function verifyVideoAccessToken(
   appointmentId: string,
   email: string,
@@ -61,6 +65,7 @@ export function verifyVideoAccessToken(
   }
 }
 
+/** Chemin relatif de la page visio, avec jeton d'accès en query si disponible. */
 export function diagnosticVideoPath(
   appointmentId: string,
   email: string,
@@ -70,6 +75,7 @@ export function diagnosticVideoPath(
   return token ? `${path}?token=${encodeURIComponent(token)}` : path;
 }
 
+/** URL absolue (utilisable dans un email/notif) de la page visio diagnostic. */
 export function diagnosticVideoAbsoluteUrl(
   appointmentId: string,
   email: string,
@@ -77,6 +83,7 @@ export function diagnosticVideoAbsoluteUrl(
   return absoluteUrl(diagnosticVideoPath(appointmentId, email));
 }
 
+/** La visio n'est accessible que pour un RDV confirmé ou déjà terminé. */
 export function canJoinDiagnosticVideo(status: string): boolean {
   return status === "confirmed" || status === "completed";
 }

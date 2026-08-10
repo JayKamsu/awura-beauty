@@ -49,6 +49,7 @@ function mergeLocale(...parts: Record<string, unknown>[]): ResourceLanguage {
   return Object.assign({}, ...parts) as ResourceLanguage;
 }
 
+/** Ressources i18next par locale, fusion de tous les namespaces JSON en un seul "translation". */
 export const localeResources = {
   fr: {
     translation: mergeLocale(

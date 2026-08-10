@@ -24,6 +24,7 @@ export function resolvePaymentStatus(
   return "pending";
 }
 
+/** Raccourci booléen sur `resolvePaymentStatus`. */
 export function isOrderPaid(
   order: Pick<OrderRow, "payment_status" | "status">,
 ): boolean {

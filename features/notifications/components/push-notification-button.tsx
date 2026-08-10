@@ -15,6 +15,7 @@ const iconClass =
 
 const REFRESH_EVENT = "awura:notifications-refresh";
 
+/** Props du bouton de notifications (cloche + boîte de réception). */
 type PushNotificationButtonProps = {
   /** @deprecated Conservé pour compat — l’inbox remplace la redirection. */
   hrefWhenEnabled?: string;
@@ -33,6 +34,7 @@ function toPath(link: string): string {
   return link.startsWith("/") ? link : "/";
 }
 
+/** Cloche de notifications avec boîte de réception déroulante : active les push, liste, marque comme lu et supprime les notifications. */
 export function PushNotificationButton({
   variant = "site",
 }: PushNotificationButtonProps) {
@@ -358,6 +360,7 @@ export function PushNotificationButton({
   );
 }
 
+/** Déclenche un rafraîchissement de la boîte de réception des notifications depuis n'importe où dans l'app. */
 export function dispatchNotificationsRefresh() {
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event(REFRESH_EVENT));

@@ -13,6 +13,7 @@ import { toIntlLocale } from "@/lib/i18n/intl-locale";
 
 const REF_STORAGE_KEY = "awura_referral_code";
 
+/** Section Mon compte affichant le solde de fidélité, le lien de parrainage et l'historique des points. */
 export function AccountLoyaltySection() {
   const { t, i18n } = useTranslation();
   const { session } = useAuth();
@@ -193,4 +194,5 @@ export function AccountLoyaltySection() {
   );
 }
 
+/** Clé localStorage utilisée pour reporter le code de parrainage jusqu'à la connexion. */
 export { REF_STORAGE_KEY };

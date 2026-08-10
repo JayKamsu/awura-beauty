@@ -8,11 +8,13 @@ import { useActionLock } from "@/lib/hooks/use-action-lock";
 
 const DISMISS_KEY = "awura-pwa-dismissed";
 
+/** Props du composant d'installation PWA. */
 type PwaInstallControlsProps = {
   /** Bannière flottante vs bloc profil. */
   variant?: "banner" | "inline";
 };
 
+/** Invite à installer l'application (bannière flottante ou bloc profil), avec repli vers les instructions manuelles iOS. */
 export function PwaInstallControls({
   variant = "inline",
 }: PwaInstallControlsProps) {

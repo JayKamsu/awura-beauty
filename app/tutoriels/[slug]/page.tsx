@@ -14,11 +14,13 @@ type TutorialPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+/** Pré-génère les slugs statiques de tous les tutoriels au build. */
 export async function generateStaticParams() {
   const slugs = await listBlogSlugs("tutorial");
   return slugs.map((slug) => ({ slug }));
 }
 
+/** Construit les métadonnées SEO du tutoriel à partir de son slug, ou un fallback non indexé si introuvable. */
 export async function generateMetadata({
   params,
 }: TutorialPageProps): Promise<Metadata> {
@@ -36,6 +38,7 @@ export async function generateMetadata({
   });
 }
 
+/** Page d'un tutoriel : affiche l'article et son produit associé, ou 404 si introuvable. */
 export default async function TutorialPage({ params }: TutorialPageProps) {
   const { slug } = await params;
   const post = await getBlogPostBySlug(slug);

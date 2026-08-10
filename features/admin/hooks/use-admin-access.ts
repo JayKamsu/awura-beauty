@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
 
+/** Résultat du contrôle des droits admin : statut et indicateur de chargement. */
 type AdminAccess = {
   isAdmin: boolean;
   loading: boolean;

@@ -35,6 +35,7 @@ const PHYSICAL_INCLUDES = [
   "diagnostic.physical.includes.4",
 ] as const;
 
+/** Page d'accueil du diagnostic capillaire : choix entre parcours en ligne et rendez-vous physique. */
 export function DiagnosticPageContent() {
   const { t, i18n } = useTranslation();
   const searchParams = useSearchParams();

@@ -7,6 +7,7 @@ type ThemeProviderProps = {
   children: ReactNode;
 };
 
+/** Applique le thème clair/sombre du site en s'appuyant sur next-themes. */
 export function ThemeProvider({ children }: ThemeProviderProps) {
   return (
     <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>

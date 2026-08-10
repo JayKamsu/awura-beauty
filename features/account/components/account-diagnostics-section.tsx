@@ -17,6 +17,7 @@ import type {
 
 type AppointmentRow = DiagnosticAppointment & { videoPath?: string | null };
 
+/** Section Mon compte listant les diagnostics capillaires et rendez-vous physiques du client. */
 export function AccountDiagnosticsSection() {
   const { t, i18n } = useTranslation();
   const { session } = useAuth();

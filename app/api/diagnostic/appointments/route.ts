@@ -13,6 +13,11 @@ import {
   updateAppointment,
 } from "@/lib/infrastructure/supabase/diagnostic-admin";
 
+/**
+ * Réserve un créneau de diagnostic capillaire (présentiel).
+ * Gratuit si un entitlement disponible existe pour l'utilisateur/email, sinon
+ * crée une session de paiement Stripe.
+ */
 export async function POST(request: Request) {
   const body = (await request.json()) as {
     email?: string;

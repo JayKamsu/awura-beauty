@@ -1,3 +1,4 @@
+/** Fiche produit affichée sur la page d'accueil (bestsellers, ingrédients). */
 export type HomeProduct = {
   id: string;
   number: 1 | 2 | 3 | 4 | 5;
@@ -76,6 +77,7 @@ export const CATALOG: HomeProduct[] = [
 /** Alias page d’accueil : les 5 produits */
 export const BESTSELLERS = CATALOG;
 
+/** Images statiques utilisées par les sections de la page d'accueil (hero, avatars, témoignages). */
 export const HOME_IMAGES = {
   hero: "/images/products/produit-1-beurre.jpg",
   feature: "/images/products/produit-4-lotion.jpg",

@@ -53,6 +53,7 @@ function isRemoteOrLocalImage(src: string): boolean {
   );
 }
 
+/** Panneau admin du CMS de pages : édite, réordonne et publie le contenu des sections par langue. */
 export function AdminPagesPanel() {
   const { t } = useTranslation();
   const adminFetch = useAdminFetch();

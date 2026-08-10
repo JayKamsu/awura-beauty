@@ -9,6 +9,7 @@ import { useActionLock } from "@/lib/hooks/use-action-lock";
 import { getSession } from "@/lib/infrastructure/supabase/auth";
 import { createSupabaseClient } from "@/lib/infrastructure/supabase/client";
 
+/** Page dédiée au chat support client, avec messages en temps réel via Supabase Realtime. */
 export function SupportChatPage() {
   const { t } = useTranslation();
   const { user, loading } = useAuth();

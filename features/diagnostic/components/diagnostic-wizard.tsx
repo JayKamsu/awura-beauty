@@ -15,6 +15,7 @@ import type {
 } from "@/lib/domain/diagnostic";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
+/** Questionnaire diagnostic en ligne, envoie les réponses puis affiche le résultat une fois soumis. */
 export function DiagnosticWizard() {
   const { t, i18n } = useTranslation();
   const { session } = useAuth();

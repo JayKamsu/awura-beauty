@@ -43,6 +43,7 @@ function scoreRulesToObject(rules: { slug: string; points: number }[]) {
   return out;
 }
 
+/** Éditeur admin des questions et options du diagnostic capillaire, avec règles de score par produit. */
 export function AdminDiagnosticQuestionsEditor({
   questions,
   onReload,

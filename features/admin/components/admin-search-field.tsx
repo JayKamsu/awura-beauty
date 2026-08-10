@@ -2,12 +2,14 @@
 
 import { useTranslation } from "react-i18next";
 
+/** Props du champ de recherche admin standard. */
 type AdminSearchFieldProps = {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
 };
 
+/** Champ de recherche réutilisable pour filtrer les listes admin. */
 export function AdminSearchField({
   value,
   onChange,

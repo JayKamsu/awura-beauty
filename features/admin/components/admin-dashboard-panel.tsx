@@ -73,6 +73,7 @@ function StatTile({
   );
 }
 
+/** Tableau de bord admin : KPI clés, tendances de revenus, répartitions et accès rapides. */
 export function AdminDashboardPanel() {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();

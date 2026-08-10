@@ -6,6 +6,7 @@ import { usePreferences } from "@/components/providers/preferences-provider";
 import { formatPrice } from "@/lib/format/price";
 import { useLiveRefresh } from "@/lib/hooks/use-live-refresh";
 
+/** Bandeau affichant le seuil de livraison gratuite, rafraîchi périodiquement. */
 export function AnnouncementBar() {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();

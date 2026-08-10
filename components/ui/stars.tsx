@@ -3,6 +3,7 @@ type StarsProps = {
   className?: string;
 };
 
+/** Affiche une rangée d'étoiles décoratives (indicateur visuel, sans interaction). */
 export function Stars({ count = 5, className = "text-accent" }: StarsProps) {
   return (
     <div className={`flex items-center gap-0.5 ${className}`} aria-hidden>

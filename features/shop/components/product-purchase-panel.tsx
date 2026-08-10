@@ -10,10 +10,12 @@ import { formatPrice } from "@/lib/format/price";
 import { isGammeCompleteSlug } from "@/lib/domain/bundle";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
+/** Props du panneau d'achat produit. */
 type ProductPurchasePanelProps = {
   product: ProductRow;
 };
 
+/** Panneau d'achat sticky d'une fiche produit : prix, stock, sélecteur de quantité et ajout au panier. */
 export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();

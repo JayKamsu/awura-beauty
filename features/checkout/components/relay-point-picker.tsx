@@ -12,6 +12,7 @@ type RelayPointPickerProps = {
   onSelect: (point: RelayPoint) => void;
 };
 
+/** Recherche et sélection d'un point relais Mondial Relay à proximité de l'adresse saisie. */
 export function RelayPointPicker({
   postalCode,
   city,

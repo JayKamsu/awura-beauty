@@ -39,6 +39,7 @@ function mapOrder(row: Record<string, unknown>): OrderRow {
   };
 }
 
+/** Données nécessaires à la création d'une commande, avant paiement. */
 export type CreateOrderInput = {
   email: string;
   paymentMethod: PaymentMethod;
@@ -60,6 +61,7 @@ export type CreateOrderInput = {
   userId?: string | null;
 };
 
+/** Crée une commande en statut "pending" (Stripe/PayPal ont besoin de l'ID de commande avant paiement pour le webhook). */
 export async function createOrder(
   input: CreateOrderInput,
 ): Promise<{ order: OrderRow | null; error: string | null }> {
@@ -114,6 +116,7 @@ export async function createOrder(
   return { order: mapOrder(data as Record<string, unknown>), error: null };
 }
 
+/** Met à jour brutalement le statut de paiement d'une commande (admin, service_role requis) — préférer claimOrderPaid pour un passage à "paid" idempotent. */
 export async function updateOrderPayment(
   orderId: string,
   payload: {
@@ -176,6 +179,7 @@ export async function claimOrderPaid(orderId: string): Promise<{
   return { claimed: false, alreadyPaid, order: current };
 }
 
+/** Met à jour le suivi d'expédition d'une commande ; passe automatiquement le statut commande à "processing" dès que l'expédition démarre. */
 export async function updateOrderShipping(
   orderId: string,
   payload: {
@@ -212,6 +216,7 @@ export async function updateOrderShipping(
   return !error;
 }
 
+/** Commandes de l'utilisateur connecté (session navigateur, RLS filtre déjà par user_id). */
 export async function listMyOrders(): Promise<OrderRow[]> {
   const supabase = createSupabaseClient();
   const userId = await getCurrentUserId();
@@ -265,6 +270,7 @@ export async function markOrderReceived(
   return getOrderById(orderId);
 }
 
+/** Récupère une commande par son id. */
 export async function getOrderById(orderId: string): Promise<OrderRow | null> {
   const supabase = createAdminSupabaseClient() ?? createSupabaseClient();
   if (!supabase) return null;

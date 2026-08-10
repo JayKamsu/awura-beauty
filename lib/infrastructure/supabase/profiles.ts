@@ -19,6 +19,7 @@ function mapProfile(row: Record<string, unknown>): ProfileRow {
   };
 }
 
+/** Profil de l'utilisateur connecté ; le crée automatiquement (ligne vide) s'il n'existe pas encore. */
 export async function getMyProfile(): Promise<ProfileRow | null> {
   const userId = await getCurrentUserId();
   const supabase = createSupabaseClient();
@@ -43,6 +44,7 @@ export async function getMyProfile(): Promise<ProfileRow | null> {
   return mapProfile(created as Record<string, unknown>);
 }
 
+/** Met à jour (upsert) le profil de l'utilisateur connecté ; échoue si non authentifié. */
 export async function updateMyProfile(
   input: ProfileUpdateInput,
 ): Promise<{ profile: ProfileRow | null; error: string | null }> {

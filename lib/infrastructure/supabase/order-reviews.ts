@@ -3,6 +3,7 @@ import {
   createSupabaseClient,
 } from "@/lib/infrastructure/supabase/client";
 
+/** Avis client sur un produit acheté, rattaché à une commande précise. */
 export type OrderReviewRow = {
   id: string;
   orderId: string;
@@ -25,6 +26,7 @@ function mapReview(row: Record<string, unknown>): OrderReviewRow {
   };
 }
 
+/** Avis laissés pour une commande donnée (admin/service_role ou client selon le contexte d'appel). */
 export async function listReviewsForOrder(
   orderId: string,
 ): Promise<OrderReviewRow[]> {
@@ -40,6 +42,7 @@ export async function listReviewsForOrder(
   return data.map((row) => mapReview(row as Record<string, unknown>));
 }
 
+/** Avis publiés pour un produit, les plus récents d'abord. */
 export async function listReviewsForProduct(
   productId: string,
 ): Promise<OrderReviewRow[]> {
@@ -56,6 +59,7 @@ export async function listReviewsForProduct(
   return data.map((row) => mapReview(row as Record<string, unknown>));
 }
 
+/** Tous les avis, tous produits confondus (admin, service_role requis). */
 export async function listAllReviews(): Promise<OrderReviewRow[]> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return [];
@@ -69,6 +73,7 @@ export async function listAllReviews(): Promise<OrderReviewRow[]> {
   return data.map((row) => mapReview(row as Record<string, unknown>));
 }
 
+/** Avis enrichi des infos produit (nom, slug, image) pour l'affichage public. */
 export type PublicReview = OrderReviewRow & {
   productName: string;
   productSlug: string;
@@ -104,6 +109,7 @@ export async function listPublicReviews(limit = 100): Promise<PublicReview[]> {
     .filter((review) => review.productSlug);
 }
 
+/** Crée ou remplace l'avis d'un client pour un produit d'une commande (un seul avis par couple commande/produit). */
 export async function upsertOrderReview(input: {
   orderId: string;
   productId: string;

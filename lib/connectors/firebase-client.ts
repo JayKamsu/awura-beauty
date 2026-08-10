@@ -21,6 +21,7 @@ function clientConfig() {
   };
 }
 
+/** Vérifie que toutes les variables d'env nécessaires au push web (Firebase + VAPID) sont présentes. */
 export function isFirebaseClientConfigured(): boolean {
   const c = clientConfig();
   return Boolean(
@@ -39,6 +40,7 @@ function getFirebaseApp(): FirebaseApp | null {
   return initializeApp(clientConfig());
 }
 
+/** Instance Messaging côté client, uniquement si le navigateur supporte le push et Firebase est configuré. */
 export async function getFirebaseMessagingClient(): Promise<Messaging | null> {
   if (typeof window === "undefined") return null;
   if (!(await isSupported())) return null;
@@ -103,6 +105,7 @@ export async function registerMessagingServiceWorker(): Promise<ServiceWorkerReg
   }
 }
 
+/** Demande la permission de notification, enregistre le service worker et récupère le token push (null si refusé/indisponible). */
 export async function requestWebPushToken(): Promise<string | null> {
   if (typeof window === "undefined") return null;
   const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;

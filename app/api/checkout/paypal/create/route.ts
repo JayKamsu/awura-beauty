@@ -23,6 +23,7 @@ type PayPalCreateBody = {
   pointsToRedeem?: number;
 };
 
+/** Crée la commande Awura (en attente) puis la commande PayPal associée. */
 export async function POST(request: Request) {
   const body = (await request.json()) as PayPalCreateBody;
 

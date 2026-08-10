@@ -16,6 +16,7 @@ function VideoRoomInner({ appointmentId }: { appointmentId: string }) {
   );
 }
 
+/** Page de visioconférence pour le rendez-vous de diagnostic capillaire identifié par `appointmentId`. */
 export default function DiagnosticVisioPage({ params }: PageProps) {
   const { appointmentId } = use(params);
   return (

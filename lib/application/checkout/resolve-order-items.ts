@@ -11,6 +11,7 @@ import {
   isGammeCompleteSlug,
 } from "@/lib/domain/bundle";
 
+/** Ligne panier brute (non validée) telle que reçue du client. */
 export type CartLineInput = {
   slug?: string;
   quantity?: number;
@@ -18,6 +19,7 @@ export type CartLineInput = {
 
 const MAX_QTY = 20;
 
+/** Résultat de résolution du panier : items validés + totaux, ou `error` renseigné si invalide. */
 export type ResolveCartResult = {
   items: OrderItem[];
   subtotal: number;

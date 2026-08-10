@@ -19,6 +19,7 @@ import {
   type PaymentMethod,
 } from "@/lib/infrastructure/supabase/order-types";
 
+/** État de configuration des passerelles de paiement (Stripe, PayPal) affiché à l'admin. */
 type PaymentsStatus = {
   livePaymentsEnabled: boolean;
   stripe: {
@@ -56,6 +57,7 @@ function statusTone(status: string): string {
   return "bg-background-alt text-muted";
 }
 
+/** Panneau admin des paiements : diagnostic Stripe/PayPal et gestion manuelle des statuts de commande. */
 export function AdminPaymentsPanel() {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();

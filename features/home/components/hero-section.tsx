@@ -10,6 +10,7 @@ import {
 } from "@/features/cms/context/page-cms-context";
 import { HOME_IMAGES } from "@/features/home/data/content";
 
+/** Bannière principale de la page d'accueil : accroche, CTA vers le diagnostic/la boutique et preuve sociale. */
 export function HeroSection() {
   const { t } = useTranslation();
   const cms = usePageCmsFields("hero");

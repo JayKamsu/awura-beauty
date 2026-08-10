@@ -3,12 +3,14 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
+/** Props de l'en-tête standard des pages admin : titre, sous-titre et actions optionnelles. */
 type AdminPageHeaderProps = {
   title: string;
   subtitle?: string;
   actions?: ReactNode;
 };
 
+/** En-tête réutilisable des pages admin (titre + sous-titre + actions), masqué sur mobile car doublé par le shell. */
 export function AdminPageHeader({
   title,
   subtitle,

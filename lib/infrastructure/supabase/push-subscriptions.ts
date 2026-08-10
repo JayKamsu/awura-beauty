@@ -3,6 +3,7 @@ import {
   createSupabaseClient,
 } from "@/lib/infrastructure/supabase/client";
 
+/** Abonnement push (token FCM) lié à un utilisateur optionnel. */
 export type PushSubscriptionRow = {
   id: string;
   fcm_token: string;
@@ -11,6 +12,7 @@ export type PushSubscriptionRow = {
   is_admin: boolean;
 };
 
+/** Enregistre ou met à jour un token push (last_seen_at rafraîchi) ; upsert sur fcm_token. */
 export async function upsertPushSubscription(input: {
   token: string;
   userId?: string | null;
@@ -37,6 +39,7 @@ export async function upsertPushSubscription(input: {
   return { ok: true };
 }
 
+/** Tous les tokens push enregistrés (diffusion large). */
 export async function listAllPushTokens(): Promise<string[]> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return [];
@@ -51,6 +54,7 @@ export async function listAllPushTokens(): Promise<string[]> {
     .filter(Boolean);
 }
 
+/** Tokens push d'un utilisateur donné (notif ciblée). */
 export async function listPushTokensForUser(userId: string): Promise<string[]> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return [];
@@ -66,6 +70,7 @@ export async function listPushTokensForUser(userId: string): Promise<string[]> {
     .filter(Boolean);
 }
 
+/** Tokens push des sessions admin (notifications back-office). */
 export async function listAdminPushTokens(): Promise<string[]> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return [];
@@ -81,6 +86,7 @@ export async function listAdminPushTokens(): Promise<string[]> {
     .filter(Boolean);
 }
 
+/** IDs utilisateurs uniques ayant au moins un abonnement push actif. */
 export async function listPushUserIds(): Promise<string[]> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return [];
@@ -98,6 +104,7 @@ export async function listPushUserIds(): Promise<string[]> {
   );
 }
 
+/** IDs utilisateurs uniques ayant un abonnement push admin actif. */
 export async function listAdminPushUserIds(): Promise<string[]> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return [];
@@ -116,6 +123,7 @@ export async function listAdminPushUserIds(): Promise<string[]> {
   );
 }
 
+/** Supprime des tokens push invalides/expirés (nettoyage suite à un envoi échoué). */
 export async function deletePushTokens(tokens: string[]): Promise<void> {
   if (!tokens.length) return;
   const supabase = createAdminSupabaseClient();

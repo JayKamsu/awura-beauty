@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 
+/** Props de la modale admin : titre, fermeture, contenu et pied optionnel. */
 type AdminModalProps = {
   title: string;
   onClose: () => void;

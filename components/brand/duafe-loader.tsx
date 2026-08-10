@@ -8,6 +8,7 @@ type DuafeLoaderProps = {
   className?: string;
 };
 
+/** Indicateur de chargement animé affichant le symbole Duafe de la marque. */
 export function DuafeLoader({ label, className = "" }: DuafeLoaderProps) {
   const { settings } = useBrandSettings();
 

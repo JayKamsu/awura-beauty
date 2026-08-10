@@ -7,6 +7,7 @@ import { RatingInput } from "@/components/ui/rating-input";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import type { PublicReview } from "@/lib/infrastructure/supabase/order-reviews";
 
+/** Liste des avis clients publics avec note, produit associé et commentaire. */
 export function ReviewsList({ reviews }: { reviews: PublicReview[] }) {
   const { t, i18n } = useTranslation();
 

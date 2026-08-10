@@ -15,6 +15,10 @@ function amountsMatch(expected: number, actual: string | null | undefined) {
   return Math.abs(a - expected) < 0.01;
 }
 
+/**
+ * Capture un paiement PayPal et marque la commande payée.
+ * Vérifie montant/devise/id pour éviter toute fraude, et gère les doubles appels.
+ */
 export async function POST(request: Request) {
   const body = (await request.json()) as CaptureBody;
 

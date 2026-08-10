@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 
+/** Article du panier tel que persisté côté client. */
 export type CartItem = {
   productId: string;
   slug: string;
@@ -33,6 +34,7 @@ type CartContextValue = {
 const CART_KEY = "awura-cart";
 const CartContext = createContext<CartContextValue | null>(null);
 
+/** Fournit le panier à l'arbre React et le synchronise avec le localStorage du navigateur. */
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
@@ -111,6 +113,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
+/** Accès au panier courant ; doit être utilisé sous un CartProvider. */
 export function useCart() {
   const context = useContext(CartContext);
   if (!context) {

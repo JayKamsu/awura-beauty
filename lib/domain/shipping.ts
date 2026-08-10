@@ -1,5 +1,6 @@
 import type { ShippingCarrier } from "@/lib/infrastructure/shipping/types";
 
+/** Point relais sélectionnable pour la livraison. */
 export type RelayPoint = {
   id: string;
   name: string;
@@ -12,4 +13,5 @@ export type RelayPoint = {
   lng?: number | null;
 };
 
+/** Alias domaine du transporteur infra, utilisé côté UI/checkout. */
 export type ShippingMethod = ShippingCarrier;

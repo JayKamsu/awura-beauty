@@ -10,6 +10,7 @@ const FOLDERS = new Set<StorageFolder>([
   "brand",
 ]);
 
+/** Upload d'une image vers le stockage public (dossier whitelisté) — admin uniquement. */
 export async function POST(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;

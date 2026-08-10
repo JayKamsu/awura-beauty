@@ -3,6 +3,7 @@ import { container } from "@/lib/application/container";
 import { requireAdminFromRequest } from "@/lib/infrastructure/supabase/admin-auth";
 import type { PageSectionConfig } from "@/lib/domain";
 
+/** Liste les mises en page de toutes les pages du site (admin). */
 export async function GET(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -10,6 +11,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ layouts });
 }
 
+/** Enregistre la mise en page (sections) d'une page donnée (admin). */
 export async function PUT(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;

@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 
+/** Props du bouton de suppression avec confirmation inline. */
 type ConfirmDeleteButtonProps = {
   label: string;
   confirmMessage: string;
@@ -12,6 +13,7 @@ type ConfirmDeleteButtonProps = {
   disabled?: boolean;
 };
 
+/** Bouton de suppression exigeant une confirmation explicite avant d'exécuter l'action irréversible. */
 export function ConfirmDeleteButton({
   label,
   confirmMessage,

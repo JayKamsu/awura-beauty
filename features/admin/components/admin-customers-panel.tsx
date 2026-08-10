@@ -16,6 +16,7 @@ import type { AdminCustomer } from "@/lib/infrastructure/supabase/admin-dashboar
 
 const PAGE_SIZE = 50;
 
+/** Panneau admin listant les clients avec leurs commandes, points de fidélité et ajustement manuel du solde. */
 export function AdminCustomersPanel() {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();

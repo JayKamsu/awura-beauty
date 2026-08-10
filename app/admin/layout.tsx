@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   },
 };
 
+/** Layout de la zone admin : enveloppe les pages dans la coquille (navigation, garde d'accès) `AdminShell`. */
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return <AdminShell>{children}</AdminShell>;
 }

@@ -8,6 +8,7 @@ import {
   usePageCmsFields,
 } from "@/features/cms/context/page-cms-context";
 
+/** Section « À propos » racontant l'histoire de la marque, avec image et texte éditables via le CMS. */
 export function AboutStorySection() {
   const { t } = useTranslation();
   const cms = usePageCmsFields("story");

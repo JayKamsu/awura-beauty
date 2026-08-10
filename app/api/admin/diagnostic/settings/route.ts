@@ -6,6 +6,7 @@ import {
 } from "@/lib/infrastructure/supabase/diagnostic-admin";
 import type { DiagnosticSettings } from "@/lib/domain/diagnostic";
 
+/** Récupère les réglages du module diagnostic (admin). */
 export async function GET(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -13,6 +14,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ settings });
 }
 
+/** Met à jour les réglages du module diagnostic (admin). */
 export async function PUT(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;

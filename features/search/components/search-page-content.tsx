@@ -7,12 +7,14 @@ import { ProductCard, type ProductCardData } from "@/components/ui/product-card"
 import type { BlogPost } from "@/lib/infrastructure/supabase/blog-types";
 import { SearchForm } from "@/features/search/components/search-form";
 
+/** Props du contenu de la page de recherche. */
 type SearchPageContentProps = {
   query: string;
   products: ProductCardData[];
   posts: BlogPost[];
 };
 
+/** Page de résultats de recherche : affiche les produits et articles correspondant à la requête. */
 export function SearchPageContent({
   query,
   products,

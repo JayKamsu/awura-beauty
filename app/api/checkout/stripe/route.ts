@@ -38,6 +38,10 @@ function normalizeAddress(
   };
 }
 
+/**
+ * Crée la commande Awura puis la session Stripe Checkout associée.
+ * Si Supabase n'est pas configuré, bascule sur une commande "demo" sans persistance.
+ */
 export async function POST(request: Request) {
   const body = (await request.json()) as StripeCheckoutBody;
 

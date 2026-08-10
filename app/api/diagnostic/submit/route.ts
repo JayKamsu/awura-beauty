@@ -13,6 +13,10 @@ import { container } from "@/lib/application/container";
 import { listDiagnosticQuestions } from "@/lib/infrastructure/supabase/diagnostic-admin";
 import type { DiagnosticLocale } from "@/lib/domain/diagnostic";
 
+/**
+ * Calcule et sauvegarde le résultat du diagnostic capillaire en ligne
+ * (profil, routine, produits recommandés) ; associé à l'utilisateur si connecté.
+ */
 export async function POST(request: Request) {
   const body = (await request.json()) as {
     answers?: Record<string, unknown>;

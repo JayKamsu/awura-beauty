@@ -11,13 +11,16 @@ export const GAMME_COMPLETE_COMPONENT_SLUGS = [
   "beurre-capillaire",
 ] as const;
 
+/** Slug d'un des 5 produits composant la gamme complète. */
 export type GammeCompleteComponentSlug =
   (typeof GAMME_COMPLETE_COMPONENT_SLUGS)[number];
 
+/** Vérifie si un slug correspond au pack gamme complète. */
 export function isGammeCompleteSlug(slug: string): boolean {
   return slug.trim() === GAMME_COMPLETE_SLUG;
 }
 
+/** Compte les unités du pack gamme complète présentes dans une commande (ignore les autres lignes). */
 export function gammeCompleteUnitsInOrder(
   items: Array<{ slug: string; quantity: number }>,
 ): number {

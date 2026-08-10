@@ -11,6 +11,7 @@ type PostListProps = {
   emptyKey: string;
 };
 
+/** Grille de cartes d'articles, avec message de repli si la liste est vide. */
 export function PostList({ posts, basePath, emptyKey }: PostListProps) {
   const { t } = useTranslation();
 
@@ -31,6 +32,7 @@ type BlogNavTabsProps = {
   active: "articles" | "tutorials";
 };
 
+/** Onglets de navigation entre les sections articles et tutoriels du blog. */
 export function BlogNavTabs({ active }: BlogNavTabsProps) {
   const { t } = useTranslation();
 

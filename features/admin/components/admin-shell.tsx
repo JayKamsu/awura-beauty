@@ -89,6 +89,7 @@ function navTitleKey(pathname: string): string {
   return match ? `admin.nav.${match.key}` : "admin.navBrand";
 }
 
+/** Coquille des pages admin : vérifie les droits admin puis affiche la navigation (desktop et mobile). */
 export function AdminShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const pathname = usePathname();

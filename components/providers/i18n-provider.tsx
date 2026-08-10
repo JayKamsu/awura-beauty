@@ -12,6 +12,7 @@ type I18nProviderProps = {
   children: ReactNode;
 };
 
+/** Fournit l'internationalisation ainsi que les contextes préférences, auth et panier à l'application. */
 export function I18nProvider({ children }: I18nProviderProps) {
   return (
     <I18nextProvider i18n={i18n}>

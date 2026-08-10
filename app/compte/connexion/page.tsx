@@ -25,6 +25,7 @@ function ConnexionForm() {
   );
 }
 
+/** Page "Connexion" : affiche le formulaire de login avec redirection post-auth. */
 export default function ConnexionPage() {
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 py-14 md:px-6">

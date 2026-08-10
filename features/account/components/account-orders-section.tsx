@@ -40,12 +40,14 @@ type TrackingPayload = {
   error?: string;
 };
 
+/** Props de la section commandes : liste des commandes du client et callback de mise à jour. */
 type AccountOrdersSectionProps = {
   orders: OrderRow[];
   ordersLoading: boolean;
   onOrdersChange: (orders: OrderRow[]) => void;
 };
 
+/** Section Mon compte listant les commandes du client avec suivi de livraison, reçu et avis. */
 export function AccountOrdersSection({
   orders,
   ordersLoading,

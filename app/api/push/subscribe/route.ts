@@ -5,6 +5,7 @@ import {
 } from "@/lib/infrastructure/supabase/admin-auth";
 import { upsertPushSubscription } from "@/lib/infrastructure/supabase/push-subscriptions";
 
+/** Enregistre un token push FCM, lié à l'utilisateur si connecté (anonyme sinon). */
 export async function POST(request: Request) {
   const body = (await request.json()) as {
     token?: string;

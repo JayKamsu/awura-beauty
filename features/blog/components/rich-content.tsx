@@ -8,6 +8,7 @@ type RichContentProps = {
   blocks: BlogContentBlock[];
 };
 
+/** Restitue les blocs de contenu structuré d'un article (titres, paragraphes, listes, astuces, images). */
 export function RichContent({ blocks }: RichContentProps) {
   const { t } = useTranslation();
 

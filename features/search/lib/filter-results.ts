@@ -18,6 +18,7 @@ function matchesQuery(haystack: string, query: string): boolean {
   return tokens.every((token) => target.includes(token));
 }
 
+/** Filtre les produits dont le nom, la description, la catégorie ou les ingrédients correspondent à la requête (recherche insensible aux accents/casse). */
 export function filterProductsByQuery(
   products: ProductRow[],
   query: string,
@@ -37,6 +38,7 @@ export function filterProductsByQuery(
   );
 }
 
+/** Filtre les articles de blog/tutoriels dont le titre, l'extrait ou le type correspondent à la requête. */
 export function filterPostsByQuery(posts: BlogPost[], query: string): BlogPost[] {
   if (!query.trim()) return [];
   return posts.filter((post) =>
@@ -44,6 +46,7 @@ export function filterPostsByQuery(posts: BlogPost[], query: string): BlogPost[]
   );
 }
 
+/** Convertit une ligne produit en données de carte produit pour l'affichage des résultats de recherche. */
 export function toSearchProductCard(product: ProductRow): ProductCardData {
   return {
     id: product.id,

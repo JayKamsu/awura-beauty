@@ -24,6 +24,10 @@ type ManualCheckoutBody = {
   pointsToRedeem?: number;
 };
 
+/**
+ * Paiement manuel (hors Stripe/PayPal) — désactivé dès qu'un moyen de
+ * paiement en ligne est configuré. Marque la commande payée immédiatement.
+ */
 export async function POST(request: Request) {
   if (isLivePaymentConfigured()) {
     return NextResponse.json(

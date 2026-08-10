@@ -6,6 +6,7 @@ import {
   upsertShippingRates,
 } from "@/lib/infrastructure/supabase/shipping-rates";
 
+/** Liste les tarifs de livraison par transporteur — admin uniquement. */
 export async function GET(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -23,6 +24,7 @@ type PutBody = {
   }>;
 };
 
+/** Met à jour les tarifs de livraison (validés puis remplacés en bloc) — admin uniquement. */
 export async function PUT(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;

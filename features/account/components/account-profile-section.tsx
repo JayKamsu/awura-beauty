@@ -13,11 +13,13 @@ import { useActionLock } from "@/lib/hooks/use-action-lock";
 import { getMyProfile, updateMyProfile } from "@/lib/infrastructure/supabase/profiles";
 import type { ProfileRow } from "@/lib/infrastructure/supabase/profile-types";
 
+/** Props de la section profil : identité affichée en lecture seule (email, ancienneté). */
 type AccountProfileSectionProps = {
   email: string;
   memberSince?: string;
 };
 
+/** Section Mon compte permettant de consulter et modifier les informations de profil et d'adresse. */
 export function AccountProfileSection({
   email,
   memberSince,

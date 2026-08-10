@@ -1,10 +1,12 @@
 "use client";
 
+/** Props du bandeau de retour admin : tonalité (succès/erreur) et message. */
 type AdminFeedbackProps = {
   tone: "success" | "error";
   message: string;
 };
 
+/** Bandeau de retour standard (succès/erreur) utilisé après une action admin. */
 export function AdminFeedback({ tone, message }: AdminFeedbackProps) {
   const className =
     tone === "success"

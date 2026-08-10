@@ -55,6 +55,7 @@ type QuoteState = {
   referralEligible?: boolean;
 };
 
+/** Page de commande : adresse, transporteur, points de fidélité et paiement (Stripe, PayPal ou manuel). */
 export function CheckoutPageContent() {
   const { t, i18n } = useTranslation();
   const router = useRouter();

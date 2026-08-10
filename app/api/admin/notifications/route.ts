@@ -7,6 +7,7 @@ import {
   listPushTokensForUser,
 } from "@/lib/infrastructure/supabase/push-subscriptions";
 
+/** Nombre d'abonnés aux notifications push (admin). */
 export async function GET(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -14,6 +15,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ subscriberCount: tokens.length });
 }
 
+/** Envoie une notification push à un utilisateur ciblé, ou diffusée à tous les abonnés (admin). */
 export async function POST(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;

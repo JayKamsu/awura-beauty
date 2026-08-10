@@ -37,6 +37,7 @@ function dayKey(iso: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+/** Tunnel de réservation du diagnostic présentiel : questionnaire, choix du créneau, coordonnées puis paiement. */
 export function DiagnosticPhysicalFlow({
   settings: initialSettings,
 }: DiagnosticPhysicalFlowProps) {

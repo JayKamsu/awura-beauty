@@ -6,6 +6,7 @@ import {
   updateSiteBrandSettings,
 } from "@/lib/infrastructure/supabase/site-brand";
 
+/** Récupère les réglages de marque du site (admin). */
 export async function GET(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -13,6 +14,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ settings });
 }
 
+/** Met à jour les réglages de marque (logos, univers enfant, QR par défaut). */
 export async function PUT(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;

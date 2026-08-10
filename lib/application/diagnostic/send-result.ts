@@ -17,6 +17,7 @@ import type {
   DiagnosticRoutineStep,
 } from "@/lib/domain/diagnostic";
 
+/** Paramètres d'envoi d'un résultat de diagnostic (admin ou automatique) vers un client. */
 export type SendDiagnosticResultInput = {
   channel: DiagnosticChannel;
   userId?: string | null;
@@ -50,6 +51,7 @@ async function findAuthUserIdByEmail(email: string): Promise<string | null> {
   return match?.id ?? null;
 }
 
+/** Enregistre le résultat diagnostic, relie le compte client par email si besoin, marque le RDV terminé et notifie. */
 export async function sendDiagnosticResultToClient(
   input: SendDiagnosticResultInput,
 ): Promise<{

@@ -119,6 +119,7 @@ async function fetchLayout(
   };
 }
 
+/** Layout d'une page pour une langue donnée ; retombe sur le layout par défaut si Supabase est indisponible ou vide. */
 export async function getPageLayout(
   pageKey: string,
   locale: PageLocale = "fr",
@@ -126,6 +127,7 @@ export async function getPageLayout(
   return fetchLayout(pageKey, locale);
 }
 
+/** Layouts de toutes les pages configurées, groupés par page_key (admin). */
 export async function listPageLayouts(): Promise<PageLayout[]> {
   const supabase = createSupabaseClient();
   if (!supabase) {
@@ -163,6 +165,7 @@ export async function listPageLayouts(): Promise<PageLayout[]> {
   });
 }
 
+/** Sauvegarde le layout d'une page section par section, langue par langue (admin, service_role requis en production). */
 export async function savePageLayout(
   pageKey: string,
   sections: PageSectionConfig[],

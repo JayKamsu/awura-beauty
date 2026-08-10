@@ -6,10 +6,12 @@ function getStripe() {
   return new Stripe(key);
 }
 
+/** Client Stripe, ou null si STRIPE_SECRET_KEY absente (paiement non configuré). */
 export function getStripeClient(): Stripe | null {
   return getStripe();
 }
 
+/** Ligne d'article pour une session de checkout Stripe. */
 export type StripeLineItem = {
   name: string;
   unitAmountCents: number;
@@ -17,6 +19,7 @@ export type StripeLineItem = {
   imageUrl?: string;
 };
 
+/** Crée une session de paiement Stripe pour une commande, avec orderId tracé en metadata + client_reference_id. */
 export async function createStripeCheckoutSession(input: {
   orderId: string;
   customerEmail: string;

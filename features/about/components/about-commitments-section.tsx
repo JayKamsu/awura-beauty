@@ -22,6 +22,7 @@ const COMMITMENT_ICONS: Record<(typeof COMMITMENT_KEYS)[number], ReactNode> = {
   artisanal: <path d="M4 18h16M7 18V9l5-4 5 4v9M10 18v-4h4v4" />,
 };
 
+/** Section « À propos » listant les engagements de la marque (naturalité, cruelty-free, artisanal). */
 export function AboutCommitmentsSection() {
   const { t } = useTranslation();
   const cms = usePageCmsFields("commitments");

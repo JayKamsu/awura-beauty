@@ -15,6 +15,10 @@ type BoutiquePageProps = {
   }>;
 };
 
+/**
+ * Page boutique : liste les produits filtrés par catégorie, univers et pagination,
+ * en tenant compte des réglages de marque (univers enfant activé ou non).
+ */
 export default async function BoutiquePage({ searchParams }: BoutiquePageProps) {
   const params = await searchParams;
   const category = params.category ?? "all";

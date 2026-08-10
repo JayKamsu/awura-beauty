@@ -28,6 +28,7 @@ export type ProductRow = {
   created_at?: string;
 };
 
+/** Slugs de catégories produit connus (usage typage strict, distinct de la table dynamique product_categories). */
 export type ProductCategory =
   | "hydratation"
   | "demelage"
@@ -36,6 +37,7 @@ export type ProductCategory =
   | "soin"
   | "routine";
 
+/** Paramètres de filtrage/pagination pour la liste des produits. */
 export type ListProductsParams = {
   category?: string | null;
   universe?: "adult" | "child" | null;
@@ -43,6 +45,7 @@ export type ListProductsParams = {
   pageSize?: number;
 };
 
+/** Résultat paginé de listProducts, avec indication de la source (Supabase ou fallback local). */
 export type ListProductsResult = {
   products: ProductRow[];
   total: number;

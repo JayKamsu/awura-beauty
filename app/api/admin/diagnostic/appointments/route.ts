@@ -7,6 +7,7 @@ import {
 } from "@/lib/infrastructure/supabase/diagnostic-admin";
 import type { DiagnosticAppointmentStatus } from "@/lib/domain/diagnostic";
 
+/** Liste les rendez-vous diagnostic, ou l'historique si `kind=history` (admin). */
 export async function GET(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -20,6 +21,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ appointments });
 }
 
+/** Met à jour le statut ou les notes d'un rendez-vous diagnostic (admin). */
 export async function PATCH(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;

@@ -39,6 +39,7 @@ function formatDateTime(locale: string, iso: string) {
   }).format(new Date(iso));
 }
 
+/** Panneau admin du diagnostic capillaire : résultats, rendez-vous, envoi de résultat et réglages. */
 export function AdminDiagnosticPanel() {
   const { t, i18n } = useTranslation();
   const adminFetch = useAdminFetch();

@@ -110,6 +110,7 @@ function mapQuestion(
   };
 }
 
+/** Tarifs et réglages du diagnostic capillaire ; retombe sur les valeurs par défaut si Supabase est indisponible ou la ligne absente. */
 export async function getDiagnosticSettings(): Promise<DiagnosticSettings> {
   const supabase = createAdminSupabaseClient() ?? createSupabaseClient();
   if (!supabase) return DEFAULT_SETTINGS;
@@ -133,6 +134,7 @@ export async function getDiagnosticSettings(): Promise<DiagnosticSettings> {
   };
 }
 
+/** Met à jour partiellement les réglages diagnostic (admin, service_role requis) et relit la valeur finale. */
 export async function updateDiagnosticSettings(
   patch: Partial<DiagnosticSettings>,
 ): Promise<DiagnosticSettings | null> {
@@ -164,6 +166,7 @@ export async function updateDiagnosticSettings(
   return getDiagnosticSettings();
 }
 
+/** Liste le questionnaire actif pour un canal/langue ; bascule sur le questionnaire de secours local si Supabase est indisponible ou vide. */
 export async function listDiagnosticQuestions(input: {
   channel?: "online" | "physical_pre" | "all";
   locale?: DiagnosticLocale;
@@ -210,6 +213,7 @@ export async function listDiagnosticQuestions(input: {
     .filter((question) => input.includeDisabled || question.enabled);
 }
 
+/** Crée ou met à jour une question du diagnostic (admin, service_role requis). */
 export async function upsertDiagnosticQuestion(input: {
   id?: string;
   questionKey: string;
@@ -248,6 +252,7 @@ export async function upsertDiagnosticQuestion(input: {
   return mapQuestion(data as Record<string, unknown>, [], "fr");
 }
 
+/** Supprime une question du diagnostic (admin, service_role requis). */
 export async function deleteDiagnosticQuestion(id: string): Promise<boolean> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return false;
@@ -258,6 +263,7 @@ export async function deleteDiagnosticQuestion(id: string): Promise<boolean> {
   return !error;
 }
 
+/** Crée ou met à jour une option de réponse du diagnostic (admin, service_role requis). */
 export async function upsertDiagnosticOption(input: {
   id?: string;
   questionId: string;
@@ -298,6 +304,7 @@ export async function upsertDiagnosticOption(input: {
   return mapOption(data as Record<string, unknown>, "fr");
 }
 
+/** Supprime une option de réponse du diagnostic (admin, service_role requis). */
 export async function deleteDiagnosticOption(id: string): Promise<boolean> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return false;
@@ -308,6 +315,7 @@ export async function deleteDiagnosticOption(id: string): Promise<boolean> {
   return !error;
 }
 
+/** Règles hebdomadaires de disponibilité pour les créneaux diagnostic ; fallback sur des créneaux par défaut (mar-sam 10h-18h) si Supabase est indisponible. */
 export async function listAvailabilityRules(): Promise<
   DiagnosticAvailabilityRule[]
 > {
@@ -335,6 +343,7 @@ export async function listAvailabilityRules(): Promise<
   }));
 }
 
+/** Remplace intégralement les règles de disponibilité (admin, service_role requis) : supprime tout puis réinsère. */
 export async function replaceAvailabilityRules(
   rules: Array<{
     weekday: number;
@@ -361,6 +370,7 @@ export async function replaceAvailabilityRules(
   return !error;
 }
 
+/** Liste les exceptions de créneaux (ouverts/bloqués) chevauchant la période donnée. */
 export async function listSlotOverrides(fromIso: string, toIso: string) {
   const supabase = createAdminSupabaseClient() ?? createSupabaseClient();
   if (!supabase) return [] as DiagnosticSlotOverride[];
@@ -379,6 +389,7 @@ export async function listSlotOverrides(fromIso: string, toIso: string) {
   }));
 }
 
+/** Crée ou met à jour une exception de créneau (admin, service_role requis). */
 export async function upsertSlotOverride(input: {
   id?: string;
   startsAt: string;
@@ -408,6 +419,7 @@ export async function upsertSlotOverride(input: {
   };
 }
 
+/** Supprime une exception de créneau (admin, service_role requis). */
 export async function deleteSlotOverride(id: string): Promise<boolean> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return false;
@@ -439,6 +451,7 @@ function mapAppointment(row: Record<string, unknown>): DiagnosticAppointment {
   };
 }
 
+/** Rendez-vous chevauchant la période donnée, limité aux statuts actifs (en attente de paiement, confirmé, terminé) — utilisé pour le calcul des créneaux disponibles. */
 export async function listAppointmentsInRange(
   fromIso: string,
   toIso: string,
@@ -454,6 +467,7 @@ export async function listAppointmentsInRange(
   return (data ?? []).map((row) => mapAppointment(row as Record<string, unknown>));
 }
 
+/** Les 200 derniers rendez-vous, tous statuts confondus (admin, service_role requis). */
 export async function listAllAppointments(): Promise<DiagnosticAppointment[]> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return [];
@@ -465,6 +479,7 @@ export async function listAllAppointments(): Promise<DiagnosticAppointment[]> {
   return (data ?? []).map((row) => mapAppointment(row as Record<string, unknown>));
 }
 
+/** Récupère un rendez-vous par son id. */
 export async function getAppointmentById(
   id: string,
 ): Promise<DiagnosticAppointment | null> {
@@ -479,6 +494,7 @@ export async function getAppointmentById(
   return mapAppointment(data as Record<string, unknown>);
 }
 
+/** Crée un rendez-vous diagnostic, par défaut en attente de paiement. */
 export async function createAppointment(input: {
   userId: string | null;
   email: string;
@@ -513,6 +529,7 @@ export async function createAppointment(input: {
   return mapAppointment(data as Record<string, unknown>);
 }
 
+/** Met à jour partiellement un rendez-vous (statut, session Stripe, notes, user lié) — admin, service_role requis. */
 export async function updateAppointment(
   id: string,
   patch: {
@@ -542,11 +559,13 @@ export async function updateAppointment(
   return mapAppointment(data as Record<string, unknown>);
 }
 
+/** Diagnostic enrichi des infos client (email/nom) pour l'affichage admin. */
 export type AdminDiagnosticListItem = DiagnosticRecord & {
   customerEmail: string | null;
   customerName: string | null;
 };
 
+/** Les 200 derniers diagnostics capillaires, enrichis email/nom client via l'API admin auth (admin, service_role requis). */
 export async function listAllHairDiagnostics(): Promise<AdminDiagnosticListItem[]> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return [];
@@ -597,6 +616,7 @@ export async function listAllHairDiagnostics(): Promise<AdminDiagnosticListItem[
   }));
 }
 
+/** Convertit une ligne brute Supabase en DiagnosticRecord typé ; exporté pour être réutilisé par diagnostics.ts. */
 export function mapDiagnosticRecord(
   row: Record<string, unknown>,
 ): DiagnosticRecord {

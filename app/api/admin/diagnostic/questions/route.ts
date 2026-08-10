@@ -9,6 +9,7 @@ import {
 } from "@/lib/infrastructure/supabase/diagnostic-admin";
 import type { DiagnosticQuestionChannel } from "@/lib/domain/diagnostic";
 
+/** Liste toutes les questions du diagnostic, y compris désactivées (admin). */
 export async function GET(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -20,6 +21,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ questions });
 }
 
+/** Crée ou met à jour une question ou une option du diagnostic (admin). */
 export async function POST(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -73,6 +75,7 @@ export async function POST(request: Request) {
   return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
 }
 
+/** Supprime une question ou une option du diagnostic par id (admin). */
 export async function DELETE(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;

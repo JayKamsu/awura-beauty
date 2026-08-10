@@ -12,6 +12,7 @@ import type {
 } from "@/lib/connectors/support-chat";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 
+/** Panneau admin de messagerie support : liste des conversations et échange de messages en quasi temps réel. */
 export function AdminMessagesPanel() {
   const { t } = useTranslation();
   const adminFetch = useAdminFetch();

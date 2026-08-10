@@ -37,6 +37,7 @@ function isCurrency(value: string): value is AppCurrency {
   return (supportedCurrencies as readonly string[]).includes(value);
 }
 
+/** Fournit et persiste les préférences utilisateur (langue, devise) en localStorage. */
 export function PreferencesProvider({ children }: { children: ReactNode }) {
   const { i18n } = useTranslation();
   const [locale, setLocaleState] = useState<AppLocale>("fr");
@@ -83,6 +84,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** Accède à la langue et à la devise courantes ainsi qu'à leurs mutateurs. */
 export function usePreferences() {
   const context = useContext(PreferencesContext);
   if (!context) {

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+/** Props de la coquille visuelle partagée des blocs Mon compte. */
 type AccountSectionProps = {
   id: string;
   title: string;
@@ -43,8 +44,10 @@ export function AccountSection({
   );
 }
 
+/** Classes Tailwind partagées pour les champs de formulaire des blocs Mon compte. */
 export const accountFieldClass =
   "w-full rounded-2xl border border-border/80 bg-background px-3.5 py-3 text-sm outline-none transition placeholder:text-muted/70 focus:border-accent focus:ring-2 focus:ring-accent/20";
 
+/** Classes Tailwind partagées pour les panneaux internes des blocs Mon compte. */
 export const accountPanelClass =
   "rounded-2xl bg-background/70 p-5 ring-1 ring-border/50";

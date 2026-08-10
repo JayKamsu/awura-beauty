@@ -9,6 +9,7 @@ export function getAdminEmails(): string[] {
     .filter(Boolean);
 }
 
+/** Active un faux admin en dev local (hors production) pour tester les routes sans JWT. */
 export function isAdminDevBypassEnabled(): boolean {
   return (
     process.env.ADMIN_DEV_BYPASS === "true" &&
@@ -34,6 +35,7 @@ export function isAdminUser(user: User | null | undefined): boolean {
   return false;
 }
 
+/** Résout l'utilisateur Supabase à partir d'un access token brut (ex. header Authorization). */
 export async function getUserFromAccessToken(
   accessToken: string | null,
 ): Promise<User | null> {
@@ -46,6 +48,7 @@ export async function getUserFromAccessToken(
   return data.user;
 }
 
+/** Vérifie que l'appelant est admin (JWT Bearer) avant d'autoriser une route API admin ; sinon renvoie une Response 401/403 prête à l'emploi. */
 export async function requireAdminFromRequest(
   request: Request,
 ): Promise<{ user: User } | { error: Response }> {

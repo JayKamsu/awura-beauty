@@ -42,6 +42,7 @@ function shippingBadgeClass(status: ShippingStatus): string {
   }
 }
 
+/** Panneau admin des commandes : suivi logistique, changement de transporteur, étiquettes et reçus. */
 export function AdminOrdersPanel() {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();

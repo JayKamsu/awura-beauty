@@ -7,6 +7,7 @@ import {
 } from "@/lib/site";
 import { BRAND_LOGOS } from "@/lib/brand";
 
+/** JSON-LD Organization (identité de la marque, utilisé sur les pages principales). */
 export function organizationJsonLd() {
   return {
     "@context": "https://schema.org",
@@ -53,6 +54,7 @@ export function organizationJsonLd() {
   };
 }
 
+/** JSON-LD WebSite (avec action de recherche du site). */
 export function websiteJsonLd() {
   return {
     "@context": "https://schema.org",
@@ -119,6 +121,7 @@ export function faqJsonLd() {
   };
 }
 
+/** JSON-LD Product/Offer pour une fiche produit, avec disponibilité dérivée du stock. */
 export function productJsonLd(product: {
   name: string;
   description: string;
@@ -155,6 +158,7 @@ export function productJsonLd(product: {
   };
 }
 
+/** JSON-LD Article ou HowTo selon le type de contenu (blog vs tutoriel). */
 export function articleJsonLd(post: {
   title: string;
   excerpt: string;
@@ -187,6 +191,7 @@ export function articleJsonLd(post: {
   };
 }
 
+/** JSON-LD BreadcrumbList pour le fil d'ariane d'une page. */
 export function breadcrumbJsonLd(
   items: Array<{ name: string; path: string }>,
 ) {

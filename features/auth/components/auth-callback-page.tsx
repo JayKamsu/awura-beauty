@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { resolvePostLoginPath } from "@/features/auth/lib/resolve-post-login-path";
 import { exchangeAuthCode } from "@/lib/infrastructure/supabase/auth";
 
+/** Page de retour OAuth/magic link : échange le code Supabase puis redirige vers la destination post-connexion. */
 export function AuthCallbackPage() {
   const { t } = useTranslation();
   const router = useRouter();

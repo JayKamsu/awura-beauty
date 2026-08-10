@@ -24,6 +24,7 @@ function prune(now: number) {
   }
 }
 
+/** Paramètres d'une vérification de rate limit (nom du bucket, quota, fenêtre). */
 export type RateLimitOptions = {
   /** Identifiant logique (ex. checkout:create) */
   name: string;
@@ -31,10 +32,12 @@ export type RateLimitOptions = {
   windowMs: number;
 };
 
+/** Résultat d'une vérification : autorisé, ou refusé avec délai avant réessai. */
 export type RateLimitResult =
   | { ok: true }
   | { ok: false; retryAfterSec: number };
 
+/** Incrémente et vérifie le compteur pour une clé donnée. Fenêtre glissante par bucket, reset automatique à expiration. */
 export function checkRateLimit(
   key: string,
   options: RateLimitOptions,
@@ -62,6 +65,7 @@ export function checkRateLimit(
   return { ok: true };
 }
 
+/** Dérive une clé client depuis les en-têtes de proxy (x-forwarded-for / x-real-ip) pour le rate limiting par IP. */
 export function clientKeyFromRequest(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {

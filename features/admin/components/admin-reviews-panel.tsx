@@ -11,6 +11,7 @@ import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import type { OrderReviewRow } from "@/lib/infrastructure/supabase/order-reviews";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
+/** Panneau admin listant les avis produits laissés par les clients. */
 export function AdminReviewsPanel() {
   const { t, i18n } = useTranslation();
   const adminFetch = useAdminFetch();

@@ -9,6 +9,7 @@ import {
 } from "@/features/cms/context/page-cms-context";
 import { BESTSELLERS } from "@/features/home/data/content";
 
+/** Section « meilleures ventes » de la page d'accueil : grille des produits phares avec lien vers la boutique complète. */
 export function BestsellersSection() {
   const { t } = useTranslation();
   const cms = usePageCmsFields("bestsellers");
