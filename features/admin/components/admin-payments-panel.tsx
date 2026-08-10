@@ -166,131 +166,152 @@ export function AdminPaymentsPanel() {
         <AdminFeedback tone={feedback.tone} message={feedback.message} />
       ) : null}
 
-      {status ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          <section className="space-y-3 rounded-2xl border border-border p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="font-serif text-xl text-primary">Stripe</h2>
-              <span
-                className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                  status.stripe.ready
-                    ? "bg-primary/10 text-primary"
-                    : "bg-accent/15 text-accent"
-                }`}
+      <section className="space-y-3">
+        <p className="text-sm text-muted">{t("admin.paymentsStatusHint")}</p>
+        {status ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            <section className="space-y-3 rounded-2xl border border-border p-5 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="font-serif text-xl text-primary">Stripe</h2>
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                    status.stripe.ready
+                      ? "bg-primary/10 text-primary"
+                      : "bg-accent/15 text-accent"
+                  }`}
+                >
+                  <span
+                    className={`size-1.5 rounded-full ${
+                      status.stripe.ready ? "bg-primary" : "bg-accent"
+                    }`}
+                  />
+                  {status.stripe.ready
+                    ? t("admin.payments.ready")
+                    : t("admin.payments.incomplete")}
+                </span>
+              </div>
+              <ul className="space-y-1.5 rounded-xl bg-background-alt p-3">
+                {checkItem(
+                  status.stripe.publishable,
+                  t("admin.payments.stripePublishable"),
+                )}
+                {checkItem(status.stripe.secret, t("admin.payments.stripeSecret"))}
+                {checkItem(
+                  status.stripe.webhook,
+                  t("admin.payments.stripeWebhook"),
+                )}
+              </ul>
+              <a
+                href={status.stripe.dashboardUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-light"
               >
-                {status.stripe.ready
-                  ? t("admin.payments.ready")
-                  : t("admin.payments.incomplete")}
-              </span>
-            </div>
-            <ul className="space-y-1">
-              {checkItem(
-                status.stripe.publishable,
-                t("admin.payments.stripePublishable"),
-              )}
-              {checkItem(status.stripe.secret, t("admin.payments.stripeSecret"))}
-              {checkItem(
-                status.stripe.webhook,
-                t("admin.payments.stripeWebhook"),
-              )}
-            </ul>
-            <a
-              href={status.stripe.dashboardUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex text-sm text-accent hover:text-accent-light"
-            >
-              {t("admin.payments.openStripeDashboard")}
-            </a>
-          </section>
+                {t("admin.payments.openStripeDashboard")} →
+              </a>
+            </section>
 
-          <section className="space-y-3 rounded-2xl border border-border p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="font-serif text-xl text-primary">PayPal</h2>
-              <span
-                className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                  status.paypal.ready
-                    ? "bg-primary/10 text-primary"
-                    : "bg-accent/15 text-accent"
-                }`}
+            <section className="space-y-3 rounded-2xl border border-border p-5 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="font-serif text-xl text-primary">PayPal</h2>
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                    status.paypal.ready
+                      ? "bg-primary/10 text-primary"
+                      : "bg-accent/15 text-accent"
+                  }`}
+                >
+                  <span
+                    className={`size-1.5 rounded-full ${
+                      status.paypal.ready ? "bg-primary" : "bg-accent"
+                    }`}
+                  />
+                  {status.paypal.ready
+                    ? t("admin.payments.ready")
+                    : t("admin.payments.incomplete")}
+                </span>
+              </div>
+              <ul className="space-y-1.5 rounded-xl bg-background-alt p-3">
+                {checkItem(
+                  status.paypal.clientId,
+                  t("admin.payments.paypalClient"),
+                )}
+                {checkItem(
+                  status.paypal.secret,
+                  t("admin.payments.paypalSecret"),
+                )}
+                {checkItem(
+                  status.paypal.liveApi,
+                  t("admin.payments.paypalLiveApi"),
+                )}
+              </ul>
+              <a
+                href={status.paypal.dashboardUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-light"
               >
-                {status.paypal.ready
-                  ? t("admin.payments.ready")
-                  : t("admin.payments.incomplete")}
-              </span>
-            </div>
-            <ul className="space-y-1">
-              {checkItem(
-                status.paypal.clientId,
-                t("admin.payments.paypalClient"),
-              )}
-              {checkItem(
-                status.paypal.secret,
-                t("admin.payments.paypalSecret"),
-              )}
-              {checkItem(
-                status.paypal.liveApi,
-                t("admin.payments.paypalLiveApi"),
-              )}
-            </ul>
-            <a
-              href={status.paypal.dashboardUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex text-sm text-accent hover:text-accent-light"
-            >
-              {t("admin.payments.openPaypalDashboard")}
-            </a>
-          </section>
+                {t("admin.payments.openPaypalDashboard")} →
+              </a>
+            </section>
+          </div>
+        ) : null}
+      </section>
+
+      <p className="rounded-xl bg-background-alt px-4 py-3 text-sm text-muted">
+        {t("admin.payments.refundHint")}
+      </p>
+
+      <section className="space-y-3">
+        <h2 className="font-serif text-xl text-primary">
+          {t("admin.paymentsListTitle")}
+        </h2>
+
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <AdminSearchField value={query} onChange={setQuery} />
+          <span className="text-xs text-muted">
+            {t("admin.ordersCountLabel", { count: filtered.length })}
+          </span>
         </div>
-      ) : null}
 
-      <p className="text-sm text-muted">{t("admin.payments.refundHint")}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {METHOD_FILTERS.map((method) => (
+            <button
+              key={method}
+              type="button"
+              onClick={() => setMethodFilter(method)}
+              className={`inline-flex min-h-8 items-center rounded-lg px-2.5 text-xs transition ${
+                methodFilter === method
+                  ? "bg-primary text-background"
+                  : "border border-border text-muted hover:border-accent"
+              }`}
+            >
+              {method === "all"
+                ? t("admin.filterAll")
+                : t(`checkout.methods.${method as PaymentMethod}.label`)}
+            </button>
+          ))}
+        </div>
 
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <AdminSearchField value={query} onChange={setQuery} />
-        <span className="text-xs text-muted">
-          {t("admin.ordersCountLabel", { count: filtered.length })}
-        </span>
-      </div>
-
-      <div className="flex flex-wrap gap-1.5">
-        {METHOD_FILTERS.map((method) => (
-          <button
-            key={method}
-            type="button"
-            onClick={() => setMethodFilter(method)}
-            className={`inline-flex min-h-8 items-center rounded-lg px-2.5 text-xs transition ${
-              methodFilter === method
-                ? "bg-primary text-background"
-                : "border border-border text-muted hover:border-accent"
-            }`}
-          >
-            {method === "all"
-              ? t("admin.filterAll")
-              : t(`checkout.methods.${method as PaymentMethod}.label`)}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap gap-1.5">
-        {STATUS_FILTERS.map((statusKey) => (
-          <button
-            key={statusKey}
-            type="button"
-            onClick={() => setStatusFilter(statusKey)}
-            className={`inline-flex min-h-8 items-center rounded-lg px-2.5 text-xs transition ${
-              statusFilter === statusKey
-                ? "bg-primary text-background"
-                : "border border-border text-muted hover:border-accent"
-            }`}
-          >
-            {statusKey === "all"
-              ? t("admin.filterAll")
-              : t(`account.status.payment.${statusKey}`)}
-          </button>
-        ))}
-      </div>
+        <div className="flex flex-wrap gap-1.5">
+          {STATUS_FILTERS.map((statusKey) => (
+            <button
+              key={statusKey}
+              type="button"
+              onClick={() => setStatusFilter(statusKey)}
+              className={`inline-flex min-h-8 items-center rounded-lg px-2.5 text-xs transition ${
+                statusFilter === statusKey
+                  ? "bg-primary text-background"
+                  : "border border-border text-muted hover:border-accent"
+              }`}
+            >
+              {statusKey === "all"
+                ? t("admin.filterAll")
+                : t(`account.status.payment.${statusKey}`)}
+            </button>
+          ))}
+        </div>
+      </section>
 
       {loading ? (
         <p className="text-muted">{t("admin.loading")}</p>

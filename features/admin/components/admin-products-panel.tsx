@@ -793,6 +793,9 @@ export function AdminProductsPanel() {
               <summary className="cursor-pointer text-sm font-medium text-primary">
                 {t("admin.formAdvanced")}
               </summary>
+              <p className="mt-2 text-xs text-muted">
+                {t("admin.formAdvancedHint")}
+              </p>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <label className="block space-y-1 text-sm sm:col-span-2">
                   <span className="text-muted">{t("admin.fields.slug")}</span>
@@ -804,6 +807,9 @@ export function AdminProductsPanel() {
                       setForm((prev) => ({ ...prev, slug: e.target.value }));
                     }}
                   />
+                  <span className="block text-xs text-muted">
+                    {t("admin.slugHint")}
+                  </span>
                 </label>
                 <label className="block space-y-1 text-sm">
                   <span className="text-muted">
@@ -821,6 +827,9 @@ export function AdminProductsPanel() {
                       }))
                     }
                   />
+                  <span className="block text-xs text-muted">
+                    {t("admin.shippingFeeHint")}
+                  </span>
                 </label>
                 <label className="block space-y-1 text-sm">
                   <span className="text-muted">{t("admin.fields.qr_url")}</span>
@@ -831,6 +840,9 @@ export function AdminProductsPanel() {
                       setForm((prev) => ({ ...prev, qr_url: e.target.value }))
                     }
                   />
+                  <span className="block text-xs text-muted">
+                    {t("admin.qrUrlHint")}
+                  </span>
                 </label>
               </div>
             </details>

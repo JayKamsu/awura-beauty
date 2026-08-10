@@ -1,6 +1,13 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 let browserClient: SupabaseClient | null = null;
+let adminBrowserClient: SupabaseClient | null = null;
+
+/**
+ * Clé de stockage dédiée à la session admin — évite que la connexion
+ * /admin/connexion partage la session (localStorage) du site public.
+ */
+const ADMIN_AUTH_STORAGE_KEY = "sb-admin-auth-token";
 
 export function getSupabaseEnv() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,6 +24,10 @@ export function createSupabaseClient(): SupabaseClient | null {
     return createClient(url, anonKey);
   }
 
+  if (window.location.pathname.startsWith("/admin")) {
+    return createAdminBrowserClient(url, anonKey);
+  }
+
   if (!browserClient) {
     browserClient = createClient(url, anonKey, {
       auth: {
@@ -27,6 +38,25 @@ export function createSupabaseClient(): SupabaseClient | null {
     });
   }
   return browserClient;
+}
+
+/**
+ * Client dédié à l'espace admin : session stockée sous une clé distincte,
+ * pour que se connecter sur /admin ne connecte pas aussi le visiteur côté
+ * boutique (panier, compte client) et inversement.
+ */
+function createAdminBrowserClient(url: string, anonKey: string): SupabaseClient {
+  if (!adminBrowserClient) {
+    adminBrowserClient = createClient(url, anonKey, {
+      auth: {
+        detectSessionInUrl: true,
+        persistSession: true,
+        autoRefreshToken: true,
+        storageKey: ADMIN_AUTH_STORAGE_KEY,
+      },
+    });
+  }
+  return adminBrowserClient;
 }
 
 /** Client service_role (serveur uniquement) — bypass RLS pour l'admin. */

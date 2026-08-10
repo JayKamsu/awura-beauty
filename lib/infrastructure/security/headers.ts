@@ -73,6 +73,7 @@ export function buildContentSecurityPolicy(): string {
 
   const frame = [
     "'self'",
+    "blob:",
     "https://js.stripe.com",
     "https://hooks.stripe.com",
     "https://www.paypal.com",

@@ -159,6 +159,10 @@ export function AdminContentPanel() {
 
       {feedback ? <AdminFeedback tone={feedback.tone} message={feedback.message} /> : null}
 
+      <p className="rounded-2xl bg-background-alt px-4 py-3 text-sm text-muted">
+        {t("admin.content.help")}
+      </p>
+
       <section className="grid gap-4 rounded-2xl border border-border p-5 lg:grid-cols-2">
         <h2 className="font-serif text-2xl text-primary lg:col-span-2">
           {form.id ? t("admin.updateContent") : t("admin.createContent")}
@@ -191,6 +195,7 @@ export function AdminContentPanel() {
             <option value="article">{t("blog.badgeArticle")}</option>
             <option value="tutorial">{t("blog.badgeTutorial")}</option>
           </select>
+          <span className="block text-xs text-muted">{t("admin.content.kindHint")}</span>
         </label>
         <label className="space-y-1 text-sm">
           <span className="text-muted">{t("admin.fields.published_at")}</span>
@@ -238,6 +243,7 @@ export function AdminContentPanel() {
             value={form.product_slug}
             onChange={(e) => setForm((prev) => ({ ...prev, product_slug: e.target.value }))}
           />
+          <span className="block text-xs text-muted">{t("admin.content.productSlugHint")}</span>
         </label>
         <label className="space-y-1 text-sm lg:col-span-2">
           <span className="text-muted">{t("admin.fields.body")}</span>
@@ -247,6 +253,7 @@ export function AdminContentPanel() {
             value={form.body}
             onChange={(e) => setForm((prev) => ({ ...prev, body: e.target.value }))}
           />
+          <span className="block text-xs text-muted">{t("admin.content.bodyHint")}</span>
         </label>
         <div className="flex flex-wrap gap-3 lg:col-span-2">
           <Button type="button" pending={pending} onClick={save}>

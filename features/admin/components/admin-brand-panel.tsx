@@ -135,6 +135,7 @@ export function AdminBrandPanel() {
         <h2 className="font-serif text-2xl text-primary">
           {t("admin.brandLogos")}
         </h2>
+        <p className="text-sm text-muted">{t("admin.brandLogosHint")}</p>
         {(
           [
             ["logoLightUrl", "logo_light_url"],
@@ -169,6 +170,7 @@ export function AdminBrandPanel() {
         <h2 className="font-serif text-2xl text-primary">
           {t("admin.brandQr")}
         </h2>
+        <p className="text-sm text-muted">{t("admin.brandQrHint")}</p>
         <label className="block space-y-1 text-sm">
           <span className="text-muted">{t("admin.fields.qr_default_mode")}</span>
           <select
@@ -199,13 +201,14 @@ export function AdminBrandPanel() {
             />
           </label>
         ) : null}
-        <p className="text-xs text-muted">{t("admin.brandQrHint")}</p>
+        <p className="text-xs text-muted">{t("admin.brandQrOverrideHint")}</p>
       </section>
 
       <section className="space-y-4 rounded-2xl border border-border p-5">
         <h2 className="font-serif text-2xl text-primary">
           {t("admin.brandUniverse")}
         </h2>
+        <p className="text-sm text-muted">{t("admin.brandUniverseHint")}</p>
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"

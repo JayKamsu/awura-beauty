@@ -10,6 +10,8 @@
     "ordersTitle": "Gestion des commandes",
     "paymentsTitle": "Paiements",
     "paymentsSubtitle": "État Stripe / PayPal, suivi des paiements et actions admin.",
+    "paymentsStatusHint": "État des connexions aux prestataires de paiement. « Prêt » = toutes les clés nécessaires sont configurées côté serveur et les paiements en ligne fonctionnent. « Incomplet » = au moins une clé manque, les paiements par ce moyen sont désactivés.",
+    "paymentsListTitle": "Commandes & transactions",
     "diagnosticTitle": "Diagnostic capillaire",
     "diagnosticSubtitle": "Diagnostics en ligne, RDV présentiel, questions et tarifs.",
     "ordersSubtitle": "Liste dense : filtre, recherche, reçus et suivi — détail à la demande.",
@@ -17,6 +19,12 @@
     "productsSubtitle": "Liste des produits, création en modal, et gestion des catégories.",
     "contentTitle": "Blog & tutoriels",
     "contentSubtitle": "Gère les articles et tutoriels publiés sur le site.",
+    "content": {
+      "help": "La liste ci-dessous montre tous les articles et tutoriels déjà publiés. Clique « Modifier » sur une ligne pour charger son contenu dans le formulaire ci-dessus et le changer, ou « Supprimer » pour le retirer du site.",
+      "bodyHint": "Un paragraphe par ligne (ligne vide = nouveau paragraphe). C'est le texte affiché dans l'article.",
+      "kindHint": "Article = billet de blog. Tutoriel = guide pas-à-pas, accessible depuis /tutoriels.",
+      "productSlugHint": "Optionnel : relie ce contenu à un produit (ex. affiché sur sa fiche). Laisse vide si aucun lien."
+    },
     "pagesTitle": "Pages & affichage",
     "pagesSubtitle": "Ordre, visibilité et contenus détaillés des sections (accueil, à propos…).",
     "notificationsTitle": "Notifications push",
@@ -160,6 +168,10 @@
     "formImages": "Photos",
     "formDetails": "Fiche produit",
     "formAdvanced": "Options avancées",
+    "formAdvancedHint": "Réglages optionnels, rarement modifiés : identifiant technique dans l’URL, surcoût de livraison spécifique à ce produit, et destination du QR code imprimé sur son emballage.",
+    "slugHint": "Identifiant technique utilisé dans l’URL de la fiche produit (ex. /boutique/beurre-capillaire). Généré automatiquement depuis le nom — à modifier seulement si tu veux une URL précise.",
+    "shippingFeeHint": "Montant ajouté aux frais de livraison de base pour chaque unité de ce produit dans le panier (ex. produit lourd ou fragile). Laisse à 0 si ce produit n’a pas de surcoût.",
+    "qrUrlHint": "Adresse vers laquelle pointe le QR code imprimé sur l’emballage de ce produit. Laisse vide pour utiliser la destination par défaut définie dans Marque → QR codes produits.",
     "noCustomers": "Aucun client pour le moment.",
     "ordersCount": "Commandes",
     "totalSpent": "Total dépensé",
@@ -195,11 +207,14 @@
     "brandTitle": "Marque & design",
     "brandSubtitle": "Duafe, logos, QR produits, univers Adulte / Enfant — tout gérable ici.",
     "brandDuafe": "Symbole Duafe",
-    "brandDuafeHint": "Utilisé en favicon, loader et motif. Laisse vide pour le symbole intégré.",
+    "brandDuafeHint": "Le symbole Duafe est l’icône de la marque (ailes stylisées) utilisée comme favicon (onglet navigateur), pendant le chargement des pages, et en motif décoratif en filigrane sur le site. Laisse le champ vide pour garder le symbole par défaut déjà intégré au site — mets une URL d’image seulement si tu veux le remplacer.",
     "brandLogos": "Logos",
+    "brandLogosHint": "Le logo affiché change selon le thème du visiteur : « fond clair » sort sur un fond blanc/clair, « fond sombre » sur un fond sombre, et « accent / or » est une variante dorée utilisée pour des mises en avant spéciales (emails, promos). Laisse vide pour garder le logo par défaut.",
     "brandQr": "QR codes produits",
-    "brandQrHint": "Chaque produit peut surcharger l’URL dans Produits → URL QR.",
+    "brandQrHint": "Définit où mènent les QR codes imprimés sur les emballages produits quand un produit n’a pas sa propre URL QR personnalisée.",
+    "brandQrOverrideHint": "Chaque produit peut surcharger cette destination par défaut dans Produits → Options avancées → URL QR.",
     "brandUniverse": "Univers & motif",
+    "brandUniverseHint": "« Univers Enfant » ajoute un filtre dans la boutique pour séparer les produits pensés pour les enfants des produits adultes. « Motif Duafe » affiche le symbole de marque en fond décoratif discret sur certaines pages.",
     "brandChildEnabled": "Activer le filtre Univers Enfant en boutique",
     "brandShowPattern": "Afficher le motif Duafe en filigrane",
     "universeAdult": "Adulte (profond)",
@@ -273,10 +288,56 @@
       "send": "Envoyer la notification",
       "sending": "Envoi…",
       "success": "Notification envoyée ({{count}} destinataire(s)).",
+      "successOne": "Notification envoyée à {{name}}.",
       "error": "Échec de l'envoi.",
       "emptyTokens": "Aucun abonné push pour le moment.",
       "subscribers": "{{count}} navigateur(s) abonné(s).",
-      "stub": "Firebase non configuré — envoi simulé."
+      "stub": "Firebase non configuré — envoi simulé.",
+      "audienceLabel": "Destinataires",
+      "audienceAll": "Tout le monde",
+      "audienceAllHint": "Envoie à tous les navigateurs abonnés aux notifications.",
+      "audienceOne": "Une personne",
+      "audienceOneHint": "Recherche un client par nom ou e-mail et envoie uniquement à lui.",
+      "recipientSearchPlaceholder": "Rechercher un client (nom, e-mail)…",
+      "recipientNoResults": "Aucun client trouvé.",
+      "recipientSelected": "Destinataire sélectionné :",
+      "recipientChange": "Changer",
+      "recipientNoPush": "Ce client n’a pas encore activé les notifications sur son appareil — l’envoi ne le touchera pas.",
+      "templatesLabel": "Modèles prêts à l’emploi",
+      "templatesHint": "Choisis un modèle pour pré-remplir le titre et le message, puis modifie-les si besoin.",
+      "templateCustom": "Vierge",
+      "templates": {
+        "promo": {
+          "label": "Promotion",
+          "title": "Offre spéciale ✨",
+          "body": "Profite de -15% sur toute la boutique ce week-end avec le code AWURA15.",
+          "link": "/boutique"
+        },
+        "newProduct": {
+          "label": "Nouveau produit",
+          "title": "Nouveauté chez Awura Beauty",
+          "body": "Découvre notre dernier soin, disponible dès maintenant en boutique.",
+          "link": "/boutique"
+        },
+        "restock": {
+          "label": "Retour en stock",
+          "title": "De retour en stock !",
+          "body": "Ton produit préféré est de nouveau disponible — ne tarde pas, les stocks sont limités.",
+          "link": "/boutique"
+        },
+        "diagnostic": {
+          "label": "Diagnostic capillaire",
+          "title": "Et si on faisait le point sur ta couronne ?",
+          "body": "Réserve ton diagnostic capillaire personnalisé, gratuit en ligne.",
+          "link": "/diagnostic-capillaire"
+        },
+        "orderShipped": {
+          "label": "Rappel expédition",
+          "title": "Ta commande est en route",
+          "body": "Ton colis vient d’être expédié, suis-le depuis ton compte.",
+          "link": "/compte"
+        }
+      }
     },
     "messages": {
       "empty": "Aucune conversation.",
