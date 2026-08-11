@@ -70,6 +70,7 @@ export type OrderPort = {
       shippingCarrier?: ShippingCarrier | null;
       trackingNumber?: string | null;
       labelUrl?: string | null;
+      labelPath?: string | null;
       relayPointId?: string | null;
     },
   ) => Promise<boolean>;

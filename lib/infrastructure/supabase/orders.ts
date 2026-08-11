@@ -23,6 +23,7 @@ function mapOrder(row: Record<string, unknown>): OrderRow {
     shipping_carrier: (row.shipping_carrier as ShippingCarrier) ?? null,
     tracking_number: row.tracking_number ? String(row.tracking_number) : null,
     label_url: row.label_url ? String(row.label_url) : null,
+    label_path: row.label_path ? String(row.label_path) : null,
     relay_point_id: row.relay_point_id ? String(row.relay_point_id) : null,
     shipping_fee: Number(row.shipping_fee ?? 0),
     points_earned: Number(row.points_earned ?? 0),
@@ -187,6 +188,7 @@ export async function updateOrderShipping(
     shippingCarrier?: ShippingCarrier | null;
     trackingNumber?: string | null;
     labelUrl?: string | null;
+    labelPath?: string | null;
     relayPointId?: string | null;
   },
 ): Promise<boolean> {
@@ -204,12 +206,50 @@ export async function updateOrderShipping(
         ? { tracking_number: payload.trackingNumber }
         : {}),
       ...(payload.labelUrl !== undefined ? { label_url: payload.labelUrl } : {}),
+      ...(payload.labelPath !== undefined
+        ? { label_path: payload.labelPath }
+        : {}),
       ...(payload.relayPointId !== undefined
         ? { relay_point_id: payload.relayPointId }
         : {}),
       ...(payload.shippingStatus !== "preparing"
         ? { status: "processing" }
         : {}),
+    })
+    .eq("id", orderId);
+
+  return !error;
+}
+
+/**
+ * Ajoute un événement à l'historique de suivi transporteur (jsonb append)
+ * et met à jour la date de dernière synchro. Utilisé par le cron de sync.
+ */
+export async function appendCarrierStatusEvent(
+  orderId: string,
+  event: { date: string; code: string; label: string; status: ShippingStatus },
+): Promise<boolean> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) return false;
+
+  const { data: current, error: readError } = await supabase
+    .from("orders")
+    .select("carrier_status_history")
+    .eq("id", orderId)
+    .maybeSingle();
+
+  if (readError) return false;
+
+  const history = Array.isArray(current?.carrier_status_history)
+    ? (current!.carrier_status_history as unknown[])
+    : [];
+  history.push(event);
+
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      carrier_status_history: history,
+      last_tracking_sync_at: new Date().toISOString(),
     })
     .eq("id", orderId);
 

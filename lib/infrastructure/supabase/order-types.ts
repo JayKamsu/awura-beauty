@@ -34,7 +34,10 @@ export type OrderRow = {
   shipping_status: ShippingStatus;
   shipping_carrier: ShippingCarrier | null;
   tracking_number: string | null;
+  /** URL distante hébergée par le transporteur (Mondial Relay uniquement). */
   label_url: string | null;
+  /** Chemin dans le bucket privé shipping-labels (Colissimo) — jamais une URL stockée. */
+  label_path: string | null;
   relay_point_id: string | null;
   shipping_fee: number;
   points_earned: number;

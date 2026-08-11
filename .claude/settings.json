@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(kill %1 %2)",
+      "Bash(taskkill //F //IM node.exe //FI \"WINDOWTITLE eq npm*\")",
+      "WebFetch(domain:www.colissimo.fr)",
+      "WebSearch",
+      "Bash(curl -sL \"https://www.colissimo.fr/doc-colissimo/yaml/en\" -o /tmp/colissimo-spec.raw -w \"HTTP:%{http_code} TYPE:%{content_type} SIZE:%{size_download}\\\\n\")",
+      "Read(//tmp/**)",
+      "Bash(sed -n '5700,5820p' /tmp/colissimo-spec.raw)",
+      "Bash(grep -n \"^  GenerateLabelV2Response:\\\\|^  GenerateLabelRequestV31:\" /tmp/colissimo-spec.raw)",
+      "Bash(grep -n \"GenerateLabelV2Response\\\\|GenerateLabelRequestV31\" /tmp/colissimo-spec.raw | head -20)",
+      "Bash(sed -n '8100,8180p' /tmp/colissimo-spec.raw)",
+      "Bash(grep -n \"^    XmlV2Response:\" /tmp/colissimo-spec.raw)",
+      "Bash(sed -n '8261,8300p' /tmp/colissimo-spec.raw)",
+      "Bash(sed -n '8300,8340p' /tmp/colissimo-spec.raw)",
+      "Bash(grep -n \"^    DataHandler:\\\\|^    Fields:\\\\|base64\\\\|binary\" /tmp/colissimo-spec.raw | head -20)",
+      "Bash(sed -n '2400,2540p' /tmp/colissimo-spec.raw)",
+      "Bash(sed -n '1,60p' /tmp/colissimo-spec.raw)",
+      "Bash(sed -n '6121,6215p' /tmp/colissimo-spec.raw)",
+      "Bash(grep -n \"^    Response:\" /tmp/colissimo-spec.raw)",
+      "Bash(sed -n '7639,7700p' /tmp/colissimo-spec.raw)",
+      "Bash(grep -n \"dematerialized\" /tmp/colissimo-spec.raw | head -10)",
+      "Bash(sed -n '7370,7420p' /tmp/colissimo-spec.raw)",
+      "Bash(sed -n '8470,8600p' /tmp/colissimo-spec.raw)",
+      "Bash(grep -n \"^    Service:\\\\|^    Sender:\\\\|^    Addressee:\\\\|^    Address:\\\\b\" /tmp/colissimo-spec.raw)",
+      "Bash(sed -n '7462,7530p' /tmp/colissimo-spec.raw)",
+      "Bash(grep -n \"pdfUrl\" /tmp/colissimo-spec.raw)"
+    ]
+  }
+}

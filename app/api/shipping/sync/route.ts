@@ -3,6 +3,7 @@ import { notifyShippingStatusChange } from "@/lib/application/notifications/orde
 import { container } from "@/lib/application/container";
 import { requireAdminFromRequest } from "@/lib/infrastructure/supabase/admin-auth";
 import {
+  appendCarrierStatusEvent,
   listAllOrders,
   updateOrderShipping,
 } from "@/lib/infrastructure/supabase/orders";
@@ -14,8 +15,17 @@ import {
  *
  * Mondial Relay / La Poste n’offrent pas de webhook fiable en API 1 SOAP :
  * ce endpoint remplace un polling / cron Vercel.
+ * GET : appelé par le cron Vercel (vercel.json). POST : déclenchement manuel (admin).
  */
+export async function GET(request: Request) {
+  return handleSync(request);
+}
+
 export async function POST(request: Request) {
+  return handleSync(request);
+}
+
+async function handleSync(request: Request) {
   const cronSecret = process.env.CRON_SECRET?.trim();
   const headerSecret =
     request.headers.get("x-cron-secret")?.trim() ||
@@ -47,12 +57,22 @@ export async function POST(request: Request) {
         order.shipping_carrier!,
         order.tracking_number!,
       );
+
+      const latestEvent = tracking.events[0];
+      await appendCarrierStatusEvent(order.id, {
+        date: latestEvent?.date ?? new Date().toISOString(),
+        code: latestEvent?.code ?? tracking.status,
+        label: latestEvent?.label ?? tracking.statusLabel,
+        status: tracking.status,
+      });
+
       if (tracking.status !== order.shipping_status) {
         await updateOrderShipping(order.id, {
           shippingStatus: tracking.status,
           shippingCarrier: order.shipping_carrier,
           trackingNumber: order.tracking_number,
           labelUrl: order.label_url,
+          labelPath: order.label_path,
           relayPointId: order.relay_point_id,
         });
         await notifyShippingStatusChange({

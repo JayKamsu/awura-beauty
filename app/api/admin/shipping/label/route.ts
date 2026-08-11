@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     orderId: body.orderId,
     carrier: result.carrier,
     trackingNumber: result.trackingNumber,
-    labelUrl: result.labelUrl,
+    labelUrl: result.previewUrl,
     shippingStatus: "shipped",
   });
 }

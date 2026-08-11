@@ -1,19 +1,21 @@
 import { notifyShippingStatusChange } from "@/lib/application/notifications/order-notify";
-import { resolvePrintableLabelUrl } from "@/lib/application/shipping/resolve-label-preview";
+import { resolvePrintableLabel } from "@/lib/application/shipping/resolve-label-preview";
 import { createLaPosteLabel } from "@/lib/infrastructure/shipping/laposte";
 import { createMondialRelayLabel } from "@/lib/infrastructure/shipping/mondialrelay";
 import type { ShippingCarrier } from "@/lib/infrastructure/shipping/types";
+import { getSignedLabelUrl } from "@/lib/infrastructure/supabase/storage";
 import {
   getOrderById,
   updateOrderShipping,
 } from "@/lib/infrastructure/supabase/orders";
 
-/** Résultat de création d'étiquette : succès avec suivi/URL ou message d'erreur. */
+/** Résultat de création d'étiquette : succès avec suivi/URL d'aperçu (signée si privée) ou message d'erreur. */
 export type CreateOrderLabelResult =
   | {
       ok: true;
       trackingNumber: string;
-      labelUrl: string | null;
+      /** URL d'aperçu immédiat — signée temporaire (Colissimo) ou distante (Mondial Relay). */
+      previewUrl: string | null;
       carrier: ShippingCarrier;
     }
   | { ok: false; error: string };
@@ -62,7 +64,7 @@ export async function createOrderShippingLabel(input: {
             relayPointId,
           });
 
-    const printableUrl = await resolvePrintableLabelUrl({
+    const resolved = await resolvePrintableLabel({
       orderId: order.id,
       labelUrl: label.labelUrl,
       labelBase64: label.labelBase64,
@@ -72,7 +74,8 @@ export async function createOrderShippingLabel(input: {
       shippingStatus: "shipped",
       shippingCarrier: label.carrier,
       trackingNumber: label.trackingNumber,
-      labelUrl: printableUrl,
+      labelUrl: resolved.kind === "url" ? resolved.labelUrl : null,
+      labelPath: resolved.kind === "path" ? resolved.labelPath : null,
       relayPointId: relayPointId ?? null,
     });
 
@@ -87,10 +90,17 @@ export async function createOrderShippingLabel(input: {
       });
     }
 
+    const previewUrl =
+      resolved.kind === "url"
+        ? resolved.labelUrl
+        : resolved.kind === "path"
+          ? (await getSignedLabelUrl(resolved.labelPath)).url
+          : null;
+
     return {
       ok: true,
       trackingNumber: label.trackingNumber,
-      labelUrl: printableUrl,
+      previewUrl,
       carrier: label.carrier,
     };
   } catch (error) {

@@ -4,6 +4,15 @@ import { container } from "@/lib/application/container";
 import { getUserFromAccessToken } from "@/lib/infrastructure/supabase/admin-auth";
 import { createAdminSupabaseClient } from "@/lib/infrastructure/supabase/client";
 import type { OrderRow } from "@/lib/infrastructure/supabase/order-types";
+import { getSignedLabelUrl } from "@/lib/infrastructure/supabase/storage";
+
+async function resolveLabelPreviewUrl(order: OrderRow): Promise<string | null> {
+  if (order.label_path) {
+    const signed = await getSignedLabelUrl(order.label_path);
+    return signed.url;
+  }
+  return order.label_url;
+}
 
 async function getOrderForAccount(orderId: string): Promise<OrderRow | null> {
   const admin = createAdminSupabaseClient();
@@ -29,6 +38,7 @@ async function getOrderForAccount(orderId: string): Promise<OrderRow | null> {
         ? String(data.tracking_number)
         : null,
       label_url: data.label_url ? String(data.label_url) : null,
+      label_path: data.label_path ? String(data.label_path) : null,
       relay_point_id: data.relay_point_id ? String(data.relay_point_id) : null,
       shipping_fee: Number(data.shipping_fee ?? 0),
       points_earned: Number(data.points_earned ?? 0),
@@ -107,6 +117,7 @@ export async function GET(request: Request) {
       shippingCarrier: tracking.carrier,
       trackingNumber: tracking.trackingNumber,
       labelUrl: order.label_url,
+      labelPath: order.label_path,
     });
 
     if (tracking.status !== previousStatus) {
@@ -127,7 +138,7 @@ export async function GET(request: Request) {
       shippingStatus: tracking.status,
       statusLabel: tracking.statusLabel,
       events: tracking.events,
-      labelUrl: order.label_url,
+      labelUrl: await resolveLabelPreviewUrl(order),
     });
   } catch (error) {
     return NextResponse.json(

@@ -23,6 +23,7 @@ export type CreateShippingLabelInput = {
 export type CreateShippingLabelResult = {
   carrier: ShippingCarrier;
   trackingNumber: string;
+  /** URL distante hébergée par le transporteur (Mondial Relay) — à ne pas stocker durablement. */
   labelUrl: string | null;
   labelBase64: string | null;
   rawStatus: string;

@@ -263,6 +263,28 @@ export function AdminOrdersPanel() {
     setPreview(null);
   };
 
+  const openLabelPreview = async (order: OrderRow) => {
+    const response = await adminFetch(
+      `/api/admin/shipping/label-preview?orderId=${encodeURIComponent(order.id)}`,
+    );
+    const json = (await response.json()) as {
+      labelUrl?: string;
+      error?: string;
+    };
+    if (!response.ok || !json.labelUrl) {
+      setFeedback({
+        tone: "error",
+        message: json.error ?? t("admin.labelError"),
+      });
+      return;
+    }
+    setPreview({
+      title: t("admin.labelPreviewTitle"),
+      url: json.labelUrl,
+      subtitle: order.tracking_number,
+    });
+  };
+
   const syncTracking = async () => {
     setSyncing(true);
     setFeedback(null);
@@ -563,18 +585,12 @@ export function AdminOrdersPanel() {
                                       {t("admin.previewReceipt")}
                                     </Button>
                                   ) : null}
-                                  {order.label_url ? (
+                                  {order.label_url || order.label_path ? (
                                     <Button
                                       type="button"
                                       variant="ghost"
                                       size="md"
-                                      onClick={() =>
-                                        setPreview({
-                                          title: t("admin.labelPreviewTitle"),
-                                          url: order.label_url!,
-                                          subtitle: order.tracking_number,
-                                        })
-                                      }
+                                      onClick={() => void openLabelPreview(order)}
                                     >
                                       {t("admin.previewLabel")}
                                     </Button>

@@ -18,16 +18,22 @@ export function normalizeMondialRelayLabelUrl(url: string | null): string | null
   }
 }
 
+export type ResolvedLabel =
+  | { kind: "path"; labelPath: string }
+  | { kind: "url"; labelUrl: string }
+  | { kind: "none" };
+
 /**
- * Prépare une URL d’aperçu imprimable :
- * - La Poste : upload du PDF base64 vers Storage
- * - Mondial Relay : URL PDF (éventuellement mise en A4)
+ * Prépare l'étiquette pour aperçu/impression :
+ * - Colissimo : upload du PDF vers le bucket privé, retourne son chemin
+ *   (l'URL n'est jamais stockée durablement — signée à la demande).
+ * - Mondial Relay : URL PDF distante (éventuellement mise en A4).
  */
-export async function resolvePrintableLabelUrl(input: {
+export async function resolvePrintableLabel(input: {
   orderId: string;
   labelUrl: string | null;
   labelBase64: string | null;
-}): Promise<string | null> {
+}): Promise<ResolvedLabel> {
   if (input.labelBase64) {
     const raw = input.labelBase64.replace(/\s+/g, "");
     const bytes = Buffer.from(raw, "base64");
@@ -43,7 +49,7 @@ export async function resolvePrintableLabelUrl(input: {
       bytes,
       contentType,
     });
-    if (uploaded.url) return uploaded.url;
+    if (uploaded.path) return { kind: "path", labelPath: uploaded.path };
   }
 
   if (input.labelUrl) {
@@ -53,9 +59,11 @@ export async function resolvePrintableLabelUrl(input: {
       input.labelUrl.includes("PDF") ||
       input.labelUrl.toLowerCase().endsWith(".pdf")
     ) {
-      return normalizeMondialRelayLabelUrl(input.labelUrl);
+      const normalized = normalizeMondialRelayLabelUrl(input.labelUrl);
+      if (normalized) return { kind: "url", labelUrl: normalized };
     }
+    return { kind: "url", labelUrl: input.labelUrl };
   }
 
-  return input.labelUrl;
+  return { kind: "none" };
 }
