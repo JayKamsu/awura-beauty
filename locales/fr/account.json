@@ -13,6 +13,7 @@
       "payments": "Paiements",
       "loyalty": "Fidélité",
       "diagnostics": "Diagnostics",
+      "favorites": "Favoris",
       "messages": "Messages",
       "security": "Sécurité"
     },
@@ -98,6 +99,10 @@
     "diagnosticsJoinVideo": "Rejoindre la visio",
     "diagnosticsScalpAnalysis": "Analyse cuir chevelu / trichogramme",
     "diagnosticsAppointments": "Mes rendez-vous",
+    "favoritesTitle": "Mes favoris",
+    "favoritesLoading": "Chargement des favoris…",
+    "favoritesEmpty": "Aucun favori pour le moment. Ajoute des produits en cliquant sur le cœur.",
+    "favoritesBrowse": "Voir la boutique",
     "diagnosticsResults": "Mes résultats",
     "diagnosticsApptStatus": {
       "pending_payment": "Paiement en attente",

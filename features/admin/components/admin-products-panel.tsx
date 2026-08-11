@@ -17,11 +17,14 @@ import { useActionLock } from "@/lib/hooks/use-action-lock";
 import type { ProductCategory } from "@/lib/infrastructure/supabase/product-categories";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
+type BundleComponentDraft = { productId: string; quantity: number };
+
 const emptyForm = {
   id: "",
   slug: "",
   name: "",
   price: 0,
+  compare_at_price: "",
   short_description: "",
   description: "",
   ingredients: "",
@@ -30,11 +33,14 @@ const emptyForm = {
   ingredients_image_url: "",
   lifestyle_image_url: "",
   category: "soin",
+  product_type: "hair_care" as "hair_care" | "accessory",
+  is_bundle: false,
   is_new: false,
   stock: 10,
   shipping_fee: 0,
   qr_url: "",
   universe: "adult" as "adult" | "child",
+  bundleComponents: [] as BundleComponentDraft[],
 };
 
 const fieldClass =
@@ -62,6 +68,9 @@ export function AdminProductsPanel() {
   const [slugTouched, setSlugTouched] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [newCategoryLabel, setNewCategoryLabel] = useState("");
+  const [newCategoryType, setNewCategoryType] = useState<"hair_care" | "accessory">(
+    "hair_care",
+  );
   const [feedback, setFeedback] = useState<{
     tone: "success" | "error";
     message: string;
@@ -114,25 +123,43 @@ export function AdminProductsPanel() {
         label_en: slug,
         label_es: slug,
         position: 999,
+        product_type: "hair_care" as const,
       })),
     ];
   }, [categories, products]);
 
   const openCreate = () => {
+    const defaultCategory = categories[0];
     setForm({
       ...emptyForm,
-      category: categories[0]?.slug ?? emptyForm.category,
+      category: defaultCategory?.slug ?? emptyForm.category,
+      product_type: defaultCategory?.product_type ?? emptyForm.product_type,
     });
     setSlugTouched(false);
     setModalOpen(true);
   };
 
-  const openEdit = (product: ProductRow) => {
+  const openEdit = async (product: ProductRow) => {
+    let bundleComponents: BundleComponentDraft[] = [];
+    if (product.is_bundle) {
+      const res = await adminFetch(
+        `/api/admin/bundles?productId=${encodeURIComponent(product.id)}`,
+      );
+      const json = (await res.json()) as {
+        components?: Array<{ product: ProductRow; quantity: number }>;
+      };
+      bundleComponents = (json.components ?? []).map((c) => ({
+        productId: c.product.id,
+        quantity: c.quantity,
+      }));
+    }
     setForm({
       id: product.id,
       slug: product.slug,
       name: product.name,
       price: product.price,
+      compare_at_price:
+        product.compare_at_price !== null ? String(product.compare_at_price) : "",
       short_description: product.short_description,
       description: product.description,
       ingredients: product.ingredients,
@@ -141,11 +168,14 @@ export function AdminProductsPanel() {
       ingredients_image_url: product.ingredients_image_url,
       lifestyle_image_url: product.lifestyle_image_url ?? "",
       category: product.category,
+      product_type: product.product_type,
+      is_bundle: product.is_bundle,
       is_new: product.is_new,
       stock: product.stock,
       shipping_fee: product.shipping_fee ?? 0,
       qr_url: product.qr_url ?? "",
       universe: product.universe === "child" ? "child" : "adult",
+      bundleComponents,
     });
     setSlugTouched(true);
     setModalOpen(true);
@@ -191,11 +221,15 @@ export function AdminProductsPanel() {
   const save = () => {
     void run(async () => {
       setFeedback(null);
+      const isBundle = form.is_bundle && form.bundleComponents.length > 0;
       const payload = {
         ...(form.id ? { id: form.id } : {}),
         slug: form.slug || slugify(form.name),
         name: form.name,
         price: Number(form.price),
+        compare_at_price: form.compare_at_price.trim()
+          ? Number(form.compare_at_price)
+          : null,
         short_description: form.short_description,
         description: form.description,
         ingredients: form.ingredients,
@@ -204,6 +238,8 @@ export function AdminProductsPanel() {
         ingredients_image_url: form.ingredients_image_url || form.image_url,
         lifestyle_image_url: form.lifestyle_image_url || null,
         category: form.category,
+        product_type: form.product_type,
+        is_bundle: isBundle,
         is_new: form.is_new,
         stock: Number(form.stock),
         shipping_fee: Number(form.shipping_fee) || 0,
@@ -216,14 +252,33 @@ export function AdminProductsPanel() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const json = (await response.json()) as { error?: string };
-      if (!response.ok) {
+      const json = (await response.json()) as {
+        product?: ProductRow;
+        error?: string;
+      };
+      if (!response.ok || !json.product) {
         setFeedback({
           tone: "error",
           message: json.error ?? t("admin.saveError"),
         });
         return;
       }
+
+      if (isBundle) {
+        const bundleRes = await adminFetch("/api/admin/bundles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            productId: json.product.id,
+            components: form.bundleComponents.filter((c) => c.productId),
+          }),
+        });
+        if (!bundleRes.ok) {
+          setFeedback({ tone: "error", message: t("admin.bundleSaveError") });
+          return;
+        }
+      }
+
       setFeedback({ tone: "success", message: t("admin.saveSuccess") });
       closeModal();
       await load();
@@ -252,7 +307,7 @@ export function AdminProductsPanel() {
       const response = await adminFetch("/api/admin/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ label }),
+        body: JSON.stringify({ label, product_type: newCategoryType }),
       });
       const json = (await response.json()) as { error?: string };
       if (!response.ok) {
@@ -263,6 +318,7 @@ export function AdminProductsPanel() {
         return;
       }
       setNewCategoryLabel("");
+      setNewCategoryType("hair_care");
       setFeedback({ tone: "success", message: t("admin.categoryCreated") });
       await load();
     });
@@ -294,7 +350,7 @@ export function AdminProductsPanel() {
         type="button"
         variant="ghost"
         className="min-h-11 flex-1 sm:flex-none"
-        onClick={() => openEdit(product)}
+        onClick={() => void openEdit(product)}
       >
         {t("admin.edit")}
       </Button>
@@ -367,7 +423,7 @@ export function AdminProductsPanel() {
                   <button
                     type="button"
                     className="flex w-full items-start gap-3 text-left"
-                    onClick={() => openEdit(product)}
+                    onClick={() => void openEdit(product)}
                   >
                     <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-background-alt">
                       {product.image_url ? (
@@ -380,10 +436,27 @@ export function AdminProductsPanel() {
                       ) : null}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-primary">{product.name}</p>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <p className="font-medium text-primary">{product.name}</p>
+                        {product.product_type === "accessory" ? (
+                          <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-accent">
+                            {t("admin.productTypeAccessory")}
+                          </span>
+                        ) : null}
+                        {product.is_bundle ? (
+                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-primary">
+                            {t("admin.bundleBadge")}
+                          </span>
+                        ) : null}
+                      </div>
                       <p className="mt-0.5 text-sm text-muted">
                         {product.category}
                         {" · "}
+                        {product.compare_at_price ? (
+                          <span className="mr-1 text-xs text-muted line-through">
+                            {formatPrice(product.compare_at_price, currency, i18n.language)}
+                          </span>
+                        ) : null}
                         {formatPrice(product.price, currency, i18n.language)}
                       </p>
                       <p
@@ -453,10 +526,27 @@ export function AdminProductsPanel() {
                         </div>
                       </td>
                       <td className="px-3 py-2 text-muted">
-                        {product.category}
+                        <span className="inline-flex items-center gap-1.5">
+                          {product.category}
+                          {product.product_type === "accessory" ? (
+                            <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-accent">
+                              {t("admin.productTypeAccessory")}
+                            </span>
+                          ) : null}
+                          {product.is_bundle ? (
+                            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-primary">
+                              {t("admin.bundleBadge")}
+                            </span>
+                          ) : null}
+                        </span>
                       </td>
                       <td className="px-3 py-2 text-muted">{product.stock}</td>
                       <td className="whitespace-nowrap px-3 py-2 text-primary">
+                        {product.compare_at_price ? (
+                          <span className="mr-1.5 text-xs text-muted line-through">
+                            {formatPrice(product.compare_at_price, currency, i18n.language)}
+                          </span>
+                        ) : null}
                         {formatPrice(product.price, currency, i18n.language)}
                       </td>
                       <td className="px-3 py-2 text-right">
@@ -489,7 +579,7 @@ export function AdminProductsPanel() {
         <div className="mt-4 space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
-              className={fieldClass}
+              className={`${fieldClass} sm:flex-1`}
               value={newCategoryLabel}
               placeholder={t("admin.newCategoryPlaceholder")}
               onChange={(e) => setNewCategoryLabel(e.target.value)}
@@ -500,6 +590,18 @@ export function AdminProductsPanel() {
                 }
               }}
             />
+            <select
+              className={`${fieldClass} sm:w-48`}
+              value={newCategoryType}
+              onChange={(e) =>
+                setNewCategoryType(
+                  e.target.value === "accessory" ? "accessory" : "hair_care",
+                )
+              }
+            >
+              <option value="hair_care">{t("admin.productTypeHairCare")}</option>
+              <option value="accessory">{t("admin.productTypeAccessory")}</option>
+            </select>
             <Button
               type="button"
               pending={pending}
@@ -521,7 +623,14 @@ export function AdminProductsPanel() {
                   className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div>
-                    <p className="font-medium text-primary">{category.label}</p>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <p className="font-medium text-primary">{category.label}</p>
+                      {category.product_type === "accessory" ? (
+                        <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-accent">
+                          {t("admin.productTypeAccessory")}
+                        </span>
+                      ) : null}
+                    </div>
                     <p className="text-xs text-muted">{category.slug}</p>
                   </div>
                   <ConfirmDeleteButton
@@ -592,7 +701,7 @@ export function AdminProductsPanel() {
                   autoComplete="off"
                 />
               </label>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-3">
                 <label className="block space-y-1 text-sm">
                   <span className="text-muted">{t("admin.fields.price")}</span>
                   <input
@@ -607,6 +716,27 @@ export function AdminProductsPanel() {
                       }))
                     }
                   />
+                </label>
+                <label className="block space-y-1 text-sm">
+                  <span className="text-muted">
+                    {t("admin.fields.compare_at_price")}
+                  </span>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    className={fieldClass}
+                    placeholder={t("admin.compareAtPricePlaceholder")}
+                    value={form.compare_at_price}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        compare_at_price: e.target.value,
+                      }))
+                    }
+                  />
+                  <span className="block text-xs text-muted">
+                    {t("admin.compareAtPriceHint")}
+                  </span>
                 </label>
                 <label className="block space-y-1 text-sm">
                   <span className="text-muted">{t("admin.fields.stock")}</span>
@@ -632,12 +762,16 @@ export function AdminProductsPanel() {
                   <select
                     className={fieldClass}
                     value={form.category}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const nextCategory = categoryOptions.find(
+                        (item) => item.slug === e.target.value,
+                      );
                       setForm((prev) => ({
                         ...prev,
                         category: e.target.value,
-                      }))
-                    }
+                        product_type: nextCategory?.product_type ?? prev.product_type,
+                      }));
+                    }}
                   >
                     {categoryOptions.map((category) => (
                       <option key={category.slug} value={category.slug}>
@@ -695,6 +829,95 @@ export function AdminProductsPanel() {
                 />
                 <span className="text-muted">{t("admin.fields.is_new")}</span>
               </label>
+
+              <label className="flex min-h-12 items-center gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-5"
+                  checked={form.is_bundle}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      is_bundle: e.target.checked,
+                      bundleComponents: e.target.checked ? prev.bundleComponents : [],
+                    }))
+                  }
+                />
+                <span className="text-muted">{t("admin.fields.is_bundle")}</span>
+              </label>
+
+              {form.is_bundle ? (
+                <div className="space-y-2 rounded-xl border border-accent/30 bg-accent/5 p-3">
+                  <p className="text-sm font-medium text-primary">
+                    {t("admin.bundleComponentsTitle")}
+                  </p>
+                  <p className="text-xs text-muted">{t("admin.bundleComponentsHint")}</p>
+                  {form.bundleComponents.map((component, index) => (
+                    <div key={index} className="flex flex-wrap items-center gap-2">
+                      <select
+                        className={`${fieldClass} sm:max-w-xs`}
+                        value={component.productId}
+                        onChange={(e) => {
+                          const next = [...form.bundleComponents];
+                          next[index] = { ...component, productId: e.target.value };
+                          setForm((prev) => ({ ...prev, bundleComponents: next }));
+                        }}
+                      >
+                        <option value="">{t("admin.bundleComponentSelect")}</option>
+                        {products
+                          .filter((p) => !p.is_bundle && p.id !== form.id)
+                          .map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.name}
+                            </option>
+                          ))}
+                      </select>
+                      <input
+                        type="number"
+                        min={1}
+                        inputMode="numeric"
+                        className={`${fieldClass} sm:max-w-24`}
+                        value={String(component.quantity)}
+                        onChange={(e) => {
+                          const next = [...form.bundleComponents];
+                          next[index] = {
+                            ...component,
+                            quantity: Math.max(1, Number(e.target.value) || 1),
+                          };
+                          setForm((prev) => ({ ...prev, bundleComponents: next }));
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        size="md"
+                        variant="ghost"
+                        onClick={() => {
+                          const next = form.bundleComponents.filter((_, i) => i !== index);
+                          setForm((prev) => ({ ...prev, bundleComponents: next }));
+                        }}
+                      >
+                        {t("admin.removeBundleComponent")}
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    size="md"
+                    variant="primary-outline"
+                    onClick={() =>
+                      setForm((prev) => ({
+                        ...prev,
+                        bundleComponents: [
+                          ...prev.bundleComponents,
+                          { productId: "", quantity: 1 },
+                        ],
+                      }))
+                    }
+                  >
+                    {t("admin.addBundleComponent")}
+                  </Button>
+                </div>
+              ) : null}
             </fieldset>
 
             <fieldset className="space-y-3">

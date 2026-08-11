@@ -24,12 +24,14 @@ export async function POST(request: Request) {
     slug?: string;
     label_en?: string;
     label_es?: string;
+    product_type?: "hair_care" | "accessory";
   };
   const result = await adminCreateCategory({
     label: body.label ?? "",
     slug: body.slug,
     label_en: body.label_en,
     label_es: body.label_es,
+    product_type: body.product_type,
   });
   if (!result.category) {
     return NextResponse.json({ error: result.error }, { status: 400 });

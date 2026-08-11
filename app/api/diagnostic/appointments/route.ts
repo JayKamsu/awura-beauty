@@ -12,6 +12,7 @@ import {
   getDiagnosticSettings,
   updateAppointment,
 } from "@/lib/infrastructure/supabase/diagnostic-admin";
+import type { DiagnosticPhoto } from "@/lib/domain/diagnostic";
 
 /**
  * Réserve un créneau de diagnostic capillaire (présentiel).
@@ -25,6 +26,8 @@ export async function POST(request: Request) {
     phone?: string;
     startsAt?: string;
     answers?: Record<string, unknown>;
+    notes?: string;
+    photos?: DiagnosticPhoto[];
   };
 
   const email = String(body.email ?? "").trim();
@@ -32,6 +35,8 @@ export async function POST(request: Request) {
   const phone = String(body.phone ?? "").trim();
   const startsAt = String(body.startsAt ?? "").trim();
   const answers = normalizeAnswerMap(body.answers ?? {});
+  const notes = typeof body.notes === "string" ? body.notes.trim().slice(0, 2000) : "";
+  const photos = Array.isArray(body.photos) ? body.photos.slice(0, 5) : [];
 
   if (!email || !fullName || !phone || !startsAt) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
@@ -83,6 +88,8 @@ export async function POST(request: Request) {
     amountCents,
     currency: settings.currency,
     status: freeWithGamme ? "confirmed" : "pending_payment",
+    notes,
+    photos,
   });
 
   if (!appointment) {

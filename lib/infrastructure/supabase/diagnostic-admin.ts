@@ -59,6 +59,7 @@ function mapOption(
     hintFr: String(row.hint_fr ?? ""),
     hintEn: String(row.hint_en ?? ""),
     hintEs: String(row.hint_es ?? ""),
+    imageUrl: row.image_url ? String(row.image_url) : undefined,
     label: pickLocale(
       locale,
       String(row.label_fr ?? ""),
@@ -104,6 +105,7 @@ function mapQuestion(
       String(row.subtitle_en ?? ""),
       String(row.subtitle_es ?? ""),
     ),
+    allowUnknown: Boolean(row.allow_unknown),
     options: options
       .filter((o) => o.questionId === String(row.id) && o.enabled)
       .sort((a, b) => a.position - b.position),
@@ -226,6 +228,7 @@ export async function upsertDiagnosticQuestion(input: {
   subtitleFr: string;
   subtitleEn: string;
   subtitleEs: string;
+  allowUnknown?: boolean;
 }): Promise<DiagnosticQuestion | null> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return null;
@@ -241,6 +244,7 @@ export async function upsertDiagnosticQuestion(input: {
     subtitle_fr: input.subtitleFr,
     subtitle_en: input.subtitleEn,
     subtitle_es: input.subtitleEs,
+    allow_unknown: input.allowUnknown ?? false,
   };
 
   const query = input.id
@@ -276,6 +280,7 @@ export async function upsertDiagnosticOption(input: {
   hintFr: string;
   hintEn: string;
   hintEs: string;
+  imageUrl?: string;
   scoreRules: Record<string, number>;
 }): Promise<DiagnosticOption | null> {
   const supabase = createAdminSupabaseClient();
@@ -292,6 +297,7 @@ export async function upsertDiagnosticOption(input: {
     hint_fr: input.hintFr,
     hint_en: input.hintEn,
     hint_es: input.hintEs,
+    image_url: input.imageUrl ?? null,
     score_rules: input.scoreRules,
   };
 
@@ -447,6 +453,9 @@ function mapAppointment(row: Record<string, unknown>): DiagnosticAppointment {
       ? String(row.stripe_session_id)
       : null,
     notes: String(row.notes ?? ""),
+    photos: Array.isArray(row.photos)
+      ? (row.photos as DiagnosticAppointment["photos"])
+      : undefined,
     createdAt: String(row.created_at),
   };
 }
@@ -506,6 +515,8 @@ export async function createAppointment(input: {
   amountCents: number;
   currency: string;
   status?: DiagnosticAppointmentStatus;
+  notes?: string;
+  photos?: DiagnosticAppointment["photos"];
 }): Promise<DiagnosticAppointment | null> {
   const supabase = createAdminSupabaseClient() ?? createSupabaseClient();
   if (!supabase) return null;
@@ -520,8 +531,10 @@ export async function createAppointment(input: {
       ends_at: input.endsAt,
       status: input.status ?? "pending_payment",
       answers: input.answers,
+      notes: input.notes ?? "",
       amount_cents: input.amountCents,
       currency: input.currency,
+      photos: input.photos ?? [],
     })
     .select("*")
     .maybeSingle();
@@ -629,6 +642,10 @@ export function mapDiagnosticRecord(
     channel: (row.channel as DiagnosticChannel) || "online",
     appointment_id: row.appointment_id ? String(row.appointment_id) : null,
     routine: (row.routine as DiagnosticRoutineStep[]) ?? [],
+    notes: row.notes ? String(row.notes) : undefined,
+    photos: Array.isArray(row.photos)
+      ? (row.photos as DiagnosticRecord["photos"])
+      : undefined,
     created_at: String(row.created_at),
   };
 }

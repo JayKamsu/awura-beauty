@@ -12,15 +12,27 @@ export type ProductCategory = {
   label_en: string;
   label_es: string;
   position: number;
+  /** Groupe de produit rattaché à la catégorie : soin capillaire ou accessoire/fibre. */
+  product_type: "hair_care" | "accessory";
 };
 
-const FALLBACK_LABELS: Record<string, { fr: string; en: string; es: string }> = {
-  hydratation: { fr: "Hydratation", en: "Hydration", es: "Hidratación" },
-  demelage: { fr: "Démêlage", en: "Detangling", es: "Desenredado" },
-  soin: { fr: "Soin", en: "Care", es: "Cuidado" },
-  pousse: { fr: "Pousse", en: "Growth", es: "Crecimiento" },
-  nettoyage: { fr: "Nettoyage", en: "Cleansing", es: "Limpieza" },
-  routine: { fr: "Routine", en: "Routine", es: "Rutina" },
+const FALLBACK_LABELS: Record<
+  string,
+  { fr: string; en: string; es: string; product_type: "hair_care" | "accessory" }
+> = {
+  hydratation: { fr: "Hydratation", en: "Hydration", es: "Hidratación", product_type: "hair_care" },
+  demelage: { fr: "Démêlage", en: "Detangling", es: "Desenredado", product_type: "hair_care" },
+  soin: { fr: "Soin", en: "Care", es: "Cuidado", product_type: "hair_care" },
+  pousse: { fr: "Pousse", en: "Growth", es: "Crecimiento", product_type: "hair_care" },
+  nettoyage: { fr: "Nettoyage", en: "Cleansing", es: "Limpieza", product_type: "hair_care" },
+  routine: { fr: "Routine", en: "Routine", es: "Rutina", product_type: "hair_care" },
+  "fibres-de-bananier": {
+    fr: "Fibres de bananier",
+    en: "Banana fiber",
+    es: "Fibra de plátano",
+    product_type: "accessory",
+  },
+  accessoires: { fr: "Accessoires", en: "Accessories", es: "Accesorios", product_type: "accessory" },
 };
 
 let demoCategories: ProductCategory[] = PRODUCT_CATEGORIES.map((slug, index) => {
@@ -28,6 +40,7 @@ let demoCategories: ProductCategory[] = PRODUCT_CATEGORIES.map((slug, index) => 
     fr: slug,
     en: slug,
     es: slug,
+    product_type: "hair_care" as const,
   };
   return {
     slug,
@@ -35,6 +48,7 @@ let demoCategories: ProductCategory[] = PRODUCT_CATEGORIES.map((slug, index) => 
     label_en: labels.en,
     label_es: labels.es,
     position: (index + 1) * 10,
+    product_type: labels.product_type,
   };
 });
 
@@ -45,6 +59,7 @@ function mapRow(row: Record<string, unknown>): ProductCategory {
     label_en: String(row.label_en ?? ""),
     label_es: String(row.label_es ?? ""),
     position: Number(row.position ?? 0),
+    product_type: row.product_type === "accessory" ? "accessory" : "hair_care",
   };
 }
 
@@ -65,7 +80,7 @@ export async function listProductCategories(): Promise<ProductCategory[]> {
   if (supabase) {
     const { data, error } = await supabase
       .from("product_categories")
-      .select("slug,label,label_en,label_es,position")
+      .select("slug,label,label_en,label_es,position,product_type")
       .order("position", { ascending: true });
     if (!error && data && data.length > 0) {
       return data.map((row) => mapRow(row as Record<string, unknown>));
@@ -90,11 +105,13 @@ export async function adminCreateCategory(input: {
   slug?: string;
   label_en?: string;
   label_es?: string;
+  product_type?: "hair_care" | "accessory";
 }): Promise<{ category?: ProductCategory; error?: string }> {
   const label = input.label.trim();
   if (!label) return { error: "label required" };
   const slug = (input.slug?.trim() ? slugify(input.slug) : slugify(label)) || "";
   if (!slug) return { error: "slug required" };
+  const productType = input.product_type === "accessory" ? "accessory" : "hair_care";
 
   const supabase = createAdminSupabaseClient();
   if (supabase) {
@@ -107,11 +124,12 @@ export async function adminCreateCategory(input: {
       label_en: (input.label_en ?? label).trim(),
       label_es: (input.label_es ?? label).trim(),
       position,
+      product_type: productType,
     };
     const { data, error } = await supabase
       .from("product_categories")
       .insert(payload)
-      .select("slug,label,label_en,label_es,position")
+      .select("slug,label,label_en,label_es,position,product_type")
       .single();
     if (error || !data) {
       return { error: error?.message ?? "insert failed" };
@@ -130,6 +148,7 @@ export async function adminCreateCategory(input: {
     label_en: (input.label_en ?? label).trim(),
     label_es: (input.label_es ?? label).trim(),
     position,
+    product_type: productType,
   };
   demoCategories = [...demoCategories, category];
   return { category };

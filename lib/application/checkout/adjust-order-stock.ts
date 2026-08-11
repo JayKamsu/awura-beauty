@@ -1,12 +1,12 @@
-import { GAMME_COMPLETE_COMPONENT_SLUGS, isGammeCompleteSlug } from "@/lib/domain/bundle";
+import { getBundleComponents } from "@/lib/infrastructure/supabase/bundles";
 import { createAdminSupabaseClient } from "@/lib/infrastructure/supabase/client";
 import { getProductsBySlugs } from "@/lib/infrastructure/supabase/products";
 import type { OrderItem } from "@/lib/infrastructure/supabase/order-types";
 
 /**
  * Déltas de stock par produit réel pour les lignes d'une commande.
- * Le pack "gamme complète" n'a pas son propre stock physique : il répercute
- * la quantité sur ses 5 composants.
+ * Un bundle (offre promo multi-produits) n'a pas son propre stock physique :
+ * il répercute la quantité sur ses composants (bundle_items).
  */
 async function stockDeltasForItems(
   items: OrderItem[],
@@ -17,21 +17,16 @@ async function stockDeltasForItems(
     deltas.set(productId, (deltas.get(productId) ?? 0) + sign * quantity);
   };
 
-  const bundleSlugs = items
-    .filter((item) => isGammeCompleteSlug(item.slug))
-    .map(() => [...GAMME_COMPLETE_COMPONENT_SLUGS])
-    .flat();
-
-  const components = bundleSlugs.length
-    ? await getProductsBySlugs([...new Set(bundleSlugs)])
-    : [];
-  const componentBySlug = new Map(components.map((p) => [p.slug, p]));
+  const slugs = [...new Set(items.map((item) => item.slug))];
+  const products = await getProductsBySlugs(slugs);
+  const bySlug = new Map(products.map((p) => [p.slug, p]));
 
   for (const item of items) {
-    if (isGammeCompleteSlug(item.slug)) {
-      for (const componentSlug of GAMME_COMPLETE_COMPONENT_SLUGS) {
-        const component = componentBySlug.get(componentSlug);
-        if (component) add(component.id, item.quantity);
+    const product = bySlug.get(item.slug);
+    if (product?.is_bundle) {
+      const components = await getBundleComponents(product.id);
+      for (const component of components) {
+        add(component.product.id, component.quantity * item.quantity);
       }
       continue;
     }

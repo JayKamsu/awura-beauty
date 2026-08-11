@@ -83,6 +83,10 @@ export type DiagnosticRecord = {
   channel: DiagnosticChannel;
   appointment_id: string | null;
   routine: DiagnosticRoutineStep[];
+  /** Notes libres ajoutées par le client en fin de questionnaire. */
+  notes?: string;
+  /** Photos jointes (face, profils, arrière, pointes) — chemins de stockage privé. */
+  photos?: DiagnosticPhoto[];
   created_at: string;
 };
 
@@ -101,7 +105,23 @@ export type DiagnosticOption = {
   hintFr: string;
   hintEn: string;
   hintEs: string;
+  /** Image illustrative optionnelle (ex : texture 4A/4B/4C) — URL externe. */
+  imageUrl?: string;
   scoreRules: Record<string, number>;
+};
+
+/** Angle de prise de vue pour les photos jointes à un diagnostic. */
+export type DiagnosticPhotoAngle =
+  | "face"
+  | "profil_gauche"
+  | "profil_droit"
+  | "arriere"
+  | "pointes";
+
+/** Photo jointe à un diagnostic : angle + chemin de stockage privé. */
+export type DiagnosticPhoto = {
+  angle: DiagnosticPhotoAngle;
+  path: string;
 };
 
 /** Question de diagnostic configurable (admin), avec ses options i18n. */
@@ -119,6 +139,8 @@ export type DiagnosticQuestion = {
   subtitleFr: string;
   subtitleEn: string;
   subtitleEs: string;
+  /** Autorise une réponse "Je ne sais pas" en plus des options listées. */
+  allowUnknown?: boolean;
   options: DiagnosticOption[];
 };
 
@@ -173,6 +195,8 @@ export type DiagnosticAppointment = {
   currency: string;
   stripeSessionId: string | null;
   notes: string;
+  /** Photos jointes (face, profils, arrière, pointes) — chemins de stockage privé. */
+  photos?: DiagnosticPhoto[];
   createdAt: string;
 };
 

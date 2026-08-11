@@ -32,6 +32,7 @@ export type {
   DiagnosticChannel,
   DiagnosticLocale,
   DiagnosticOption,
+  DiagnosticPhoto,
   DiagnosticProfile,
   DiagnosticQuestion,
   DiagnosticRecord,

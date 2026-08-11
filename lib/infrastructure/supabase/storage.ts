@@ -2,9 +2,12 @@ import { createAdminSupabaseClient } from "@/lib/infrastructure/supabase/client"
 
 const BUCKET = "media";
 const LABEL_BUCKET = "shipping-labels";
+const DIAGNOSTIC_PHOTOS_BUCKET = "diagnostic-photos";
 const MAX_BYTES = 5 * 1024 * 1024;
 /** Durée de vie d'une URL signée d'étiquette (secondes) — assez pour ouvrir/imprimer, jamais permanent. */
 const LABEL_SIGNED_URL_TTL_SECONDS = 5 * 60;
+/** Durée de vie d'une URL signée de photo diagnostic (secondes) — accès admin ponctuel. */
+const DIAGNOSTIC_PHOTO_SIGNED_URL_TTL_SECONDS = 5 * 60;
 
 const ALLOWED_MIME: Record<string, string> = {
   "image/jpeg": ".jpg",
@@ -204,6 +207,106 @@ export async function getSignedLabelUrl(
 
   if (error || !data?.signedUrl) {
     return { url: null, error: error?.message ?? "Unable to sign label URL" };
+  }
+
+  return { url: data.signedUrl, error: null };
+}
+
+/** Assure l’existence du bucket privé `diagnostic-photos` (idempotent) — photos personnelles, jamais publiques. */
+export async function ensureDiagnosticPhotosBucket(): Promise<{
+  ok: boolean;
+  error?: string;
+}> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return { ok: false, error: "Supabase admin client unavailable" };
+  }
+
+  const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+  if (listError) return { ok: false, error: listError.message };
+
+  const exists = buckets?.some((b) => b.name === DIAGNOSTIC_PHOTOS_BUCKET);
+  if (exists) return { ok: true };
+
+  const { error: createError } = await supabase.storage.createBucket(
+    DIAGNOSTIC_PHOTOS_BUCKET,
+    {
+      public: false,
+      fileSizeLimit: MAX_BYTES,
+      allowedMimeTypes: Object.keys(ALLOWED_MIME),
+    },
+  );
+
+  if (createError && !/already exists/i.test(createError.message)) {
+    return { ok: false, error: createError.message };
+  }
+
+  return { ok: true };
+}
+
+/**
+ * Upload une photo de diagnostic (JPEG/PNG/WebP, max 5 Mo) dans le bucket privé.
+ * Retourne le chemin de stockage — jamais d'URL publique ; utiliser
+ * `getSignedDiagnosticPhotoUrl` pour un accès temporaire (admin).
+ */
+export async function uploadDiagnosticPhoto(
+  file: File,
+  sessionId: string,
+): Promise<{ path: string | null; error: string | null }> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return { path: null, error: "Supabase is not configured" };
+  }
+
+  if (file.size <= 0 || file.size > MAX_BYTES) {
+    return { path: null, error: "File must be between 1 byte and 5 MB" };
+  }
+
+  const mime = file.type.toLowerCase();
+  const ext = ALLOWED_MIME[mime];
+  if (!ext) {
+    return { path: null, error: "Only JPEG, PNG and WebP images are allowed" };
+  }
+
+  const ensured = await ensureDiagnosticPhotosBucket();
+  if (!ensured.ok) {
+    return {
+      path: null,
+      error: ensured.error ?? "Unable to ensure diagnostic photos bucket",
+    };
+  }
+
+  const safeSession = sessionId.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 48);
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
+  const path = `${safeSession}/${filename}`;
+  const bytes = Buffer.from(await file.arrayBuffer());
+
+  const { error } = await supabase.storage
+    .from(DIAGNOSTIC_PHOTOS_BUCKET)
+    .upload(path, bytes, { contentType: mime, upsert: false });
+
+  if (error) {
+    return { path: null, error: error.message };
+  }
+
+  return { path, error: null };
+}
+
+/** URL signée temporaire vers une photo de diagnostic privée (aperçu admin). */
+export async function getSignedDiagnosticPhotoUrl(
+  path: string,
+): Promise<{ url: string | null; error: string | null }> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) {
+    return { url: null, error: "Supabase is not configured" };
+  }
+
+  const { data, error } = await supabase.storage
+    .from(DIAGNOSTIC_PHOTOS_BUCKET)
+    .createSignedUrl(path, DIAGNOSTIC_PHOTO_SIGNED_URL_TTL_SECONDS);
+
+  if (error || !data?.signedUrl) {
+    return { url: null, error: error?.message ?? "Unable to sign photo URL" };
   }
 
   return { url: data.signedUrl, error: null };

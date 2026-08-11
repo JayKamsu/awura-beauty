@@ -20,6 +20,15 @@ type RawQuestion = Omit<DiagnosticQuestion, "title" | "subtitle" | "options"> & 
   options: Omit<DiagnosticOption, "label" | "hint">[];
 };
 
+/** Images illustratives (texture capillaire) — photos Unsplash (libres de droits), une par catégorie. */
+const TEXTURE_IMAGES: Record<string, string> = {
+  "4a": "https://images.unsplash.com/photo-1613498382159-0972b7b4c9f1?w=320&q=75&fit=crop&crop=faces",
+  "4b": "https://images.unsplash.com/photo-1632765866070-3fadf25d3d5b?w=320&q=75&fit=crop&crop=faces",
+  "4c": "https://images.unsplash.com/photo-1565357419076-6acd4a10094e?w=320&q=75&fit=crop&crop=faces",
+  "3abc": "https://images.unsplash.com/photo-1568046738123-300caca6d0ca?w=320&q=75&fit=crop&crop=faces",
+  locs: "https://images.unsplash.com/photo-1625536658395-2bd89a631e37?w=320&q=75&fit=crop&crop=faces",
+};
+
 function localizeQuestion(
   q: RawQuestion,
   locale: DiagnosticLocale,
@@ -44,6 +53,38 @@ function localizeQuestion(
   };
 }
 
+type OptInput = {
+  questionId: string;
+  valueKey: string;
+  position: number;
+  labelFr: string;
+  labelEn: string;
+  labelEs: string;
+  hintFr?: string;
+  hintEn?: string;
+  hintEs?: string;
+  imageUrl?: string;
+  scoreRules: Record<string, number>;
+};
+
+function opt(input: OptInput): Omit<DiagnosticOption, "label" | "hint"> {
+  return {
+    id: `${input.questionId}-${input.valueKey}`,
+    questionId: input.questionId,
+    valueKey: input.valueKey,
+    position: input.position,
+    enabled: true,
+    labelFr: input.labelFr,
+    labelEn: input.labelEn,
+    labelEs: input.labelEs,
+    hintFr: input.hintFr ?? "",
+    hintEn: input.hintEn ?? "",
+    hintEs: input.hintEs ?? "",
+    imageUrl: input.imageUrl,
+    scoreRules: input.scoreRules,
+  };
+}
+
 const FALLBACK_QUESTIONS: RawQuestion[] = [
   {
     id: "fb-texture",
@@ -51,18 +92,20 @@ const FALLBACK_QUESTIONS: RawQuestion[] = [
     channel: "online" as DiagnosticQuestionChannel,
     position: 0,
     enabled: true,
+    allowUnknown: true,
     titleFr: "Quelle est la texture de ta couronne ?",
     titleEn: "What is your crown texture?",
     titleEs: "¿Cuál es la textura de tu corona?",
-    subtitleFr: "Choisis la description la plus proche de tes cheveux au naturel.",
-    subtitleEn: "Pick the description closest to your natural hair.",
-    subtitleEs: "Elige la descripción más cercana a tu cabello natural.",
+    subtitleFr: "Choisis la description la plus proche de tes cheveux au naturel — aide-toi des photos si tu hésites.",
+    subtitleEn: "Pick the description closest to your natural hair — use the photos if you're unsure.",
+    subtitleEs: "Elige la descripción más cercana a tu cabello natural — usa las fotos si dudas.",
     options: [
-      opt("fb-texture", "4a", 0, "4A — Bouclés serrés", "4A — Tight curls", "4A — Rizos apretados", "Ressorts définis", "Defined springs", "Muelles definidos", { "demelant-nourrissant": 1, "beurre-capillaire": 1 }),
-      opt("fb-texture", "4b", 1, "4B — Crépus", "4B — Coily", "4B — Crespo", "Angles en Z", "Z-pattern", "Patrón en Z", { "beurre-capillaire": 2, "masque-capillaire": 1 }),
-      opt("fb-texture", "4c", 2, "4C — Très crépus", "4C — Very coily", "4C — Muy crespo", "Shrinkage fort", "Strong shrinkage", "Encogimiento fuerte", { "beurre-capillaire": 3, "demelant-nourrissant": 2 }),
-      opt("fb-texture", "3abc", 3, "3A–3C — Bouclés", "3A–3C — Curly", "3A–3C — Rizado", "Boucles souples", "Soft curls", "Rizos suaves", { "demelant-nourrissant": 2 }),
-      opt("fb-texture", "locs", 4, "Locs / Tresses", "Locs / Braids", "Locs / Trenzas", "Styles protégés", "Protective styles", "Estilos protectores", { "lotion-repousse": 3, "savon-solide": 2 }),
+      opt({ questionId: "fb-texture", valueKey: "4a", position: 0, labelFr: "4A — Bouclés serrés", labelEn: "4A — Tight curls", labelEs: "4A — Rizos apretados", hintFr: "Ressorts définis", hintEn: "Defined springs", hintEs: "Muelles definidos", imageUrl: TEXTURE_IMAGES["4a"], scoreRules: { "demelant-nourrissant": 1, "beurre-capillaire": 1 } }),
+      opt({ questionId: "fb-texture", valueKey: "4b", position: 1, labelFr: "4B — Crépus", labelEn: "4B — Coily", labelEs: "4B — Crespo", hintFr: "Angles en Z", hintEn: "Z-pattern", hintEs: "Patrón en Z", imageUrl: TEXTURE_IMAGES["4b"], scoreRules: { "beurre-capillaire": 2, "masque-capillaire": 1 } }),
+      opt({ questionId: "fb-texture", valueKey: "4c", position: 2, labelFr: "4C — Très crépus", labelEn: "4C — Very coily", labelEs: "4C — Muy crespo", hintFr: "Shrinkage fort", hintEn: "Strong shrinkage", hintEs: "Encogimiento fuerte", imageUrl: TEXTURE_IMAGES["4c"], scoreRules: { "beurre-capillaire": 3, "demelant-nourrissant": 2 } }),
+      opt({ questionId: "fb-texture", valueKey: "3abc", position: 3, labelFr: "3A–3C — Bouclés", labelEn: "3A–3C — Curly", labelEs: "3A–3C — Rizado", hintFr: "Boucles souples", hintEn: "Soft curls", hintEs: "Rizos suaves", imageUrl: TEXTURE_IMAGES["3abc"], scoreRules: { "demelant-nourrissant": 2 } }),
+      opt({ questionId: "fb-texture", valueKey: "locs", position: 4, labelFr: "Locs / Tresses", labelEn: "Locs / Braids", labelEs: "Locs / Trenzas", hintFr: "Styles protégés", hintEn: "Protective styles", hintEs: "Estilos protectores", imageUrl: TEXTURE_IMAGES.locs, scoreRules: { "lotion-repousse": 3, "savon-solide": 2 } }),
+      opt({ questionId: "fb-texture", valueKey: "dont_know", position: 5, labelFr: "Je ne sais pas", labelEn: "I don't know", labelEs: "No lo sé", hintFr: "Pas grave, on affine ensemble", hintEn: "No worries, we'll refine together", hintEs: "No pasa nada, lo afinamos juntas", scoreRules: {} }),
     ],
   },
   {
@@ -71,16 +114,18 @@ const FALLBACK_QUESTIONS: RawQuestion[] = [
     channel: "online",
     position: 1,
     enabled: true,
+    allowUnknown: true,
     titleFr: "Comment ton cheveu absorbe-t-il l’eau et les soins ?",
     titleEn: "How does your hair absorb water and products?",
     titleEs: "¿Cómo absorbe tu cabello el agua y los productos?",
-    subtitleFr: "La porosité guide l’hydratation et le scellement.",
-    subtitleEn: "Porosity guides hydration and sealing.",
-    subtitleEs: "La porosidad guía la hidratación y el sellado.",
+    subtitleFr: "La porosité guide l’hydratation et le scellement. Astuce : un cheveu propre et sec flotte (faible porosité) ou coule vite (forte porosité) dans un verre d’eau.",
+    subtitleEn: "Porosity guides hydration and sealing. Tip: a clean, dry strand floats (low porosity) or sinks fast (high porosity) in a glass of water.",
+    subtitleEs: "La porosidad guía la hidratación y el sellado. Truco: un mechón limpio y seco flota (baja porosidad) o se hunde rápido (alta) en un vaso de agua.",
     options: [
-      opt("fb-porosity", "low", 0, "Faible", "Low", "Baja", "L’eau perle", "Water beads", "El agua perla", { "demelant-nourrissant": 3, "masque-capillaire": 2 }),
-      opt("fb-porosity", "medium", 1, "Moyenne", "Medium", "Media", "Équilibre", "Balanced", "Equilibrio", { "masque-capillaire": 2, "beurre-capillaire": 2 }),
-      opt("fb-porosity", "high", 2, "Élevée", "High", "Alta", "Absorbe vite", "Absorbs fast", "Absorbe rápido", { "beurre-capillaire": 4, "masque-capillaire": 3 }),
+      opt({ questionId: "fb-porosity", valueKey: "low", position: 0, labelFr: "Faible", labelEn: "Low", labelEs: "Baja", hintFr: "L’eau perle, sèche lentement", hintEn: "Water beads, dries slowly", hintEs: "El agua perla, seca lento", scoreRules: { "demelant-nourrissant": 3, "masque-capillaire": 2 } }),
+      opt({ questionId: "fb-porosity", valueKey: "medium", position: 1, labelFr: "Moyenne", labelEn: "Medium", labelEs: "Media", hintFr: "Équilibre, sèche normalement", hintEn: "Balanced, dries at a normal pace", hintEs: "Equilibrio, seca de forma normal", scoreRules: { "masque-capillaire": 2, "beurre-capillaire": 2 } }),
+      opt({ questionId: "fb-porosity", valueKey: "high", position: 2, labelFr: "Élevée", labelEn: "High", labelEs: "Alta", hintFr: "Absorbe et sèche très vite", hintEn: "Absorbs and dries very fast", hintEs: "Absorbe y seca muy rápido", scoreRules: { "beurre-capillaire": 4, "masque-capillaire": 3 } }),
+      opt({ questionId: "fb-porosity", valueKey: "dont_know", position: 3, labelFr: "Je ne sais pas", labelEn: "I don't know", labelEs: "No lo sé", hintFr: "On pourra tester ensemble", hintEn: "We can test it together", hintEs: "Podemos probarlo juntas", scoreRules: {} }),
     ],
   },
   {
@@ -89,6 +134,7 @@ const FALLBACK_QUESTIONS: RawQuestion[] = [
     channel: "online",
     position: 2,
     enabled: true,
+    allowUnknown: true,
     titleFr: "Comment va ton cuir chevelu ?",
     titleEn: "How is your scalp?",
     titleEs: "¿Cómo está tu cuero cabelludo?",
@@ -96,11 +142,12 @@ const FALLBACK_QUESTIONS: RawQuestion[] = [
     subtitleEn: "A comfortable scalp is the foundation of growth.",
     subtitleEs: "Un cuero cabelludo cómodo es la base del crecimiento.",
     options: [
-      opt("fb-scalp", "dry", 0, "Sec / tiraillements", "Dry / tight", "Seco / tirante", "", "", "", { "lotion-repousse": 3, "beurre-capillaire": 2 }),
-      opt("fb-scalp", "oily", 1, "Gras", "Oily", "Graso", "", "", "", { "savon-solide": 4 }),
-      opt("fb-scalp", "sensitive", 2, "Sensible", "Sensitive", "Sensible", "", "", "", { "savon-solide": 2, "lotion-repousse": 2 }),
-      opt("fb-scalp", "flaky", 3, "Pellicules", "Flaky", "Con caspa", "", "", "", { "savon-solide": 3, "lotion-repousse": 3 }),
-      opt("fb-scalp", "balanced", 4, "Équilibré", "Balanced", "Equilibrado", "", "", "", { "demelant-nourrissant": 1 }),
+      opt({ questionId: "fb-scalp", valueKey: "dry", position: 0, labelFr: "Sec / tiraillements", labelEn: "Dry / tight", labelEs: "Seco / tirante", scoreRules: { "lotion-repousse": 3, "beurre-capillaire": 2 } }),
+      opt({ questionId: "fb-scalp", valueKey: "oily", position: 1, labelFr: "Gras", labelEn: "Oily", labelEs: "Graso", hintFr: "Recharge vite après le lavage", hintEn: "Gets oily fast after washing", hintEs: "Se engrasa rápido tras lavar", scoreRules: { "savon-solide": 4 } }),
+      opt({ questionId: "fb-scalp", valueKey: "sensitive", position: 2, labelFr: "Sensible", labelEn: "Sensitive", labelEs: "Sensible", hintFr: "Picotements, rougeurs", hintEn: "Tingling, redness", hintEs: "Picazón, enrojecimiento", scoreRules: { "savon-solide": 2, "lotion-repousse": 2 } }),
+      opt({ questionId: "fb-scalp", valueKey: "flaky", position: 3, labelFr: "Pellicules", labelEn: "Flaky", labelEs: "Con caspa", scoreRules: { "savon-solide": 3, "lotion-repousse": 3 } }),
+      opt({ questionId: "fb-scalp", valueKey: "balanced", position: 4, labelFr: "Équilibré", labelEn: "Balanced", labelEs: "Equilibrado", scoreRules: { "demelant-nourrissant": 1 } }),
+      opt({ questionId: "fb-scalp", valueKey: "dont_know", position: 5, labelFr: "Je ne sais pas", labelEn: "I don't know", labelEs: "No lo sé", scoreRules: {} }),
     ],
   },
   {
@@ -109,6 +156,7 @@ const FALLBACK_QUESTIONS: RawQuestion[] = [
     channel: "online",
     position: 3,
     enabled: true,
+    allowUnknown: true,
     titleFr: "Comment se passe le démêlage ?",
     titleEn: "How is detangling?",
     titleEs: "¿Cómo es el desenredo?",
@@ -116,9 +164,10 @@ const FALLBACK_QUESTIONS: RawQuestion[] = [
     subtitleEn: "We adapt conditioner and leave-in time.",
     subtitleEs: "Adaptamos el acondicionador y el tiempo.",
     options: [
-      opt("fb-detangle", "easy", 0, "Facile", "Easy", "Fácil", "", "", "", { "demelant-nourrissant": 1 }),
-      opt("fb-detangle", "moderate", 1, "Moyen", "Moderate", "Moderado", "", "", "", { "demelant-nourrissant": 3 }),
-      opt("fb-detangle", "hard", 2, "Difficile / casse", "Hard / breakage", "Difícil / rotura", "", "", "", { "demelant-nourrissant": 5, "masque-capillaire": 2 }),
+      opt({ questionId: "fb-detangle", valueKey: "easy", position: 0, labelFr: "Facile", labelEn: "Easy", labelEs: "Fácil", scoreRules: { "demelant-nourrissant": 1 } }),
+      opt({ questionId: "fb-detangle", valueKey: "moderate", position: 1, labelFr: "Moyen", labelEn: "Moderate", labelEs: "Moderado", scoreRules: { "demelant-nourrissant": 3 } }),
+      opt({ questionId: "fb-detangle", valueKey: "hard", position: 2, labelFr: "Difficile / casse", labelEn: "Hard / breakage", labelEs: "Difícil / rotura", scoreRules: { "demelant-nourrissant": 5, "masque-capillaire": 2 } }),
+      opt({ questionId: "fb-detangle", valueKey: "dont_know", position: 3, labelFr: "Je ne sais pas", labelEn: "I don't know", labelEs: "No lo sé", scoreRules: {} }),
     ],
   },
   {
@@ -134,11 +183,12 @@ const FALLBACK_QUESTIONS: RawQuestion[] = [
     subtitleEn: "We prioritize a clear routine around your goal.",
     subtitleEs: "Priorizamos una rutina clara según tu meta.",
     options: [
-      opt("fb-goal", "hydration", 0, "Hydratation", "Hydration", "Hidratación", "", "", "", { "beurre-capillaire": 5, "masque-capillaire": 3 }),
-      opt("fb-goal", "length", 1, "Pousse / longueur", "Growth / length", "Crecimiento", "", "", "", { "lotion-repousse": 5, "masque-capillaire": 2 }),
-      opt("fb-goal", "definition", 2, "Définition", "Definition", "Definición", "", "", "", { "demelant-nourrissant": 4, "beurre-capillaire": 3 }),
-      opt("fb-goal", "repair", 3, "Réparation", "Repair", "Reparación", "", "", "", { "masque-capillaire": 5, "beurre-capillaire": 3 }),
-      opt("fb-goal", "volume", 4, "Volume", "Volume", "Volumen", "", "", "", { "savon-solide": 2, "lotion-repousse": 3 }),
+      opt({ questionId: "fb-goal", valueKey: "hydration", position: 0, labelFr: "Hydratation", labelEn: "Hydration", labelEs: "Hidratación", scoreRules: { "beurre-capillaire": 5, "masque-capillaire": 3 } }),
+      opt({ questionId: "fb-goal", valueKey: "length", position: 1, labelFr: "Pousse / longueur", labelEn: "Growth / length", labelEs: "Crecimiento", scoreRules: { "lotion-repousse": 5, "masque-capillaire": 2 } }),
+      opt({ questionId: "fb-goal", valueKey: "definition", position: 2, labelFr: "Définition", labelEn: "Definition", labelEs: "Definición", scoreRules: { "demelant-nourrissant": 4, "beurre-capillaire": 3 } }),
+      opt({ questionId: "fb-goal", valueKey: "repair", position: 3, labelFr: "Réparation", labelEn: "Repair", labelEs: "Reparación", scoreRules: { "masque-capillaire": 5, "beurre-capillaire": 3 } }),
+      opt({ questionId: "fb-goal", valueKey: "volume", position: 4, labelFr: "Volume", labelEn: "Volume", labelEs: "Volumen", scoreRules: { "savon-solide": 2, "lotion-repousse": 3 } }),
+      opt({ questionId: "fb-goal", valueKey: "hair_loss", position: 5, labelFr: "Chute", labelEn: "Hair loss", labelEs: "Caída", hintFr: "Freiner la chute et stimuler la repousse", hintEn: "Slow shedding and boost regrowth", hintEs: "Frenar la caída y estimular el crecimiento", scoreRules: { "lotion-repousse": 5 } }),
     ],
   },
   {
@@ -154,10 +204,10 @@ const FALLBACK_QUESTIONS: RawQuestion[] = [
     subtitleEn: "We fill the gaps in your regimen.",
     subtitleEs: "Completamos lo que falta en tu rutina.",
     options: [
-      opt("fb-routine", "minimal", 0, "Minimale", "Minimal", "Mínima", "", "", "", { "savon-solide": 2, "demelant-nourrissant": 2, "beurre-capillaire": 2 }),
-      opt("fb-routine", "wash_day", 1, "Wash day complet", "Full wash day", "Día de lavado", "", "", "", { "masque-capillaire": 2 }),
-      opt("fb-routine", "protective", 2, "Styles protégés", "Protective styles", "Estilos protectores", "", "", "", { "lotion-repousse": 3, "beurre-capillaire": 2 }),
-      opt("fb-routine", "heat", 3, "Chaleur / brushings", "Heat styling", "Calor", "", "", "", { "masque-capillaire": 4, "beurre-capillaire": 2 }),
+      opt({ questionId: "fb-routine", valueKey: "minimal", position: 0, labelFr: "Minimale", labelEn: "Minimal", labelEs: "Mínima", scoreRules: { "savon-solide": 2, "demelant-nourrissant": 2, "beurre-capillaire": 2 } }),
+      opt({ questionId: "fb-routine", valueKey: "wash_day", position: 1, labelFr: "Wash day complet", labelEn: "Full wash day", labelEs: "Día de lavado", scoreRules: { "masque-capillaire": 2 } }),
+      opt({ questionId: "fb-routine", valueKey: "protective", position: 2, labelFr: "Styles protégés", labelEn: "Protective styles", labelEs: "Estilos protectores", scoreRules: { "lotion-repousse": 3, "beurre-capillaire": 2 } }),
+      opt({ questionId: "fb-routine", valueKey: "heat", position: 3, labelFr: "Chaleur / brushings", labelEn: "Heat styling", labelEs: "Calor", scoreRules: { "masque-capillaire": 4, "beurre-capillaire": 2 } }),
     ],
   },
   {
@@ -173,9 +223,9 @@ const FALLBACK_QUESTIONS: RawQuestion[] = [
     subtitleEn: "Time, simplicity, or care intensity.",
     subtitleEs: "Tiempo, simplicidad o intensidad.",
     options: [
-      opt("fb-constraint", "fast", 0, "Routine rapide", "Quick routine", "Rutina rápida", "", "", "", { "savon-solide": 1, "beurre-capillaire": 2 }),
-      opt("fb-constraint", "complete", 1, "Routine complète Awura", "Full Awura routine", "Rutina Awura completa", "", "", "", { "savon-solide": 2, "demelant-nourrissant": 2, "masque-capillaire": 2, "lotion-repousse": 2, "beurre-capillaire": 2 }),
-      opt("fb-constraint", "growth_focus", 2, "Focus pousse", "Growth focus", "Foco crecimiento", "", "", "", { "lotion-repousse": 4, "beurre-capillaire": 2 }),
+      opt({ questionId: "fb-constraint", valueKey: "fast", position: 0, labelFr: "Routine rapide", labelEn: "Quick routine", labelEs: "Rutina rápida", scoreRules: { "savon-solide": 1, "beurre-capillaire": 2 } }),
+      opt({ questionId: "fb-constraint", valueKey: "complete", position: 1, labelFr: "Routine complète Awura", labelEn: "Full Awura routine", labelEs: "Rutina Awura completa", scoreRules: { "savon-solide": 2, "demelant-nourrissant": 2, "masque-capillaire": 2, "lotion-repousse": 2, "beurre-capillaire": 2 } }),
+      opt({ questionId: "fb-constraint", valueKey: "growth_focus", position: 2, labelFr: "Focus pousse", labelEn: "Growth focus", labelEs: "Foco crecimiento", scoreRules: { "lotion-repousse": 4, "beurre-capillaire": 2 } }),
     ],
   },
   {
@@ -184,18 +234,20 @@ const FALLBACK_QUESTIONS: RawQuestion[] = [
     channel: "physical_pre",
     position: 0,
     enabled: true,
+    allowUnknown: true,
     titleFr: "Texture principale",
     titleEn: "Main texture",
     titleEs: "Textura principal",
-    subtitleFr: "Pour préparer ton rendez-vous en salon.",
-    subtitleEn: "To prepare your in-person appointment.",
-    subtitleEs: "Para preparar tu cita en salón.",
+    subtitleFr: "Pour préparer ton rendez-vous en salon — aide-toi des photos si tu hésites.",
+    subtitleEn: "To prepare your in-person appointment — use the photos if you're unsure.",
+    subtitleEs: "Para preparar tu cita en salón — usa las fotos si dudas.",
     options: [
-      opt("fb-phys-texture", "4a", 0, "4A", "4A", "4A", "", "", "", {}),
-      opt("fb-phys-texture", "4b", 1, "4B", "4B", "4B", "", "", "", {}),
-      opt("fb-phys-texture", "4c", 2, "4C", "4C", "4C", "", "", "", {}),
-      opt("fb-phys-texture", "3abc", 3, "3A–3C", "3A–3C", "3A–3C", "", "", "", {}),
-      opt("fb-phys-texture", "locs", 4, "Locs / Tresses", "Locs / Braids", "Locs / Trenzas", "", "", "", {}),
+      opt({ questionId: "fb-phys-texture", valueKey: "4a", position: 0, labelFr: "4A", labelEn: "4A", labelEs: "4A", imageUrl: TEXTURE_IMAGES["4a"], scoreRules: {} }),
+      opt({ questionId: "fb-phys-texture", valueKey: "4b", position: 1, labelFr: "4B", labelEn: "4B", labelEs: "4B", imageUrl: TEXTURE_IMAGES["4b"], scoreRules: {} }),
+      opt({ questionId: "fb-phys-texture", valueKey: "4c", position: 2, labelFr: "4C", labelEn: "4C", labelEs: "4C", imageUrl: TEXTURE_IMAGES["4c"], scoreRules: {} }),
+      opt({ questionId: "fb-phys-texture", valueKey: "3abc", position: 3, labelFr: "3A–3C", labelEn: "3A–3C", labelEs: "3A–3C", imageUrl: TEXTURE_IMAGES["3abc"], scoreRules: {} }),
+      opt({ questionId: "fb-phys-texture", valueKey: "locs", position: 4, labelFr: "Locs / Tresses", labelEn: "Locs / Braids", labelEs: "Locs / Trenzas", imageUrl: TEXTURE_IMAGES.locs, scoreRules: {} }),
+      opt({ questionId: "fb-phys-texture", valueKey: "dont_know", position: 5, labelFr: "Je ne sais pas", labelEn: "I don't know", labelEs: "No lo sé", scoreRules: {} }),
     ],
   },
   {
@@ -211,10 +263,10 @@ const FALLBACK_QUESTIONS: RawQuestion[] = [
     subtitleEn: "What you want to go deeper on in person.",
     subtitleEs: "Lo que quieres profundizar en persona.",
     options: [
-      opt("fb-phys-goal", "hydration", 0, "Hydratation", "Hydration", "Hidratación", "", "", "", {}),
-      opt("fb-phys-goal", "length", 1, "Pousse", "Growth", "Crecimiento", "", "", "", {}),
-      opt("fb-phys-goal", "repair", 2, "Réparation", "Repair", "Reparación", "", "", "", {}),
-      opt("fb-phys-goal", "routine", 3, "Routine complète", "Full routine", "Rutina completa", "", "", "", {}),
+      opt({ questionId: "fb-phys-goal", valueKey: "hydration", position: 0, labelFr: "Hydratation", labelEn: "Hydration", labelEs: "Hidratación", scoreRules: {} }),
+      opt({ questionId: "fb-phys-goal", valueKey: "length", position: 1, labelFr: "Pousse", labelEn: "Growth", labelEs: "Crecimiento", scoreRules: {} }),
+      opt({ questionId: "fb-phys-goal", valueKey: "repair", position: 2, labelFr: "Réparation", labelEn: "Repair", labelEs: "Reparación", scoreRules: {} }),
+      opt({ questionId: "fb-phys-goal", valueKey: "routine", position: 3, labelFr: "Routine complète", labelEn: "Full routine", labelEs: "Rutina completa", scoreRules: {} }),
     ],
   },
   {
@@ -223,6 +275,7 @@ const FALLBACK_QUESTIONS: RawQuestion[] = [
     channel: "physical_pre",
     position: 2,
     enabled: true,
+    allowUnknown: true,
     titleFr: "Souci principal",
     titleEn: "Main concern",
     titleEs: "Preocupación principal",
@@ -230,10 +283,12 @@ const FALLBACK_QUESTIONS: RawQuestion[] = [
     subtitleEn: "What you feel most day to day.",
     subtitleEs: "Lo que más sientes a diario.",
     options: [
-      opt("fb-phys-concern", "dryness", 0, "Sécheresse", "Dryness", "Sequedad", "", "", "", {}),
-      opt("fb-phys-concern", "breakage", 1, "Casse", "Breakage", "Rotura", "", "", "", {}),
-      opt("fb-phys-concern", "scalp", 2, "Cuir chevelu", "Scalp", "Cuero cabelludo", "", "", "", {}),
-      opt("fb-phys-concern", "growth", 3, "Pousse lente", "Slow growth", "Crecimiento lento", "", "", "", {}),
+      opt({ questionId: "fb-phys-concern", valueKey: "dryness", position: 0, labelFr: "Sécheresse", labelEn: "Dryness", labelEs: "Sequedad", scoreRules: {} }),
+      opt({ questionId: "fb-phys-concern", valueKey: "breakage", position: 1, labelFr: "Casse", labelEn: "Breakage", labelEs: "Rotura", scoreRules: {} }),
+      opt({ questionId: "fb-phys-concern", valueKey: "scalp", position: 2, labelFr: "Cuir chevelu", labelEn: "Scalp", labelEs: "Cuero cabelludo", scoreRules: {} }),
+      opt({ questionId: "fb-phys-concern", valueKey: "growth", position: 3, labelFr: "Pousse lente", labelEn: "Slow growth", labelEs: "Crecimiento lento", scoreRules: {} }),
+      opt({ questionId: "fb-phys-concern", valueKey: "hair_loss", position: 4, labelFr: "Chute", labelEn: "Hair loss", labelEs: "Caída", scoreRules: {} }),
+      opt({ questionId: "fb-phys-concern", valueKey: "dont_know", position: 5, labelFr: "Je ne sais pas", labelEn: "I don't know", labelEs: "No lo sé", scoreRules: {} }),
     ],
   },
   {
@@ -249,37 +304,9 @@ const FALLBACK_QUESTIONS: RawQuestion[] = [
     subtitleEn: "We prioritize slots near your preference.",
     subtitleEs: "Priorizamos franjas cercanas a tu preferencia.",
     options: [
-      opt("fb-phys-pref", "morning", 0, "Matin", "Morning", "Mañana", "", "", "", {}),
-      opt("fb-phys-pref", "afternoon", 1, "Après-midi", "Afternoon", "Tarde", "", "", "", {}),
-      opt("fb-phys-pref", "flexible", 2, "Flexible", "Flexible", "Flexible", "", "", "", {}),
+      opt({ questionId: "fb-phys-pref", valueKey: "morning", position: 0, labelFr: "Matin", labelEn: "Morning", labelEs: "Mañana", scoreRules: {} }),
+      opt({ questionId: "fb-phys-pref", valueKey: "afternoon", position: 1, labelFr: "Après-midi", labelEn: "Afternoon", labelEs: "Tarde", scoreRules: {} }),
+      opt({ questionId: "fb-phys-pref", valueKey: "flexible", position: 2, labelFr: "Flexible", labelEn: "Flexible", labelEs: "Flexible", scoreRules: {} }),
     ],
   },
 ];
-
-function opt(
-  questionId: string,
-  valueKey: string,
-  position: number,
-  labelFr: string,
-  labelEn: string,
-  labelEs: string,
-  hintFr: string,
-  hintEn: string,
-  hintEs: string,
-  scoreRules: Record<string, number>,
-): Omit<DiagnosticOption, "label" | "hint"> {
-  return {
-    id: `${questionId}-${valueKey}`,
-    questionId,
-    valueKey,
-    position,
-    enabled: true,
-    labelFr,
-    labelEn,
-    labelEs,
-    hintFr,
-    hintEn,
-    hintEs,
-    scoreRules,
-  };
-}

@@ -13,6 +13,7 @@
       "payments": "Pagos",
       "loyalty": "Fidelidad",
       "diagnostics": "Diagnósticos",
+      "favorites": "Favoritos",
       "messages": "Mensajes",
       "security": "Seguridad"
     },
@@ -84,6 +85,10 @@
     "diagnosticsJoinVideo": "Unirse a la visio",
     "diagnosticsScalpAnalysis": "Análisis del cuero / tricograma",
     "diagnosticsAppointments": "Mis citas",
+    "favoritesTitle": "Mis favoritos",
+    "favoritesLoading": "Cargando favoritos…",
+    "favoritesEmpty": "Todavía no tienes favoritos. Añade productos con el icono de corazón.",
+    "favoritesBrowse": "Ver la tienda",
     "diagnosticsResults": "Mis resultados",
     "diagnosticsApptStatus": {
       "pending_payment": "Pago pendiente",

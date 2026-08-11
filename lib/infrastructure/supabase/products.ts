@@ -1,10 +1,8 @@
 import { createSupabaseClient } from "@/lib/infrastructure/supabase/client";
 import { FALLBACK_PRODUCTS } from "@/lib/infrastructure/supabase/fallback-products";
-import {
-  GAMME_COMPLETE_COMPONENT_SLUGS,
-  isGammeCompleteSlug,
-} from "@/lib/domain/bundle";
+import { getBundleComponents } from "@/lib/infrastructure/supabase/bundles";
 import type {
+  BundleComponent,
   ListProductsParams,
   ListProductsResult,
   ProductRow,
@@ -34,10 +32,26 @@ function paginate(
   };
 }
 
-function filterFallback(
-  category?: string | null,
-  universe?: "adult" | "child" | null,
-) {
+function sortProducts(
+  products: ProductRow[],
+  sort?: ListProductsParams["sort"],
+): ProductRow[] {
+  const list = [...products];
+  switch (sort) {
+    case "price_asc":
+      return list.sort((a, b) => a.price - b.price);
+    case "price_desc":
+      return list.sort((a, b) => b.price - a.price);
+    case "name_asc":
+      return list.sort((a, b) => a.name.localeCompare(b.name));
+    default:
+      return list;
+  }
+}
+
+function filterFallback(params: ListProductsParams) {
+  const { category, universe, productType, query, minPrice, maxPrice, inStockOnly, sort } =
+    params;
   let list = FALLBACK_PRODUCTS;
   if (category && category !== "all") {
     list = list.filter((product) => product.category === category);
@@ -45,7 +59,28 @@ function filterFallback(
   if (universe === "adult" || universe === "child") {
     list = list.filter((product) => product.universe === universe);
   }
-  return list;
+  if (productType) {
+    list = list.filter((product) => product.product_type === productType);
+  }
+  if (query?.trim()) {
+    const q = query.trim().toLowerCase();
+    list = list.filter(
+      (product) =>
+        product.name.toLowerCase().includes(q) ||
+        product.short_description.toLowerCase().includes(q) ||
+        product.description.toLowerCase().includes(q),
+    );
+  }
+  if (typeof minPrice === "number") {
+    list = list.filter((product) => product.price >= minPrice);
+  }
+  if (typeof maxPrice === "number") {
+    list = list.filter((product) => product.price <= maxPrice);
+  }
+  if (inStockOnly) {
+    list = list.filter((product) => product.stock > 0);
+  }
+  return sortProducts(list, sort);
 }
 
 function mapRow(row: Record<string, unknown>): ProductRow {
@@ -54,6 +89,10 @@ function mapRow(row: Record<string, unknown>): ProductRow {
     slug: String(row.slug ?? row.id),
     name: String(row.name ?? ""),
     price: Number(row.price ?? 0),
+    compare_at_price:
+      row.compare_at_price !== null && row.compare_at_price !== undefined
+        ? Number(row.compare_at_price)
+        : null,
     description: String(row.description ?? ""),
     short_description: String(row.short_description ?? row.description ?? ""),
     ingredients: String(row.ingredients ?? ""),
@@ -64,6 +103,8 @@ function mapRow(row: Record<string, unknown>): ProductRow {
       ? String(row.lifestyle_image_url)
       : null,
     category: String(row.category ?? "soin"),
+    product_type: row.product_type === "accessory" ? "accessory" : "hair_care",
+    is_bundle: Boolean(row.is_bundle),
     is_new: Boolean(row.is_new),
     stock: Number(row.stock ?? 0),
     shipping_fee: Number(row.shipping_fee ?? 0),
@@ -73,35 +114,55 @@ function mapRow(row: Record<string, unknown>): ProductRow {
   };
 }
 
-/** Liste paginée des produits avec filtres catégorie/univers ; retombe sur le catalogue local si Supabase échoue ou est vide. */
+/** Liste paginée des produits avec filtres catégorie/univers/recherche/prix/stock/tri ; retombe sur le catalogue local si Supabase échoue ou est vide. */
 export async function listProducts(
   params: ListProductsParams = {},
 ): Promise<ListProductsResult> {
   const page = params.page ?? 1;
   const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE;
-  const category = params.category;
-  const universe = params.universe;
+  const { category, universe, productType, query: search, minPrice, maxPrice, inStockOnly, sort } =
+    params;
 
   const supabase = createSupabaseClient();
   if (!supabase) {
-    return paginate(
-      filterFallback(category, universe),
-      page,
-      pageSize,
-      "fallback",
-    );
+    return paginate(filterFallback(params), page, pageSize, "fallback");
   }
 
-  let query = supabase
-    .from("products")
-    .select("*", { count: "exact" })
-    .order("created_at", { ascending: true });
+  let query = supabase.from("products").select("*", { count: "exact" });
+
+  if (sort === "price_asc") {
+    query = query.order("price", { ascending: true });
+  } else if (sort === "price_desc") {
+    query = query.order("price", { ascending: false });
+  } else if (sort === "name_asc") {
+    query = query.order("name", { ascending: true });
+  } else {
+    query = query.order("created_at", { ascending: true });
+  }
 
   if (category && category !== "all") {
     query = query.eq("category", category);
   }
   if (universe === "adult" || universe === "child") {
     query = query.eq("universe", universe);
+  }
+  if (productType) {
+    query = query.eq("product_type", productType);
+  }
+  if (search?.trim()) {
+    const escaped = search.trim().replace(/[%_]/g, (m) => `\\${m}`);
+    query = query.or(
+      `name.ilike.%${escaped}%,short_description.ilike.%${escaped}%,description.ilike.%${escaped}%`,
+    );
+  }
+  if (typeof minPrice === "number") {
+    query = query.gte("price", minPrice);
+  }
+  if (typeof maxPrice === "number") {
+    query = query.lte("price", maxPrice);
+  }
+  if (inStockOnly) {
+    query = query.gt("stock", 0);
   }
 
   const from = (Math.max(1, page) - 1) * pageSize;
@@ -110,12 +171,7 @@ export async function listProducts(
   const { data, error, count } = await query.range(from, to);
 
   if (error) {
-    return paginate(
-      filterFallback(category, universe),
-      page,
-      pageSize,
-      "fallback",
-    );
+    return paginate(filterFallback(params), page, pageSize, "fallback");
   }
 
   // Table vide / non seedée → fallback local
@@ -123,14 +179,11 @@ export async function listProducts(
     (count === 0 || !data) &&
     (!category || category === "all") &&
     !universe &&
+    !productType &&
+    !search &&
     page <= 1
   ) {
-    return paginate(
-      filterFallback(category, universe),
-      page,
-      pageSize,
-      "fallback",
-    );
+    return paginate(filterFallback(params), page, pageSize, "fallback");
   }
 
   const rows = data ?? [];
@@ -170,14 +223,16 @@ export async function getProductBySlug(slug: string): Promise<ProductRow | null>
 
   if (!product) return null;
 
-  if (isGammeCompleteSlug(product.slug)) {
-    const components = await getProductsBySlugs([
-      ...GAMME_COMPLETE_COMPONENT_SLUGS,
-    ]);
-    if (components.length === GAMME_COMPLETE_COMPONENT_SLUGS.length) {
+  if (product.is_bundle) {
+    const components = await getBundleComponents(product.id);
+    if (components.length > 0) {
       product = {
         ...product,
-        stock: Math.min(...components.map((row) => row.stock)),
+        stock: Math.min(
+          ...components.map((c: BundleComponent) =>
+            Math.floor(c.product.stock / c.quantity),
+          ),
+        ),
       };
     }
   }
@@ -258,5 +313,26 @@ export async function getProductsBySlugs(
 
   return slugs
     .map((slug) => FALLBACK_PRODUCTS.find((product) => product.slug === slug))
+    .filter(Boolean) as ProductRow[];
+}
+
+/** Récupère plusieurs produits par ids, en conservant l'ordre demandé (ex. hydratation des favoris). */
+export async function getProductsByIds(ids: string[]): Promise<ProductRow[]> {
+  if (ids.length === 0) return [];
+
+  const supabase = createSupabaseClient();
+  if (supabase) {
+    const { data, error } = await supabase.from("products").select("*").in("id", ids);
+
+    if (!error && data && data.length > 0) {
+      const mapped = data.map((row) => mapRow(row as Record<string, unknown>));
+      return ids
+        .map((id) => mapped.find((product) => product.id === id))
+        .filter(Boolean) as ProductRow[];
+    }
+  }
+
+  return ids
+    .map((id) => FALLBACK_PRODUCTS.find((product) => product.id === id))
     .filter(Boolean) as ProductRow[];
 }

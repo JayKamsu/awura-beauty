@@ -6,13 +6,27 @@
     "emailLabel": "E-mail de atención al cliente",
     "hours": "Disponible 6 días a la semana — respuesta en 24 a 48 horas laborables.",
     "fields": {
+      "subject": "Asunto",
       "name": "Nombre",
       "email": "E-mail",
+      "phone": "Teléfono",
+      "orderNumber": "Número de pedido",
       "message": "Mensaje"
     },
+    "subjects": {
+      "order": "Seguimiento de pedido",
+      "product": "Pregunta sobre un producto",
+      "diagnostic": "Diagnóstico capilar",
+      "shipping": "Envío",
+      "returns": "Devolución / reclamación",
+      "partnership": "Colaboración / prensa",
+      "other": "Otra solicitud"
+    },
+    "optional": "opcional",
+    "orderNumberPlaceholder": "Ej. AWURA-10234",
     "submit": "Enviar mensaje",
     "success": "Se abrirá tu cliente de correo con el mensaje listo para enviar.",
-    "mailSubject": "Contacto Awura Beauty — {{name}}",
+    "mailSubject": "Contacto Awura Beauty — {{subject}}",
     "anonymous": "Visitante"
   }
 }

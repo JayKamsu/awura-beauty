@@ -7,31 +7,25 @@ import { useTranslation } from "react-i18next";
 type ShopPaginationProps = {
   page: number;
   totalPages: number;
-  category?: string | null;
-  universe?: "adult" | "child" | null;
+  /** Paramètres additionnels à préserver dans l'URL (catégorie, univers, recherche, prix, tri…). */
+  extraParams?: Record<string, string | null | undefined>;
 };
 
-function buildHref(
-  page: number,
-  category?: string | null,
-  universe?: "adult" | "child" | null,
-) {
+function buildHref(page: number, extraParams: Record<string, string | null | undefined>) {
   const params = new URLSearchParams();
-  if (category && category !== "all") params.set("category", category);
-  if (universe === "adult" || universe === "child") {
-    params.set("universe", universe);
+  for (const [key, value] of Object.entries(extraParams)) {
+    if (value) params.set(key, value);
   }
   if (page > 1) params.set("page", String(page));
   const query = params.toString();
   return query ? `/boutique?${query}` : "/boutique";
 }
 
-/** Pagination précédent/suivant de la boutique, préserve la catégorie et l'univers actifs dans l'URL ; masquée s'il n'y a qu'une page. */
+/** Pagination précédent/suivant de la boutique, préserve tous les filtres actifs dans l'URL ; masquée s'il n'y a qu'une page. */
 export function ShopPagination({
   page,
   totalPages,
-  category,
-  universe,
+  extraParams = {},
 }: ShopPaginationProps) {
   const { t } = useTranslation();
 
@@ -44,7 +38,7 @@ export function ShopPagination({
     >
       {page > 1 ? (
         <Link
-          href={buildHref(page - 1, category, universe)}
+          href={buildHref(page - 1, extraParams)}
           className="inline-flex min-h-11 items-center rounded-xl border border-border px-4 text-sm text-foreground transition hover:border-accent"
         >
           {t("shop.prev")}
@@ -61,7 +55,7 @@ export function ShopPagination({
 
       {page < totalPages ? (
         <Link
-          href={buildHref(page + 1, category, universe)}
+          href={buildHref(page + 1, extraParams)}
           className="inline-flex min-h-11 items-center rounded-xl border border-border px-4 text-sm text-foreground transition hover:border-accent"
         >
           {t("shop.next")}

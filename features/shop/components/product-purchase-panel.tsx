@@ -6,8 +6,9 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import { useCart } from "@/features/cart/context/cart-provider";
+import { useFavorites } from "@/features/favorites/context/favorites-provider";
 import { formatPrice } from "@/lib/format/price";
-import { isGammeCompleteSlug } from "@/lib/domain/bundle";
+import { GAMME_COMPLETE_SLUG } from "@/lib/domain/bundle";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
 /** Props du panneau d'achat produit. */
@@ -20,13 +21,21 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();
   const { addItem } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
   const lowStock = product.stock > 0 && product.stock <= 5;
   const outOfStock = product.stock <= 0;
   const categoryKey = `shop.categories.${product.category}`;
-  const isGamme = isGammeCompleteSlug(product.slug);
+  const isBundle = product.is_bundle;
+  const isFlagshipGamme = product.slug === GAMME_COMPLETE_SLUG;
+  const hasDiscount = Boolean(
+    product.compare_at_price && product.compare_at_price > product.price,
+  );
+  const discountPercent = hasDiscount
+    ? Math.round((1 - product.price / product.compare_at_price!) * 100)
+    : 0;
   const handleAdd = () => {
     if (outOfStock) return;
     addItem(
@@ -69,9 +78,18 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
               {t("shop.newBadge")}
             </span>
           ) : null}
-          {isGamme ? (
+          {isFlagshipGamme ? (
             <span className="rounded-md bg-accent/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
               {t("shop.gammeOfferBadge")}
+            </span>
+          ) : isBundle ? (
+            <span className="rounded-md bg-accent/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
+              {t("shop.bundleBadge")}
+            </span>
+          ) : null}
+          {hasDiscount ? (
+            <span className="rounded-md bg-foreground px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-background">
+              {t("shop.discountBadge", { percent: discountPercent })}
             </span>
           ) : null}
         </div>
@@ -86,10 +104,15 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
         </div>
 
         <div className="space-y-1">
-          <p className="font-serif text-3xl text-primary">
-            {formatPrice(product.price, currency, i18n.language)}
+          <p className="flex flex-wrap items-baseline gap-2 font-serif text-3xl text-primary">
+            <span>{formatPrice(product.price, currency, i18n.language)}</span>
+            {hasDiscount ? (
+              <span className="font-sans text-lg font-normal text-muted line-through">
+                {formatPrice(product.compare_at_price!, currency, i18n.language)}
+              </span>
+            ) : null}
           </p>
-          {isGamme ? (
+          {isFlagshipGamme ? (
             <p className="text-sm text-muted">{t("shop.gammeCompareHint")}</p>
           ) : null}
         </div>
@@ -150,6 +173,31 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
           >
             {t("shop.addToCartButton")}
           </Button>
+
+          <button
+            type="button"
+            onClick={() => toggleFavorite(product.id)}
+            className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border text-primary transition hover:border-accent hover:bg-background-alt"
+            aria-label={
+              isFavorite(product.id)
+                ? t("shop.removeFromFavorites", { name: product.name })
+                : t("shop.addToFavorites", { name: product.name })
+            }
+            aria-pressed={isFavorite(product.id)}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="size-5"
+              fill={isFavorite(product.id) ? "currentColor" : "none"}
+              stroke="currentColor"
+              strokeWidth="1.75"
+            >
+              <path
+                d="M12 20.5s-7.5-4.6-10-9.1C.6 8 2 4.5 5.4 3.6c2.1-.5 4.1.4 5.3 2.1a.4.4 0 0 0 .6 0c1.2-1.7 3.2-2.6 5.3-2.1C20 4.5 21.4 8 22 11.4c-2.5 4.5-10 9.1-10 9.1Z"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
         </div>
 
         {added ? (
@@ -163,7 +211,7 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
       </div>
 
       <ul className="space-y-3 border-t border-border pt-8 text-sm text-muted">
-        {isGamme ? (
+        {isFlagshipGamme ? (
           <li className="flex gap-3 font-medium text-primary">
             <span className="mt-1 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
             {t("shop.gammeOfferBadge")}

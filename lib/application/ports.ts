@@ -5,6 +5,7 @@ import type {
   CreateShippingLabelResult,
   DiagnosticAnswers,
   DiagnosticChannel,
+  DiagnosticPhoto,
   DiagnosticProfile,
   DiagnosticRecord,
   DiagnosticRoutineStep,
@@ -95,6 +96,8 @@ export type DiagnosticPort = {
     appointmentId?: string | null;
     routine?: DiagnosticRoutineStep[];
     userId?: string | null;
+    notes?: string;
+    photos?: DiagnosticPhoto[];
   }) => Promise<{ id: string | null; error: string | null }>;
   listMyDiagnostics: () => Promise<DiagnosticRecord[]>;
 };

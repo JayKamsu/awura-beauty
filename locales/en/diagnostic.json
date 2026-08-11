@@ -22,6 +22,15 @@
     "emptyQuestions": "No questions available right now.",
     "progress": "Step {{current}} / {{total}}",
     "progressLabel": "Diagnostic progress",
+    "dontKnow": "I don't know",
+    "extras": {
+      "title": "One last step",
+      "subtitle": "Optional: add a note or photos to refine your diagnostic.",
+      "notesLabel": "Additional notes",
+      "notesPlaceholder": "Add anything that could help us (allergies, history, specific habits…)",
+      "photosLabel": "Photos of your hair",
+      "photosHint": "Optional — front, left profile, right profile, back, and ends. It helps us fine-tune your routine."
+    },
     "price": {
       "free": "Free"
     },

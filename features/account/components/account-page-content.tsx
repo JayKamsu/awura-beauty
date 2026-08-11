@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { AccountDiagnosticsSection } from "@/features/account/components/account-diagnostics-section";
+import { AccountFavoritesSection } from "@/features/account/components/account-favorites-section";
 import { AccountLoyaltySection } from "@/features/account/components/account-loyalty-section";
 import { AccountOrdersSection } from "@/features/account/components/account-orders-section";
 import { AccountPaymentsSection } from "@/features/account/components/account-payments-section";
@@ -23,6 +24,7 @@ const SECTIONS = [
   { id: "paiements", key: "account.nav.payments" },
   { id: "fidelite", key: "account.nav.loyalty" },
   { id: "diagnostics", key: "account.nav.diagnostics" },
+  { id: "favoris", key: "account.nav.favorites" },
   { id: "securite", key: "account.nav.security" },
 ] as const;
 
@@ -210,6 +212,7 @@ export function AccountPageContent() {
         <AccountPaymentsSection />
         <AccountLoyaltySection />
         <AccountDiagnosticsSection />
+        <AccountFavoritesSection />
         <AccountSecuritySection />
       </div>
     </main>

@@ -1,15 +1,13 @@
+import { getBundleComponents } from "@/lib/infrastructure/supabase/bundles";
 import { getProductsBySlugs } from "@/lib/infrastructure/supabase/products";
 import type { OrderItem } from "@/lib/infrastructure/supabase/order-types";
 import type { ShippingCarrier } from "@/lib/infrastructure/supabase/order-types";
+import type { BundleComponent } from "@/lib/infrastructure/supabase/types";
 import {
   productLinesForQuote,
   quoteShipping,
   type ShippingQuote,
 } from "@/lib/application/checkout/quote-shipping";
-import {
-  GAMME_COMPLETE_COMPONENT_SLUGS,
-  isGammeCompleteSlug,
-} from "@/lib/domain/bundle";
 
 /** Ligne panier brute (non validée) telle que reçue du client. */
 export type CartLineInput = {
@@ -78,17 +76,15 @@ export async function resolveOrderItemsFromCatalog(
     }
   }
 
-  const needsComponents = normalized.some((line) =>
-    isGammeCompleteSlug(line.slug),
-  );
-  const slugs = [
-    ...new Set([
-      ...normalized.map((line) => line.slug),
-      ...(needsComponents ? [...GAMME_COMPLETE_COMPONENT_SLUGS] : []),
-    ]),
-  ];
+  const slugs = [...new Set(normalized.map((line) => line.slug))];
   const products = await getProductsBySlugs(slugs);
   const bySlug = new Map(products.map((product) => [product.slug, product]));
+
+  const componentsByBundleId = new Map<string, BundleComponent[]>();
+  for (const product of products) {
+    if (!product.is_bundle) continue;
+    componentsByBundleId.set(product.id, await getBundleComponents(product.id));
+  }
 
   const items: OrderItem[] = [];
   for (const line of normalized) {
@@ -104,27 +100,28 @@ export async function resolveOrderItemsFromCatalog(
       };
     }
 
-    if (isGammeCompleteSlug(line.slug)) {
-      for (const componentSlug of GAMME_COMPLETE_COMPONENT_SLUGS) {
-        const component = bySlug.get(componentSlug);
-        if (!component) {
+    if (product.is_bundle) {
+      const components = componentsByBundleId.get(product.id) ?? [];
+      if (components.length === 0) {
+        return {
+          items: [],
+          subtotal: 0,
+          shippingFee: 0,
+          total: 0,
+          quote: null,
+          error: `Empty bundle: ${product.slug}`,
+        };
+      }
+      for (const component of components) {
+        const needed = component.quantity * line.quantity;
+        if (component.product.stock < needed) {
           return {
             items: [],
             subtotal: 0,
             shippingFee: 0,
             total: 0,
             quote: null,
-            error: `Missing bundle component: ${componentSlug}`,
-          };
-        }
-        if (component.stock < line.quantity) {
-          return {
-            items: [],
-            subtotal: 0,
-            shippingFee: 0,
-            total: 0,
-            quote: null,
-            error: `Insufficient stock for gamme (${component.slug})`,
+            error: `Insufficient stock for ${product.slug} (${component.product.slug})`,
           };
         }
       }

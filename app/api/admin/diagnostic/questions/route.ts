@@ -39,6 +39,7 @@ export async function POST(request: Request) {
       subtitleFr: string;
       subtitleEn: string;
       subtitleEs: string;
+      allowUnknown?: boolean;
     };
     option?: {
       id?: string;
@@ -52,6 +53,7 @@ export async function POST(request: Request) {
       hintFr: string;
       hintEn: string;
       hintEs: string;
+      imageUrl?: string;
       scoreRules: Record<string, number>;
     };
   };

@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import { formatPrice } from "@/lib/format/price";
 import { useCart } from "@/features/cart/context/cart-provider";
+import { useFavorites } from "@/features/favorites/context/favorites-provider";
 
 /** Données produit nécessaires à l'affichage d'une carte dans une grille boutique. */
 export type ProductCardData = {
@@ -15,10 +16,14 @@ export type ProductCardData = {
   name: string;
   shortDescription: string;
   price: number;
+  /** Prix barré (avant réduction) ; undefined/null = pas de réduction. */
+  compareAtPrice?: number | null;
   image: string;
   ingredientImage?: string;
   lifestyleImage?: string | null;
   isNew?: boolean;
+  productType?: "hair_care" | "accessory";
+  stock?: number;
 };
 
 type ProductCardProps = {
@@ -36,12 +41,19 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();
   const { addItem } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
   /** Mobile / tactile : bascule manuelle (desktop = hover CSS). */
   const [touchReveal, setTouchReveal] = useState(false);
   const [added, setAdded] = useState(false);
 
   const hasIngredientsImage = Boolean(product.ingredientImage);
   const href = `/boutique/${product.slug}`;
+  const hasDiscount = Boolean(
+    product.compareAtPrice && product.compareAtPrice > product.price,
+  );
+  const discountPercent = hasDiscount
+    ? Math.round((1 - product.price / product.compareAtPrice!) * 100)
+    : 0;
 
   const handleAdd = () => {
     if (onAddToCart) {
@@ -68,11 +80,58 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl bg-background-alt/60">
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-background-alt">
-        {product.isNew ? (
-          <span className="absolute left-3 top-3 z-20 rounded-md bg-primary px-2.5 py-1 text-[10px] font-semibold tracking-wider text-background">
-            {t("shop.newBadge")}
-          </span>
-        ) : null}
+        <div className="absolute left-3 top-3 z-20 flex flex-col gap-1.5">
+          {product.isNew ? (
+            <span className="rounded-md bg-primary px-2.5 py-1 text-[10px] font-semibold tracking-wider text-background">
+              {t("shop.newBadge")}
+            </span>
+          ) : null}
+          {product.productType === "accessory" ? (
+            <span className="rounded-md bg-accent px-2.5 py-1 text-[10px] font-semibold tracking-wider text-background">
+              {t("shop.accessoryBadge")}
+            </span>
+          ) : null}
+          {hasDiscount ? (
+            <span className="rounded-md bg-foreground px-2.5 py-1 text-[10px] font-semibold tracking-wider text-background">
+              {t("shop.discountBadge", { percent: discountPercent })}
+            </span>
+          ) : null}
+        </div>
+        <div className="absolute right-3 top-3 z-20 flex flex-col items-end gap-1.5">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleFavorite(product.id);
+            }}
+            className="flex size-8 items-center justify-center rounded-full bg-background/90 text-primary shadow-sm backdrop-blur transition hover:bg-background sm:size-9"
+            aria-label={
+              isFavorite(product.id)
+                ? t("shop.removeFromFavorites", { name: product.name })
+                : t("shop.addToFavorites", { name: product.name })
+            }
+            aria-pressed={isFavorite(product.id)}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="size-4.5 sm:size-5"
+              fill={isFavorite(product.id) ? "currentColor" : "none"}
+              stroke="currentColor"
+              strokeWidth="1.75"
+            >
+              <path
+                d="M12 20.5s-7.5-4.6-10-9.1C.6 8 2 4.5 5.4 3.6c2.1-.5 4.1.4 5.3 2.1a.4.4 0 0 0 .6 0c1.2-1.7 3.2-2.6 5.3-2.1C20 4.5 21.4 8 22 11.4c-2.5 4.5-10 9.1-10 9.1Z"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          {product.stock === 0 ? (
+            <span className="rounded-md bg-foreground/80 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-background">
+              {t("shop.outOfStock")}
+            </span>
+          ) : null}
+        </div>
 
         <Link
           href={href}
@@ -149,8 +208,13 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           {product.shortDescription}
         </p>
         <div className="mt-auto flex items-center justify-between gap-2 pt-2 sm:gap-3 sm:pt-3">
-          <p className="text-sm font-medium text-primary sm:text-base">
-            {formatPrice(product.price, currency, i18n.language)}
+          <p className="flex flex-wrap items-baseline gap-1.5 text-sm font-medium text-primary sm:text-base">
+            <span>{formatPrice(product.price, currency, i18n.language)}</span>
+            {hasDiscount ? (
+              <span className="text-xs font-normal text-muted line-through sm:text-sm">
+                {formatPrice(product.compareAtPrice!, currency, i18n.language)}
+              </span>
+            ) : null}
           </p>
           <button
             type="button"

@@ -6,8 +6,10 @@ import { ProductGallery } from "@/features/shop/components/product-gallery";
 import { ProductPurchasePanel } from "@/features/shop/components/product-purchase-panel";
 import { RelatedProducts } from "@/features/shop/components/related-products";
 import {
+  getBundleComponents,
   getProductBySlug,
   getRelatedProducts,
+  getTutorialForProduct,
   listAllProductSlugs,
 } from "@/lib/infrastructure/supabase";
 import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo/json-ld";
@@ -49,7 +51,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   if (!product) notFound();
 
-  const related = await getRelatedProducts(product, 4);
+  const [related, tutorial, bundleComponents] = await Promise.all([
+    getRelatedProducts(product, 4),
+    getTutorialForProduct(product.slug),
+    product.is_bundle ? getBundleComponents(product.id) : Promise.resolve([]),
+  ]);
 
   const gallery = [
     {
@@ -99,7 +105,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </div>
 
       <div className="mx-auto w-full max-w-7xl px-4 pb-10 md:px-6 md:pb-14">
-        <ProductDetails product={product} />
+        <ProductDetails
+          product={product}
+          tutorialSlug={tutorial?.slug ?? null}
+          bundleComponents={bundleComponents}
+        />
       </div>
 
       <div className="border-t border-border bg-background">

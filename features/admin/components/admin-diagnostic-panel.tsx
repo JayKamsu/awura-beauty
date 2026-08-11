@@ -13,12 +13,94 @@ import type {
   DiagnosticAppointment,
   DiagnosticAppointmentStatus,
   DiagnosticAvailabilityRule,
+  DiagnosticPhoto,
   DiagnosticQuestion,
   DiagnosticSettings,
   DiagnosticSlotOverride,
 } from "@/lib/domain/diagnostic";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import type { AdminDiagnosticListItem } from "@/lib/infrastructure/supabase/diagnostic-admin";
+
+const PHOTO_ANGLE_LABELS: Record<string, string> = {
+  face: "Face",
+  profil_gauche: "Profil G.",
+  profil_droit: "Profil D.",
+  arriere: "Arrière",
+  pointes: "Pointes",
+};
+
+/** Miniatures des photos jointes à un diagnostic/RDV — charge les URLs signées à la demande. */
+function DiagnosticPhotosStrip({
+  photos,
+  adminFetch,
+}: {
+  photos: DiagnosticPhoto[];
+  adminFetch: ReturnType<typeof useAdminFetch>;
+}) {
+  const [urls, setUrls] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  const loadUrls = async () => {
+    setLoading(true);
+    const entries = await Promise.all(
+      photos.map(async (p) => {
+        const res = await adminFetch(
+          `/api/admin/diagnostic/photo-preview?path=${encodeURIComponent(p.path)}`,
+        );
+        const json = (await res.json()) as { url?: string };
+        return [p.path, json.url ?? ""] as const;
+      }),
+    );
+    setUrls(Object.fromEntries(entries));
+    setLoading(false);
+    setLoaded(true);
+  };
+
+  if (!photos.length) return null;
+
+  if (!loaded) {
+    return (
+      <button
+        type="button"
+        onClick={() => void loadUrls()}
+        className="mt-2 text-xs text-accent underline hover:text-accent-light"
+        disabled={loading}
+      >
+        {loading ? "…" : `Voir les photos (${photos.length})`}
+      </button>
+    );
+  }
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      {photos.map((p) => (
+        <a
+          key={p.path}
+          href={urls[p.path] || undefined}
+          target="_blank"
+          rel="noreferrer"
+          className="flex flex-col items-center gap-1"
+        >
+          {urls[p.path] ? (
+            <img
+              src={urls[p.path]}
+              alt={p.angle}
+              className="h-16 w-16 rounded-lg object-cover"
+            />
+          ) : (
+            <span className="flex h-16 w-16 items-center justify-center rounded-lg bg-background-alt text-xs text-muted">
+              —
+            </span>
+          )}
+          <span className="text-[0.65rem] text-muted">
+            {PHOTO_ANGLE_LABELS[p.angle] ?? p.angle}
+          </span>
+        </a>
+      ))}
+    </div>
+  );
+}
 
 type Tab = "results" | "appointments" | "sendResult" | "settings";
 type SettingsTab = "questions" | "pricing" | "availability";
@@ -339,6 +421,14 @@ export function AdminDiagnosticPanel() {
                         {row.recommended_product_slugs.join(", ")}
                       </p>
                     ) : null}
+                    {row.notes ? (
+                      <p className="mt-2 rounded-lg bg-background-alt px-3 py-2 text-xs text-muted">
+                        {row.notes}
+                      </p>
+                    ) : null}
+                    {row.photos?.length ? (
+                      <DiagnosticPhotosStrip photos={row.photos} adminFetch={adminFetch} />
+                    ) : null}
                   </li>
                 ))}
               </ul>
@@ -385,6 +475,14 @@ export function AdminDiagnosticPanel() {
                         row.profile.summary ||
                         t(row.profile.summaryKey)}
                     </p>
+                    {row.notes ? (
+                      <p className="mt-2 rounded-lg bg-background-alt px-3 py-2 text-xs text-muted">
+                        {row.notes}
+                      </p>
+                    ) : null}
+                    {row.photos?.length ? (
+                      <DiagnosticPhotosStrip photos={row.photos} adminFetch={adminFetch} />
+                    ) : null}
                   </li>
                 ))}
               </ul>
@@ -418,6 +516,14 @@ export function AdminDiagnosticPanel() {
                       <p className="text-xs text-muted">
                         {formatDateTime(i18n.language, a.startsAt)}
                       </p>
+                      {a.notes ? (
+                        <p className="mt-1 rounded-lg bg-background-alt px-3 py-2 text-xs text-muted">
+                          {a.notes}
+                        </p>
+                      ) : null}
+                      {a.photos?.length ? (
+                        <DiagnosticPhotosStrip photos={a.photos} adminFetch={adminFetch} />
+                      ) : null}
                     </div>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">

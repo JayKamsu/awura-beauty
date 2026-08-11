@@ -6,13 +6,27 @@
     "emailLabel": "Customer care email",
     "hours": "Available 6 days a week — reply within 24 to 48 business hours.",
     "fields": {
+      "subject": "Subject",
       "name": "Name",
       "email": "Email",
+      "phone": "Phone",
+      "orderNumber": "Order number",
       "message": "Message"
     },
+    "subjects": {
+      "order": "Order tracking",
+      "product": "Product question",
+      "diagnostic": "Hair diagnostic",
+      "shipping": "Shipping",
+      "returns": "Return / complaint",
+      "partnership": "Partnership / press",
+      "other": "Other request"
+    },
+    "optional": "optional",
+    "orderNumberPlaceholder": "e.g. AWURA-10234",
     "submit": "Send message",
     "success": "Your email client will open with the message ready to send.",
-    "mailSubject": "Awura Beauty contact — {{name}}",
+    "mailSubject": "Awura Beauty contact — {{subject}}",
     "anonymous": "Visitor"
   }
 }

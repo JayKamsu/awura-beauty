@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/form-field";
+import { DiagnosticOptionGrid } from "@/features/diagnostic/components/diagnostic-option-grid";
+import { DiagnosticPhotoUpload } from "@/features/diagnostic/components/diagnostic-photo-upload";
 import { DiagnosticProgress } from "@/features/diagnostic/components/diagnostic-progress";
 import {
   clearDiagnosticLead,
@@ -16,6 +18,7 @@ import { formatPrice } from "@/lib/format/price";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import type {
   DiagnosticAnswerMap,
+  DiagnosticPhoto,
   DiagnosticQuestion,
   DiagnosticSettings,
   DiagnosticSlot,
@@ -26,7 +29,10 @@ import {
 } from "@/lib/infrastructure/supabase/profiles";
 import { profileFullName } from "@/lib/infrastructure/supabase/profile-types";
 
-type Phase = "quiz" | "slot" | "contact";
+const textareaClass =
+  "w-full min-h-28 rounded-xl border border-border bg-background px-3.5 py-2.5 text-base text-foreground outline-none transition placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/20 sm:text-sm";
+
+type Phase = "quiz" | "extras" | "slot" | "contact";
 
 type DiagnosticPhysicalFlowProps = {
   settings: DiagnosticSettings;
@@ -45,10 +51,15 @@ export function DiagnosticPhysicalFlow({
   const { user, session } = useAuth();
   const { locked: pending, run } = useActionLock();
   const [phase, setPhase] = useState<Phase>("quiz");
+  const [sessionId] = useState(
+    () => `diag-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
   const [questions, setQuestions] = useState<DiagnosticQuestion[]>([]);
   const [settings, setSettings] = useState(initialSettings);
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<DiagnosticAnswerMap>({});
+  const [notes, setNotes] = useState("");
+  const [photos, setPhotos] = useState<DiagnosticPhoto[]>([]);
   const [slots, setSlots] = useState<DiagnosticSlot[]>([]);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
@@ -189,13 +200,16 @@ export function DiagnosticPhysicalFlow({
 
   const locale = toIntlLocale(i18n.language);
 
-  const goNextQuiz = () => {
-    if (!selected) return;
+  const canSkip = Boolean(step?.allowUnknown);
+
+  const goNextQuiz = (valueKeyOverride?: string) => {
+    const value = valueKeyOverride ?? selected;
+    if (!value) return;
     if (stepIndex < questions.length - 1) {
       setStepIndex((i) => i + 1);
       return;
     }
-    setPhase("slot");
+    setPhase("extras");
   };
 
   const goToContactOrPay = () => {
@@ -239,6 +253,8 @@ export function DiagnosticPhysicalFlow({
           phone,
           startsAt: selectedSlot,
           answers,
+          notes: notes.trim() || undefined,
+          photos,
         }),
       });
       const json = (await res.json()) as { url?: string; error?: string };
@@ -255,12 +271,12 @@ export function DiagnosticPhysicalFlow({
     return <p className="text-muted">{t("diagnostic.loading")}</p>;
   }
 
-  if (phase === "quiz" && questions.length > 0) {
+  if (phase === "quiz" && questions.length > 0 && step) {
     return (
       <div className="space-y-8">
         <DiagnosticProgress
           stepIndex={stepIndex}
-          totalSteps={questions.length}
+          totalSteps={questions.length + 1}
         />
         <div className="space-y-3">
           <h2 className="font-serif text-3xl text-primary">{step.title}</h2>
@@ -268,30 +284,13 @@ export function DiagnosticPhysicalFlow({
             <p className="text-muted">{step.subtitle}</p>
           ) : null}
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {step.options.map((option) => {
-            const isActive = selected === option.valueKey;
-            return (
-              <button
-                key={option.id}
-                type="button"
-                onClick={() =>
-                  setAnswers((prev) => ({
-                    ...prev,
-                    [step.questionKey]: option.valueKey,
-                  }))
-                }
-                className={`rounded-2xl border px-5 py-4 text-left transition ${
-                  isActive
-                    ? "border-primary bg-primary text-background"
-                    : "border-border hover:border-accent"
-                }`}
-              >
-                <span className="font-medium">{option.label}</span>
-              </button>
-            );
-          })}
-        </div>
+        <DiagnosticOptionGrid
+          options={step.options}
+          selected={selected}
+          onSelect={(valueKey) =>
+            setAnswers((prev) => ({ ...prev, [step.questionKey]: valueKey }))
+          }
+        />
         <div className="flex justify-between gap-3">
           <Button
             type="button"
@@ -301,10 +300,66 @@ export function DiagnosticPhysicalFlow({
           >
             {t("diagnostic.back")}
           </Button>
-          <Button type="button" size="lg" disabled={!selected} onClick={goNextQuiz}>
-            {stepIndex === questions.length - 1
-              ? t("diagnostic.physical.chooseSlot")
-              : t("diagnostic.next")}
+          <div className="flex gap-3">
+            {canSkip && !selected ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setAnswers((prev) => ({ ...prev, [step.questionKey]: "dont_know" }));
+                  goNextQuiz("dont_know");
+                }}
+              >
+                {t("diagnostic.dontKnow")}
+              </Button>
+            ) : null}
+            <Button type="button" size="lg" disabled={!selected} onClick={() => goNextQuiz()}>
+              {t("diagnostic.next")}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === "extras") {
+    return (
+      <div className="space-y-8">
+        <DiagnosticProgress stepIndex={questions.length} totalSteps={questions.length + 1} />
+        <div className="space-y-3">
+          <h2 className="font-serif text-3xl text-primary">
+            {t("diagnostic.extras.title")}
+          </h2>
+          <p className="text-muted">{t("diagnostic.extras.subtitle")}</p>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="diagnostic-physical-notes" className="block text-sm font-medium text-foreground">
+            {t("diagnostic.extras.notesLabel")}
+          </label>
+          <textarea
+            id="diagnostic-physical-notes"
+            className={textareaClass}
+            placeholder={t("diagnostic.extras.notesPlaceholder")}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-foreground">
+            {t("diagnostic.extras.photosLabel")}
+          </p>
+          <p className="text-sm text-muted">{t("diagnostic.extras.photosHint")}</p>
+          <DiagnosticPhotoUpload sessionId={sessionId} onChange={setPhotos} />
+        </div>
+
+        <div className="flex justify-between gap-3">
+          <Button type="button" variant="ghost" onClick={() => setPhase("quiz")}>
+            {t("diagnostic.back")}
+          </Button>
+          <Button type="button" size="lg" onClick={() => setPhase("slot")}>
+            {t("diagnostic.physical.chooseSlot")}
           </Button>
         </div>
       </div>
@@ -448,7 +503,7 @@ export function DiagnosticPhysicalFlow({
         )}
 
         <div className="flex justify-between gap-3">
-          <Button type="button" variant="ghost" onClick={() => setPhase("quiz")}>
+          <Button type="button" variant="ghost" onClick={() => setPhase("extras")}>
             {t("diagnostic.back")}
           </Button>
           <Button

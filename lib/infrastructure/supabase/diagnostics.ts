@@ -8,6 +8,7 @@ import type {
   DiagnosticAnswerMap,
   DiagnosticAnswers,
   DiagnosticChannel,
+  DiagnosticPhoto,
   DiagnosticProfile,
   DiagnosticRecord,
   DiagnosticRoutineStep,
@@ -23,6 +24,8 @@ export type SaveDiagnosticInput = {
   appointmentId?: string | null;
   routine?: DiagnosticRoutineStep[];
   userId?: string | null;
+  notes?: string;
+  photos?: DiagnosticPhoto[];
 };
 
 async function insertDiagnostic(
@@ -83,6 +86,8 @@ export async function saveHairDiagnostic(
     channel: input.channel ?? "online",
     appointment_id: input.appointmentId ?? null,
     routine: input.routine ?? [],
+    notes: input.notes ?? null,
+    photos: input.photos ?? [],
   };
 
   const id = await insertDiagnostic(supabase, payload);

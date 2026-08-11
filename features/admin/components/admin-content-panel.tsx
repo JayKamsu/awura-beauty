@@ -12,6 +12,7 @@ import { ConfirmDeleteButton } from "@/features/admin/components/confirm-delete-
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 import type { BlogPost, BlogPostKind } from "@/lib/infrastructure/supabase/blog-types";
+import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
 const emptyForm = {
   id: "",
@@ -34,6 +35,7 @@ export function AdminContentPanel() {
   const adminFetch = useAdminFetch();
   const { locked: pending, run } = useActionLock();
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [products, setProducts] = useState<ProductRow[]>([]);
   const [form, setForm] = useState(emptyForm);
   const [feedback, setFeedback] = useState<{
     tone: "success" | "error";
@@ -44,9 +46,14 @@ export function AdminContentPanel() {
   const [loaded, setLoaded] = useState(false);
 
   const load = useCallback(async () => {
-    const response = await adminFetch("/api/admin/posts");
-    const json = (await response.json()) as { posts?: BlogPost[] };
+    const [postsRes, productsRes] = await Promise.all([
+      adminFetch("/api/admin/posts"),
+      adminFetch("/api/admin/products"),
+    ]);
+    const json = (await postsRes.json()) as { posts?: BlogPost[] };
+    const productsJson = (await productsRes.json()) as { products?: ProductRow[] };
     setPosts(json.posts ?? []);
+    setProducts(productsJson.products ?? []);
     setLoaded(true);
   }, [adminFetch]);
 
@@ -237,15 +244,26 @@ export function AdminContentPanel() {
             }}
           />
         </label>
-        <label className="space-y-1 text-sm lg:col-span-2">
-          <span className="text-muted">{t("admin.fields.product_slug")}</span>
-          <input
-            className={fieldClass}
-            value={form.product_slug}
-            onChange={(e) => setForm((prev) => ({ ...prev, product_slug: e.target.value }))}
-          />
-          <span className="block text-xs text-muted">{t("admin.content.productSlugHint")}</span>
-        </label>
+        {form.kind === "tutorial" ? (
+          <label className="space-y-1 text-sm lg:col-span-2">
+            <span className="text-muted">{t("admin.fields.product_slug")}</span>
+            <select
+              className={fieldClass}
+              value={form.product_slug}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, product_slug: e.target.value }))
+              }
+            >
+              <option value="">{t("admin.content.productSlugNone")}</option>
+              {products.map((product) => (
+                <option key={product.id} value={product.slug}>
+                  {product.name}
+                </option>
+              ))}
+            </select>
+            <span className="block text-xs text-muted">{t("admin.content.productSlugHint")}</span>
+          </label>
+        ) : null}
         <label className="space-y-1 text-sm lg:col-span-2">
           <span className="text-muted">{t("admin.fields.body")}</span>
           <textarea

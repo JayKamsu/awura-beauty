@@ -10,8 +10,11 @@ export function toProductCardData(product: ProductRow): ProductCardData {
     shortDescription: product.short_description,
     price: product.price,
     image: product.image_url,
+    compareAtPrice: product.compare_at_price,
     ingredientImage: product.ingredients_image_url || undefined,
     lifestyleImage: product.lifestyle_image_url,
     isNew: product.is_new,
+    productType: product.product_type,
+    stock: product.stock,
   };
 }

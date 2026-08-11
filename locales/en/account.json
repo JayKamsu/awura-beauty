@@ -13,6 +13,7 @@
       "payments": "Payments",
       "loyalty": "Loyalty",
       "diagnostics": "Diagnostics",
+      "favorites": "Favorites",
       "messages": "Messages",
       "security": "Security"
     },
@@ -84,6 +85,10 @@
     "diagnosticsJoinVideo": "Join video call",
     "diagnosticsScalpAnalysis": "Scalp analysis / trichogram",
     "diagnosticsAppointments": "My appointments",
+    "favoritesTitle": "My favorites",
+    "favoritesLoading": "Loading favorites…",
+    "favoritesEmpty": "No favorites yet. Add products by clicking the heart icon.",
+    "favoritesBrowse": "Browse the shop",
     "diagnosticsResults": "My results",
     "diagnosticsApptStatus": {
       "pending_payment": "Payment pending",

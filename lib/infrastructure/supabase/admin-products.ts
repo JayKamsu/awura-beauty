@@ -11,6 +11,10 @@ function mapRow(row: Record<string, unknown>): ProductRow {
     slug: String(row.slug ?? row.id),
     name: String(row.name ?? ""),
     price: Number(row.price ?? 0),
+    compare_at_price:
+      row.compare_at_price !== null && row.compare_at_price !== undefined
+        ? Number(row.compare_at_price)
+        : null,
     description: String(row.description ?? ""),
     short_description: String(row.short_description ?? ""),
     ingredients: String(row.ingredients ?? ""),
@@ -21,6 +25,8 @@ function mapRow(row: Record<string, unknown>): ProductRow {
       ? String(row.lifestyle_image_url)
       : null,
     category: String(row.category ?? "soin"),
+    product_type: row.product_type === "accessory" ? "accessory" : "hair_care",
+    is_bundle: Boolean(row.is_bundle),
     is_new: Boolean(row.is_new),
     stock: Number(row.stock ?? 0),
     shipping_fee: Number(row.shipping_fee ?? 0),
@@ -58,6 +64,10 @@ export async function adminUpsertProduct(
     slug: input.slug,
     name: input.name,
     price: input.price,
+    compare_at_price:
+      input.compare_at_price !== null && input.compare_at_price !== undefined
+        ? Number(input.compare_at_price)
+        : null,
     description: input.description,
     short_description: input.short_description,
     ingredients: input.ingredients,
@@ -66,6 +76,8 @@ export async function adminUpsertProduct(
     ingredients_image_url: input.ingredients_image_url,
     lifestyle_image_url: input.lifestyle_image_url,
     category: input.category,
+    product_type: input.product_type === "accessory" ? "accessory" : "hair_care",
+    is_bundle: Boolean(input.is_bundle),
     is_new: input.is_new,
     stock: input.stock,
     shipping_fee: Number(input.shipping_fee ?? 0),

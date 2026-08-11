@@ -13,6 +13,7 @@ export {
 export type { AuthResult } from "./auth";
 export {
   getBlogPostBySlug,
+  getTutorialForProduct,
   listBlogPosts,
   listBlogSlugs,
 } from "./blog";
@@ -57,12 +58,15 @@ export type {
 } from "./order-types";
 export {
   getProductBySlug,
+  getProductsByIds,
   getProductsBySlugs,
   getRelatedProducts,
   listAllProductSlugs,
   listProducts,
 } from "./products";
+export { getBundleComponents } from "./bundles";
 export type {
+  BundleComponent,
   ListProductsParams,
   ListProductsResult,
   ProductCategory,

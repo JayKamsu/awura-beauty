@@ -11,7 +11,7 @@ import {
 import { userIdFromRequest } from "@/lib/application/checkout/request-user";
 import { container } from "@/lib/application/container";
 import { listDiagnosticQuestions } from "@/lib/infrastructure/supabase/diagnostic-admin";
-import type { DiagnosticLocale } from "@/lib/domain/diagnostic";
+import type { DiagnosticLocale, DiagnosticPhoto } from "@/lib/domain/diagnostic";
 
 /**
  * Calcule et sauvegarde le résultat du diagnostic capillaire en ligne
@@ -21,6 +21,8 @@ export async function POST(request: Request) {
   const body = (await request.json()) as {
     answers?: Record<string, unknown>;
     locale?: string;
+    notes?: string;
+    photos?: DiagnosticPhoto[];
   };
 
   const answers = normalizeAnswerMap(body.answers ?? {});
@@ -52,6 +54,9 @@ export async function POST(request: Request) {
   const routine = buildRoutineSteps(recommendedProductSlugs, locale);
   const userId = await userIdFromRequest(request);
 
+  const notes = typeof body.notes === "string" ? body.notes.trim().slice(0, 2000) : undefined;
+  const photos = Array.isArray(body.photos) ? body.photos.slice(0, 5) : undefined;
+
   const saved = await container.diagnostics.saveHairDiagnostic({
     answers,
     profile,
@@ -59,6 +64,8 @@ export async function POST(request: Request) {
     channel: "online",
     routine,
     userId,
+    notes,
+    photos,
   });
 
   if (saved.id && userId) {

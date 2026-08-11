@@ -22,6 +22,15 @@
     "emptyQuestions": "No hay preguntas disponibles por ahora.",
     "progress": "Paso {{current}} / {{total}}",
     "progressLabel": "Progreso del diagnóstico",
+    "dontKnow": "No lo sé",
+    "extras": {
+      "title": "Un último paso",
+      "subtitle": "Opcional: añade una nota o fotos para afinar tu diagnóstico.",
+      "notesLabel": "Notas adicionales",
+      "notesPlaceholder": "Indica aquí cualquier cosa que pueda ayudarnos (alergias, historial, hábitos particulares…)",
+      "photosLabel": "Fotos de tu cabello",
+      "photosHint": "Opcional — frente, perfil izquierdo, perfil derecho, atrás y puntas. Nos ayuda a afinar tu rutina."
+    },
     "price": {
       "free": "Gratis"
     },

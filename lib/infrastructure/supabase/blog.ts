@@ -84,3 +84,11 @@ export async function listBlogSlugs(kind?: BlogPostKind): Promise<string[]> {
   const { posts } = await listBlogPosts(kind);
   return posts.map((post) => post.slug);
 }
+
+/** Tutoriel publié lié à un produit (le plus récent), ou null si aucun n'existe. */
+export async function getTutorialForProduct(
+  productSlug: string,
+): Promise<BlogPost | null> {
+  const { posts } = await listBlogPosts("tutorial");
+  return posts.find((post) => post.product_slug === productSlug) ?? null;
+}

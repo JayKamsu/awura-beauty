@@ -7,6 +7,8 @@ export type {
   DiagnosticChannel,
   DiagnosticLocale,
   DiagnosticOption,
+  DiagnosticPhoto,
+  DiagnosticPhotoAngle,
   DiagnosticProfile,
   DiagnosticQuestion,
   DiagnosticQuestionChannel,
