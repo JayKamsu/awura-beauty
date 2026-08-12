@@ -131,3 +131,20 @@ export async function listDiagnosticsForUserId(
   if (error || !data) return [];
   return data.map((row) => mapDiagnosticRecord(row as Record<string, unknown>));
 }
+
+/** Récupère un diagnostic par son id (admin, service_role requis). */
+export async function getDiagnosticById(
+  id: string,
+): Promise<DiagnosticRecord | null> {
+  const supabase = createAdminSupabaseClient() ?? createSupabaseClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("hair_diagnostics")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapDiagnosticRecord(data as Record<string, unknown>);
+}

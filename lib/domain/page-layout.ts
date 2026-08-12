@@ -7,6 +7,7 @@ export type PageSectionId =
   | "feature"
   | "testimonials"
   | "story"
+  | "founder"
   | "mission"
   | "commitments"
   | "cta";
@@ -66,9 +67,10 @@ export const DEFAULT_HOME_SECTIONS: PageSectionConfig[] = [
 
 export const DEFAULT_ABOUT_SECTIONS: PageSectionConfig[] = [
   { id: "story", enabled: true, position: 0 },
-  { id: "mission", enabled: true, position: 1 },
-  { id: "commitments", enabled: true, position: 2 },
-  { id: "cta", enabled: true, position: 3 },
+  { id: "founder", enabled: true, position: 1 },
+  { id: "mission", enabled: true, position: 2 },
+  { id: "commitments", enabled: true, position: 3 },
+  { id: "cta", enabled: true, position: 4 },
 ];
 
 /** Layout par défaut (fallback) pour une page si aucune config admin n'est enregistrée. */
@@ -89,6 +91,7 @@ export function isPageSectionId(value: string): value is PageSectionId {
     value === "feature" ||
     value === "testimonials" ||
     value === "story" ||
+    value === "founder" ||
     value === "mission" ||
     value === "commitments" ||
     value === "cta"

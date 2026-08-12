@@ -12,6 +12,7 @@ import {
 } from "@/lib/infrastructure/supabase/diagnostic-admin";
 import type {
   DiagnosticChannel,
+  DiagnosticContentBlock,
   DiagnosticProfile,
   DiagnosticRecord,
   DiagnosticRoutineStep,
@@ -29,6 +30,8 @@ export type SendDiagnosticResultInput = {
   scalpAnalysis?: string;
   /** Processus / suivi routine rédigé par l’admin. */
   detailedFeedback?: string;
+  /** Contenu riche structuré (sections, listes, liens) rédigé par l'admin. */
+  content?: DiagnosticContentBlock[];
   tags?: string[];
   recommendedProductSlugs: string[];
   routine?: DiagnosticRoutineStep[];
@@ -104,6 +107,7 @@ export async function sendDiagnosticResultToClient(
     title: input.title.trim(),
     summary: input.summary.trim(),
     detailedFeedback,
+    content: input.content?.length ? input.content : undefined,
     scalpAnalysis,
     tags: input.tags?.length
       ? input.tags

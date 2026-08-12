@@ -4,8 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { DiagnosticPhysicalFlow } from "@/features/diagnostic/components/diagnostic-physical-flow";
-import { DiagnosticWizard } from "@/features/diagnostic/components/diagnostic-wizard";
+import { DiagnosticBookingFlow } from "@/features/diagnostic/components/diagnostic-booking-flow";
 import { formatPrice } from "@/lib/format/price";
 import type { DiagnosticSettings } from "@/lib/domain/diagnostic";
 
@@ -108,7 +107,7 @@ export function DiagnosticPageContent() {
             })}
           </p>
         </header>
-        <DiagnosticWizard />
+        <DiagnosticBookingFlow settings={settings} channel="online" />
       </main>
     );
   }
@@ -141,7 +140,7 @@ export function DiagnosticPageContent() {
             })}
           </p>
         </header>
-        <DiagnosticPhysicalFlow settings={settings} />
+        <DiagnosticBookingFlow settings={settings} channel="physical" />
       </main>
     );
   }

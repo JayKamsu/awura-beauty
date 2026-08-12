@@ -44,8 +44,7 @@ function receiptNumber(order: OrderRow) {
   return `REC-${y}${m}${day}-${order.id.slice(0, 8).toUpperCase()}`;
 }
 
-/** HTML imprimable — reçu de paiement Awura Beauty. */
-export function buildPaymentReceiptHtml(order: OrderRow): string {
+function receiptBodyHtml(order: OrderRow, includePrintButton: boolean): string {
   const address = order.shipping_address;
   const subtotal = order.items.reduce(
     (sum, item) => sum + item.unit_price * item.quantity,
@@ -170,12 +169,31 @@ export function buildPaymentReceiptHtml(order: OrderRow): string {
           : ""
       }
     </p>
-    <div class="actions no-print">
+    ${
+      includePrintButton
+        ? `<div class="actions no-print">
       <button onclick="window.print()" style="padding:10px 16px;border-radius:10px;border:1px solid #1a2e24;background:#1a2e24;color:#fff;cursor:pointer">
         Imprimer / PDF
       </button>
-    </div>
+    </div>`
+        : ""
+    }
   </div>
 </body>
 </html>`;
+}
+
+/** HTML imprimable — reçu de paiement Awura Beauty (page web, avec bouton Imprimer/PDF). */
+export function buildPaymentReceiptHtml(order: OrderRow): string {
+  return receiptBodyHtml(order, true);
+}
+
+/** HTML e-mail — même reçu, sans bouton Imprimer (inerte dans un client mail). */
+export function buildPaymentReceiptEmailHtml(order: OrderRow): string {
+  return receiptBodyHtml(order, false);
+}
+
+/** Sujet de l'e-mail de reçu de paiement. */
+export function paymentReceiptEmailSubject(order: OrderRow): string {
+  return `Ton reçu ${SITE_NAME} — commande #${order.id.slice(0, 8).toUpperCase()}`;
 }

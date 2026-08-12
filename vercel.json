@@ -3,6 +3,10 @@
     {
       "path": "/api/shipping/sync",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/diagnostic/appointments/reminders",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

@@ -29,7 +29,16 @@
       "notesLabel": "Additional notes",
       "notesPlaceholder": "Add anything that could help us (allergies, history, specific habits…)",
       "photosLabel": "Photos of your hair",
-      "photosHint": "Optional — front, left profile, right profile, back, and ends. It helps us fine-tune your routine."
+      "photosHint": "Optional — front, left profile, right profile, back, and ends. It helps us fine-tune your routine.",
+      "photosHintRequired": "Required — front, left profile, right profile, back and ends. Needed to prepare your in-person report.",
+      "photosRequiredError": "Add at least one photo to continue."
+    },
+    "reschedule": {
+      "cta": "Reschedule",
+      "title": "Reschedule appointment",
+      "currentSlot": "Current slot: {{date}}",
+      "confirm": "Confirm new slot",
+      "error": "Unable to reschedule to this slot. Please try again."
     },
     "price": {
       "free": "Free"
@@ -38,18 +47,21 @@
       "eyebrow": "Online",
       "badge": "Remote",
       "title": "Online diagnostic",
-      "subtitle": "A guided remote analysis to understand your crown’s needs and leave with a clear routine.",
+      "subtitle": "A guided questionnaire, then a video call (1h max) with the Awura team to understand your crown’s needs.",
       "cardTitle": "Online hair diagnostic",
-      "cardBody": "Full remote analysis: profile, detailed feedback, process to follow, and links to products to buy.",
-      "duration": "~10 min",
+      "cardBody": "Guided questionnaire, then a video call (1h max) with the Awura team. Your personalized report then lands in your account.",
+      "duration": "Questionnaire + video call, 1h max",
       "meta": "{{duration}} · {{price}} (value {{compare}})",
       "cta": "Start the free diagnostic",
       "includes": {
         "1": "Guided questions on texture, scalp and goals",
-        "2": "Detailed feedback with wash-day / between-wash process",
-        "3": "New Awura routine with the right products",
-        "4": "Shop links + saved in your account"
-      }
+        "2": "Video call (1h max) with the Awura team",
+        "3": "Personalized written report, available in your account",
+        "4": "Routine and shop links included in your report"
+      },
+      "slotsTitle": "Choose your video call slot",
+      "slotsSubtitle": "Choose a day, then a time for your video call (1h max).",
+      "videoNotice": "💡 The video call link opens 5 min before the scheduled time and stays available for 1h. You'll find it in your account."
     },
     "physical": {
       "eyebrow": "In person",
@@ -76,6 +88,7 @@
       "selectedSlot": "Selected: {{slot}}",
       "priceLabel": "{{price}} (instead of {{compare}})",
       "noSlots": "No open slots in the coming weeks. Check back soon or contact us.",
+      "washHairNotice": "💡 Please don't wash your hair for 48 hours before your appointment 😊",
       "contactTitle": "Your details",
       "contactFromAccount": "Pre-filled from your account — you can edit if needed.",
       "editContact": "Edit",
@@ -85,6 +98,7 @@
       "bookError": "Unable to start payment. Please try again.",
       "successTitle": "Appointment confirmed",
       "successBody": "Thank you! Your appointment is booked. After the trichogram analysis, your report and personalized routine will appear in your account.",
+      "addToCalendar": "Add to calendar",
       "status": {
         "pending_payment": "Payment pending",
         "confirmed": "Confirmed",
@@ -140,7 +154,11 @@
       "error": "Unable to open video. Check that the appointment is confirmed, or sign in again.",
       "openExternal": "Open full screen",
       "joinCta": "Join video call",
-      "hint": "Free video via Jitsi. If the frame stays blank, use “Open full screen”. Allow camera and microphone in your browser."
+      "hint": "Free video via Jitsi. If the frame stays blank, use “Open full screen”. Allow camera and microphone in your browser.",
+      "opensIn": "The room opens in",
+      "opensHint": "Opens automatically {{minutes}} minutes before the appointment time.",
+      "over": "This session's window (1h max) has ended. Contact us if you need a new slot.",
+      "timeRemaining": "Time remaining"
     },
     "result": {
       "eyebrow": "For your crown",

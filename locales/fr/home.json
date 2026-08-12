@@ -145,6 +145,7 @@
     "subtitle": "Notes et commentaires laissés par des clientes après réception de leur commande.",
     "empty": "Aucun avis pour le moment.",
     "ratingLabel": "{{rating}} / 5",
-    "seeProduct": "Voir le produit"
+    "seeProduct": "Voir le produit",
+    "diagnosticBadge": "Diagnostic capillaire"
   }
 }

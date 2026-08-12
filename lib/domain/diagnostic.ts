@@ -48,6 +48,14 @@ export type DiagnosticProcessStep = {
   body: string;
 };
 
+/** Bloc de contenu riche pour le résultat rédigé par l'admin (lettre personnalisée structurée). */
+export type DiagnosticContentBlock =
+  | { type: "paragraph"; text: string }
+  | { type: "heading"; text: string }
+  | { type: "subheading"; text: string }
+  | { type: "list"; items: string[]; ordered?: boolean }
+  | { type: "link"; text: string; url: string };
+
 /** Profil capillaire résultant d'un diagnostic (recommandations + contenu éditorial). */
 export type DiagnosticProfile = {
   key: string;
@@ -56,8 +64,10 @@ export type DiagnosticProfile = {
   /** Titres résolus (admin / DB) — optionnels pour legacy */
   title?: string;
   summary?: string;
-  /** Retour détaillé rédigé (admin ou généré online). */
+  /** Retour détaillé rédigé (admin ou généré online) — texte brut, conservé pour compatibilité/notifs. */
   detailedFeedback?: string;
+  /** Contenu riche structuré du résultat (sections, listes, liens) rédigé par l'admin. */
+  content?: DiagnosticContentBlock[];
   /** Analyse cuir chevelu / trichogramme (présentiel). */
   scalpAnalysis?: string;
   /** Processus à suivre (ordre, cadence, gestes). */
@@ -180,7 +190,7 @@ export type DiagnosticAppointmentStatus =
   | "cancelled"
   | "completed";
 
-/** RDV présentiel de diagnostic (créneau réservé, paiement, coordonnées). */
+/** RDV de diagnostic (créneau réservé, paiement, coordonnées) — présentiel ou visio en ligne. */
 export type DiagnosticAppointment = {
   id: string;
   userId: string | null;
@@ -190,6 +200,7 @@ export type DiagnosticAppointment = {
   startsAt: string;
   endsAt: string;
   status: DiagnosticAppointmentStatus;
+  channel: DiagnosticChannel;
   answers: DiagnosticAnswerMap;
   amountCents: number;
   currency: string;
@@ -197,6 +208,8 @@ export type DiagnosticAppointment = {
   notes: string;
   /** Photos jointes (face, profils, arrière, pointes) — chemins de stockage privé. */
   photos?: DiagnosticPhoto[];
+  /** Nombre de fois où le RDV a été replanifié (client ou admin). */
+  rescheduledCount?: number;
   createdAt: string;
 };
 

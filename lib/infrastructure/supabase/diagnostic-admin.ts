@@ -446,6 +446,7 @@ function mapAppointment(row: Record<string, unknown>): DiagnosticAppointment {
     startsAt: String(row.starts_at),
     endsAt: String(row.ends_at),
     status: row.status as DiagnosticAppointmentStatus,
+    channel: (row.channel as DiagnosticChannel) || "physical",
     answers: (row.answers as Record<string, string>) ?? {},
     amountCents: Number(row.amount_cents ?? 0),
     currency: String(row.currency ?? "EUR"),
@@ -456,6 +457,7 @@ function mapAppointment(row: Record<string, unknown>): DiagnosticAppointment {
     photos: Array.isArray(row.photos)
       ? (row.photos as DiagnosticAppointment["photos"])
       : undefined,
+    rescheduledCount: Number(row.rescheduled_count ?? 0),
     createdAt: String(row.created_at),
   };
 }
@@ -474,6 +476,36 @@ export async function listAppointmentsInRange(
     .gt("ends_at", fromIso)
     .in("status", ["pending_payment", "confirmed", "completed"]);
   return (data ?? []).map((row) => mapAppointment(row as Record<string, unknown>));
+}
+
+/**
+ * RDV confirmés démarrant dans la fenêtre [from, to] et pour lesquels le
+ * rappel J-5min n'a pas encore été envoyé (admin, service_role requis).
+ */
+export async function listAppointmentsDueForReminder(
+  fromIso: string,
+  toIso: string,
+): Promise<DiagnosticAppointment[]> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("diagnostic_appointments")
+    .select("*")
+    .eq("status", "confirmed")
+    .gte("starts_at", fromIso)
+    .lte("starts_at", toIso)
+    .is("reminder_sent_at", null);
+  return (data ?? []).map((row) => mapAppointment(row as Record<string, unknown>));
+}
+
+/** Marque le rappel J-5min comme envoyé pour ce RDV (idempotence). */
+export async function markAppointmentReminderSent(id: string): Promise<void> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) return;
+  await supabase
+    .from("diagnostic_appointments")
+    .update({ reminder_sent_at: new Date().toISOString() })
+    .eq("id", id);
 }
 
 /** Les 200 derniers rendez-vous, tous statuts confondus (admin, service_role requis). */
@@ -511,6 +543,7 @@ export async function createAppointment(input: {
   phone: string;
   startsAt: string;
   endsAt: string;
+  channel?: DiagnosticChannel;
   answers: Record<string, string>;
   amountCents: number;
   currency: string;
@@ -530,6 +563,7 @@ export async function createAppointment(input: {
       starts_at: input.startsAt,
       ends_at: input.endsAt,
       status: input.status ?? "pending_payment",
+      channel: input.channel ?? "physical",
       answers: input.answers,
       notes: input.notes ?? "",
       amount_cents: input.amountCents,
@@ -542,7 +576,7 @@ export async function createAppointment(input: {
   return mapAppointment(data as Record<string, unknown>);
 }
 
-/** Met à jour partiellement un rendez-vous (statut, session Stripe, notes, user lié) — admin, service_role requis. */
+/** Met à jour partiellement un rendez-vous (statut, session Stripe, notes, créneau, user lié) — admin, service_role requis. */
 export async function updateAppointment(
   id: string,
   patch: {
@@ -550,6 +584,10 @@ export async function updateAppointment(
     stripeSessionId?: string | null;
     notes?: string;
     userId?: string | null;
+    startsAt?: string;
+    endsAt?: string;
+    /** true : replanification — incrémente le compteur et réarme le rappel J-5min. */
+    reschedule?: boolean;
   },
 ): Promise<DiagnosticAppointment | null> {
   const supabase = createAdminSupabaseClient();
@@ -562,6 +600,17 @@ export async function updateAppointment(
     payload.stripe_session_id = patch.stripeSessionId;
   if (patch.notes !== undefined) payload.notes = patch.notes;
   if (patch.userId !== undefined) payload.user_id = patch.userId;
+  if (patch.startsAt !== undefined) payload.starts_at = patch.startsAt;
+  if (patch.endsAt !== undefined) payload.ends_at = patch.endsAt;
+  if (patch.reschedule) {
+    payload.reminder_sent_at = null;
+  }
+
+  if (patch.reschedule) {
+    const current = await getAppointmentById(id);
+    payload.rescheduled_count = (current?.rescheduledCount ?? 0) + 1;
+  }
+
   const { data, error } = await supabase
     .from("diagnostic_appointments")
     .update(payload)

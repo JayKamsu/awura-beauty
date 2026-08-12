@@ -9,13 +9,21 @@ import {
   accountPanelClass,
 } from "@/features/account/components/account-section";
 import { useAuth } from "@/features/auth/context/auth-provider";
+import { DiagnosticContentBlocks } from "@/features/diagnostic/components/diagnostic-content-blocks";
+import { RescheduleAppointmentPicker } from "@/features/diagnostic/components/reschedule-appointment-picker";
+import { DiagnosticTestimonialForm } from "@/features/diagnostic/components/diagnostic-testimonial-form";
+import { downloadAppointmentIcsAuthenticated } from "@/lib/application/diagnostic/download-ics";
+import { downloadDiagnosticResultPdf } from "@/lib/application/diagnostic/download-result-pdf";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import type {
   DiagnosticAppointment,
   DiagnosticRecord,
+  DiagnosticSlot,
 } from "@/lib/domain/diagnostic";
 
 type AppointmentRow = DiagnosticAppointment & { videoPath?: string | null };
+
+const RESCHEDULABLE_STATUSES = new Set(["pending_payment", "confirmed"]);
 
 /** Section Mon compte listant les diagnostics capillaires et rendez-vous physiques du client. */
 export function AccountDiagnosticsSection() {
@@ -24,6 +32,7 @@ export function AccountDiagnosticsSection() {
   const [items, setItems] = useState<DiagnosticRecord[]>([]);
   const [appointments, setAppointments] = useState<AppointmentRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reschedulingId, setReschedulingId] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -102,33 +111,110 @@ export function AccountDiagnosticsSection() {
                 {appointments.map((a) => (
                   <li
                     key={a.id}
-                    className={`flex flex-wrap items-start justify-between gap-3 ${accountPanelClass}`}
+                    className={accountPanelClass}
                   >
-                    <div className="space-y-2">
-                      <p className="font-medium text-primary">
-                        {new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
-                          dateStyle: "full",
-                          timeStyle: "short",
-                        }).format(new Date(a.startsAt))}
-                      </p>
-                      <p className="text-sm text-muted">
-                        {t(`account.diagnosticsApptStatus.${a.status}`, {
-                          defaultValue: a.status,
-                        })}
-                      </p>
-                      {a.videoPath ? (
-                        <Button
-                          href={a.videoPath}
-                          size="md"
-                          variant="primary-outline"
-                        >
-                          {t("account.diagnosticsJoinVideo")}
-                        </Button>
-                      ) : null}
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="space-y-2">
+                        <p className="font-medium text-primary">
+                          {new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
+                            dateStyle: "full",
+                            timeStyle: "short",
+                          }).format(new Date(a.startsAt))}
+                        </p>
+                        <p className="text-sm text-muted">
+                          {t(`account.diagnosticsApptStatus.${a.status}`, {
+                            defaultValue: a.status,
+                          })}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {a.videoPath ? (
+                            <Button
+                              href={a.videoPath}
+                              size="md"
+                              variant="primary-outline"
+                            >
+                              {t("account.diagnosticsJoinVideo")}
+                            </Button>
+                          ) : null}
+                          <Button
+                            type="button"
+                            size="md"
+                            variant="ghost"
+                            onClick={() => {
+                              if (!session?.access_token) return;
+                              void downloadAppointmentIcsAuthenticated(
+                                a.id,
+                                session.access_token,
+                              );
+                            }}
+                          >
+                            {t("account.diagnosticsAddToCalendar")}
+                          </Button>
+                          {RESCHEDULABLE_STATUSES.has(a.status) ? (
+                            <Button
+                              type="button"
+                              size="md"
+                              variant="ghost"
+                              onClick={() =>
+                                setReschedulingId((prev) => (prev === a.id ? null : a.id))
+                              }
+                            >
+                              {t("diagnostic.reschedule.cta")}
+                            </Button>
+                          ) : null}
+                        </div>
+                      </div>
+                      <span className="rounded-xl bg-primary/10 px-2.5 py-1 text-xs text-primary">
+                        {t("account.diagnosticsPhysical")}
+                      </span>
                     </div>
-                    <span className="rounded-xl bg-primary/10 px-2.5 py-1 text-xs text-primary">
-                      {t("account.diagnosticsPhysical")}
-                    </span>
+
+                    {reschedulingId === a.id ? (
+                      <div className="mt-4 border-t border-border/60 pt-4">
+                        <RescheduleAppointmentPicker
+                          currentStartsAt={a.startsAt}
+                          fetchSlots={async (from, to) => {
+                            const res = await fetch(
+                              `/api/diagnostic/slots?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+                            );
+                            if (!res.ok) return [];
+                            const json = (await res.json()) as { slots?: DiagnosticSlot[] };
+                            return json.slots ?? [];
+                          }}
+                          onConfirm={async (startsAt) => {
+                            if (!session?.access_token) {
+                              return { ok: false, error: t("diagnostic.reschedule.error") };
+                            }
+                            const res = await fetch(
+                              `/api/diagnostic/appointments/${a.id}/reschedule`,
+                              {
+                                method: "POST",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `Bearer ${session.access_token}`,
+                                },
+                                body: JSON.stringify({ startsAt }),
+                              },
+                            );
+                            const json = (await res.json()) as {
+                              appointment?: AppointmentRow;
+                              error?: string;
+                            };
+                            if (!res.ok || !json.appointment) {
+                              return { ok: false, error: json.error };
+                            }
+                            setAppointments((prev) =>
+                              prev.map((row) =>
+                                row.id === a.id ? { ...row, ...json.appointment } : row,
+                              ),
+                            );
+                            setReschedulingId(null);
+                            return { ok: true };
+                          }}
+                          onCancel={() => setReschedulingId(null)}
+                        />
+                      </div>
+                    ) : null}
                   </li>
                 ))}
               </ul>
@@ -182,9 +268,35 @@ export function AccountDiagnosticsSection() {
                         </div>
                       ) : null}
 
-                      <p className="whitespace-pre-wrap text-sm text-muted">
-                        {summary}
-                      </p>
+                      {item.profile.content?.length ? (
+                        <>
+                          <DiagnosticContentBlocks blocks={item.profile.content} />
+                          <Button
+                            type="button"
+                            size="md"
+                            variant="ghost"
+                            onClick={() => {
+                              if (!session?.access_token) return;
+                              void downloadDiagnosticResultPdf(
+                                item.id,
+                                session.access_token,
+                              );
+                            }}
+                          >
+                            {t("account.diagnosticsDownloadPdf")}
+                          </Button>
+                          {session?.access_token ? (
+                            <DiagnosticTestimonialForm
+                              diagnosticId={item.id}
+                              accessToken={session.access_token}
+                            />
+                          ) : null}
+                        </>
+                      ) : (
+                        <p className="whitespace-pre-wrap text-sm text-muted">
+                          {summary}
+                        </p>
+                      )}
 
                       {item.profile.processSteps?.length ? (
                         <ol className="space-y-2 text-sm text-muted">

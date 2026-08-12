@@ -29,7 +29,16 @@
       "notesLabel": "Notas adicionales",
       "notesPlaceholder": "Indica aquí cualquier cosa que pueda ayudarnos (alergias, historial, hábitos particulares…)",
       "photosLabel": "Fotos de tu cabello",
-      "photosHint": "Opcional — frente, perfil izquierdo, perfil derecho, atrás y puntas. Nos ayuda a afinar tu rutina."
+      "photosHint": "Opcional — frente, perfil izquierdo, perfil derecho, atrás y puntas. Nos ayuda a afinar tu rutina.",
+      "photosHintRequired": "Obligatorio — frente, perfil izquierdo, perfil derecho, espalda y puntas. Necesario para preparar tu informe presencial.",
+      "photosRequiredError": "Añade al menos una foto para continuar."
+    },
+    "reschedule": {
+      "cta": "Reprogramar",
+      "title": "Reprogramar la cita",
+      "currentSlot": "Cita actual: {{date}}",
+      "confirm": "Confirmar nuevo horario",
+      "error": "No se pudo reprogramar a este horario. Inténtalo de nuevo."
     },
     "price": {
       "free": "Gratis"
@@ -38,18 +47,21 @@
       "eyebrow": "Online",
       "badge": "A distancia",
       "title": "Diagnóstico online",
-      "subtitle": "Análisis guiado a distancia para entender las necesidades de tu corona y salir con una rutina clara.",
+      "subtitle": "Un cuestionario guiado y luego una videollamada (1h máx.) con el equipo Awura para entender las necesidades de tu corona.",
       "cardTitle": "Diagnóstico capilar online",
-      "cardBody": "Análisis completo a distancia: perfil, retorno detallado, proceso a seguir y enlaces de productos a comprar.",
-      "duration": "~10 min",
+      "cardBody": "Cuestionario guiado y luego videollamada (1h máx.) con el equipo Awura. Tu informe personalizado llega después a tu cuenta.",
+      "duration": "Cuestionario + videollamada, 1h máx.",
       "meta": "{{duration}} · {{price}} (valor {{compare}})",
       "cta": "Empezar el diagnóstico gratis",
       "includes": {
         "1": "Cuestionario guiado sobre textura, cuero y objetivos",
-        "2": "Retorno detallado con proceso wash day / entre lavados",
-        "3": "Nueva rutina Awura con los productos adecuados",
-        "4": "Enlaces de compra + guardado en tu cuenta"
-      }
+        "2": "Videollamada (1h máx.) con el equipo Awura",
+        "3": "Informe personalizado redactado, disponible en tu cuenta",
+        "4": "Rutina y enlaces de compra incluidos en tu informe"
+      },
+      "slotsTitle": "Elige tu franja de videollamada",
+      "slotsSubtitle": "Elige un día y luego un horario para tu videollamada (1h máx.).",
+      "videoNotice": "💡 El enlace de la videollamada se abre 5 min antes de la hora prevista y queda disponible 1h. Lo encontrarás en tu cuenta."
     },
     "physical": {
       "eyebrow": "Presencial",
@@ -76,6 +88,7 @@
       "selectedSlot": "Franja elegida: {{slot}}",
       "priceLabel": "{{price}} (en lugar de {{compare}})",
       "noSlots": "No hay franjas abiertas en las próximas semanas. Vuelve pronto o contáctanos.",
+      "washHairNotice": "💡 No te laves el cabello en las 48 horas previas a tu cita 😊",
       "contactTitle": "Tus datos",
       "contactFromAccount": "Rellenados desde tu cuenta — puedes editarlos si hace falta.",
       "editContact": "Modificar",
@@ -85,6 +98,7 @@
       "bookError": "No se pudo iniciar el pago. Inténtalo de nuevo.",
       "successTitle": "Cita confirmada",
       "successBody": "¡Gracias! Tu cita está reservada. Tras el tricograma, tu informe y rutina personalizada aparecerán en tu cuenta.",
+      "addToCalendar": "Añadir al calendario",
       "status": {
         "pending_payment": "Pago pendiente",
         "confirmed": "Confirmada",
@@ -140,7 +154,11 @@
       "error": "No se pudo abrir la visio. Comprueba que la cita está confirmada o vuelve a iniciar sesión.",
       "openExternal": "Abrir a pantalla completa",
       "joinCta": "Unirse a la visio",
-      "hint": "Visio gratuita con Jitsi. Si el marco queda vacío, usa « Abrir a pantalla completa ». Permite cámara y micrófono en el navegador."
+      "hint": "Visio gratuita con Jitsi. Si el marco queda vacío, usa « Abrir a pantalla completa ». Permite cámara y micrófono en el navegador.",
+      "opensIn": "La sala abre en",
+      "opensHint": "Se abre automáticamente {{minutes}} minutos antes de la hora de la cita.",
+      "over": "La ventana de este encuentro (1h máximo) ha terminado. Contáctanos si necesitas una nueva cita.",
+      "timeRemaining": "Tiempo restante"
     },
     "result": {
       "eyebrow": "Para tu corona",

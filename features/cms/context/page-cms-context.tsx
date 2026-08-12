@@ -114,6 +114,7 @@ export const SECTION_EDITABLE_FIELDS: Record<PageSectionId, PageFieldKey[]> = {
   feature: ["title", "subtitle", "body", "image_url", "cta_label"],
   testimonials: ["title", "body"],
   story: ["title", "subtitle", "body", "image_url"],
+  founder: ["title", "subtitle", "body", "image_url"],
   mission: ["title", "subtitle", "body"],
   commitments: ["title", "subtitle", "body"],
   cta: ["title", "body", "cta_label"],

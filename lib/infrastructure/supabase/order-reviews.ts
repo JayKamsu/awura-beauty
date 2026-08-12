@@ -3,11 +3,12 @@ import {
   createSupabaseClient,
 } from "@/lib/infrastructure/supabase/client";
 
-/** Avis client sur un produit acheté, rattaché à une commande précise. */
+/** Avis client sur un produit acheté (rattaché à une commande) ou témoignage sur un diagnostic. */
 export type OrderReviewRow = {
   id: string;
-  orderId: string;
-  productId: string;
+  orderId: string | null;
+  productId: string | null;
+  diagnosticId: string | null;
   userId: string | null;
   rating: number;
   comment: string;
@@ -17,8 +18,9 @@ export type OrderReviewRow = {
 function mapReview(row: Record<string, unknown>): OrderReviewRow {
   return {
     id: String(row.id),
-    orderId: String(row.order_id),
-    productId: String(row.product_id),
+    orderId: row.order_id ? String(row.order_id) : null,
+    productId: row.product_id ? String(row.product_id) : null,
+    diagnosticId: row.diagnostic_id ? String(row.diagnostic_id) : null,
     userId: row.user_id ? String(row.user_id) : null,
     rating: Number(row.rating ?? 0),
     comment: String(row.comment ?? ""),
@@ -59,7 +61,7 @@ export async function listReviewsForProduct(
   return data.map((row) => mapReview(row as Record<string, unknown>));
 }
 
-/** Tous les avis, tous produits confondus (admin, service_role requis). */
+/** Tous les avis produits, tous produits confondus (admin, service_role requis). */
 export async function listAllReviews(): Promise<OrderReviewRow[]> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return [];
@@ -67,17 +69,40 @@ export async function listAllReviews(): Promise<OrderReviewRow[]> {
   const { data, error } = await supabase
     .from("order_reviews")
     .select("*")
+    .not("product_id", "is", null)
     .order("created_at", { ascending: false });
 
   if (error || !data) return [];
   return data.map((row) => mapReview(row as Record<string, unknown>));
 }
 
-/** Avis enrichi des infos produit (nom, slug, image) pour l'affichage public. */
+/** Tous les témoignages diagnostic (admin, service_role requis). */
+export async function listAllDiagnosticTestimonials(): Promise<OrderReviewRow[]> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("order_reviews")
+    .select("*")
+    .not("diagnostic_id", "is", null)
+    .order("created_at", { ascending: false });
+
+  if (error || !data) return [];
+  return data.map((row) => mapReview(row as Record<string, unknown>));
+}
+
+/** Avis produit enrichi des infos produit (nom, slug, image) pour l'affichage public. */
 export type PublicReview = OrderReviewRow & {
+  kind: "product";
   productName: string;
   productSlug: string;
   productImageUrl: string;
+};
+
+/** Témoignage diagnostic enrichi (titre du bilan) pour l'affichage public. */
+export type PublicDiagnosticTestimonial = OrderReviewRow & {
+  kind: "diagnostic";
+  diagnosticTitle: string;
 };
 
 /** Page publique /avis — RLS autorise la lecture anonyme, sans clé service_role. */
@@ -88,6 +113,7 @@ export async function listPublicReviews(limit = 100): Promise<PublicReview[]> {
   const { data, error } = await supabase
     .from("order_reviews")
     .select("*, products:product_id(name, slug, image_url)")
+    .not("product_id", "is", null)
     .order("created_at", { ascending: false })
     .limit(limit);
 
@@ -101,12 +127,85 @@ export async function listPublicReviews(limit = 100): Promise<PublicReview[]> {
         | null;
       return {
         ...mapReview(record),
+        kind: "product" as const,
         productName: product?.name ?? "",
         productSlug: product?.slug ?? "",
         productImageUrl: product?.image_url ?? "",
       };
     })
     .filter((review) => review.productSlug);
+}
+
+/** Témoignages diagnostic publiés (avec commentaire), les plus récents d'abord. */
+export async function listPublicDiagnosticTestimonials(
+  limit = 100,
+): Promise<PublicDiagnosticTestimonial[]> {
+  const supabase = createSupabaseClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("order_reviews")
+    .select("*, hair_diagnostics:diagnostic_id(profile)")
+    .not("diagnostic_id", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error || !data) return [];
+
+  return data.map((row) => {
+    const record = row as Record<string, unknown>;
+    const diagnostic = record.hair_diagnostics as
+      | { profile?: { title?: string } }
+      | null;
+    return {
+      ...mapReview(record),
+      kind: "diagnostic" as const,
+      diagnosticTitle: diagnostic?.profile?.title ?? "",
+    };
+  });
+}
+
+/** Témoignage laissé par le client pour un diagnostic donné, s'il existe. */
+export async function getReviewForDiagnostic(
+  diagnosticId: string,
+): Promise<OrderReviewRow | null> {
+  const supabase = createAdminSupabaseClient() ?? createSupabaseClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("order_reviews")
+    .select("*")
+    .eq("diagnostic_id", diagnosticId)
+    .maybeSingle();
+  if (error || !data) return null;
+  return mapReview(data as Record<string, unknown>);
+}
+
+/** Crée ou remplace le témoignage d'un client pour un diagnostic (un seul témoignage par diagnostic). */
+export async function upsertDiagnosticTestimonial(input: {
+  diagnosticId: string;
+  userId: string;
+  rating: number;
+  comment: string;
+}): Promise<OrderReviewRow | null> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("order_reviews")
+    .upsert(
+      {
+        diagnostic_id: input.diagnosticId,
+        user_id: input.userId,
+        rating: input.rating,
+        comment: input.comment,
+      },
+      { onConflict: "diagnostic_id" },
+    )
+    .select("*")
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapReview(data as Record<string, unknown>);
 }
 
 /** Crée ou remplace l'avis d'un client pour un produit d'une commande (un seul avis par couple commande/produit). */

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/context/auth-provider";
@@ -13,6 +13,10 @@ type VideoPayload = {
   displayName: string;
   startsAt: string;
   status: string;
+  canJoinNow: boolean;
+  joinWindowStartsAt: string;
+  callEndsAt: string;
+  callMaxMinutes: number;
 };
 
 type DiagnosticVideoRoomProps = {
@@ -20,7 +24,16 @@ type DiagnosticVideoRoomProps = {
   token?: string | null;
 };
 
-/** Salle de visioconférence (Jitsi) pour le rendez-vous diagnostic à distance. */
+function formatCountdown(ms: number): string {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+}
+
+/** Salle de visioconférence (Jitsi) pour le rendez-vous diagnostic à distance : ouverture 5 min avant, minuteur 1h max. */
 export function DiagnosticVideoRoom({
   appointmentId,
   token,
@@ -30,6 +43,7 @@ export function DiagnosticVideoRoom({
   const [data, setData] = useState<VideoPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     let mounted = true;
@@ -61,6 +75,30 @@ export function DiagnosticVideoRoom({
     };
   }, [appointmentId, token, session?.access_token, t]);
 
+  // Tick chaque seconde pour le compte à rebours / minuteur.
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const timing = useMemo(() => {
+    if (!data) return null;
+    const windowStart = new Date(data.joinWindowStartsAt).getTime();
+    const starts = new Date(data.startsAt).getTime();
+    const callEnd = new Date(data.callEndsAt).getTime();
+    if (now < windowStart) {
+      return { phase: "before" as const, msUntilOpen: windowStart - now };
+    }
+    if (now > callEnd) {
+      return { phase: "over" as const };
+    }
+    return {
+      phase: "live" as const,
+      msRemaining: callEnd - now,
+      lateStart: now > starts,
+    };
+  }, [data, now]);
+
   if (loading) {
     return (
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-4 py-14 md:px-6">
@@ -69,13 +107,64 @@ export function DiagnosticVideoRoom({
     );
   }
 
-  if (error || !data) {
+  if (error || !data || !timing) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 py-14 md:px-6">
         <h1 className="font-serif text-3xl text-primary">
           {t("diagnostic.video.title")}
         </h1>
         <p className="text-muted">{error ?? t("diagnostic.video.error")}</p>
+        <Button href="/compte#diagnostics" variant="primary-outline">
+          {t("diagnostic.result.accountCta")}
+        </Button>
+      </main>
+    );
+  }
+
+  const formattedDate = new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
+    dateStyle: "full",
+    timeStyle: "short",
+  }).format(new Date(data.startsAt));
+
+  // RDV pas encore ouvert : compte à rebours avant ouverture de la salle.
+  if (timing.phase === "before") {
+    return (
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center gap-6 px-4 py-16 text-center md:px-6">
+        <p className="text-sm uppercase tracking-[0.18em] text-accent">
+          {t("diagnostic.video.eyebrow")}
+        </p>
+        <h1 className="font-serif text-3xl text-primary sm:text-4xl">
+          {t("diagnostic.video.title")}
+        </h1>
+        <p className="text-muted">
+          {t("diagnostic.video.subtitle", { date: formattedDate })}
+        </p>
+        <div className="w-full rounded-2xl border border-border bg-background-alt p-8">
+          <p className="text-sm text-muted">{t("diagnostic.video.opensIn")}</p>
+          <p className="mt-2 font-serif text-5xl tabular-nums text-primary">
+            {formatCountdown(timing.msUntilOpen)}
+          </p>
+          <p className="mt-3 text-xs text-muted">
+            {t("diagnostic.video.opensHint", {
+              minutes: 5,
+            })}
+          </p>
+        </div>
+        <Button href="/compte#diagnostics" variant="primary-outline">
+          {t("diagnostic.result.accountCta")}
+        </Button>
+      </main>
+    );
+  }
+
+  // Fenêtre dépassée (1h après l'heure prévue) : entretien terminé.
+  if (timing.phase === "over") {
+    return (
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center gap-6 px-4 py-16 text-center md:px-6">
+        <h1 className="font-serif text-3xl text-primary">
+          {t("diagnostic.video.title")}
+        </h1>
+        <p className="text-muted">{t("diagnostic.video.over")}</p>
         <Button href="/compte#diagnostics" variant="primary-outline">
           {t("diagnostic.result.accountCta")}
         </Button>
@@ -92,21 +181,31 @@ export function DiagnosticVideoRoom({
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-10 md:px-6">
-      <header className="space-y-2">
-        <p className="text-sm uppercase tracking-[0.18em] text-accent">
-          {t("diagnostic.video.eyebrow")}
-        </p>
-        <h1 className="font-serif text-3xl text-primary sm:text-4xl">
-          {t("diagnostic.video.title")}
-        </h1>
-        <p className="text-muted">
-          {t("diagnostic.video.subtitle", {
-            date: new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
-              dateStyle: "full",
-              timeStyle: "short",
-            }).format(new Date(data.startsAt)),
-          })}
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-2">
+          <p className="text-sm uppercase tracking-[0.18em] text-accent">
+            {t("diagnostic.video.eyebrow")}
+          </p>
+          <h1 className="font-serif text-3xl text-primary sm:text-4xl">
+            {t("diagnostic.video.title")}
+          </h1>
+          <p className="text-muted">
+            {t("diagnostic.video.subtitle", { date: formattedDate })}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-border bg-background-alt px-5 py-3 text-center">
+          <p className="text-xs uppercase tracking-wide text-muted">
+            {t("diagnostic.video.timeRemaining")}
+          </p>
+          <p
+            className={`font-serif text-3xl tabular-nums ${
+              timing.msRemaining < 5 * 60_000 ? "text-accent" : "text-primary"
+            }`}
+            aria-live="polite"
+          >
+            {formatCountdown(timing.msRemaining)}
+          </p>
+        </div>
       </header>
 
       <div className="flex flex-wrap gap-3">

@@ -34,8 +34,10 @@ const textareaClass =
 
 type Phase = "quiz" | "extras" | "slot" | "contact";
 
-type DiagnosticPhysicalFlowProps = {
+type DiagnosticBookingFlowProps = {
   settings: DiagnosticSettings;
+  /** "physical" = RDV en cabine ; "online" = créneau visio (appel vidéo 1h max). */
+  channel: "physical" | "online";
 };
 
 function dayKey(iso: string): string {
@@ -43,10 +45,11 @@ function dayKey(iso: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-/** Tunnel de réservation du diagnostic présentiel : questionnaire, choix du créneau, coordonnées puis paiement. */
-export function DiagnosticPhysicalFlow({
+/** Tunnel de réservation du diagnostic (présentiel ou visio) : questionnaire, choix du créneau, coordonnées puis paiement. */
+export function DiagnosticBookingFlow({
   settings: initialSettings,
-}: DiagnosticPhysicalFlowProps) {
+  channel,
+}: DiagnosticBookingFlowProps) {
   const { t, i18n } = useTranslation();
   const { user, session } = useAuth();
   const { locked: pending, run } = useActionLock();
@@ -131,8 +134,9 @@ export function DiagnosticPhysicalFlow({
   useEffect(() => {
     let cancelled = false;
     void (async () => {
+      const questionChannel = channel === "online" ? "online" : "physical_pre";
       const res = await fetch(
-        `/api/diagnostic/questionnaire?channel=physical_pre&locale=${encodeURIComponent(i18n.language)}`,
+        `/api/diagnostic/questionnaire?channel=${questionChannel}&locale=${encodeURIComponent(i18n.language)}`,
       );
       const json = (await res.json()) as {
         questions?: DiagnosticQuestion[];
@@ -146,7 +150,7 @@ export function DiagnosticPhysicalFlow({
     return () => {
       cancelled = true;
     };
-  }, [i18n.language]);
+  }, [i18n.language, channel]);
 
   useEffect(() => {
     if (phase !== "slot") return;
@@ -199,6 +203,11 @@ export function DiagnosticPhysicalFlow({
   }, [days, selectedDay]);
 
   const locale = toIntlLocale(i18n.language);
+  const isOnline = channel === "online";
+  const priceCents = isOnline ? settings.onlinePriceCents : settings.physicalPriceCents;
+  const compareCents = isOnline
+    ? settings.onlineCompareCents
+    : settings.physicalCompareCents;
 
   const canSkip = Boolean(step?.allowUnknown);
 
@@ -252,6 +261,7 @@ export function DiagnosticPhysicalFlow({
           fullName,
           phone,
           startsAt: selectedSlot,
+          channel,
           answers,
           notes: notes.trim() || undefined,
           photos,
@@ -323,6 +333,8 @@ export function DiagnosticPhysicalFlow({
   }
 
   if (phase === "extras") {
+    const photosRequired = !isOnline;
+    const canContinue = !photosRequired || photos.length > 0;
     return (
       <div className="space-y-8">
         <DiagnosticProgress stepIndex={questions.length} totalSteps={questions.length + 1} />
@@ -349,8 +361,13 @@ export function DiagnosticPhysicalFlow({
         <div className="space-y-2">
           <p className="text-sm font-medium text-foreground">
             {t("diagnostic.extras.photosLabel")}
+            {photosRequired ? " *" : ""}
           </p>
-          <p className="text-sm text-muted">{t("diagnostic.extras.photosHint")}</p>
+          <p className="text-sm text-muted">
+            {photosRequired
+              ? t("diagnostic.extras.photosHintRequired")
+              : t("diagnostic.extras.photosHint")}
+          </p>
           <DiagnosticPhotoUpload sessionId={sessionId} onChange={setPhotos} />
         </div>
 
@@ -358,10 +375,20 @@ export function DiagnosticPhysicalFlow({
           <Button type="button" variant="ghost" onClick={() => setPhase("quiz")}>
             {t("diagnostic.back")}
           </Button>
-          <Button type="button" size="lg" onClick={() => setPhase("slot")}>
+          <Button
+            type="button"
+            size="lg"
+            disabled={!canContinue}
+            onClick={() => setPhase("slot")}
+          >
             {t("diagnostic.physical.chooseSlot")}
           </Button>
         </div>
+        {!canContinue ? (
+          <p className="text-sm text-accent" role="alert">
+            {t("diagnostic.extras.photosRequiredError")}
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -371,9 +398,11 @@ export function DiagnosticPhysicalFlow({
       <div className="space-y-8">
         <div className="space-y-2">
           <h2 className="font-serif text-3xl text-primary">
-            {t("diagnostic.physical.slotsTitle")}
+            {t(isOnline ? "diagnostic.online.slotsTitle" : "diagnostic.physical.slotsTitle")}
           </h2>
-          <p className="text-muted">{t("diagnostic.physical.slotsSubtitle")}</p>
+          <p className="text-muted">
+            {t(isOnline ? "diagnostic.online.slotsSubtitle" : "diagnostic.physical.slotsSubtitle")}
+          </p>
           {freeEntitlements > 0 ? (
             <p className="text-sm font-medium text-primary">
               {t("diagnostic.physical.freeWithGamme", {
@@ -383,20 +412,22 @@ export function DiagnosticPhysicalFlow({
           ) : (
             <p className="text-sm text-muted">
               {t("diagnostic.physical.priceLabel", {
-                price: formatPrice(
-                  settings.physicalPriceCents / 100,
-                  settings.currency,
-                  i18n.language,
-                ),
-                compare: formatPrice(
-                  settings.physicalCompareCents / 100,
-                  settings.currency,
-                  i18n.language,
-                ),
+                price: formatPrice(priceCents / 100, settings.currency, i18n.language),
+                compare: formatPrice(compareCents / 100, settings.currency, i18n.language),
               })}
             </p>
           )}
         </div>
+
+        {isOnline ? (
+          <p className="rounded-2xl border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-primary">
+            {t("diagnostic.online.videoNotice")}
+          </p>
+        ) : (
+          <p className="rounded-2xl border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-primary">
+            {t("diagnostic.physical.washHairNotice")}
+          </p>
+        )}
 
         {slots.length === 0 ? (
           <p className="rounded-2xl bg-background-alt p-6 text-muted">
@@ -583,7 +614,7 @@ export function DiagnosticPhysicalFlow({
         </>
       )}
 
-      {settings.physicalLocationText ? (
+      {!isOnline && settings.physicalLocationText ? (
         <p className="text-sm text-muted">{settings.physicalLocationText}</p>
       ) : null}
       {error ? (
@@ -599,11 +630,7 @@ export function DiagnosticPhysicalFlow({
           {freeEntitlements > 0
             ? t("diagnostic.physical.bookFreeCta")
             : t("diagnostic.physical.payCta", {
-                price: formatPrice(
-                  settings.physicalPriceCents / 100,
-                  settings.currency,
-                  i18n.language,
-                ),
+                price: formatPrice(priceCents / 100, settings.currency, i18n.language),
               })}
         </Button>
       </div>

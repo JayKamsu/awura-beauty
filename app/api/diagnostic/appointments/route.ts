@@ -12,10 +12,10 @@ import {
   getDiagnosticSettings,
   updateAppointment,
 } from "@/lib/infrastructure/supabase/diagnostic-admin";
-import type { DiagnosticPhoto } from "@/lib/domain/diagnostic";
+import type { DiagnosticChannel, DiagnosticPhoto } from "@/lib/domain/diagnostic";
 
 /**
- * Réserve un créneau de diagnostic capillaire (présentiel).
+ * Réserve un créneau de diagnostic capillaire (présentiel ou visio en ligne).
  * Gratuit si un entitlement disponible existe pour l'utilisateur/email, sinon
  * crée une session de paiement Stripe.
  */
@@ -25,6 +25,7 @@ export async function POST(request: Request) {
     fullName?: string;
     phone?: string;
     startsAt?: string;
+    channel?: string;
     answers?: Record<string, unknown>;
     notes?: string;
     photos?: DiagnosticPhoto[];
@@ -34,12 +35,16 @@ export async function POST(request: Request) {
   const fullName = String(body.fullName ?? "").trim();
   const phone = String(body.phone ?? "").trim();
   const startsAt = String(body.startsAt ?? "").trim();
+  const channel: DiagnosticChannel = body.channel === "online" ? "online" : "physical";
   const answers = normalizeAnswerMap(body.answers ?? {});
   const notes = typeof body.notes === "string" ? body.notes.trim().slice(0, 2000) : "";
   const photos = Array.isArray(body.photos) ? body.photos.slice(0, 5) : [];
 
   if (!email || !fullName || !phone || !startsAt) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
+  if (channel === "physical" && photos.length === 0) {
+    return NextResponse.json({ error: "Photos required" }, { status: 400 });
   }
 
   const settings = await getDiagnosticSettings();
@@ -75,7 +80,11 @@ export async function POST(request: Request) {
     email,
   });
   const freeWithGamme = Boolean(entitlement);
-  const amountCents = freeWithGamme ? 0 : settings.physicalPriceCents;
+  const amountCents = freeWithGamme
+    ? 0
+    : channel === "online"
+      ? settings.onlinePriceCents
+      : settings.physicalPriceCents;
 
   const appointment = await createAppointment({
     userId,
@@ -84,6 +93,7 @@ export async function POST(request: Request) {
     phone,
     startsAt: match?.startsAt ?? startsAt,
     endsAt: match?.endsAt ?? endsAt,
+    channel,
     answers,
     amountCents,
     currency: settings.currency,
@@ -126,14 +136,17 @@ export async function POST(request: Request) {
     customerEmail: email,
     currency: settings.currency,
     successUrl: `${successPath}&session_id={CHECKOUT_SESSION_ID}`,
-    cancelUrl: `${origin}/diagnostic-capillaire?mode=physical&cancelled=1`,
+    cancelUrl: `${origin}/diagnostic-capillaire?mode=${channel}&cancelled=1`,
     metadata: {
       appointmentId: appointment.id,
       type: "diagnostic_appointment",
     },
     lineItems: [
       {
-        name: "Diagnostic capillaire Awura Beauty (présentiel)",
+        name:
+          channel === "online"
+            ? "Diagnostic capillaire Awura Beauty (visio)"
+            : "Diagnostic capillaire Awura Beauty (présentiel)",
         quantity: 1,
         unitAmountCents: amountCents,
       },

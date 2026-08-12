@@ -1,4 +1,5 @@
 import { adjustOrderStock } from "@/lib/application/checkout/adjust-order-stock";
+import { sendPaymentReceiptEmail } from "@/lib/application/checkout/send-receipt-email";
 import { settleOrderLoyalty } from "@/lib/application/loyalty/settle-order-loyalty";
 import { maybeAutoCreateLabelAfterPaid } from "@/lib/application/shipping/create-order-label";
 import { notifyOrderPaid } from "@/lib/application/notifications/order-notify";
@@ -28,6 +29,7 @@ export async function markOrderPaid(orderId: string): Promise<boolean> {
       orderId: result.order.id,
       pickup: result.order.shipping_carrier === "pickup",
     });
+    await sendPaymentReceiptEmail(result.order);
     await maybeAutoCreateLabelAfterPaid(orderId);
     return true;
   }

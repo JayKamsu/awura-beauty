@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { downloadAppointmentIcs } from "@/lib/application/diagnostic/download-ics";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import type { DiagnosticAppointment } from "@/lib/domain/diagnostic";
 
@@ -57,6 +58,26 @@ export function DiagnosticAppointmentSuccess() {
               defaultValue: appointment.status,
             })}
           </p>
+          <p className="mt-3 rounded-xl border border-accent/30 bg-accent/5 px-3 py-2.5 text-sm text-primary">
+            {t(
+              appointment.channel === "online"
+                ? "diagnostic.online.videoNotice"
+                : "diagnostic.physical.washHairNotice",
+            )}
+          </p>
+          <button
+            type="button"
+            onClick={() =>
+              downloadAppointmentIcs({
+                id: appointment.id,
+                startsAt: appointment.startsAt,
+                endsAt: appointment.endsAt,
+              })
+            }
+            className="mt-3 inline-flex items-center gap-1.5 text-sm text-accent hover:text-accent-light"
+          >
+            {t("diagnostic.physical.addToCalendar")}
+          </button>
         </div>
       ) : null}
       <div className="flex flex-wrap justify-center gap-3">

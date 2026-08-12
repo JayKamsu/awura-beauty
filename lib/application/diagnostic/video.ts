@@ -7,6 +7,26 @@ import { absoluteUrl } from "@/lib/site";
 /** Domaine du service Jitsi Meet public utilisé pour les visios diagnostic. */
 export const JITSI_DOMAIN = "meet.jit.si";
 
+/** Ouverture de la salle avant l'heure prévue (minutes). */
+export const VIDEO_JOIN_WINDOW_MINUTES = 5;
+
+/** Durée maximale de l'entretien, à partir de l'heure prévue (minutes). */
+export const VIDEO_CALL_MAX_MINUTES = 60;
+
+/** Heure d'ouverture de la salle (5 min avant le RDV). */
+export function videoJoinWindowStartsAt(startsAt: string): string {
+  return new Date(
+    new Date(startsAt).getTime() - VIDEO_JOIN_WINDOW_MINUTES * 60_000,
+  ).toISOString();
+}
+
+/** Heure de fin forcée de l'entretien (1h après l'heure prévue), indépendante de la durée du créneau réservé. */
+export function videoCallEndsAt(startsAt: string): string {
+  return new Date(
+    new Date(startsAt).getTime() + VIDEO_CALL_MAX_MINUTES * 60_000,
+  ).toISOString();
+}
+
 function videoSecret(): string {
   return (
     process.env.DIAGNOSTIC_VIDEO_SECRET?.trim() ||
@@ -83,7 +103,22 @@ export function diagnosticVideoAbsoluteUrl(
   return absoluteUrl(diagnosticVideoPath(appointmentId, email));
 }
 
-/** La visio n'est accessible que pour un RDV confirmé ou déjà terminé. */
-export function canJoinDiagnosticVideo(status: string): boolean {
+/** Le RDV a le bon statut pour accéder à la visio (indépendant de l'heure). */
+export function isVideoEligibleStatus(status: string): boolean {
   return status === "confirmed" || status === "completed";
+}
+
+/**
+ * La visio n'est réellement joignable que dans la fenêtre : 5 min avant
+ * l'heure prévue jusqu'à la fin forcée de l'entretien (1h après le début).
+ */
+export function canJoinDiagnosticVideoNow(
+  status: string,
+  startsAt: string,
+): boolean {
+  if (!isVideoEligibleStatus(status)) return false;
+  const now = Date.now();
+  const windowStart = new Date(videoJoinWindowStartsAt(startsAt)).getTime();
+  const callEnd = new Date(videoCallEndsAt(startsAt)).getTime();
+  return now >= windowStart && now <= callEnd;
 }

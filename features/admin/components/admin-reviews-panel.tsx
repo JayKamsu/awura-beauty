@@ -16,20 +16,26 @@ export function AdminReviewsPanel() {
   const { t, i18n } = useTranslation();
   const adminFetch = useAdminFetch();
   const [reviews, setReviews] = useState<OrderReviewRow[]>([]);
+  const [testimonials, setTestimonials] = useState<OrderReviewRow[]>([]);
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
 
   useEffect(() => {
     void (async () => {
-      const [reviewsRes, productsRes] = await Promise.all([
+      const [reviewsRes, productsRes, testimonialsRes] = await Promise.all([
         adminFetch("/api/admin/reviews"),
         adminFetch("/api/admin/products"),
+        adminFetch("/api/admin/diagnostic/testimonials"),
       ]);
       const reviewsJson = (await reviewsRes.json()) as { reviews?: OrderReviewRow[] };
       const productsJson = (await productsRes.json()) as { products?: ProductRow[] };
+      const testimonialsJson = (await testimonialsRes.json()) as {
+        testimonials?: OrderReviewRow[];
+      };
       setReviews(reviewsJson.reviews ?? []);
       setProducts(productsJson.products ?? []);
+      setTestimonials(testimonialsJson.testimonials ?? []);
       setLoading(false);
     })();
   }, [adminFetch]);
@@ -44,11 +50,11 @@ export function AdminReviewsPanel() {
     const q = query.trim().toLowerCase();
     if (!q) return reviews;
     return reviews.filter((review) => {
-      const name = productNameById.get(review.productId) ?? "";
+      const name = (review.productId && productNameById.get(review.productId)) ?? "";
       return (
         name.toLowerCase().includes(q) ||
         review.comment.toLowerCase().includes(q) ||
-        review.orderId.toLowerCase().includes(q)
+        (review.orderId ?? "").toLowerCase().includes(q)
       );
     });
   }, [reviews, query, productNameById]);
@@ -81,14 +87,15 @@ export function AdminReviewsPanel() {
             >
               <div className="min-w-0 space-y-1">
                 <p className="font-medium text-primary">
-                  {productNameById.get(review.productId) ?? review.productId}
+                  {(review.productId && productNameById.get(review.productId)) ??
+                    review.productId}
                 </p>
                 <RatingInput value={review.rating} onChange={() => {}} disabled />
                 <p className="text-muted">{review.comment || t("admin.reviews.noComment")}</p>
               </div>
               <div className="shrink-0 text-right text-xs text-muted">
                 <p>
-                  {t("admin.reviews.colOrder")}: #{review.orderId.slice(0, 8)}
+                  {t("admin.reviews.colOrder")}: #{(review.orderId ?? "").slice(0, 8)}
                 </p>
                 <p>
                   {new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
@@ -100,6 +107,40 @@ export function AdminReviewsPanel() {
           ))}
         </ul>
       )}
+
+      <section className="space-y-3 border-t border-border pt-6">
+        <h2 className="font-serif text-xl text-primary">
+          {t("admin.reviews.diagnosticTestimonialsTitle", {
+            count: testimonials.length,
+          })}
+        </h2>
+        {loading ? null : testimonials.length === 0 ? (
+          <AdminEmptyState message={t("admin.reviews.diagnosticTestimonialsEmpty")} />
+        ) : (
+          <ul className="space-y-3">
+            {testimonials.map((testimonial) => (
+              <li
+                key={testimonial.id}
+                className="flex flex-col gap-2 rounded-2xl border border-border p-4 text-sm sm:flex-row sm:items-start sm:justify-between"
+              >
+                <div className="min-w-0 space-y-1">
+                  <RatingInput value={testimonial.rating} onChange={() => {}} disabled />
+                  <p className="text-muted">
+                    {testimonial.comment || t("admin.reviews.noComment")}
+                  </p>
+                </div>
+                <div className="shrink-0 text-right text-xs text-muted">
+                  <p>
+                    {new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
+                      dateStyle: "medium",
+                    }).format(new Date(testimonial.createdAt))}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
   );
 }

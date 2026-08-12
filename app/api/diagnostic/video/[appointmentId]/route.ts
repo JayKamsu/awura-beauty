@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import {
-  canJoinDiagnosticVideo,
+  canJoinDiagnosticVideoNow,
   createVideoAccessToken,
   diagnosticVideoPath,
+  isVideoEligibleStatus,
   JITSI_DOMAIN,
   jitsiJoinUrl,
   jitsiRoomName,
+  VIDEO_CALL_MAX_MINUTES,
   verifyVideoAccessToken,
+  videoCallEndsAt,
+  videoJoinWindowStartsAt,
 } from "@/lib/application/diagnostic/video";
 import {
   getUserFromAccessToken,
@@ -35,7 +39,7 @@ export async function GET(request: Request, { params }: Params) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  if (!canJoinDiagnosticVideo(appointment.status)) {
+  if (!isVideoEligibleStatus(appointment.status)) {
     return NextResponse.json(
       { error: "Appointment not ready for video" },
       { status: 403 },
@@ -76,5 +80,10 @@ export async function GET(request: Request, { params }: Params) {
     displayName,
     videoPath: diagnosticVideoPath(appointment.id, appointment.email),
     accessToken: createVideoAccessToken(appointment.id, appointment.email),
+    isAdmin,
+    canJoinNow: canJoinDiagnosticVideoNow(appointment.status, appointment.startsAt),
+    joinWindowStartsAt: videoJoinWindowStartsAt(appointment.startsAt),
+    callEndsAt: videoCallEndsAt(appointment.startsAt),
+    callMaxMinutes: VIDEO_CALL_MAX_MINUTES,
   });
 }

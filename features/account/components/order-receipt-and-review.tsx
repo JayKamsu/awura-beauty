@@ -43,7 +43,9 @@ export function OrderReceiptAndReview({
       const json = (await res.json()) as { reviews?: OrderReviewRow[] };
       if (cancelled) return;
       const byProduct: Record<string, OrderReviewRow> = {};
-      for (const review of json.reviews ?? []) byProduct[review.productId] = review;
+      for (const review of json.reviews ?? []) {
+        if (review.productId) byProduct[review.productId] = review;
+      }
       setReviews(byProduct);
       setReviewsLoaded(true);
     })();

@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { AboutCommitmentsSection } from "@/features/about/components/about-commitments-section";
 import { AboutCtaSection } from "@/features/about/components/about-cta-section";
+import { AboutFounderSection } from "@/features/about/components/about-founder-section";
 import { AboutMissionSection } from "@/features/about/components/about-mission-section";
 import { AboutStorySection } from "@/features/about/components/about-story-section";
 import { PageCmsProvider } from "@/features/cms/context/page-cms-context";
@@ -15,6 +16,7 @@ import {
 
 const SECTION_MAP: Partial<Record<PageSectionId, ReactNode>> = {
   story: <AboutStorySection />,
+  founder: <AboutFounderSection />,
   mission: <AboutMissionSection />,
   commitments: <AboutCommitmentsSection />,
   cta: <AboutCtaSection />,

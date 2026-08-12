@@ -207,7 +207,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         <p className="line-clamp-2 text-xs text-muted sm:text-sm">
           {product.shortDescription}
         </p>
-        <div className="mt-auto flex items-center justify-between gap-2 pt-2 sm:gap-3 sm:pt-3">
+        <div className="mt-auto flex flex-col gap-2 pt-2 sm:gap-3 sm:pt-3">
           <p className="flex flex-wrap items-baseline gap-1.5 text-sm font-medium text-primary sm:text-base">
             <span>{formatPrice(product.price, currency, i18n.language)}</span>
             {hasDiscount ? (
@@ -219,12 +219,12 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           <button
             type="button"
             onClick={handleAdd}
-            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-background transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:size-11"
+            className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 text-background transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:h-11"
             aria-label={t("shop.addToCart", { name: product.name })}
           >
             <svg
               viewBox="0 0 24 24"
-              className="size-5"
+              className="size-4.5 shrink-0 sm:size-5"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.75"
@@ -232,6 +232,9 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
               <path d="M6 7h12l-1 11H7L6 7Z" />
               <path d="M9 7V5.5A3 3 0 0 1 15 5.5V7" />
             </svg>
+            <span className="text-xs font-medium uppercase tracking-wide sm:text-sm">
+              {t("shop.addToCartButton")}
+            </span>
           </button>
         </div>
         {added ? (

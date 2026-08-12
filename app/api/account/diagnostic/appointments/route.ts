@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import {
-  canJoinDiagnosticVideo,
   diagnosticVideoPath,
+  isVideoEligibleStatus,
 } from "@/lib/application/diagnostic/video";
 import { getUserFromAccessToken } from "@/lib/infrastructure/supabase/admin-auth";
 import { createAdminSupabaseClient } from "@/lib/infrastructure/supabase/client";
@@ -23,6 +23,7 @@ function mapRow(row: Record<string, unknown>): DiagnosticAppointment {
     startsAt: String(row.starts_at),
     endsAt: String(row.ends_at),
     status: row.status as DiagnosticAppointment["status"],
+    channel: (row.channel as DiagnosticAppointment["channel"]) || "physical",
     answers: (row.answers as Record<string, string>) ?? {},
     amountCents: Number(row.amount_cents ?? 0),
     currency: String(row.currency ?? "EUR"),
@@ -81,9 +82,10 @@ export async function GET(request: Request) {
 
   const payload = appointments.map((a) => ({
     ...a,
-    videoPath: canJoinDiagnosticVideo(a.status)
-      ? diagnosticVideoPath(a.id, a.email)
-      : null,
+    videoPath:
+      a.channel === "online" && isVideoEligibleStatus(a.status)
+        ? diagnosticVideoPath(a.id, a.email)
+        : null,
   }));
 
   return NextResponse.json({ appointments: payload });

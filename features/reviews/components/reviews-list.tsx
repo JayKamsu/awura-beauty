@@ -5,10 +5,15 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { RatingInput } from "@/components/ui/rating-input";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
-import type { PublicReview } from "@/lib/infrastructure/supabase/order-reviews";
+import type {
+  PublicDiagnosticTestimonial,
+  PublicReview,
+} from "@/lib/infrastructure/supabase/order-reviews";
 
-/** Liste des avis clients publics avec note, produit associé et commentaire. */
-export function ReviewsList({ reviews }: { reviews: PublicReview[] }) {
+type Review = PublicReview | PublicDiagnosticTestimonial;
+
+/** Liste des avis clients publics : avis produits et témoignages diagnostic, avec note et commentaire. */
+export function ReviewsList({ reviews }: { reviews: Review[] }) {
   const { t, i18n } = useTranslation();
 
   if (reviews.length === 0) {
@@ -23,7 +28,7 @@ export function ReviewsList({ reviews }: { reviews: PublicReview[] }) {
           className="flex flex-col gap-3 rounded-2xl border border-border bg-background p-5"
         >
           <div className="flex items-center gap-3">
-            {review.productImageUrl ? (
+            {review.kind === "product" && review.productImageUrl ? (
               <div className="relative size-12 shrink-0 overflow-hidden rounded-full bg-background-alt">
                 <Image
                   src={review.productImageUrl}
@@ -35,13 +40,20 @@ export function ReviewsList({ reviews }: { reviews: PublicReview[] }) {
               </div>
             ) : null}
             <div className="min-w-0">
-              <Link
-                href={`/boutique/${review.productSlug}`}
-                className="block truncate font-medium text-primary hover:text-accent"
-              >
-                {review.productName}
-              </Link>
+              {review.kind === "product" ? (
+                <Link
+                  href={`/boutique/${review.productSlug}`}
+                  className="block truncate font-medium text-primary hover:text-accent"
+                >
+                  {review.productName}
+                </Link>
+              ) : (
+                <p className="truncate font-medium text-primary">
+                  {review.diagnosticTitle || t("reviews.diagnosticBadge")}
+                </p>
+              )}
               <p className="text-xs text-muted">
+                {review.kind === "diagnostic" ? `${t("reviews.diagnosticBadge")} · ` : ""}
                 {new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
                   dateStyle: "medium",
                 }).format(new Date(review.createdAt))}

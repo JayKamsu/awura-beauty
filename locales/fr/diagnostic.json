@@ -29,7 +29,16 @@
       "notesLabel": "Notes complémentaires",
       "notesPlaceholder": "Précise ici tout ce qui pourrait nous aider (allergies, historique, habitudes particulières…)",
       "photosLabel": "Photos de tes cheveux",
-      "photosHint": "Facultatif — face, profil gauche, profil droit, arrière et pointes. Ça nous aide à affiner ta routine."
+      "photosHint": "Facultatif — face, profil gauche, profil droit, arrière et pointes. Ça nous aide à affiner ta routine.",
+      "photosHintRequired": "Obligatoire — face, profil gauche, profil droit, arrière et pointes. Nécessaire pour préparer ton bilan présentiel.",
+      "photosRequiredError": "Ajoute au moins une photo pour continuer."
+    },
+    "reschedule": {
+      "cta": "Reprogrammer",
+      "title": "Reprogrammer le rendez-vous",
+      "currentSlot": "Créneau actuel : {{date}}",
+      "confirm": "Confirmer le nouveau créneau",
+      "error": "Impossible de reprogrammer ce créneau. Réessaie."
     },
     "price": {
       "free": "Gratuit"
@@ -38,18 +47,21 @@
       "eyebrow": "En ligne",
       "badge": "À distance",
       "title": "Diagnostic en ligne",
-      "subtitle": "Une analyse guidée à distance pour comprendre les besoins de ta couronne et repartir avec une routine claire.",
+      "subtitle": "Un questionnaire guidé puis un appel vidéo (1h max) avec l’équipe Awura pour comprendre les besoins de ta couronne.",
       "cardTitle": "Diagnostic capillaire en ligne",
-      "cardBody": "Analyse complète à distance : profil, retour détaillé, processus à suivre et liens vers les soins à acheter.",
-      "duration": "~10 min",
+      "cardBody": "Questionnaire guidé puis appel vidéo (1h max) avec l’équipe Awura. Ton bilan personnalisé arrive ensuite dans ton compte.",
+      "duration": "Questionnaire + appel vidéo 1h max",
       "meta": "{{duration}} · {{price}} (valeur {{compare}})",
       "cta": "Commencer le diagnostic gratuit",
       "includes": {
         "1": "Questionnaire guidé sur ta texture, ton scalp et tes objectifs",
-        "2": "Retour détaillé avec le processus wash day / entre-deux",
-        "3": "Nouvelle routine Awura avec les bons produits",
-        "4": "Liens d’achat + sauvegarde dans ton compte"
-      }
+        "2": "Appel vidéo (1h max) avec l’équipe Awura",
+        "3": "Bilan personnalisé rédigé, à consulter dans ton compte",
+        "4": "Routine et liens d’achat inclus dans ton bilan"
+      },
+      "slotsTitle": "Choisis ton créneau visio",
+      "slotsSubtitle": "Choisis un jour, puis un horaire pour ton appel vidéo (1h max).",
+      "videoNotice": "💡 Le lien de connexion à l’appel vidéo s’ouvre 5 min avant l’heure prévue et reste disponible 1h. Tu le retrouveras dans ton compte."
     },
     "physical": {
       "eyebrow": "Présentiel",
@@ -76,6 +88,7 @@
       "selectedSlot": "Créneau choisi : {{slot}}",
       "priceLabel": "{{price}} (au lieu de {{compare}})",
       "noSlots": "Aucun créneau ouvert sur les prochaines semaines. Reviens bientôt ou contacte-nous.",
+      "washHairNotice": "💡 Merci de ne pas te laver les cheveux dans les 48 heures précédant ton rendez-vous 😊",
       "contactTitle": "Tes coordonnées",
       "contactFromAccount": "Préremplies depuis ton compte — tu peux les modifier si besoin.",
       "editContact": "Modifier",
@@ -85,6 +98,7 @@
       "bookError": "Impossible de démarrer le paiement. Réessaie.",
       "successTitle": "Rendez-vous confirmé",
       "successBody": "Merci ! Ton RDV est réservé. Après l’analyse au trichogramme, ton bilan et ta routine personnalisée arriveront dans ton compte.",
+      "addToCalendar": "Ajouter au calendrier",
       "status": {
         "pending_payment": "Paiement en attente",
         "confirmed": "Confirmé",
@@ -140,7 +154,11 @@
       "error": "Impossible d’ouvrir la visio. Vérifie que le RDV est confirmé, ou reconnecte-toi.",
       "openExternal": "Ouvrir en plein écran",
       "joinCta": "Rejoindre la visio",
-      "hint": "Visio gratuite via Jitsi. Si l’écran reste vide, utilise « Ouvrir en plein écran ». Autorise caméra et micro dans le navigateur."
+      "hint": "Visio gratuite via Jitsi. Si l’écran reste vide, utilise « Ouvrir en plein écran ». Autorise caméra et micro dans le navigateur.",
+      "opensIn": "La salle ouvre dans",
+      "opensHint": "Ouverture automatique {{minutes}} minutes avant l’heure du rendez-vous.",
+      "over": "La fenêtre de cet entretien (1h maximum) est terminée. Contacte-nous si besoin d’un nouveau créneau.",
+      "timeRemaining": "Temps restant"
     },
     "result": {
       "eyebrow": "Pour ta couronne",

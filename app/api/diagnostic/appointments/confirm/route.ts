@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import {
-  canJoinDiagnosticVideo,
   diagnosticVideoPath,
+  isVideoEligibleStatus,
 } from "@/lib/application/diagnostic/video";
 import { getStripeClient } from "@/lib/infrastructure/payments/stripe";
 import {
@@ -12,9 +12,10 @@ import {
 function withVideo(appointment: NonNullable<
   Awaited<ReturnType<typeof getAppointmentById>>
 >) {
-  const videoPath = canJoinDiagnosticVideo(appointment.status)
-    ? diagnosticVideoPath(appointment.id, appointment.email)
-    : null;
+  const videoPath =
+    appointment.channel === "online" && isVideoEligibleStatus(appointment.status)
+      ? diagnosticVideoPath(appointment.id, appointment.email)
+      : null;
   return { appointment, videoPath };
 }
 

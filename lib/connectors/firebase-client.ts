@@ -109,29 +109,46 @@ export async function registerMessagingServiceWorker(): Promise<ServiceWorkerReg
 export async function requestWebPushToken(): Promise<string | null> {
   if (typeof window === "undefined") return null;
   const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
-  if (!vapidKey || !isFirebaseClientConfigured()) return null;
+  if (!vapidKey || !isFirebaseClientConfigured()) {
+    console.warn("[push] Firebase client not configured (missing env vars)");
+    return null;
+  }
   if (!("Notification" in window) || !("serviceWorker" in navigator)) {
+    console.warn("[push] Notification API or serviceWorker unsupported in this browser");
     return null;
   }
 
   try {
     const permission = await Notification.requestPermission();
-    if (permission !== "granted") return null;
+    if (permission !== "granted") {
+      console.warn(`[push] Permission not granted: ${permission}`);
+      return null;
+    }
 
     const registration = await registerMessagingServiceWorker();
-    if (!registration?.active) return null;
+    if (!registration?.active) {
+      console.error("[push] Service worker registration failed or inactive");
+      return null;
+    }
 
     await ensureSwFirebaseConfig(registration.active, clientConfig());
 
     const messaging = await getFirebaseMessagingClient();
-    if (!messaging) return null;
+    if (!messaging) {
+      console.error("[push] getFirebaseMessagingClient returned null (isSupported=false?)");
+      return null;
+    }
 
     const token = await getToken(messaging, {
       vapidKey,
       serviceWorkerRegistration: registration,
     });
+    if (!token) {
+      console.error("[push] getToken returned an empty token");
+    }
     return token || null;
-  } catch {
+  } catch (err) {
+    console.error("[push] requestWebPushToken failed:", err);
     return null;
   }
 }
