@@ -11,6 +11,9 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#faf3ec",
     theme_color: "#0F3D2E",
     lang: "fr",
+    // Requis par Firebase Cloud Messaging (getToken échoue sans ça sur certains
+    // navigateurs) — champ non typé par Next.js mais reconnu par Chrome/FCM.
+    ...({ gcm_sender_id: "103953800507" } as Record<string, string>),
     icons: [
       {
         src: "/icon-192.png",
