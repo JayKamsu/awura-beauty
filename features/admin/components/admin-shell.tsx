@@ -266,12 +266,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
           >
             {t("account.logout")}
           </Button>
-          <Link
-            href="/"
-            className="block text-center text-xs text-muted transition hover:text-accent"
-          >
-            {t("admin.guard.backHome")}
-          </Link>
         </div>
       </aside>
 
@@ -347,13 +341,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 >
                   {t("account.logout")}
                 </Button>
-                <Link
-                  href="/"
-                  className="block text-center text-sm text-muted hover:text-accent"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {t("admin.guard.backHome")}
-                </Link>
               </div>
             </div>
           </div>

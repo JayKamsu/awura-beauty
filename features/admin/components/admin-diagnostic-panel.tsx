@@ -761,37 +761,80 @@ export function AdminDiagnosticPanel() {
               {appointments.map((a) => (
                 <li
                   key={a.id}
-                  className="rounded-2xl border border-border p-4 text-sm"
+                  className="overflow-hidden rounded-2xl border border-border"
                 >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-medium text-primary">{a.fullName}</p>
-                        <span
-                          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${APPOINTMENT_STATUS_TONE[a.status]}`}
-                        >
-                          {t(`admin.diagnostic.appointmentStatus.${a.status}`)}
-                        </span>
-                        <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-0.5 text-xs text-primary">
-                          {a.channel === "online"
-                            ? t("admin.diagnostic.channel.online")
-                            : t("admin.diagnostic.channel.physical")}
-                        </span>
-                      </div>
+                  {/* En-tête : identité + statut, toujours visibles en un coup d'œil */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-background-alt px-4 py-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-primary">{a.fullName}</p>
                       <p className="text-xs text-muted">{a.email}</p>
-                      <p className="text-xs text-muted">
-                        {formatDateTime(i18n.language, a.startsAt)}
-                      </p>
-                      {a.photos?.length ? (
-                        <DiagnosticPhotosStrip photos={a.photos} adminFetch={adminFetch} />
-                      ) : null}
-                      <div className="space-y-1.5 pt-1">
-                        <label
-                          htmlFor={`call-notes-${a.id}`}
-                          className="block text-xs font-medium text-muted"
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                        {a.channel === "online"
+                          ? t("admin.diagnostic.channel.online")
+                          : t("admin.diagnostic.channel.physical")}
+                      </span>
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${APPOINTMENT_STATUS_TONE[a.status]}`}
+                      >
+                        {t(`admin.diagnostic.appointmentStatus.${a.status}`)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 p-4 text-sm">
+                    <p className="font-medium text-primary">
+                      {formatDateTime(i18n.language, a.startsAt)}
+                    </p>
+
+                    {a.photos?.length ? (
+                      <DiagnosticPhotosStrip photos={a.photos} adminFetch={adminFetch} />
+                    ) : null}
+
+                    {/* Actions principales : ce que l'admin fait le plus souvent */}
+                    <div className="flex flex-wrap gap-2 border-t border-border pt-3">
+                      <Button
+                        type="button"
+                        size="md"
+                        variant="primary-outline"
+                        onClick={() => prepareResultFor(a)}
+                      >
+                        {t("admin.diagnostic.prepareResult")}
+                      </Button>
+                      {a.channel === "online" &&
+                      (a.status === "confirmed" || a.status === "completed") ? (
+                        <Button
+                          href={`/diagnostic-capillaire/visio/${a.id}`}
+                          size="md"
+                          variant="primary-outline"
                         >
-                          {t("admin.diagnostic.callNotesLabel")}
-                        </label>
+                          {t("admin.diagnostic.joinVideo")}
+                        </Button>
+                      ) : null}
+                      {a.status === "confirmed" ? (
+                        <Button
+                          type="button"
+                          size="md"
+                          variant="ghost"
+                          onClick={() => void updateAppointmentStatus(a.id, "completed")}
+                        >
+                          {t("admin.diagnostic.markCompleted")}
+                        </Button>
+                      ) : null}
+                    </div>
+
+                    {/* Notes d'appel : repliées, consultées après l'entretien */}
+                    <details className="rounded-xl border border-border bg-background-alt/60 px-3 py-2.5">
+                      <summary className="cursor-pointer text-sm font-medium text-primary">
+                        {t("admin.diagnostic.callNotesLabel")}
+                        {a.notes ? (
+                          <span className="ml-2 font-normal text-muted">
+                            · {t("admin.diagnostic.callNotesSaved")}
+                          </span>
+                        ) : null}
+                      </summary>
+                      <div className="mt-2.5 space-y-2">
                         <textarea
                           id={`call-notes-${a.id}`}
                           className="min-h-20 w-full rounded-lg border border-border bg-background px-2.5 py-2 text-xs text-foreground outline-none focus:border-accent"
@@ -811,99 +854,81 @@ export function AdminDiagnosticPanel() {
                           {t("admin.diagnostic.saveCallNotes")}
                         </Button>
                       </div>
-                    </div>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <Button
-                      type="button"
-                      size="md"
-                      variant="primary-outline"
-                      onClick={() => prepareResultFor(a)}
-                    >
-                      {t("admin.diagnostic.prepareResult")}
-                    </Button>
-                    {a.channel === "online" &&
-                    (a.status === "confirmed" || a.status === "completed") ? (
-                      <Button
-                        href={`/diagnostic-capillaire/visio/${a.id}`}
-                        size="md"
-                        variant="primary-outline"
-                      >
-                        {t("admin.diagnostic.joinVideo")}
-                      </Button>
-                    ) : null}
-                    <Button
-                      type="button"
-                      size="md"
-                      variant="ghost"
-                      onClick={() => void downloadAppointmentIcs(a.id)}
-                    >
-                      {t("admin.diagnostic.addToCalendar")}
-                    </Button>
-                    {a.status === "confirmed" ? (
-                      <Button
-                        type="button"
-                        size="md"
-                        variant="ghost"
-                        onClick={() => void updateAppointmentStatus(a.id, "completed")}
-                      >
-                        {t("admin.diagnostic.markCompleted")}
-                      </Button>
-                    ) : null}
-                    {a.status === "pending_payment" || a.status === "confirmed" ? (
-                      <Button
-                        type="button"
-                        size="md"
-                        variant="ghost"
-                        onClick={() => void updateAppointmentStatus(a.id, "cancelled")}
-                      >
-                        {t("admin.diagnostic.cancel")}
-                      </Button>
-                    ) : null}
-                    {a.status === "pending_payment" || a.status === "confirmed" ? (
-                      <Button
-                        type="button"
-                        size="md"
-                        variant="ghost"
-                        onClick={() =>
-                          setReschedulingId((prev) => (prev === a.id ? null : a.id))
-                        }
-                      >
-                        {t("diagnostic.reschedule.cta")}
-                      </Button>
-                    ) : null}
-                  </div>
+                    </details>
 
-                  {reschedulingId === a.id ? (
-                    <div className="mt-4 border-t border-border pt-4">
-                      <RescheduleAppointmentPicker
-                        currentStartsAt={a.startsAt}
-                        fetchSlots={async (from, to) => {
-                          const res = await adminFetch(
-                            `/api/diagnostic/slots?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
-                          );
-                          if (!res.ok) return [];
-                          const json = (await res.json()) as { slots?: DiagnosticSlot[] };
-                          return json.slots ?? [];
-                        }}
-                        onConfirm={async (startsAt) => {
-                          const res = await adminFetch("/api/admin/diagnostic/appointments", {
-                            method: "PATCH",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ id: a.id, startsAt }),
-                          });
-                          const json = (await res.json()) as { error?: string };
-                          if (!res.ok) {
-                            return { ok: false, error: json.error };
-                          }
-                          setReschedulingId(null);
-                          await load();
-                          return { ok: true };
-                        }}
-                        onCancel={() => setReschedulingId(null)}
-                      />
-                    </div>
-                  ) : null}
+                    {/* Gestion du RDV : replanifier, annuler, calendrier — moins fréquent */}
+                    <details className="rounded-xl border border-border px-3 py-2.5">
+                      <summary className="cursor-pointer text-sm font-medium text-muted">
+                        {t("admin.diagnostic.manageAppointment")}
+                      </summary>
+                      <div className="mt-2.5 flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          size="md"
+                          variant="ghost"
+                          onClick={() => void downloadAppointmentIcs(a.id)}
+                        >
+                          {t("admin.diagnostic.addToCalendar")}
+                        </Button>
+                        {a.status === "pending_payment" || a.status === "confirmed" ? (
+                          <Button
+                            type="button"
+                            size="md"
+                            variant="ghost"
+                            onClick={() =>
+                              setReschedulingId((prev) => (prev === a.id ? null : a.id))
+                            }
+                          >
+                            {t("diagnostic.reschedule.cta")}
+                          </Button>
+                        ) : null}
+                        {a.status === "pending_payment" || a.status === "confirmed" ? (
+                          <Button
+                            type="button"
+                            size="md"
+                            variant="ghost"
+                            onClick={() => void updateAppointmentStatus(a.id, "cancelled")}
+                          >
+                            {t("admin.diagnostic.cancel")}
+                          </Button>
+                        ) : null}
+                      </div>
+
+                      {reschedulingId === a.id ? (
+                        <div className="mt-4 border-t border-border pt-4">
+                          <RescheduleAppointmentPicker
+                            currentStartsAt={a.startsAt}
+                            fetchSlots={async (from, to) => {
+                              const res = await adminFetch(
+                                `/api/diagnostic/slots?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+                              );
+                              if (!res.ok) return [];
+                              const json = (await res.json()) as { slots?: DiagnosticSlot[] };
+                              return json.slots ?? [];
+                            }}
+                            onConfirm={async (startsAt) => {
+                              const res = await adminFetch(
+                                "/api/admin/diagnostic/appointments",
+                                {
+                                  method: "PATCH",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ id: a.id, startsAt }),
+                                },
+                              );
+                              const json = (await res.json()) as { error?: string };
+                              if (!res.ok) {
+                                return { ok: false, error: json.error };
+                              }
+                              setReschedulingId(null);
+                              await load();
+                              return { ok: true };
+                            }}
+                            onCancel={() => setReschedulingId(null)}
+                          />
+                        </div>
+                      ) : null}
+                    </details>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -912,9 +937,9 @@ export function AdminDiagnosticPanel() {
       ) : null}
 
       {!loading && tab === "sendResult" ? (
-        <div className="max-w-2xl space-y-4 rounded-2xl border border-border p-4 sm:p-5">
+        <div className="max-w-2xl space-y-5">
           <div>
-            <h2 className="font-medium text-primary">
+            <h2 className="font-serif text-2xl text-primary">
               {t("admin.diagnostic.sendResultTitle")}
             </h2>
             <p className="text-sm text-muted">{t("admin.diagnostic.sendResultHint")}</p>
@@ -926,82 +951,109 @@ export function AdminDiagnosticPanel() {
             </p>
           ) : null}
 
-          <label className="block space-y-1 text-sm">
-            <span className="text-muted">{t("admin.diagnostic.linkAppointment")}</span>
-            <select
-              className="w-full rounded-xl border border-border bg-background px-3 py-2"
-              value={resultForm.appointmentId}
-              onChange={(e) => {
-                setResultForm({ ...resultForm, appointmentId: e.target.value });
-                if (!e.target.value) setPreparingFor(null);
-              }}
-            >
-              <option value="">{t("admin.diagnostic.noAppointment")}</option>
-              {appointments.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.fullName} — {formatDateTime(i18n.language, a.startsAt)} (
-                  {t(`admin.diagnostic.appointmentStatus.${a.status}`)})
-                </option>
-              ))}
-            </select>
-            <span className="block text-xs text-muted">
-              {t("admin.diagnostic.linkAppointmentHint")}
-            </span>
-          </label>
-          <label className="block space-y-1 text-sm">
-            <span className="text-muted">{t("admin.diagnostic.resultTitle")}</span>
-            <input
-              className="w-full rounded-xl border border-border bg-background px-3 py-2"
-              value={resultForm.title}
-              onChange={(e) => setResultForm({ ...resultForm, title: e.target.value })}
-            />
-          </label>
-          <label className="block space-y-1 text-sm">
-            <span className="text-muted">{t("admin.diagnostic.scalpAnalysis")}</span>
-            <textarea
-              className="min-h-24 w-full rounded-xl border border-border bg-background px-3 py-2"
-              placeholder={t("admin.diagnostic.scalpAnalysisHint")}
-              value={resultForm.scalpAnalysis}
-              onChange={(e) =>
-                setResultForm({ ...resultForm, scalpAnalysis: e.target.value })
-              }
-            />
-          </label>
-          <label className="block space-y-1 text-sm">
-            <span className="text-muted">{t("admin.diagnostic.resultSummary")}</span>
-            <textarea
-              className="min-h-24 w-full rounded-xl border border-border bg-background px-3 py-2"
-              placeholder={t("admin.diagnostic.resultSummaryHint")}
-              value={resultForm.summary}
-              onChange={(e) => setResultForm({ ...resultForm, summary: e.target.value })}
-            />
-          </label>
-          <label className="block space-y-1 text-sm">
-            <span className="text-muted">{t("admin.diagnostic.detailedFeedback")}</span>
-            <textarea
-              className="min-h-28 w-full rounded-xl border border-border bg-background px-3 py-2"
-              placeholder={t("admin.diagnostic.detailedFeedbackHint")}
-              value={resultForm.detailedFeedback}
-              onChange={(e) =>
-                setResultForm({ ...resultForm, detailedFeedback: e.target.value })
-              }
-            />
-          </label>
+          {/* 1. Client & RDV */}
+          <section className="space-y-3 rounded-2xl border border-border p-4 sm:p-5">
+            <div className="flex items-center gap-2.5">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-background">
+                1
+              </span>
+              <h3 className="font-medium text-primary">
+                {t("admin.diagnostic.sectionClient")}
+              </h3>
+            </div>
+            <label className="block space-y-1 text-sm">
+              <span className="text-muted">{t("admin.diagnostic.linkAppointment")}</span>
+              <select
+                className="w-full rounded-xl border border-border bg-background px-3 py-2"
+                value={resultForm.appointmentId}
+                onChange={(e) => {
+                  setResultForm({ ...resultForm, appointmentId: e.target.value });
+                  if (!e.target.value) setPreparingFor(null);
+                }}
+              >
+                <option value="">{t("admin.diagnostic.noAppointment")}</option>
+                {appointments.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.fullName} — {formatDateTime(i18n.language, a.startsAt)} (
+                    {t(`admin.diagnostic.appointmentStatus.${a.status}`)})
+                  </option>
+                ))}
+              </select>
+              <span className="block text-xs text-muted">
+                {t("admin.diagnostic.linkAppointmentHint")}
+              </span>
+            </label>
+          </section>
 
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <span className="text-sm text-muted">
-                  {t("admin.diagnostic.richContent")}
+          {/* 2. Résumé rapide */}
+          <section className="space-y-3 rounded-2xl border border-border p-4 sm:p-5">
+            <div className="flex items-center gap-2.5">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-background">
+                2
+              </span>
+              <h3 className="font-medium text-primary">
+                {t("admin.diagnostic.sectionSummary")}
+              </h3>
+            </div>
+            <label className="block space-y-1 text-sm">
+              <span className="text-muted">{t("admin.diagnostic.resultTitle")}</span>
+              <input
+                className="w-full rounded-xl border border-border bg-background px-3 py-2"
+                value={resultForm.title}
+                onChange={(e) => setResultForm({ ...resultForm, title: e.target.value })}
+              />
+            </label>
+            <label className="block space-y-1 text-sm">
+              <span className="text-muted">{t("admin.diagnostic.scalpAnalysis")}</span>
+              <textarea
+                className="min-h-24 w-full rounded-xl border border-border bg-background px-3 py-2"
+                placeholder={t("admin.diagnostic.scalpAnalysisHint")}
+                value={resultForm.scalpAnalysis}
+                onChange={(e) =>
+                  setResultForm({ ...resultForm, scalpAnalysis: e.target.value })
+                }
+              />
+            </label>
+            <label className="block space-y-1 text-sm">
+              <span className="text-muted">{t("admin.diagnostic.resultSummary")}</span>
+              <textarea
+                className="min-h-24 w-full rounded-xl border border-border bg-background px-3 py-2"
+                placeholder={t("admin.diagnostic.resultSummaryHint")}
+                value={resultForm.summary}
+                onChange={(e) =>
+                  setResultForm({ ...resultForm, summary: e.target.value })
+                }
+              />
+            </label>
+            <label className="block space-y-1 text-sm">
+              <span className="text-muted">{t("admin.diagnostic.detailedFeedback")}</span>
+              <textarea
+                className="min-h-28 w-full rounded-xl border border-border bg-background px-3 py-2"
+                placeholder={t("admin.diagnostic.detailedFeedbackHint")}
+                value={resultForm.detailedFeedback}
+                onChange={(e) =>
+                  setResultForm({ ...resultForm, detailedFeedback: e.target.value })
+                }
+              />
+            </label>
+          </section>
+
+          {/* 3. Bilan détaillé (contenu riche) */}
+          <section className="space-y-3 rounded-2xl border border-border p-4 sm:p-5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-background">
+                  3
                 </span>
-                <p className="text-xs text-muted">
-                  {t("admin.diagnostic.richContentHint")}
-                </p>
+                <h3 className="font-medium text-primary">
+                  {t("admin.diagnostic.richContent")}
+                </h3>
               </div>
               <Button type="button" size="md" variant="ghost" onClick={applyResultTemplate}>
                 {t("admin.diagnostic.useTemplate")}
               </Button>
             </div>
+            <p className="text-xs text-muted">{t("admin.diagnostic.richContentHint")}</p>
             <DiagnosticContentBlockEditor
               blocks={resultForm.content}
               onChange={(content) => setResultForm({ ...resultForm, content })}
@@ -1017,15 +1069,19 @@ export function AdminDiagnosticPanel() {
                 linkTextPlaceholder: t("admin.diagnostic.blockLinkText"),
               }}
             />
-          </div>
+          </section>
 
-          <fieldset className="space-y-2">
-            <legend className="text-sm text-muted">
-              {t("admin.diagnostic.resultProducts")}
-            </legend>
-            <p className="text-xs text-muted">
-              {t("admin.diagnostic.resultProductsHint")}
-            </p>
+          {/* 4. Produits recommandés */}
+          <section className="space-y-3 rounded-2xl border border-border p-4 sm:p-5">
+            <div className="flex items-center gap-2.5">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-background">
+                4
+              </span>
+              <h3 className="font-medium text-primary">
+                {t("admin.diagnostic.resultProducts")}
+              </h3>
+            </div>
+            <p className="text-xs text-muted">{t("admin.diagnostic.resultProductsHint")}</p>
             <div className="flex flex-wrap gap-2">
               {AWURA_PRODUCT_SLUGS.map((slug) => {
                 const checked = resultForm.slugs.includes(slug);
@@ -1056,25 +1112,37 @@ export function AdminDiagnosticPanel() {
                 );
               })}
             </div>
-          </fieldset>
-          <label className="inline-flex items-center gap-2 text-sm text-muted">
-            <input
-              type="checkbox"
-              checked={resultForm.notifyClient}
-              onChange={(e) =>
-                setResultForm({ ...resultForm, notifyClient: e.target.checked })
-              }
-            />
-            {t("admin.diagnostic.notifyClient")}
-          </label>
-          <Button
-            type="button"
-            pending={sendingResult}
-            onClick={() => void sendResult()}
-            className="w-full sm:w-auto"
-          >
-            {t("admin.diagnostic.sendResult")}
-          </Button>
+          </section>
+
+          {/* 5. Envoi */}
+          <section className="space-y-3 rounded-2xl border border-border p-4 sm:p-5">
+            <div className="flex items-center gap-2.5">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-background">
+                5
+              </span>
+              <h3 className="font-medium text-primary">
+                {t("admin.diagnostic.sectionSend")}
+              </h3>
+            </div>
+            <label className="inline-flex items-center gap-2 text-sm text-muted">
+              <input
+                type="checkbox"
+                checked={resultForm.notifyClient}
+                onChange={(e) =>
+                  setResultForm({ ...resultForm, notifyClient: e.target.checked })
+                }
+              />
+              {t("admin.diagnostic.notifyClient")}
+            </label>
+            <Button
+              type="button"
+              pending={sendingResult}
+              onClick={() => void sendResult()}
+              className="w-full sm:w-auto"
+            >
+              {t("admin.diagnostic.sendResult")}
+            </Button>
+          </section>
         </div>
       ) : null}
 
