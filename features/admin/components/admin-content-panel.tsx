@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { AdminEmptyState } from "@/features/admin/components/admin-empty-state";
 import { AdminFeedback } from "@/features/admin/components/admin-feedback";
+import { AdminModal } from "@/features/admin/components/admin-modal";
 import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
 import { AdminSearchField } from "@/features/admin/components/admin-search-field";
 import { ConfirmDeleteButton } from "@/features/admin/components/confirm-delete-button";
@@ -44,6 +45,7 @@ export function AdminContentPanel() {
   const [query, setQuery] = useState("");
   const [uploading, setUploading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const load = useCallback(async () => {
     const [postsRes, productsRes] = await Promise.all([
@@ -123,8 +125,14 @@ export function AdminContentPanel() {
 
       setFeedback({ tone: "success", message: t("admin.saveSuccess") });
       setForm(emptyForm);
+      setModalOpen(false);
       await load();
     });
+  };
+
+  const openCreate = () => {
+    setForm(emptyForm);
+    setModalOpen(true);
   };
 
   const edit = (post: BlogPost) => {
@@ -142,7 +150,12 @@ export function AdminContentPanel() {
         .map((block) => (block.type === "paragraph" ? block.text : ""))
         .join("\n\n"),
     });
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setForm(emptyForm);
   };
 
   const remove = async (id: string) => {
@@ -154,7 +167,7 @@ export function AdminContentPanel() {
       return;
     }
     setFeedback({ tone: "success", message: t("admin.deleteSuccess") });
-    if (form.id === id) setForm(emptyForm);
+    if (form.id === id) closeModal();
     await load();
   };
 
@@ -163,6 +176,11 @@ export function AdminContentPanel() {
       <AdminPageHeader
         title={t("admin.contentTitle")}
         subtitle={t("admin.contentSubtitle")}
+        actions={
+          <Button type="button" onClick={openCreate}>
+            {t("admin.createContent")}
+          </Button>
+        }
       />
 
       {feedback ? <AdminFeedback tone={feedback.tone} message={feedback.message} /> : null}
@@ -171,122 +189,132 @@ export function AdminContentPanel() {
         {t("admin.content.help")}
       </p>
 
-      <section className="grid gap-4 rounded-2xl border border-border p-5 lg:grid-cols-2">
-        <h2 className="font-serif text-2xl text-primary lg:col-span-2">
-          {form.id ? t("admin.updateContent") : t("admin.createContent")}
-        </h2>
-        <label className="space-y-1 text-sm">
-          <span className="text-muted">{t("admin.fields.title")}</span>
-          <input
-            className={fieldClass}
-            value={form.title}
-            onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-          />
-        </label>
-        <label className="space-y-1 text-sm">
-          <span className="text-muted">{t("admin.fields.slug")}</span>
-          <input
-            className={fieldClass}
-            value={form.slug}
-            onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))}
-          />
-        </label>
-        <label className="space-y-1 text-sm">
-          <span className="text-muted">{t("admin.fields.kind")}</span>
-          <select
-            className={fieldClass}
-            value={form.kind}
-            onChange={(e) =>
-              setForm((prev) => ({ ...prev, kind: e.target.value as BlogPostKind }))
-            }
-          >
-            <option value="article">{t("blog.badgeArticle")}</option>
-            <option value="tutorial">{t("blog.badgeTutorial")}</option>
-          </select>
-          <span className="block text-xs text-muted">{t("admin.content.kindHint")}</span>
-        </label>
-        <label className="space-y-1 text-sm">
-          <span className="text-muted">{t("admin.fields.published_at")}</span>
-          <input
-            type="date"
-            className={fieldClass}
-            value={form.published_at}
-            onChange={(e) => setForm((prev) => ({ ...prev, published_at: e.target.value }))}
-          />
-        </label>
-        <label className="space-y-1 text-sm lg:col-span-2">
-          <span className="text-muted">{t("admin.fields.excerpt")}</span>
-          <input
-            className={fieldClass}
-            value={form.excerpt}
-            onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))}
-          />
-        </label>
-        <label className="space-y-1 text-sm">
-          <span className="text-muted">{t("admin.fields.cover_image_url")}</span>
-          <input
-            className={fieldClass}
-            value={form.cover_image_url}
-            onChange={(e) =>
-              setForm((prev) => ({ ...prev, cover_image_url: e.target.value }))
-            }
-          />
-        </label>
-        <label className="space-y-1 text-sm">
-          <span className="text-muted">{t("admin.uploadCover")}</span>
-          <input
-            type="file"
-            accept="image/*"
-            disabled={uploading}
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) void uploadCover(file);
-            }}
-          />
-        </label>
-        {form.kind === "tutorial" ? (
-          <label className="space-y-1 text-sm lg:col-span-2">
-            <span className="text-muted">{t("admin.fields.product_slug")}</span>
-            <select
-              className={fieldClass}
-              value={form.product_slug}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, product_slug: e.target.value }))
-              }
-            >
-              <option value="">{t("admin.content.productSlugNone")}</option>
-              {products.map((product) => (
-                <option key={product.id} value={product.slug}>
-                  {product.name}
-                </option>
-              ))}
-            </select>
-            <span className="block text-xs text-muted">{t("admin.content.productSlugHint")}</span>
-          </label>
-        ) : null}
-        <label className="space-y-1 text-sm lg:col-span-2">
-          <span className="text-muted">{t("admin.fields.body")}</span>
-          <textarea
-            className={fieldClass}
-            rows={6}
-            value={form.body}
-            onChange={(e) => setForm((prev) => ({ ...prev, body: e.target.value }))}
-          />
-          <span className="block text-xs text-muted">{t("admin.content.bodyHint")}</span>
-        </label>
-        <div className="flex flex-wrap gap-3 lg:col-span-2">
-          <Button type="button" pending={pending} onClick={save}>
-            {pending
-              ? t("admin.saving")
-              : form.id
-                ? t("admin.updateContent")
-                : t("admin.createContent")}
-          </Button>
-          <Button type="button" variant="ghost" onClick={() => setForm(emptyForm)}>
-            {t("admin.resetForm")}
-          </Button>
-        </div>
-      </section>
+      {modalOpen ? (
+        <AdminModal
+          title={form.id ? t("admin.updateContent") : t("admin.createContent")}
+          onClose={closeModal}
+          footer={
+            <>
+              <Button type="button" variant="ghost" onClick={closeModal}>
+                {t("admin.cancel")}
+              </Button>
+              <Button type="button" pending={pending} onClick={save}>
+                {pending
+                  ? t("admin.saving")
+                  : form.id
+                    ? t("admin.updateContent")
+                    : t("admin.createContent")}
+              </Button>
+            </>
+          }
+        >
+          <div className="grid gap-4 lg:grid-cols-2">
+            <label className="space-y-1 text-sm">
+              <span className="text-muted">{t("admin.fields.title")}</span>
+              <input
+                className={fieldClass}
+                value={form.title}
+                onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+              />
+            </label>
+            <label className="space-y-1 text-sm">
+              <span className="text-muted">{t("admin.fields.slug")}</span>
+              <input
+                className={fieldClass}
+                value={form.slug}
+                onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))}
+              />
+            </label>
+            <label className="space-y-1 text-sm">
+              <span className="text-muted">{t("admin.fields.kind")}</span>
+              <select
+                className={fieldClass}
+                value={form.kind}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, kind: e.target.value as BlogPostKind }))
+                }
+              >
+                <option value="article">{t("blog.badgeArticle")}</option>
+                <option value="tutorial">{t("blog.badgeTutorial")}</option>
+              </select>
+              <span className="block text-xs text-muted">{t("admin.content.kindHint")}</span>
+            </label>
+            <label className="space-y-1 text-sm">
+              <span className="text-muted">{t("admin.fields.published_at")}</span>
+              <input
+                type="date"
+                className={fieldClass}
+                value={form.published_at}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, published_at: e.target.value }))
+                }
+              />
+            </label>
+            <label className="space-y-1 text-sm lg:col-span-2">
+              <span className="text-muted">{t("admin.fields.excerpt")}</span>
+              <input
+                className={fieldClass}
+                value={form.excerpt}
+                onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))}
+              />
+            </label>
+            <label className="space-y-1 text-sm">
+              <span className="text-muted">{t("admin.fields.cover_image_url")}</span>
+              <input
+                className={fieldClass}
+                value={form.cover_image_url}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, cover_image_url: e.target.value }))
+                }
+              />
+            </label>
+            <label className="space-y-1 text-sm">
+              <span className="text-muted">{t("admin.uploadCover")}</span>
+              <input
+                type="file"
+                accept="image/*"
+                disabled={uploading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void uploadCover(file);
+                }}
+              />
+            </label>
+            {form.kind === "tutorial" ? (
+              <label className="space-y-1 text-sm lg:col-span-2">
+                <span className="text-muted">{t("admin.fields.product_slug")}</span>
+                <select
+                  className={fieldClass}
+                  value={form.product_slug}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, product_slug: e.target.value }))
+                  }
+                >
+                  <option value="">{t("admin.content.productSlugNone")}</option>
+                  {products.map((product) => (
+                    <option key={product.id} value={product.slug}>
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
+                <span className="block text-xs text-muted">
+                  {t("admin.content.productSlugHint")}
+                </span>
+              </label>
+            ) : null}
+            <label className="space-y-1 text-sm lg:col-span-2">
+              <span className="text-muted">{t("admin.fields.body")}</span>
+              <textarea
+                className={fieldClass}
+                rows={6}
+                value={form.body}
+                onChange={(e) => setForm((prev) => ({ ...prev, body: e.target.value }))}
+              />
+              <span className="block text-xs text-muted">{t("admin.content.bodyHint")}</span>
+            </label>
+          </div>
+        </AdminModal>
+      ) : null}
 
       <section className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
