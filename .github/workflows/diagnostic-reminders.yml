@@ -1,0 +1,36 @@
+# Rappel "visio dans 5 min" pour les RDV diagnostic en ligne.
+# Remplace le cron Vercel natif (incompatible avec le plan Hobby, limité à
+# 1 exécution/jour) : GitHub Actions autorise un schedule toutes les 5 min,
+# gratuitement, sans limite de fréquence.
+#
+# Secret GitHub requis : CRON_SECRET (même valeur que la variable d'env
+# Vercel CRON_SECRET utilisée par /api/diagnostic/appointments/reminders).
+
+name: Diagnostic appointment reminders
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: diagnostic-reminders
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    name: Trigger reminders endpoint
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Call reminders endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "Secret CRON_SECRET manquant"
+            exit 1
+          fi
+          curl -fsS -X POST "https://awurabeauty.com/api/diagnostic/appointments/reminders" \
+            -H "x-cron-secret: ${CRON_SECRET}"
