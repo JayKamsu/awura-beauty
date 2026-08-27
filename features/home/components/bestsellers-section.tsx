@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { ProductCard } from "@/components/ui/product-card";
+import { ProductRail } from "@/components/ui/product-rail";
 import {
   cmsOr,
   usePageCmsFields,
@@ -78,14 +78,10 @@ export function BestsellersSection() {
         {products.length === 0 ? (
           <p className="text-muted">{t("home.bestsellers.empty")}</p>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={toProductCardData(product)}
-              />
-            ))}
-          </div>
+          <ProductRail
+            products={products.map(toProductCardData)}
+            label={t("shop.productsRail")}
+          />
         )}
       </div>
     </section>

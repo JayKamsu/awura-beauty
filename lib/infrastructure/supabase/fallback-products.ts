@@ -201,7 +201,7 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     image_url: "/images/products/produit-3-masque.jpg",
     ingredients_image_url: "",
     lifestyle_image_url: null,
-    category: "casques-chauffants",
+    category: "accessoires",
     product_type: "accessory",
     is_bundle: false,
     is_new: true,

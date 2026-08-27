@@ -13,6 +13,7 @@ import {
   PRODUCT_COLOR_SWATCH_CLASS,
   type ProductColorKey,
 } from "@/lib/domain/product-color";
+import { isFibreProduct } from "@/features/shop/utils/map-product";
 
 /** Données produit nécessaires à l'affichage d'une carte dans une grille boutique. */
 export type ProductCardData = {
@@ -133,7 +134,7 @@ export function ProductCard({ product, onAddToCart, compact = false }: ProductCa
               {t("shop.newBadge")}
             </span>
           ) : null}
-          {product.productType === "accessory" ? (
+          {product.productType === "accessory" && !isFibreProduct(product) ? (
             <span className="rounded-md bg-accent px-2.5 py-1 text-[10px] font-semibold tracking-wider text-background">
               {t("shop.accessoryBadge")}
             </span>

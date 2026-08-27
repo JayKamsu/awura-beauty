@@ -55,7 +55,12 @@ function filterFallback(params: ListProductsParams) {
     params;
   let list = FALLBACK_PRODUCTS;
   if (category && category !== "all") {
-    list = list.filter((product) => product.category === category);
+    list = list.filter((product) =>
+      category === "accessoires"
+        ? product.category === "accessoires" ||
+          product.category === "casques-chauffants"
+        : product.category === category,
+    );
   }
   if (universe === "adult" || universe === "child") {
     list = list.filter((product) => product.universe === universe);
@@ -145,7 +150,10 @@ export async function listProducts(
   }
 
   if (category && category !== "all") {
-    query = query.eq("category", category);
+    query =
+      category === "accessoires"
+        ? query.in("category", ["accessoires", "casques-chauffants"])
+        : query.eq("category", category);
   }
   if (universe === "adult" || universe === "child") {
     query = query.eq("universe", universe);

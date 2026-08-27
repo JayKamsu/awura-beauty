@@ -9,6 +9,10 @@ import {
   type ProductCategory,
 } from "@/lib/infrastructure/supabase/product-categories";
 import type { ProductSort } from "@/lib/infrastructure/supabase/types";
+import {
+  FIBRES_CATEGORY,
+  HELMETS_CATEGORY,
+} from "@/features/shop/utils/map-product";
 
 /** Props de la barre de filtres boutique. */
 type ShopFiltersBarProps = {
@@ -35,6 +39,63 @@ function buildHref(
   }
   const s = qs.toString();
   return s ? `${pathname}?${s}` : pathname;
+}
+
+/** Rangée de puces de catégorie (fibres ou accessoires). */
+function CategoryChipRow({
+  label,
+  categories: items,
+  current,
+  language,
+  hrefFor,
+  accent = false,
+}: {
+  label: string;
+  categories: ProductCategory[];
+  current: string;
+  language: string;
+  hrefFor: (slug: string) => string;
+  accent?: boolean;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <div className="space-y-2.5">
+      <p
+        className={`text-xs font-medium uppercase tracking-[0.14em] ${
+          accent ? "text-accent" : "text-muted"
+        }`}
+      >
+        {label}
+      </p>
+      <div
+        className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible"
+        role="list"
+        aria-label={label}
+      >
+        {items.map((c) => {
+          const selected = current === c.slug;
+          return (
+            <Link
+              key={c.slug}
+              href={hrefFor(c.slug)}
+              role="listitem"
+              className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm transition ${
+                accent
+                  ? selected
+                    ? "border-accent bg-accent text-background"
+                    : "border-accent/40 text-accent hover:bg-accent/10"
+                  : selected
+                    ? "border-transparent bg-primary text-background"
+                    : "border-border text-muted hover:border-accent hover:text-foreground"
+              }`}
+            >
+              {categoryDisplayLabel(c, language)}
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -90,7 +151,24 @@ export function ShopFiltersBar({
   };
 
   const hairCareCategories = categories.filter((c) => c.product_type === "hair_care");
-  const accessoryCategories = categories.filter((c) => c.product_type === "accessory");
+  const fibreCategories = categories.filter((c) => c.slug === FIBRES_CATEGORY);
+  const accessoryCategories = categories.filter(
+    (c) =>
+      c.product_type === "accessory" &&
+      c.slug !== FIBRES_CATEGORY &&
+      c.slug !== HELMETS_CATEGORY,
+  );
+
+  const chipHref = (slug: string) =>
+    buildHref(pathname, {
+      category: slug,
+      universe: universe !== "all" ? universe : null,
+      q: query || null,
+      min: minPrice || null,
+      max: maxPrice || null,
+      inStock: inStockOnly ? "1" : null,
+      sort: sort !== "recent" ? sort : null,
+    });
 
   return (
     <div className="space-y-4">
@@ -198,48 +276,21 @@ export function ShopFiltersBar({
         </div>
       </div>
 
-      {accessoryCategories.length > 0 ? (
-        <div className="space-y-2.5">
-          <p className="text-xs font-medium uppercase tracking-[0.14em] text-accent">
-            {t("shop.accessoryFiltersLabel", {
-              defaultValue: "Fibres, casques & accessoires",
-            })}
-          </p>
-          <div
-            className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible"
-            role="list"
-            aria-label={t("shop.accessoryFiltersLabel", {
-              defaultValue: "Fibres, casques & accessoires",
-            })}
-          >
-            {accessoryCategories.map((c) => {
-              const selected = current === c.slug;
-              return (
-                <Link
-                  key={c.slug}
-                  href={buildHref(pathname, {
-                    category: c.slug,
-                    universe: universe !== "all" ? universe : null,
-                    q: query || null,
-                    min: minPrice || null,
-                    max: maxPrice || null,
-                    inStock: inStockOnly ? "1" : null,
-                    sort: sort !== "recent" ? sort : null,
-                  })}
-                  role="listitem"
-                  className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm transition ${
-                    selected
-                      ? "border-accent bg-accent text-background"
-                      : "border-accent/40 text-accent hover:bg-accent/10"
-                  }`}
-                >
-                  {categoryDisplayLabel(c, i18n.language)}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
+      <CategoryChipRow
+        label={t("shop.groupFibres")}
+        categories={fibreCategories}
+        current={current}
+        language={i18n.language}
+        hrefFor={chipHref}
+      />
+      <CategoryChipRow
+        label={t("shop.groupAccessories")}
+        categories={accessoryCategories}
+        current={current}
+        language={i18n.language}
+        hrefFor={chipHref}
+        accent
+      />
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
         <button
