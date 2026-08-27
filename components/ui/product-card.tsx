@@ -8,6 +8,10 @@ import { usePreferences } from "@/components/providers/preferences-provider";
 import { formatPrice } from "@/lib/format/price";
 import { useCart } from "@/features/cart/context/cart-provider";
 import { useFavorites } from "@/features/favorites/context/favorites-provider";
+import {
+  PRODUCT_COLOR_SWATCH_CLASS,
+  type ProductColorKey,
+} from "@/lib/domain/product-color";
 
 /** Données produit nécessaires à l'affichage d'une carte dans une grille boutique. */
 export type ProductCardData = {
@@ -24,7 +28,37 @@ export type ProductCardData = {
   isNew?: boolean;
   productType?: "hair_care" | "accessory";
   stock?: number;
+  /** Variantes couleur : si renseigné, l'ajout panier se fait depuis la fiche. */
+  colorVariants?: ProductColorKey[];
 };
+
+type ProductColorSwatchProps = {
+  colorKey: ProductColorKey;
+  selected?: boolean;
+  size?: "sm" | "md";
+};
+
+/** Pastille visuelle d'une couleur produit (tokens swatch du thème). */
+export function ProductColorSwatch({
+  colorKey,
+  selected = false,
+  size = "md",
+}: ProductColorSwatchProps) {
+  return (
+    <span
+      className={`inline-flex items-center justify-center rounded-full border border-border bg-background p-0.5 ${
+        size === "sm" ? "size-6" : "size-11"
+      } ${selected ? "ring-2 ring-accent ring-offset-2 ring-offset-background" : ""}`}
+      aria-hidden
+    >
+      <span
+        className={`size-full rounded-full ${PRODUCT_COLOR_SWATCH_CLASS[colorKey]} ${
+          colorKey === "noir" ? "ring-1 ring-inset ring-border" : ""
+        }`}
+      />
+    </span>
+  );
+}
 
 type ProductCardProps = {
   product: ProductCardData;
@@ -47,7 +81,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [added, setAdded] = useState(false);
 
   const hasIngredientsImage = Boolean(product.ingredientImage);
-  const href = `/boutique/${product.slug}`;
+  const colorVariants = product.colorVariants ?? [];
+  const hasColors = colorVariants.length > 0;
+  const href = hasColors
+    ? `/boutique/${product.slug}?couleur=${colorVariants[0]}`
+    : `/boutique/${product.slug}`;
   const hasDiscount = Boolean(
     product.compareAtPrice && product.compareAtPrice > product.price,
   );
@@ -216,28 +254,47 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
               </span>
             ) : null}
           </p>
-          <button
-            type="button"
-            onClick={handleAdd}
-            className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 text-background transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:h-11"
-            aria-label={t("shop.addToCart", { name: product.name })}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              className="size-4.5 shrink-0 sm:size-5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
+          {hasColors ? (
+            <div className="flex items-center gap-1.5" aria-hidden>
+              {colorVariants.map((key) => (
+                <ProductColorSwatch key={key} colorKey={key} size="sm" />
+              ))}
+            </div>
+          ) : null}
+          {hasColors ? (
+            <Link
+              href={href}
+              className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 text-background transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:h-11"
+              aria-label={t("shop.chooseColorAria", { name: product.name })}
             >
-              <path d="M6 7h12l-1 11H7L6 7Z" />
-              <path d="M9 7V5.5A3 3 0 0 1 15 5.5V7" />
-            </svg>
-            <span className="text-xs font-medium uppercase tracking-wide sm:text-sm">
-              {t("shop.addToCartButton")}
-            </span>
-          </button>
+              <span className="text-xs font-medium uppercase tracking-wide sm:text-sm">
+                {t("shop.chooseColor")}
+              </span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={handleAdd}
+              className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 text-background transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:h-11"
+              aria-label={t("shop.addToCart", { name: product.name })}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="size-4.5 shrink-0 sm:size-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              >
+                <path d="M6 7h12l-1 11H7L6 7Z" />
+                <path d="M9 7V5.5A3 3 0 0 1 15 5.5V7" />
+              </svg>
+              <span className="text-xs font-medium uppercase tracking-wide sm:text-sm">
+                {t("shop.addToCartButton")}
+              </span>
+            </button>
+          )}
         </div>
-        {added ? (
+        {added && !hasColors ? (
           <p className="text-xs text-primary" role="status">
             {t("shop.addedToCart", { name: product.name })}
           </p>

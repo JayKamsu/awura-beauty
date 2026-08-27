@@ -32,6 +32,15 @@
     "openImage": "Agrandir l'image de {{name}}",
     "addToCart": "Ajouter {{name}} au panier",
     "addToCartButton": "Ajouter au panier",
+    "chooseColor": "Choisir la couleur",
+    "chooseColorAria": "Choisir la couleur de {{name}}",
+    "colorLabel": "Couleur",
+    "colors": {
+      "noir": "Noir",
+      "rose-clair": "Rose clair",
+      "blond": "Blond",
+      "acajou": "Acajou"
+    },
     "addedToCart": "{{name}} ajouté au panier.",
     "viewCart": "Voir le panier",
     "addToFavorites": "Ajouter {{name}} aux favoris",

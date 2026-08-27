@@ -5,6 +5,8 @@ export type OrderItem = {
   unit_price: number;
   quantity: number;
   image_url: string;
+  /** Clé de variante couleur, si le produit en propose. */
+  color_key?: string | null;
 };
 
 export type PaymentMethod = "stripe" | "paypal" | "manual";

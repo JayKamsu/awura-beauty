@@ -123,29 +123,33 @@
     },
     "testimonials": {
       "title": "Elles ont transformé leur couronne",
-      "seeAll": "Voir tous les avis",
-      "items": {
-        "sarah": {
-          "name": "Sarah M.",
-          "quote": "Enfin une routine qui comprend vraiment mes cheveux. Résultat visible en trois semaines."
-        },
-        "amina": {
-          "name": "Amina K.",
-          "quote": "Le diagnostic m'a ouvert les yeux. Plus de casse, plus de brillance, et une vraie confiance."
-        },
-        "lea": {
-          "name": "Léa D.",
-          "quote": "Des produits nobles, un accompagnement humain. Awura a changé mon rapport à ma couronne."
-        }
-      }
+      "seeAll": "Voir tous les avis"
     }
   },
   "reviews": {
-    "title": "Avis clients",
-    "subtitle": "Notes et commentaires laissés par des clientes après réception de leur commande.",
-    "empty": "Aucun avis pour le moment.",
+    "title": "Témoignages",
+    "subtitle": "Ce que les clientes disent d'Awura Beauty — soins, diagnostic capillaire et accompagnement.",
+    "empty": "Aucun témoignage pour le moment.",
     "ratingLabel": "{{rating}} / 5",
     "seeProduct": "Voir le produit",
-    "diagnosticBadge": "Diagnostic capillaire"
+    "diagnosticBadge": "Diagnostic capillaire",
+    "invite": {
+      "loading": "Vérification du lien…",
+      "title": "Partage ton expérience Awura",
+      "subtitle": "Quelques mots et une photo, si tu veux. Ton témoignage pourra apparaître sur le site.",
+      "name": "Prénom (et initiale du nom)",
+      "rating": "Note",
+      "quote": "Ton témoignage",
+      "photo": "Photo (optionnelle)",
+      "submit": "Envoyer mon témoignage",
+      "submitting": "Envoi…",
+      "error": "Impossible d'enregistrer. Vérifie le lien ou réessaie.",
+      "ratingRequired": "Choisis une note.",
+      "thanksTitle": "Merci",
+      "thanksBody": "Ton témoignage a bien été reçu.",
+      "seePage": "Voir les témoignages",
+      "invalidTitle": "Lien expiré",
+      "invalidBody": "Ce lien n'est plus valide. Demande un nouveau lien à Awura Beauty."
+    }
   }
 }

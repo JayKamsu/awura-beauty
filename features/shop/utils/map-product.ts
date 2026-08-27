@@ -16,5 +16,6 @@ export function toProductCardData(product: ProductRow): ProductCardData {
     isNew: product.is_new,
     productType: product.product_type,
     stock: product.stock,
+    colorVariants: product.color_variants,
   };
 }

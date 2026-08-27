@@ -32,6 +32,15 @@
     "openImage": "Ampliar la imagen de {{name}}",
     "addToCart": "Añadir {{name}} al carrito",
     "addToCartButton": "Añadir al carrito",
+    "chooseColor": "Elegir el color",
+    "chooseColorAria": "Elegir el color de {{name}}",
+    "colorLabel": "Color",
+    "colors": {
+      "noir": "Negro",
+      "rose-clair": "Rosa claro",
+      "blond": "Rubio",
+      "acajou": "Caoba"
+    },
     "addedToCart": "{{name}} añadido al carrito.",
     "viewCart": "Ver el carrito",
     "addToFavorites": "Añadir {{name}} a favoritos",

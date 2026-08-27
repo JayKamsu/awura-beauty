@@ -1,0 +1,316 @@
+{
+  "legal": {
+    "navLabel": "Legal pages",
+    "updated": "Last updated: {{date}}",
+    "nav": {
+      "company": "Company",
+      "mentions": "Legal notice",
+      "terms": "Terms of use",
+      "returns": "Returns",
+      "privacy": "Privacy"
+    },
+    "company": {
+      "eyebrow": "Identity",
+      "title": "Company information",
+      "intro": "Awura Beauty’s identity and the contact details to use for any correspondence.",
+      "cardEyebrow": "Identity card",
+      "cardTitle": "Awura Beauty",
+      "cardIntro": "Brand, publication director and customer care.",
+      "fields": {
+        "tradeName": "Trade name",
+        "director": "Publication director",
+        "email": "Email"
+      },
+      "sections": {
+        "purpose": {
+          "title": "Who we are",
+          "body": [
+            "{{legalName}} (trade name {{siteName}}) is a French brand of natural, premium haircare for textured, afro, coily and mixed-heritage hair.",
+            "The website {{siteUrl}} lets you order products, read the blog and tutorials, and take a hair diagnostic."
+          ]
+        },
+        "correspondence": {
+          "title": "Correspondence",
+          "body": [
+            "Official correspondence (withdrawal, complaints, GDPR requests) is sent by email to {{email}}.",
+            "In-store pickup, when offered at checkout, takes place at the address given in the order confirmation."
+          ]
+        },
+        "contact": {
+          "title": "Contact",
+          "body": [
+            "Customer care: {{email}} — reply within 24 to 48 business hours, 6 days a week.",
+            "You can also use the site contact form."
+          ]
+        }
+      }
+    },
+    "mentions": {
+      "eyebrow": "Legal requirements",
+      "title": "Legal notice",
+      "intro": "In accordance with French law no. 2004-575 of 21 June 2004 (LCEN), the following identifies the publisher and host of {{siteUrl}}.",
+      "sections": {
+        "editor": {
+          "title": "Publisher",
+          "body": [
+            "{{siteUrl}} is published by {{legalName}}, trade name {{siteName}}.",
+            "Publication director: {{director}}.",
+            "Contact: {{email}}.",
+            "For any question identifying the publisher: {{email}}."
+          ]
+        },
+        "host": {
+          "title": "Hosting",
+          "body": [
+            "The site is hosted by {{hostName}}, {{hostAddress}} — {{hostUrl}}.",
+            "The domain awurabeauty.com is managed via Hostinger. Transactional emails (receipts, authentication) are sent from {{email}}."
+          ]
+        },
+        "ip": {
+          "title": "Intellectual property",
+          "body": [
+            "The entire site (texts, images, logos, brand, blog and tutorials) is protected by copyright and trademark law.",
+            "Any reproduction, representation or adaptation, in whole or in part, without prior written permission from {{siteName}}, is prohibited."
+          ]
+        },
+        "data": {
+          "title": "Personal data",
+          "body": [
+            "Personal-data processing is described in the privacy policy (GDPR). To exercise your rights: {{email}}."
+          ]
+        },
+        "law": {
+          "title": "Governing law",
+          "body": [
+            "This notice is governed by French law. Failing an amicable solution, the French courts of the registered office have jurisdiction, subject to mandatory consumer-protection rules."
+          ]
+        }
+      }
+    },
+    "terms": {
+      "eyebrow": "Terms of use & sale",
+      "title": "Terms of use",
+      "intro": "These terms govern access to {{siteUrl}} and sales of {{siteName}} products to consumers. Placing an order means you accept them.",
+      "sections": {
+        "purpose": {
+          "title": "Purpose",
+          "body": [
+            "These terms of use and sale define browsing, account creation, ordering and delivery on {{siteUrl}}.",
+            "{{siteName}} sells cosmetic haircare (not medicines). Diagnostic, blog and tutorial advice is educational and does not replace medical advice."
+          ]
+        },
+        "account": {
+          "title": "Customer account",
+          "body": [
+            "Some features (checkout, order history, loyalty, saved diagnostic) require an account. You agree to provide accurate information and to keep your credentials confidential.",
+            "You may request account deletion at {{email}}, subject to legal retention duties (invoices, disputes)."
+          ]
+        },
+        "products": {
+          "title": "Products",
+          "body": [
+            "Product pages describe the care (benefits, composition, use). Photos are as accurate as possible; slight shade variations may occur between artisanal batches and screens.",
+            "Availability is shown at checkout. If an item becomes unavailable after payment, {{siteName}} will contact you for an exchange, credit or refund."
+          ]
+        },
+        "orders": {
+          "title": "Orders",
+          "body": [
+            "The contract is formed when payment is confirmed (Stripe, PayPal) or when a test order is accepted. A confirmation email and receipt are sent.",
+            "You must check the delivery address, pickup point or in-store pickup choice before paying."
+          ]
+        },
+        "prices": {
+          "title": "Prices",
+          "body": [
+            "Prices are shown in euros, tax included (TTC), excluding shipping. Shipping is calculated at checkout according to the method chosen (Colissimo, Mondial Relay or pickup) and any free-shipping threshold.",
+            "The total TTC amount (products + shipping − discounts) is the one displayed before payment."
+          ]
+        },
+        "payment": {
+          "title": "Payment",
+          "body": [
+            "Payment is made online by card via Stripe or via PayPal. Full card details never pass through our servers.",
+            "Orders are shipped (or made available) only after effective payment."
+          ]
+        },
+        "delivery": {
+          "title": "Delivery",
+          "body": [
+            "Orders are prepared within 24 to 48 business hours, excluding stock-outs and public holidays. Carrier times then apply (Colissimo home delivery, Mondial Relay pickup point).",
+            "In-store pickup is free: you are contacted when the order is ready, at the address given in the order confirmation.",
+            "Risks transfer on handover to the recipient or pickup point. Check the parcel on receipt and report damage promptly to {{email}}."
+          ]
+        },
+        "withdrawal": {
+          "title": "Withdrawal and returns",
+          "body": [
+            "The right of withdrawal and return process are detailed in the returns policy. Unsealed cosmetics are subject to exceptions under the French Consumer Code."
+          ]
+        },
+        "diagnostic": {
+          "title": "Hair diagnostic",
+          "body": [
+            "The online diagnostic is a free, personalised cosmetic service. The in-person diagnostic (trichogram) is a booked service, charged at the displayed rate, sometimes included in an offer.",
+            "Once an in-person appointment has started, the withdrawal right may no longer apply to a fully performed service, under article L221-28 of the French Consumer Code."
+          ]
+        },
+        "ip": {
+          "title": "Intellectual property",
+          "body": [
+            "Site content remains the property of {{siteName}}. Unauthorised commercial use is prohibited."
+          ]
+        },
+        "liability": {
+          "title": "Liability",
+          "body": [
+            "{{siteName}} strives for accurate information and a available site. Interruptions (maintenance, force majeure, provider failure) may occur.",
+            "Use products according to the product-page instructions. If you have a skin reaction, stop use and consult a healthcare professional."
+          ]
+        },
+        "law": {
+          "title": "Governing law and mediation",
+          "body": [
+            "These terms are governed by French law. In case of dispute, first contact {{email}} to seek an amicable solution.",
+            "Under articles L611-1 et seq. of the French Consumer Code, you may use a consumer mediator free of charge. {{siteName}} will name the competent mediator once appointed; meanwhile the European ODR platform is available: https://ec.europa.eu/consumers/odr"
+          ]
+        }
+      }
+    },
+    "returns": {
+      "eyebrow": "Withdrawal",
+      "title": "Returns policy",
+      "intro": "You have a right of withdrawal for distance purchases, within the limits that apply to hygiene and cosmetic products.",
+      "sections": {
+        "withdrawal": {
+          "title": "14-day period",
+          "body": [
+            "Under articles L221-18 et seq. of the French Consumer Code, you have 14 days from receipt of the parcel (or availability at a pickup point / in-store) to withdraw, without giving a reason.",
+            "To exercise this right, write to {{email}} with your order number and the products concerned. You may use the contact form (subject “Return / complaint”)."
+          ]
+        },
+        "cosmetics": {
+          "title": "Cosmetic products",
+          "body": [
+            "{{siteName}} products are hygiene and cosmetic goods. Under article L221-28 5° of the French Consumer Code, withdrawal cannot be exercised for unsealed products that cannot be returned for health or hygiene reasons.",
+            "Only unopened, sealed, unused products in intact original packaging may be returned under the withdrawal right."
+          ]
+        },
+        "process": {
+          "title": "How to return a product",
+          "body": [
+            "1. Contact {{email}} within 14 days. 2. We confirm eligibility and the return address by email. 3. Send the products back within 14 days of your decision, in protective packaging.",
+            "Return shipping is at your expense, except where we made an error, or the product is defective or non-conforming."
+          ]
+        },
+        "refund": {
+          "title": "Refund",
+          "body": [
+            "Refunds are issued within 14 days of receiving the returned products (or proof of shipment), via the same payment method unless otherwise agreed.",
+            "Outbound shipping may be refunded based on the least expensive method we offered, as required by law. We may deduct depreciation from handling beyond what is needed to establish the nature, characteristics and functioning of the goods."
+          ]
+        },
+        "defect": {
+          "title": "Defective product or error",
+          "body": [
+            "If you receive a damaged, incomplete or wrong product, contact us within 48 business hours with photos. We will offer a replacement, restock or refund, with return shipping at our expense."
+          ]
+        },
+        "pickup": {
+          "title": "In-store pickup",
+          "body": [
+            "For in-store pickup, the withdrawal period starts when the product is handed over. The same hygiene rules (product still sealed) apply."
+          ]
+        },
+        "diagnostic": {
+          "title": "Diagnostic services",
+          "body": [
+            "The free online diagnostic is not refundable. For a paid in-person diagnostic that has not started, cancel via {{email}}; once the service has been fully performed, it is no longer refundable under the withdrawal right."
+          ]
+        }
+      }
+    },
+    "privacy": {
+      "eyebrow": "GDPR",
+      "title": "Privacy & GDPR",
+      "intro": "{{siteName}} processes your personal data fairly, limited to what is needed for the shop, account, diagnostic and customer care.",
+      "sections": {
+        "controller": {
+          "title": "Data controller",
+          "body": [
+            "The controller is {{legalName}} ({{siteName}}), represented by {{director}}.",
+            "Privacy contact: {{email}}."
+          ]
+        },
+        "data": {
+          "title": "Data we collect",
+          "body": [
+            "Account and orders: identity, email, phone, shipping address, purchase history, payments (Stripe/PayPal IDs, never the full card number), loyalty points.",
+            "Diagnostic: questionnaire answers, notes and photos you send, appointment slots, and a video-call link if applicable.",
+            "Technical: security logs, language and currency, display theme, local cart, session tokens, and in production error traces (Sentry) with text masked.",
+            "Messages: content you send via support chat, the contact form or reviews."
+          ]
+        },
+        "purposes": {
+          "title": "Purposes",
+          "body": [
+            "To fulfil orders and delivery (Colissimo, Mondial Relay, pickup), issue invoices and receipts, manage the account, loyalty and reviews.",
+            "To provide the hair diagnostic and related appointments.",
+            "To keep the site secure, support customers, and improve the service (error stats; no third-party behavioural advertising on the site)."
+          ]
+        },
+        "basis": {
+          "title": "Legal bases",
+          "body": [
+            "Contract performance: account, order, delivery, paid diagnostic.",
+            "Legal obligation: invoicing, accounting, responses to authorities.",
+            "Legitimate interest: security, fraud prevention, site improvement.",
+            "Consent: push notifications, non-essential cookies if any, diagnostic photos beyond what is strictly necessary."
+          ]
+        },
+        "processors": {
+          "title": "Recipients and processors",
+          "body": [
+            "Supabase (data hosting and authentication), Stripe and PayPal (payments), Vercel (site hosting), Hostinger (mailbox {{email}}), La Poste / Colissimo and Mondial Relay (shipping), Firebase (push notifications if you opt in), Sentry (error monitoring; session replay on errors only, with text masked), Jitsi (diagnostic video).",
+            "These providers act only for the purposes described and under their own privacy policies."
+          ]
+        },
+        "cookies": {
+          "title": "Cookies and local storage",
+          "body": [
+            "The site uses strictly necessary cookies and local storage: auth session, cart, language, currency, theme. They do not require consent as tracking cookies.",
+            "{{siteName}} does not set third-party advertising cookies. Payment and login providers (Stripe, PayPal, Google) may set their own cookies during their flows."
+          ]
+        },
+        "retention": {
+          "title": "Retention",
+          "body": [
+            "Account data: until account deletion, then limited archiving if a legal duty applies.",
+            "Orders and invoices: 10 years (accounting duties).",
+            "Diagnostic and photos: for the duration of the service, then deletion or anonymisation on request, unless needed as evidence in a dispute.",
+            "Technical logs and errors: a limited period proportionate to security."
+          ]
+        },
+        "rights": {
+          "title": "Your rights",
+          "body": [
+            "You have rights of access, rectification, erasure, restriction, objection, portability, and the right to withdraw consent.",
+            "To exercise them: {{email}} (ID if reasonably needed). You may also lodge a complaint with the CNIL (https://www.cnil.fr)."
+          ]
+        },
+        "transfers": {
+          "title": "Transfers outside the EU",
+          "body": [
+            "Some providers (including Vercel, Stripe, PayPal, Sentry, Google Auth) may process data outside the European Union. Those transfers rely on standard contractual clauses or another recognised safeguard where applicable."
+          ]
+        },
+        "contact": {
+          "title": "Contact us",
+          "body": [
+            "For any personal-data question: {{email}}."
+          ]
+        }
+      }
+    }
+  }
+}

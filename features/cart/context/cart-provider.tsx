@@ -18,6 +18,8 @@ export type CartItem = {
   unitPrice: number;
   imageUrl: string;
   quantity: number;
+  /** Variante couleur choisie, si le produit en propose. */
+  colorKey?: string | null;
 };
 
 type CartContextValue = {
@@ -25,14 +27,21 @@ type CartContextValue = {
   itemCount: number;
   subtotal: number;
   addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  setQuantity: (productId: string, quantity: number) => void;
+  removeItem: (lineKey: string) => void;
+  setQuantity: (lineKey: string, quantity: number) => void;
   clearCart: () => void;
   hydrated: boolean;
 };
 
 const CART_KEY = "awura-cart";
 const CartContext = createContext<CartContextValue | null>(null);
+
+/** Identifiant unique d'une ligne panier (produit + couleur). */
+export function cartLineKey(
+  item: Pick<CartItem, "productId" | "colorKey">,
+): string {
+  return item.colorKey ? `${item.productId}:${item.colorKey}` : item.productId;
+}
 
 /** Fournit le panier à l'arbre React et le synchronise avec le localStorage du navigateur. */
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -60,10 +69,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = useCallback(
     (item: Omit<CartItem, "quantity">, quantity = 1) => {
       setItems((current) => {
-        const existing = current.find((entry) => entry.productId === item.productId);
+        const key = cartLineKey(item);
+        const existing = current.find((entry) => cartLineKey(entry) === key);
         if (existing) {
           return current.map((entry) =>
-            entry.productId === item.productId
+            cartLineKey(entry) === key
               ? { ...entry, quantity: entry.quantity + quantity }
               : entry,
           );
@@ -74,15 +84,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const removeItem = useCallback((productId: string) => {
-    setItems((current) => current.filter((entry) => entry.productId !== productId));
+  const removeItem = useCallback((lineKey: string) => {
+    setItems((current) =>
+      current.filter((entry) => cartLineKey(entry) !== lineKey),
+    );
   }, []);
 
-  const setQuantity = useCallback((productId: string, quantity: number) => {
+  const setQuantity = useCallback((lineKey: string, quantity: number) => {
     setItems((current) =>
       current
         .map((entry) =>
-          entry.productId === productId
+          cartLineKey(entry) === lineKey
             ? { ...entry, quantity: Math.max(0, quantity) }
             : entry,
         )

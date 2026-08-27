@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateCatalog } from "@/lib/application/catalog-revalidate";
 import { requireAdminFromRequest } from "@/lib/infrastructure/supabase/admin-auth";
 import {
   adminDeleteProduct,
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
   if (!result.product) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
+  revalidateCatalog(result.product.slug);
   return NextResponse.json({ product: result.product });
 }
 
@@ -41,5 +43,6 @@ export async function DELETE(request: Request) {
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
+  revalidateCatalog();
   return NextResponse.json({ ok: true });
 }

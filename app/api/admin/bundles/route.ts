@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateCatalog } from "@/lib/application/catalog-revalidate";
 import { requireAdminFromRequest } from "@/lib/infrastructure/supabase/admin-auth";
 import {
   adminSetBundleComponents,
@@ -41,5 +42,6 @@ export async function POST(request: Request) {
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
+  revalidateCatalog();
   return NextResponse.json({ ok: true });
 }

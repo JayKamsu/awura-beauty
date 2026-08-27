@@ -1,3 +1,4 @@
+import { parseColorVariants } from "@/lib/domain/product-color";
 import {
   createAdminSupabaseClient,
   createSupabaseClient,
@@ -31,6 +32,7 @@ function mapProductRow(row: Record<string, unknown>): ProductRow {
     shipping_fee: Number(row.shipping_fee ?? 0),
     qr_url: String(row.qr_url ?? ""),
     universe: row.universe === "child" ? "child" : "adult",
+    color_variants: parseColorVariants(row.color_variants),
     created_at: row.created_at ? String(row.created_at) : undefined,
   };
 }

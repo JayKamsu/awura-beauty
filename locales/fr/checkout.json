@@ -89,6 +89,9 @@
     "pointsToEarn": "Tu gagneras {{count}} pts après paiement.",
     "usePoints": "Utiliser des points",
     "usePointsNone": "Ne pas utiliser de points",
-    "usePointsOption": "{{points}} pts (−{{amount}})"
+    "usePointsOption": "{{points}} pts (−{{amount}})",
+    "acceptTermsLead": "J’accepte les",
+    "acceptTermsAnd": "et la",
+    "acceptTermsRequired": "Accepte les conditions pour continuer."
   }
 }

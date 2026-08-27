@@ -32,6 +32,15 @@
     "openImage": "Enlarge image of {{name}}",
     "addToCart": "Add {{name}} to cart",
     "addToCartButton": "Add to cart",
+    "chooseColor": "Choose a color",
+    "chooseColorAria": "Choose a color for {{name}}",
+    "colorLabel": "Color",
+    "colors": {
+      "noir": "Black",
+      "rose-clair": "Light pink",
+      "blond": "Blonde",
+      "acajou": "Mahogany"
+    },
     "addedToCart": "{{name}} added to cart.",
     "viewCart": "View cart",
     "addToFavorites": "Add {{name}} to favorites",

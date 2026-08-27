@@ -206,3 +206,39 @@ export function breadcrumbJsonLd(
     })),
   };
 }
+
+/** JSON-LD ItemList des témoignages publics. */
+export function testimonialsJsonLd(
+  items: Array<{
+    authorName: string;
+    quote: string;
+    rating: number;
+  }>,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Témoignages Awura Beauty",
+    itemListElement: items.slice(0, 20).map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Review",
+        author: {
+          "@type": "Person",
+          name: item.authorName || "Cliente Awura",
+        },
+        reviewBody: item.quote,
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: item.rating,
+          bestRating: 5,
+        },
+        itemReviewed: {
+          "@type": "Brand",
+          name: SITE_NAME,
+        },
+      },
+    })),
+  };
+}

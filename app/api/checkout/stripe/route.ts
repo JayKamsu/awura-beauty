@@ -10,7 +10,7 @@ import { container } from "@/lib/application/container";
 type StripeCheckoutBody = {
   email: string;
   currency: string;
-  items: Array<{ slug?: string; quantity?: number }>;
+  items: Array<{ slug?: string; quantity?: number; colorKey?: string | null }>;
   shippingAddress: {
     fullName: string;
     line1: string;

@@ -5,12 +5,13 @@ import {
   PayPalScriptProvider,
 } from "@paypal/react-paypal-js";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import { useAuth } from "@/features/auth/context/auth-provider";
-import { useCart } from "@/features/cart/context/cart-provider";
+import { cartLineKey, useCart } from "@/features/cart/context/cart-provider";
 import { RelayPointPicker } from "@/features/checkout/components/relay-point-picker";
 import {
   ColissimoMark,
@@ -96,6 +97,7 @@ export function CheckoutPageContent() {
   const [editingAddress, setEditingAddress] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [stripePublishableKey, setStripePublishableKey] = useState(
     () => process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? "",
   );
@@ -170,12 +172,9 @@ export function CheckoutPageContent() {
   const orderItems = useMemo(
     () =>
       items.map((item) => ({
-        product_id: item.productId,
         slug: item.slug,
-        name: item.name,
-        unit_price: item.unitPrice,
         quantity: item.quantity,
-        image_url: item.imageUrl,
+        colorKey: item.colorKey ?? undefined,
       })),
     [items],
   );
@@ -393,6 +392,10 @@ export function CheckoutPageContent() {
       setError(t("checkout.relayRequired"));
       return false;
     }
+    if (!acceptedTerms) {
+      setError(t("checkout.acceptTermsRequired"));
+      return false;
+    }
     return true;
   };
 
@@ -488,16 +491,25 @@ export function CheckoutPageContent() {
       <aside className="h-fit rounded-3xl bg-background-alt p-5 sm:p-6 lg:order-2 lg:sticky lg:top-28">
         <h2 className="font-serif text-2xl text-primary">{t("checkout.summary")}</h2>
         <ul className="mt-4 space-y-3">
-          {items.map((item) => (
-            <li key={item.productId} className="flex justify-between gap-3 text-sm">
+          {items.map((item) => {
+            const colorLabel = item.colorKey
+              ? t(`shop.colors.${item.colorKey}`)
+              : null;
+            return (
+            <li
+              key={cartLineKey(item)}
+              className="flex justify-between gap-3 text-sm"
+            >
               <span className="min-w-0 break-words text-muted">
-                {item.name} × {item.quantity}
+                {item.name}
+                {colorLabel ? ` — ${colorLabel}` : ""} × {item.quantity}
               </span>
               <span className="shrink-0 text-primary">
                 {formatPrice(item.unitPrice * item.quantity, currency, i18n.language)}
               </span>
             </li>
-          ))}
+            );
+          })}
         </ul>
         <div className="mt-6 space-y-2 border-t border-border pt-4 text-sm">
           <div className="flex justify-between gap-3">
@@ -851,6 +863,41 @@ export function CheckoutPageContent() {
             })}
           </div>
         </section>
+
+        <label className="flex items-start gap-3 text-sm text-muted">
+          <input
+            type="checkbox"
+            required
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            className="mt-1 size-4 shrink-0 rounded border-border accent-primary"
+          />
+          <span>
+            {t("checkout.acceptTermsLead")}{" "}
+            <Link
+              href="/conditions-utilisation"
+              className="text-primary underline decoration-accent decoration-2 underline-offset-4 hover:text-accent"
+            >
+              {t("legal.nav.terms")}
+            </Link>
+            {", "}
+            <Link
+              href="/politique-de-retour"
+              className="text-primary underline decoration-accent decoration-2 underline-offset-4 hover:text-accent"
+            >
+              {t("legal.nav.returns")}
+            </Link>
+            {" "}
+            {t("checkout.acceptTermsAnd")}{" "}
+            <Link
+              href="/confidentialite"
+              className="text-primary underline decoration-accent decoration-2 underline-offset-4 hover:text-accent"
+            >
+              {t("legal.nav.privacy")}
+            </Link>
+            .
+          </span>
+        </label>
 
         {error ? (
           <p

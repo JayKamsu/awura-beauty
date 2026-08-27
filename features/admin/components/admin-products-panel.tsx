@@ -14,6 +14,8 @@ import { ConfirmDeleteButton } from "@/features/admin/components/confirm-delete-
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
 import { formatPrice } from "@/lib/format/price";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
+import { notifyCatalogChanged } from "@/lib/application/catalog-sync";
+import { PRODUCT_COLOR_KEYS, type ProductColorKey } from "@/lib/domain/product-color";
 import type { ProductCategory } from "@/lib/infrastructure/supabase/product-categories";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
@@ -40,6 +42,7 @@ const emptyForm = {
   shipping_fee: 0,
   qr_url: "",
   universe: "adult" as "adult" | "child",
+  color_variants: [] as ProductColorKey[],
   bundleComponents: [] as BundleComponentDraft[],
 };
 
@@ -175,6 +178,7 @@ export function AdminProductsPanel() {
       shipping_fee: product.shipping_fee ?? 0,
       qr_url: product.qr_url ?? "",
       universe: product.universe === "child" ? "child" : "adult",
+      color_variants: product.color_variants ?? [],
       bundleComponents,
     });
     setSlugTouched(true);
@@ -245,6 +249,7 @@ export function AdminProductsPanel() {
         shipping_fee: Number(form.shipping_fee) || 0,
         qr_url: form.qr_url.trim(),
         universe: form.universe,
+        color_variants: form.color_variants,
       };
 
       const response = await adminFetch("/api/admin/products", {
@@ -282,6 +287,7 @@ export function AdminProductsPanel() {
       setFeedback({ tone: "success", message: t("admin.saveSuccess") });
       closeModal();
       await load();
+      notifyCatalogChanged();
     });
   };
 
@@ -297,6 +303,7 @@ export function AdminProductsPanel() {
     setFeedback({ tone: "success", message: t("admin.deleteSuccess") });
     if (form.id === id) closeModal();
     await load();
+    notifyCatalogChanged();
   };
 
   const createCategory = () => {
@@ -830,6 +837,49 @@ export function AdminProductsPanel() {
                 <span className="text-muted">{t("admin.fields.is_new")}</span>
               </label>
 
+              <fieldset className="space-y-2">
+                <legend className="text-sm text-muted">
+                  {t("admin.fields.color_variants")}
+                </legend>
+                <p className="text-xs text-muted">
+                  {t("admin.fields.color_variantsHint")}
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {PRODUCT_COLOR_KEYS.map((key) => {
+                    const checked = form.color_variants.includes(key);
+                    return (
+                      <label
+                        key={key}
+                        className="flex min-h-11 items-center gap-2 text-sm"
+                      >
+                        <input
+                          type="checkbox"
+                          className="size-5"
+                          checked={checked}
+                          onChange={(e) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              color_variants: e.target.checked
+                                ? PRODUCT_COLOR_KEYS.filter(
+                                    (item) =>
+                                      item === key ||
+                                      prev.color_variants.includes(item),
+                                  )
+                                : prev.color_variants.filter(
+                                    (item) => item !== key,
+                                  ),
+                            }))
+                          }
+                        />
+                        <span className="text-muted">
+                          {t(`shop.colors.${key}`)}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
+
               <label className="flex min-h-12 items-center gap-3 text-sm">
                 <input
                   type="checkbox"
@@ -932,15 +982,30 @@ export function AdminProductsPanel() {
                 ] as const
               ).map(([field, labelKey]) => (
                 <label key={field} className="block space-y-2 text-sm">
-                  <span className="text-muted">{t(`admin.${labelKey}`)}</span>
+                  <span className="text-muted">
+                    {form[field]
+                      ? t("admin.replaceImage")
+                      : t(`admin.${labelKey}`)}
+                  </span>
                   {form[field] ? (
-                    <div className="relative h-28 w-full overflow-hidden rounded-xl bg-background-alt sm:h-24 sm:w-40">
-                      <Image
-                        src={form[field]}
-                        alt=""
-                        fill
-                        className="object-cover"
-                      />
+                    <div className="space-y-2">
+                      <div className="relative h-28 w-full overflow-hidden rounded-xl bg-background-alt sm:h-24 sm:w-40">
+                        <Image
+                          src={form[field]}
+                          alt=""
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        className="text-sm text-accent hover:text-accent-light"
+                        onClick={() =>
+                          setForm((prev) => ({ ...prev, [field]: "" }))
+                        }
+                      >
+                        {t("admin.removeImage")}
+                      </button>
                     </div>
                   ) : null}
                   <input

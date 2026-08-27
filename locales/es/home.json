@@ -123,29 +123,33 @@
     },
     "testimonials": {
       "title": "Ellas transformaron su corona",
-      "seeAll": "Ver todas las opiniones",
-      "items": {
-        "sarah": {
-          "name": "Sarah M.",
-          "quote": "Por fin una rutina que entiende de verdad mi cabello. Resultado visible en tres semanas."
-        },
-        "amina": {
-          "name": "Amina K.",
-          "quote": "El diagnóstico me abrió los ojos. Menos rotura, más brillo y una verdadera confianza."
-        },
-        "lea": {
-          "name": "Léa D.",
-          "quote": "Productos nobles, acompañamiento humano. Awura cambió mi relación con mi corona."
-        }
-      }
+      "seeAll": "Ver todas las opiniones"
     }
   },
   "reviews": {
-    "title": "Opiniones de clientas",
-    "subtitle": "Notas y comentarios dejados por clientas tras recibir su pedido.",
-    "empty": "Aún no hay opiniones.",
+    "title": "Testimonios",
+    "subtitle": "Lo que dicen las clientas de Awura Beauty: cuidados, diagnóstico capilar y acompañamiento.",
+    "empty": "Aún no hay testimonios.",
     "ratingLabel": "{{rating}} / 5",
     "seeProduct": "Ver producto",
-    "diagnosticBadge": "Diagnóstico capilar"
+    "diagnosticBadge": "Diagnóstico capilar",
+    "invite": {
+      "loading": "Comprobando el enlace…",
+      "title": "Comparte tu experiencia Awura",
+      "subtitle": "Unas palabras y una foto, si quieres. Tu testimonio podrá aparecer en el sitio.",
+      "name": "Nombre (e inicial del apellido)",
+      "rating": "Nota",
+      "quote": "Tu testimonio",
+      "photo": "Foto (opcional)",
+      "submit": "Enviar mi testimonio",
+      "submitting": "Envío…",
+      "error": "No se ha podido guardar. Comprueba el enlace o inténtalo de nuevo.",
+      "ratingRequired": "Elige una nota.",
+      "thanksTitle": "Gracias",
+      "thanksBody": "Hemos recibido tu testimonio.",
+      "seePage": "Ver testimonios",
+      "invalidTitle": "Enlace caducado",
+      "invalidBody": "Este enlace ya no es válido. Pide un enlace nuevo a Awura Beauty."
+    }
   }
 }

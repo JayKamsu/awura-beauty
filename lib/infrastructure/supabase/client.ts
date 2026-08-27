@@ -22,7 +22,11 @@ export function createSupabaseClient(): SupabaseClient | null {
   if (!configured || !url || !anonKey) return null;
 
   if (typeof window === "undefined") {
-    return createClient(url, anonKey);
+    return createClient(url, anonKey, {
+      global: {
+        fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+      },
+    });
   }
 
   if (window.location.pathname.startsWith("/admin")) {

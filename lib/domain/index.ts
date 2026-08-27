@@ -61,6 +61,25 @@ export {
   gammeCompleteUnitsInOrder,
 } from "@/lib/domain/bundle";
 
+export {
+  PRODUCT_COLOR_KEYS,
+  PRODUCT_COLOR_SWATCH_CLASS,
+  formatProductNameWithColor,
+  isProductColorKey,
+  parseColorVariants,
+  parseProductColorKey,
+  productColorLabel,
+  resolveLineColor,
+} from "@/lib/domain/product-color";
+export type { ProductColorKey } from "@/lib/domain/product-color";
+
+export type {
+  PublicTestimonial,
+  SiteTestimonialRow,
+  TestimonialInviteRow,
+} from "@/lib/domain/testimonial";
+export { TESTIMONIAL_INVITE_TTL_DAYS } from "@/lib/domain/testimonial";
+
 export { mapCarrierStatusToShippingStatus } from "@/lib/infrastructure/shipping/types";
 
 /** Canal de livraison d'une notification. */

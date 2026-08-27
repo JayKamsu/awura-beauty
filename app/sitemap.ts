@@ -18,10 +18,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/blog",
     "/tutoriels",
     "/contact",
+    "/temoignages",
+    "/informations-entreprise",
+    "/mentions-legales",
+    "/conditions-utilisation",
+    "/politique-de-retour",
+    "/confidentialite",
   ].map((path) => ({
     url: `${base}${path || "/"}`,
     lastModified: now,
-    changeFrequency: path === "" || path === "/boutique" ? "daily" : "weekly",
+    changeFrequency:
+      path === "" || path === "/boutique"
+        ? "daily"
+        : path.startsWith("/mentions") ||
+            path.startsWith("/conditions") ||
+            path.startsWith("/politique") ||
+            path.startsWith("/confidentialite") ||
+            path.startsWith("/informations")
+          ? "monthly"
+          : "weekly",
     priority:
       path === ""
         ? 1
@@ -31,7 +46,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             ? 0.9
             : path === "/a-propos"
               ? 0.8
-              : 0.7,
+              : path.startsWith("/mentions") ||
+                  path.startsWith("/conditions") ||
+                  path.startsWith("/politique") ||
+                  path.startsWith("/confidentialite") ||
+                  path.startsWith("/informations")
+                ? 0.4
+                : 0.7,
   }));
 
   const [productSlugs, articleSlugs, tutorialSlugs] = await Promise.all([

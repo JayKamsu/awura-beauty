@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { BrandLogo } from "@/components/ui/brand-logo";
+import { LEGAL_PAGES, LEGAL_SLUGS } from "@/lib/legal/pages";
 import { CONTACT_EMAIL } from "@/lib/site";
 
 const FOOTER_BLOCKS = [
@@ -89,8 +90,24 @@ export function Footer() {
           </div>
         ))}
       </div>
-      <div className="border-t border-on-brand/20 px-4 py-4 pb-[calc(1rem+4.5rem)] text-center text-xs text-on-brand/75 md:px-6 lg:pb-4">
-        © {year} {t("footer.brand")} — {t("footer.rights")}
+      <div className="border-t border-on-brand/20 px-4 py-6 pb-[calc(1.5rem+4.5rem)] text-center text-xs text-on-brand/75 md:px-6 lg:pb-6">
+        <nav
+          aria-label={t("legal.navLabel")}
+          className="mb-4 flex flex-wrap justify-center gap-x-5 gap-y-2"
+        >
+          {LEGAL_SLUGS.map((slug) => (
+            <Link
+              key={slug}
+              href={`/${slug}`}
+              className="text-on-brand/85 underline-offset-4 transition hover:text-on-brand hover:underline"
+            >
+              {t(`legal.nav.${LEGAL_PAGES[slug].i18nKey}`)}
+            </Link>
+          ))}
+        </nav>
+        <p>
+          © {year} {t("footer.brand")} — {t("footer.rights")}
+        </p>
       </div>
     </footer>
   );

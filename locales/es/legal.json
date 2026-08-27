@@ -1,0 +1,316 @@
+{
+  "legal": {
+    "navLabel": "Páginas legales",
+    "updated": "Última actualización: {{date}}",
+    "nav": {
+      "company": "Empresa",
+      "mentions": "Aviso legal",
+      "terms": "Condiciones de uso",
+      "returns": "Devoluciones",
+      "privacy": "RGPD"
+    },
+    "company": {
+      "eyebrow": "Identidad",
+      "title": "Información de la empresa",
+      "intro": "Identidad de Awura Beauty y datos de contacto para cualquier correspondencia.",
+      "cardEyebrow": "Ficha de identidad",
+      "cardTitle": "Awura Beauty",
+      "cardIntro": "Marca, publicación y atención al cliente.",
+      "fields": {
+        "tradeName": "Nombre comercial",
+        "director": "Directora de la publicación",
+        "email": "E-mail"
+      },
+      "sections": {
+        "purpose": {
+          "title": "Quiénes somos",
+          "body": [
+            "{{legalName}} (nombre comercial {{siteName}}) es una marca francesa de cuidado capilar natural y premium para cabellos texturizados, afro, crespos y mestizos.",
+            "El sitio {{siteUrl}} permite pedir los cuidados, consultar el blog y los tutoriales, y realizar un diagnóstico capilar."
+          ]
+        },
+        "correspondence": {
+          "title": "Correspondencia",
+          "body": [
+            "Toda correspondencia oficial (desistimiento, reclamación, derechos RGPD) se realiza por e-mail a {{email}}.",
+            "La recogida en tienda, cuando se ofrece en el pago, se realiza en la dirección comunicada en la confirmación del pedido."
+          ]
+        },
+        "contact": {
+          "title": "Contacto",
+          "body": [
+            "Atención al cliente: {{email}} — respuesta en 24 a 48 horas laborables, 6 días a la semana.",
+            "También puedes usar el formulario de contacto del sitio."
+          ]
+        }
+      }
+    },
+    "mentions": {
+      "eyebrow": "Obligaciones legales",
+      "title": "Aviso legal",
+      "intro": "Conforme a la ley francesa n.º 2004-575 de 21 de junio de 2004 (LCEN), los siguientes elementos identifican al editor y al alojamiento de {{siteUrl}}.",
+      "sections": {
+        "editor": {
+          "title": "Editor del sitio",
+          "body": [
+            "El sitio {{siteUrl}} es editado por {{legalName}}, nombre comercial {{siteName}}.",
+            "Directora de la publicación: {{director}}.",
+            "Contacto: {{email}}.",
+            "Para cualquier pregunta de identificación del editor: {{email}}."
+          ]
+        },
+        "host": {
+          "title": "Alojamiento",
+          "body": [
+            "El sitio está alojado por {{hostName}}, {{hostAddress}} — {{hostUrl}}.",
+            "El dominio awurabeauty.com se gestiona a través de Hostinger. Los e-mails transaccionales (recibos, autenticación) se envían desde {{email}}."
+          ]
+        },
+        "ip": {
+          "title": "Propiedad intelectual",
+          "body": [
+            "Todo el sitio (textos, imágenes, logotipos, marca, blog y tutoriales) está protegido por derechos de autor y de marca.",
+            "Queda prohibida cualquier reproducción, representación o adaptación, total o parcial, sin autorización previa por escrito de {{siteName}}."
+          ]
+        },
+        "data": {
+          "title": "Datos personales",
+          "body": [
+            "El tratamiento de datos personales se describe en la política de privacidad (RGPD). Para ejercer tus derechos: {{email}}."
+          ]
+        },
+        "law": {
+          "title": "Derecho aplicable",
+          "body": [
+            "Este aviso se rige por el derecho francés. A falta de acuerdo amistoso, son competentes los tribunales franceses del domicilio social, sin perjuicio de las normas imperativas de protección del consumidor."
+          ]
+        }
+      }
+    },
+    "terms": {
+      "eyebrow": "CGU y CGV",
+      "title": "Condiciones de uso",
+      "intro": "Estas condiciones rigen el acceso a {{siteUrl}} y las ventas de productos {{siteName}} a consumidores. Todo pedido implica su aceptación.",
+      "sections": {
+        "purpose": {
+          "title": "Objeto",
+          "body": [
+            "Las presentes condiciones generales de uso y de venta definen la navegación, la creación de cuenta, el pedido y la entrega en {{siteUrl}}.",
+            "{{siteName}} vende cuidado capilar cosmético (no medicamentos). Los consejos del diagnóstico, el blog y los tutoriales son educativos y no sustituyen un dictamen médico."
+          ]
+        },
+        "account": {
+          "title": "Cuenta de cliente",
+          "body": [
+            "Algunas funciones (pedido, historial, fidelidad, diagnóstico guardado) requieren una cuenta. Te comprometes a facilitar datos exactos y a preservar la confidencialidad de tus identificadores.",
+            "Puedes solicitar la supresión de tu cuenta en {{email}}, sin perjuicio de las obligaciones legales de conservación (facturas, litigios)."
+          ]
+        },
+        "products": {
+          "title": "Productos",
+          "body": [
+            "Las fichas describen los cuidados (beneficios, composición, uso). Las fotografías son lo más fieles posible; pueden existir ligeras variaciones de tono según los lotes artesanales y tu pantalla.",
+            "La disponibilidad se indica en el momento del pedido. Si un artículo no está disponible tras el pago, {{siteName}} te contactará para un cambio, un vale o un reembolso."
+          ]
+        },
+        "orders": {
+          "title": "Pedidos",
+          "body": [
+            "El contrato se forma cuando se confirma el pago (Stripe, PayPal) o cuando se acepta un pedido de prueba. Recibes un e-mail de confirmación y un recibo.",
+            "Debes comprobar la dirección de entrega, el Point Relais o la recogida en tienda antes de pagar."
+          ]
+        },
+        "prices": {
+          "title": "Precios",
+          "body": [
+            "Los precios se indican en euros, impuestos incluidos (TTC), excluidos los gastos de envío. Los gastos se calculan en el checkout según el modo elegido (Colissimo, Mondial Relay o recogida) y el umbral de envío gratis si aplica.",
+            "El importe total TTC (productos + envío − descuentos) es el mostrado antes del pago."
+          ]
+        },
+        "payment": {
+          "title": "Pago",
+          "body": [
+            "El pago se realiza en línea con tarjeta a través de Stripe o mediante PayPal. Los datos completos de la tarjeta no transitan por nuestros servidores.",
+            "El pedido solo se envía (o se pone a disposición) tras el cobro efectivo."
+          ]
+        },
+        "delivery": {
+          "title": "Entrega",
+          "body": [
+            "Los pedidos se preparan en 24 a 48 horas laborables, salvo roturas y festivos. Luego se añaden los plazos del transportista (Colissimo a domicilio, Mondial Relay en Point Relais).",
+            "La recogida en tienda es gratuita: te contactamos cuando el pedido está listo, en la dirección indicada en la confirmación del pedido.",
+            "Los riesgos se transmiten en la entrega al destinatario o al Point Relais. Revisa el paquete al recibirlo y comunica cualquier incidencia a {{email}} lo antes posible."
+          ]
+        },
+        "withdrawal": {
+          "title": "Desistimiento y devoluciones",
+          "body": [
+            "El derecho de desistimiento y las modalidades de devolución se detallan en la política de devolución. Para productos cosméticos desprecintados se aplican las excepciones del Código de consumo francés."
+          ]
+        },
+        "diagnostic": {
+          "title": "Diagnóstico capilar",
+          "body": [
+            "El diagnóstico en línea es un servicio de acompañamiento cosmético personalizado y gratuito. El diagnóstico presencial (tricograma) es un servicio con cita, de pago según la tarifa mostrada, a veces incluido en una oferta.",
+            "Una vez iniciado el diagnóstico presencial, el derecho de desistimiento puede dejar de aplicarse al servicio plenamente ejecutado, conforme al artículo L221-28 del Código de consumo."
+          ]
+        },
+        "ip": {
+          "title": "Propiedad intelectual",
+          "body": [
+            "Los contenidos del sitio siguen siendo propiedad de {{siteName}}. Queda prohibido cualquier uso comercial no autorizado."
+          ]
+        },
+        "liability": {
+          "title": "Responsabilidad",
+          "body": [
+            "{{siteName}} se esfuerza por ofrecer información exacta y un sitio disponible. Pueden producirse interrupciones (mantenimiento, fuerza mayor, fallo de un prestador).",
+            "Utiliza los cuidados según las instrucciones de la ficha. En caso de reacción cutánea, interrumpe el uso y consulta a un profesional sanitario."
+          ]
+        },
+        "law": {
+          "title": "Derecho aplicable y mediación",
+          "body": [
+            "Estas condiciones se rigen por el derecho francés. En caso de litigio, contacta primero {{email}} para buscar una solución amistosa.",
+            "Conforme a los artículos L611-1 y siguientes del Código de consumo, puedes acudir gratuitamente a un mediador de consumo. {{siteName}} indicará el mediador competente cuando esté designado; mientras tanto, la plataforma europea de resolución de litigios en línea está disponible: https://ec.europa.eu/consumers/odr"
+          ]
+        }
+      }
+    },
+    "returns": {
+      "eyebrow": "Desistimiento",
+      "title": "Política de devolución",
+      "intro": "Dispone de un derecho de desistimiento para las compras a distancia, dentro de los límites previstos para productos de higiene y cosmética.",
+      "sections": {
+        "withdrawal": {
+          "title": "Plazo de 14 días",
+          "body": [
+            "Conforme a los artículos L221-18 y siguientes del Código de consumo francés, dispones de 14 días desde la recepción del paquete (o la puesta a disposición en Point Relais / recogida) para desistir, sin motivar tu decisión.",
+            "Para ejercerlo, escribe a {{email}} indicando el número de pedido y los productos. Puedes usar el formulario de contacto (asunto « Devolución / reclamación »)."
+          ]
+        },
+        "cosmetics": {
+          "title": "Productos cosméticos",
+          "body": [
+            "Los cuidados {{siteName}} son productos de higiene y cosmética. Conforme al artículo L221-28 5.º del Código de consumo, no se puede ejercer el desistimiento sobre productos desprecintados que no puedan devolverse por razones de higiene o de protección de la salud.",
+            "Solo se pueden devolver, en virtud del desistimiento, productos no abiertos, precintados, no usados y en su embalaje original intacto."
+          ]
+        },
+        "process": {
+          "title": "Cómo devolver un producto",
+          "body": [
+            "1. Contacta {{email}} en el plazo de 14 días. 2. Confirmamos la elegibilidad y la dirección de devolución por e-mail. 3. Devuelve los productos en los 14 días siguientes a tu decisión, en un embalaje protector.",
+            "Los gastos de devolución corren a tu cargo, salvo error nuestro, producto defectuoso o no conforme."
+          ]
+        },
+        "refund": {
+          "title": "Reembolso",
+          "body": [
+            "El reembolso se realiza en los 14 días siguientes a la recepción de los productos devueltos (o de la prueba de envío), por el mismo medio de pago, salvo acuerdo contrario.",
+            "Los gastos de envío de ida pueden reembolsarse según el modo menos costoso ofrecido, conforme a la normativa. Puede deducirse una depreciación derivada de manipulaciones distintas de las necesarias para comprobar la naturaleza, las características y el funcionamiento del bien."
+          ]
+        },
+        "defect": {
+          "title": "Producto defectuoso o error",
+          "body": [
+            "Si recibes un producto dañado, incompleto o distinto de tu pedido, contáctanos en 48 horas laborables con fotos. Ofrecemos sustitución, reposición o reembolso, con gastos de devolución a nuestro cargo."
+          ]
+        },
+        "pickup": {
+          "title": "Recogida en tienda",
+          "body": [
+            "Para la recogida en tienda, el plazo de desistimiento empieza en la entrega del producto. Se aplican las mismas reglas de higiene (producto no desprecintado)."
+          ]
+        },
+        "diagnostic": {
+          "title": "Prestaciones de diagnóstico",
+          "body": [
+            "El diagnóstico en línea gratuito no da lugar a reembolso. Para un diagnóstico presencial de pago aún no iniciado, cancela en {{email}}; una vez ejecutada plenamente la prestación, deja de ser reembolsable en virtud del desistimiento."
+          ]
+        }
+      }
+    },
+    "privacy": {
+      "eyebrow": "RGPD",
+      "title": "Privacidad y RGPD",
+      "intro": "{{siteName}} trata tus datos personales de forma leal, limitada a lo necesario para la tienda, la cuenta, el diagnóstico y la atención al cliente.",
+      "sections": {
+        "controller": {
+          "title": "Responsable del tratamiento",
+          "body": [
+            "El responsable del tratamiento es {{legalName}} ({{siteName}}), representado por {{director}}.",
+            "Contacto privacidad: {{email}}."
+          ]
+        },
+        "data": {
+          "title": "Datos recogidos",
+          "body": [
+            "Cuenta y pedido: identidad, e-mail, teléfono, dirección de entrega, historial de compras, pagos (identificadores Stripe/PayPal, nunca el número completo de tarjeta), puntos de fidelidad.",
+            "Diagnóstico: respuestas al cuestionario, notas y fotos que envías, citas, y enlace de videollamada si aplica.",
+            "Técnicos: registros necesarios para la seguridad, idioma y divisa, tema de visualización, carrito local, tokens de sesión y, en producción, trazas de error (Sentry) con textos ocultos.",
+            "Mensajes: contenidos que envías por el chat de soporte, el formulario de contacto o las opiniones."
+          ]
+        },
+        "purposes": {
+          "title": "Finalidades",
+          "body": [
+            "Ejecutar pedidos y envíos (Colissimo, Mondial Relay, recogida), emitir facturas y recibos, gestionar la cuenta, la fidelidad y las opiniones.",
+            "Prestar el diagnóstico capilar y las citas asociadas.",
+            "Garantizar la seguridad del sitio, el soporte y mejorar el servicio (estadísticas de error; sin publicidad comportamental de terceros en el sitio)."
+          ]
+        },
+        "basis": {
+          "title": "Bases jurídicas",
+          "body": [
+            "Ejecución del contrato: cuenta, pedido, entrega, diagnóstico de pago.",
+            "Obligación legal: facturación, contabilidad, respuestas a las autoridades.",
+            "Interés legítimo: seguridad, prevención del fraude, mejora del sitio.",
+            "Consentimiento: notificaciones push, cookies no esenciales si las hubiera, fotos de diagnóstico más allá de lo estrictamente necesario."
+          ]
+        },
+        "processors": {
+          "title": "Destinatarios y encargados",
+          "body": [
+            "Supabase (alojamiento de datos y autenticación), Stripe y PayPal (pago), Vercel (alojamiento del sitio), Hostinger (correo {{email}}), La Poste / Colissimo y Mondial Relay (envío), Firebase (notificaciones push si te inscribes), Sentry (supervisión de errores; replay de sesión solo en caso de error y textos ocultos), Jitsi (videodiagnóstico).",
+            "Estos prestadores actúan solo para las finalidades descritas y según sus propias políticas de privacidad."
+          ]
+        },
+        "cookies": {
+          "title": "Cookies y almacenamiento local",
+          "body": [
+            "El sitio usa cookies y almacenamiento local estrictamente necesarios: sesión de autenticación, carrito, idioma, divisa, tema. No requieren consentimiento como cookies de seguimiento.",
+            "{{siteName}} no deposita cookies publicitarias de terceros. Los prestadores de pago y de inicio de sesión (Stripe, PayPal, Google) pueden depositar las suyas en sus flujos."
+          ]
+        },
+        "retention": {
+          "title": "Plazos de conservación",
+          "body": [
+            "Datos de cuenta: hasta la supresión de la cuenta, luego archivo limitado si aplica una obligación legal.",
+            "Pedidos y facturas: 10 años (obligaciones contables).",
+            "Diagnóstico y fotos: durante el acompañamiento, luego supresión o anonimización a petición, salvo necesidad de prueba en un litigio.",
+            "Registros técnicos y errores: duración limitada, proporcionada a la seguridad."
+          ]
+        },
+        "rights": {
+          "title": "Tus derechos",
+          "body": [
+            "Tienes derechos de acceso, rectificación, supresión, limitación, oposición, portabilidad, y el derecho a retirar tu consentimiento.",
+            "Para ejercerlos: {{email}} (documento de identidad si la duda es razonable). También puedes reclamar ante la CNIL (https://www.cnil.fr)."
+          ]
+        },
+        "transfers": {
+          "title": "Transferencias fuera de la UE",
+          "body": [
+            "Algunos prestadores (en particular Vercel, Stripe, PayPal, Sentry, Google Auth) pueden tratar datos fuera de la Unión Europea. Esas transferencias se basan en cláusulas contractuales tipo u otro mecanismo reconocido, cuando proceda."
+          ]
+        },
+        "contact": {
+          "title": "Escribirnos",
+          "body": [
+            "Para cualquier pregunta sobre datos personales: {{email}}."
+          ]
+        }
+      }
+    }
+  }
+}

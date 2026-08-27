@@ -4,10 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { ProductColorSwatch } from "@/components/ui/product-card";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import { useAuth } from "@/features/auth/context/auth-provider";
-import { useCart } from "@/features/cart/context/cart-provider";
+import { cartLineKey, useCart } from "@/features/cart/context/cart-provider";
 import { formatPrice } from "@/lib/format/price";
+import { parseProductColorKey } from "@/lib/domain/product-color";
 
 /** Page panier : liste des articles ajoutés, gestion des quantités et accès au tunnel de commande. */
 export function CartPageContent() {
@@ -37,15 +39,21 @@ export function CartPageContent() {
       <h1 className="font-serif text-4xl text-primary">{t("cart.title")}</h1>
 
       <div className="space-y-4">
-        {items.map((item) => (
+        {items.map((item) => {
+          const lineKey = cartLineKey(item);
+          const colorKey = parseProductColorKey(item.colorKey);
+          const label = colorKey
+            ? `${item.name} — ${t(`shop.colors.${colorKey}`)}`
+            : item.name;
+          return (
           <article
-            key={item.productId}
+            key={lineKey}
             className="flex flex-col gap-4 rounded-2xl bg-background-alt/70 p-4 sm:flex-row sm:items-center"
           >
             <div className="relative size-24 shrink-0 overflow-hidden rounded-xl bg-background">
               <Image
                 src={item.imageUrl}
-                alt={item.name}
+                alt={label}
                 fill
                 className="object-contain p-2"
                 sizes="96px"
@@ -53,11 +61,21 @@ export function CartPageContent() {
             </div>
             <div className="flex flex-1 flex-col gap-2">
               <Link
-                href={`/boutique/${item.slug}`}
+                href={
+                  colorKey
+                    ? `/boutique/${item.slug}?couleur=${colorKey}`
+                    : `/boutique/${item.slug}`
+                }
                 className="font-serif text-xl text-primary hover:text-accent"
               >
                 {item.name}
               </Link>
+              {colorKey ? (
+                <p className="flex items-center gap-2 text-sm text-muted">
+                  <ProductColorSwatch colorKey={colorKey} size="sm" selected />
+                  {t(`shop.colors.${colorKey}`)}
+                </p>
+              ) : null}
               <p className="text-sm text-muted">
                 {formatPrice(item.unitPrice, currency, i18n.language)}
               </p>
@@ -69,14 +87,14 @@ export function CartPageContent() {
                     min={1}
                     value={item.quantity}
                     onChange={(e) =>
-                      setQuantity(item.productId, Number(e.target.value) || 1)
+                      setQuantity(lineKey, Number(e.target.value) || 1)
                     }
                     className="h-11 w-16 rounded-lg border border-border bg-background px-2"
                   />
                 </label>
                 <button
                   type="button"
-                  onClick={() => removeItem(item.productId)}
+                  onClick={() => removeItem(lineKey)}
                   className="inline-flex min-h-11 items-center rounded-xl px-2 text-sm text-accent hover:text-accent-light"
                 >
                   {t("cart.remove")}
@@ -87,7 +105,8 @@ export function CartPageContent() {
               {formatPrice(item.unitPrice * item.quantity, currency, i18n.language)}
             </p>
           </article>
-        ))}
+          );
+        })}
       </div>
 
       <div className="flex flex-col gap-4 rounded-2xl border border-border p-6 sm:flex-row sm:items-center sm:justify-between">

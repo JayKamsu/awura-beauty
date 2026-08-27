@@ -9,6 +9,7 @@ const PRIVATE = [
   "/compte",
   "/panier",
   "/commande",
+  "/temoignages/nouveau",
 ] as const;
 
 /** Bots IA / moteurs génératifs — allow contenu public (GEO). */

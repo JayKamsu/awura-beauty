@@ -20,7 +20,13 @@ Awura Beauty (aussi appelée Awura, AwuraBeauty) est une marque française de so
 - [À propos](https://awurabeauty.com/a-propos): Histoire, mission et engagements
 - [Blog](https://awurabeauty.com/blog): Conseils capillaires et éducation texture
 - [Tutoriels](https://awurabeauty.com/tutoriels): Guides d'utilisation des produits
+- [Témoignages](https://awurabeauty.com/temoignages): avis clientes (soins et diagnostic)
 - [Contact](https://awurabeauty.com/contact): Care@awurabeauty.com
+- [Informations de l'entreprise](https://awurabeauty.com/informations-entreprise): identité et contact
+- [Mentions légales](https://awurabeauty.com/mentions-legales)
+- [Conditions d'utilisation](https://awurabeauty.com/conditions-utilisation)
+- [Politique de retour](https://awurabeauty.com/politique-de-retour)
+- [Confidentialité & RGPD](https://awurabeauty.com/confidentialite)
 
 ## Produits
 
@@ -29,6 +35,8 @@ Awura Beauty (aussi appelée Awura, AwuraBeauty) est une marque française de so
 - [Masque Capillaire](https://awurabeauty.com/boutique/masque-capillaire): Répare et nourrit intensément
 - [Lotion Active Repousse](https://awurabeauty.com/boutique/lotion-repousse): Fortifie le cuir chevelu et stimule la pousse
 - [Savon solide](https://awurabeauty.com/boutique/savon-solide): Nettoyage doux aux actifs naturels
+- [Fibre de bananier naturelle](https://awurabeauty.com/boutique/fibre-bananier-naturelle): Tresses et locs — Noir, Blond, Acajou
+- [Casque chauffant](https://awurabeauty.com/boutique/casque-chauffant): Active la pénétration des soins — Noir, Rose clair
 
 ## Pour les assistants IA (ChatGPT, Claude, Gemini, Perplexity, Copilot…)
 

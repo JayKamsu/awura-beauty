@@ -9,7 +9,7 @@ import { createOrder } from "@/lib/infrastructure/supabase/orders";
 type ManualCheckoutBody = {
   email: string;
   currency: string;
-  items: Array<{ slug?: string; quantity?: number }>;
+  items: Array<{ slug?: string; quantity?: number; colorKey?: string | null }>;
   shippingAddress: {
     fullName: string;
     line1: string;

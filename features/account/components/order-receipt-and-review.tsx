@@ -111,7 +111,8 @@ export function OrderReceiptAndReview({
           <p className="text-sm font-medium text-primary">
             {t("account.reviewPrompt")}
           </p>
-          {order.items.map((item) => (
+          {[...new Map(order.items.map((item) => [item.product_id, item])).values()].map(
+            (item) => (
             <ProductReviewForm
               key={item.product_id}
               orderId={order.id}

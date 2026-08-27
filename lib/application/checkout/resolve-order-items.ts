@@ -1,3 +1,4 @@
+import { formatProductNameWithColor, resolveLineColor } from "@/lib/domain/product-color";
 import { getBundleComponents } from "@/lib/infrastructure/supabase/bundles";
 import { getProductsBySlugs } from "@/lib/infrastructure/supabase/products";
 import type { OrderItem } from "@/lib/infrastructure/supabase/order-types";
@@ -13,6 +14,7 @@ import {
 export type CartLineInput = {
   slug?: string;
   quantity?: number;
+  colorKey?: string | null;
 };
 
 const MAX_QTY = 20;
@@ -49,6 +51,7 @@ export async function resolveOrderItemsFromCatalog(
     .map((line) => ({
       slug: String(line.slug ?? "").trim(),
       quantity: Math.floor(Number(line.quantity) || 0),
+      colorKey: line.colorKey ?? null,
     }))
     .filter((line) => line.slug && line.quantity > 0);
 
@@ -86,6 +89,11 @@ export async function resolveOrderItemsFromCatalog(
     componentsByBundleId.set(product.id, await getBundleComponents(product.id));
   }
 
+  const qtyBySlug = new Map<string, number>();
+  for (const line of normalized) {
+    qtyBySlug.set(line.slug, (qtyBySlug.get(line.slug) ?? 0) + line.quantity);
+  }
+
   const items: OrderItem[] = [];
   for (const line of normalized) {
     const product = bySlug.get(line.slug);
@@ -100,6 +108,20 @@ export async function resolveOrderItemsFromCatalog(
       };
     }
 
+    const color = resolveLineColor(product.color_variants, line.colorKey);
+    if (!color.ok) {
+      return {
+        items: [],
+        subtotal: 0,
+        shippingFee: 0,
+        total: 0,
+        quote: null,
+        error: `Color required for ${product.slug}`,
+      };
+    }
+
+    const needed = qtyBySlug.get(line.slug) ?? line.quantity;
+
     if (product.is_bundle) {
       const components = componentsByBundleId.get(product.id) ?? [];
       if (components.length === 0) {
@@ -113,8 +135,7 @@ export async function resolveOrderItemsFromCatalog(
         };
       }
       for (const component of components) {
-        const needed = component.quantity * line.quantity;
-        if (component.product.stock < needed) {
+        if (component.product.stock < component.quantity * needed) {
           return {
             items: [],
             subtotal: 0,
@@ -125,7 +146,7 @@ export async function resolveOrderItemsFromCatalog(
           };
         }
       }
-    } else if (product.stock < line.quantity) {
+    } else if (product.stock < needed) {
       return {
         items: [],
         subtotal: 0,
@@ -139,10 +160,11 @@ export async function resolveOrderItemsFromCatalog(
     items.push({
       product_id: product.id,
       slug: product.slug,
-      name: product.name,
+      name: formatProductNameWithColor(product.name, color.colorKey, "fr"),
       unit_price: Number(product.price),
       quantity: line.quantity,
       image_url: product.image_url,
+      color_key: color.colorKey,
     });
   }
 

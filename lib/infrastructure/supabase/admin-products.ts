@@ -1,3 +1,4 @@
+import { parseColorVariants } from "@/lib/domain/product-color";
 import { createAdminSupabaseClient } from "@/lib/infrastructure/supabase/client";
 import {
   getDemoProducts,
@@ -32,6 +33,7 @@ function mapRow(row: Record<string, unknown>): ProductRow {
     shipping_fee: Number(row.shipping_fee ?? 0),
     qr_url: String(row.qr_url ?? ""),
     universe: row.universe === "child" ? "child" : "adult",
+    color_variants: parseColorVariants(row.color_variants),
     created_at: row.created_at ? String(row.created_at) : undefined,
   };
 }
@@ -83,6 +85,7 @@ export async function adminUpsertProduct(
     shipping_fee: Number(input.shipping_fee ?? 0),
     qr_url: String(input.qr_url ?? ""),
     universe: input.universe === "child" ? "child" : "adult",
+    color_variants: parseColorVariants(input.color_variants),
   };
 
   if (supabase) {

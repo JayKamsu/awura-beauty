@@ -29,7 +29,8 @@ export type StorageFolder =
   | "pages"
   | "uploads"
   | "labels"
-  | "brand";
+  | "brand"
+  | "testimonials";
 
 function publicObjectUrl(path: string): string | null {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");

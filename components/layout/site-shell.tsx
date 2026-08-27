@@ -13,6 +13,7 @@ import { PushForegroundListener } from "@/features/notifications/components/push
 import { PushNavigateListener } from "@/features/notifications/components/push-navigate-listener";
 import { PushOptIn } from "@/features/notifications/components/push-opt-in";
 import { PwaInstallControls } from "@/features/pwa/components/pwa-install-controls";
+import { CatalogLiveSync } from "@/features/shop/components/catalog-live-sync";
 import { SupportChatWidget } from "@/features/support-chat/components/support-chat-widget";
 
 type SiteShellProps = {
@@ -46,6 +47,7 @@ function PublicShell({ children }: { children: ReactNode }) {
       <PushOptIn />
       <PwaInstallControls variant="banner" />
       <SupportChatWidget />
+      <CatalogLiveSync />
     </>
   );
 }

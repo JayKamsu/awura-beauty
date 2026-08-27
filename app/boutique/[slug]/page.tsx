@@ -15,8 +15,12 @@ import {
 import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo/json-ld";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
+/** Recalcule la fiche au plus toutes les 60s, et tout de suite après une écriture admin. */
+export const revalidate = 60;
+
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ couleur?: string | string[] }>;
 };
 
 /** Génère statiquement les slugs de tous les produits pour le pré-rendu. */
@@ -45,8 +49,12 @@ export async function generateMetadata({
  * Page produit : affiche la galerie, le panneau d'achat, les détails et les produits liés,
  * avec le JSON-LD produit et fil d'Ariane pour le SEO.
  */
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({
+  params,
+  searchParams,
+}: ProductPageProps) {
   const { slug } = await params;
+  const query = await searchParams;
   const product = await getProductBySlug(slug);
 
   if (!product) notFound();
@@ -100,7 +108,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <div className="mx-auto w-full max-w-7xl px-4 py-10 md:px-6 md:py-14">
         <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
           <ProductGallery images={gallery} />
-          <ProductPurchasePanel product={product} />
+          <ProductPurchasePanel
+            product={product}
+            initialColor={
+              Array.isArray(query.couleur) ? query.couleur[0] : query.couleur
+            }
+          />
         </div>
       </div>
 

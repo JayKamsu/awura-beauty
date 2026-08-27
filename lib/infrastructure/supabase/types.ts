@@ -1,3 +1,5 @@
+import type { ProductColorKey } from "@/lib/domain/product-color";
+
 /**
  * Shape alignée sur la table Supabase `products`.
  *
@@ -31,6 +33,8 @@ export type ProductRow = {
   qr_url: string;
   /** Univers charte : adult (défaut) | child (pastel). */
   universe: "adult" | "child";
+  /** Variantes couleur proposées à l'achat (vide = pas de choix). Stock partagé. */
+  color_variants: ProductColorKey[];
   created_at?: string;
 };
 

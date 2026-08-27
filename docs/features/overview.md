@@ -9,6 +9,7 @@ Chaque fonctionnalité est un module autonome sous `features/`.
 | À propos | `/a-propos` | Présentation marque |
 | Blog | `/blog` | Contenu éditorial |
 | Contact | `/contact` | Formulaire / infos |
+| Légal | `/mentions-legales`, `/conditions-utilisation`, `/politique-de-retour`, `/confidentialite`, `/informations-entreprise` | Mentions, CGU/CGV, retours, RGPD, fiche entreprise |
 | Compte | `/compte` | Espace client |
 | Recherche | `/recherche` | Recherche produits |
 | Panier | `/panier` | Panier et checkout |

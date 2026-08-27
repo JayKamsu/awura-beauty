@@ -357,7 +357,7 @@ export function AccountOrdersSection({
                     <ul className="space-y-2 border-t border-border/70 pt-4 text-sm text-muted">
                       {order.items.map((item) => (
                         <li
-                          key={`${order.id}-${item.slug}`}
+                          key={`${order.id}-${item.slug}-${item.color_key ?? ""}`}
                           className="flex justify-between gap-3"
                         >
                           <Link

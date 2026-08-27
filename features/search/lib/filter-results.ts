@@ -58,5 +58,8 @@ export function toSearchProductCard(product: ProductRow): ProductCardData {
     ingredientImage: product.ingredients_image_url || undefined,
     lifestyleImage: product.lifestyle_image_url,
     isNew: product.is_new,
+    productType: product.product_type,
+    stock: product.stock,
+    colorVariants: product.color_variants,
   };
 }

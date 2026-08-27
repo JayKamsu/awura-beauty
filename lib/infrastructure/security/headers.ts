@@ -42,7 +42,10 @@ export function buildContentSecurityPolicy(): string {
     "https://*.jitsi.net",
     "wss://*.jitsi.net",
   ];
-  if (supabase) connect.push(supabase);
+  if (supabase) {
+    connect.push(supabase);
+    connect.push(supabase.replace(/^https:/, "wss:"));
+  }
 
   const img = [
     "'self'",

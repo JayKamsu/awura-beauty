@@ -11,6 +11,7 @@
 - Promesse : hydrater, démêler, fortifier et sublimer la couronne
 - Langues du site : français (principal), anglais, espagnol
 - Contact : Care@awurabeauty.com
+- Pages légales : [mentions](https://awurabeauty.com/mentions-legales), [conditions](https://awurabeauty.com/conditions-utilisation), [retours](https://awurabeauty.com/politique-de-retour), [RGPD](https://awurabeauty.com/confidentialite), [entreprise](https://awurabeauty.com/informations-entreprise)
 - Boutique : https://awurabeauty.com/boutique
 - Diagnostic : https://awurabeauty.com/diagnostic-capillaire
 
@@ -40,8 +41,15 @@ Lotion hydratante et fortifiante pour stimuler la pousse et renforcer le cuir ch
 ### Savon solide — https://awurabeauty.com/boutique/savon-solide
 Nettoyage doux à base d'ingrédients naturels. À suivre d'un soin hydratant.
 
+### Fibre de bananier naturelle — https://awurabeauty.com/boutique/fibre-bananier-naturelle
+Fibre 100% naturelle pour tresses et locs. Couleurs : Noir, Blond, Acajou.
+
+### Casque chauffant — https://awurabeauty.com/boutique/casque-chauffant
+Casque à chaleur douce pour optimiser masques et huiles. Couleurs : Noir, Rose clair.
+
 ## Contenus
 
+- Témoignages (https://awurabeauty.com/temoignages) : avis clientes sur les soins et le diagnostic
 - Blog (https://awurabeauty.com/blog) : porosite, wash day, routines saisonnières
 - Tutoriels (https://awurabeauty.com/tutoriels) : mode d'emploi produit par produit
 - À propos (https://awurabeauty.com/a-propos) : histoire et engagements de la marque

@@ -89,13 +89,17 @@ export function productLinesForQuote(
   quantities: Array<{ slug: string; quantity: number }>,
 ): ShippingQuoteLine[] {
   const bySlug = new Map(products.map((p) => [p.slug, p]));
-  return quantities
-    .map((line) => {
-      const product = bySlug.get(line.slug);
+  const qtyBySlug = new Map<string, number>();
+  for (const line of quantities) {
+    qtyBySlug.set(line.slug, (qtyBySlug.get(line.slug) ?? 0) + line.quantity);
+  }
+  return [...qtyBySlug.entries()]
+    .map(([slug, quantity]) => {
+      const product = bySlug.get(slug);
       if (!product) return null;
       return {
-        slug: line.slug,
-        quantity: line.quantity,
+        slug,
+        quantity,
         shipping_fee: Number(product.shipping_fee ?? 0),
       };
     })

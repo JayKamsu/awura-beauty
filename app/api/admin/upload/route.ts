@@ -8,6 +8,7 @@ const FOLDERS = new Set<StorageFolder>([
   "pages",
   "uploads",
   "brand",
+  "testimonials",
 ]);
 
 /** Upload d'une image vers le stockage public (dossier whitelisté) — admin uniquement. */

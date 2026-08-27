@@ -123,29 +123,33 @@
     },
     "testimonials": {
       "title": "They transformed their crown",
-      "seeAll": "See all reviews",
-      "items": {
-        "sarah": {
-          "name": "Sarah M.",
-          "quote": "Finally a routine that truly understands my hair. Visible results in three weeks."
-        },
-        "amina": {
-          "name": "Amina K.",
-          "quote": "The diagnostic opened my eyes. Less breakage, more shine, and real confidence."
-        },
-        "lea": {
-          "name": "Léa D.",
-          "quote": "Noble products, human guidance. Awura changed how I relate to my crown."
-        }
-      }
+      "seeAll": "See all reviews"
     }
   },
   "reviews": {
-    "title": "Customer reviews",
-    "subtitle": "Ratings and comments left by customers after receiving their order.",
-    "empty": "No reviews yet.",
+    "title": "Testimonials",
+    "subtitle": "What clients say about Awura Beauty — care, hair diagnostic and guidance.",
+    "empty": "No testimonials yet.",
     "ratingLabel": "{{rating}} / 5",
     "seeProduct": "View product",
-    "diagnosticBadge": "Hair diagnostic"
+    "diagnosticBadge": "Hair diagnostic",
+    "invite": {
+      "loading": "Checking the link…",
+      "title": "Share your Awura experience",
+      "subtitle": "A few words and an optional photo. Your testimonial may appear on the site.",
+      "name": "First name (and last initial)",
+      "rating": "Rating",
+      "quote": "Your testimonial",
+      "photo": "Photo (optional)",
+      "submit": "Send my testimonial",
+      "submitting": "Sending…",
+      "error": "Unable to save. Check the link or try again.",
+      "ratingRequired": "Please choose a rating.",
+      "thanksTitle": "Thank you",
+      "thanksBody": "Your testimonial has been received.",
+      "seePage": "See testimonials",
+      "invalidTitle": "Link expired",
+      "invalidBody": "This link is no longer valid. Ask Awura Beauty for a new one."
+    }
   }
 }

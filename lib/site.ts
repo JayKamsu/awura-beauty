@@ -37,15 +37,25 @@ export const SITE_KEYWORDS = [
 export const CONTACT_EMAIL =
   process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "Care@awurabeauty.com";
 
-/** Infos légales optionnelles (reçus / mentions). */
-export const COMPANY_LEGAL_NAME =
-  process.env.NEXT_PUBLIC_COMPANY_LEGAL_NAME ?? SITE_NAME;
-export const COMPANY_ADDRESS =
-  process.env.NEXT_PUBLIC_COMPANY_ADDRESS?.trim() || null;
-export const COMPANY_SIRET =
-  process.env.NEXT_PUBLIC_COMPANY_SIRET?.trim() || null;
-export const COMPANY_VAT =
-  process.env.NEXT_PUBLIC_COMPANY_VAT?.trim() || null;
+/** Directrice de la publication (mentions légales). */
+export const COMPANY_DIRECTOR = "Mariama Diallo";
+
+/** Hébergeur du site (LCEN) — Vercel, derrière le domaine Hostinger. */
+export const HOSTING_PROVIDER = "Vercel Inc.";
+export const HOSTING_ADDRESS =
+  "440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis";
+export const HOSTING_WEBSITE = "https://vercel.com";
+
+/** Profil public affiché sur les pages légales. */
+export function getPublicCompanyProfile() {
+  return {
+    legalName: SITE_NAME,
+    tradeName: SITE_NAME,
+    director: COMPANY_DIRECTOR,
+    email: CONTACT_EMAIL,
+    siteUrl: getSiteUrl(),
+  };
+}
 
 /** URL canonique du site (prod = https://awurabeauty.com). Fallback localhost en dev. */
 export function getSiteUrl(): string {
@@ -55,6 +65,7 @@ export function getSiteUrl(): string {
   return "http://localhost:3000";
 }
 
+/** Construit une URL absolue à partir d’un chemin du site. */
 export function absoluteUrl(path = "/"): string {
   const base = getSiteUrl();
   if (!path || path === "/") return base;

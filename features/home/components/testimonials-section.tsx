@@ -1,37 +1,41 @@
 "use client";
 
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Stars } from "@/components/ui/stars";
 import {
   cmsOr,
-  parseCmsBlocks,
   usePageCmsFields,
 } from "@/features/cms/context/page-cms-context";
-import { HOME_IMAGES } from "@/features/home/data/content";
+import { TestimonialCard } from "@/features/reviews/components/testimonial-card";
+import type { PublicTestimonial } from "@/lib/domain/testimonial";
 
-const TESTIMONIALS = [
-  { key: "sarah", image: HOME_IMAGES.testimonials[0] },
-  { key: "amina", image: HOME_IMAGES.testimonials[1] },
-  { key: "lea", image: HOME_IMAGES.testimonials[2] },
-] as const;
-
-/** Section « témoignages » de la page d'accueil : avis clients avec notation et lien vers tous les avis. */
+/** Section témoignages de l'accueil : avis réels, masquée s'il n'y en a aucun. */
 export function TestimonialsSection() {
   const { t } = useTranslation();
   const cms = usePageCmsFields("testimonials");
-  const blocks = parseCmsBlocks(cms.body);
+  const [items, setItems] = useState<PublicTestimonial[] | null>(null);
 
-  const items = TESTIMONIALS.map((item, index) => {
-    const block = blocks[index];
-    return {
-      key: item.key,
-      image: block?.image || item.image,
-      quote: block?.body || t(`home.testimonials.items.${item.key}.quote`),
-      name: block?.title || t(`home.testimonials.items.${item.key}.name`),
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/testimonials?limit=6")
+      .then((res) => res.json())
+      .then((json: { testimonials?: PublicTestimonial[] }) => {
+        if (cancelled) return;
+        const list = json.testimonials ?? [];
+        const withPhoto = list.filter((item) => item.imageUrl);
+        const without = list.filter((item) => !item.imageUrl);
+        setItems([...withPhoto, ...without].slice(0, 3));
+      })
+      .catch(() => {
+        if (!cancelled) setItems([]);
+      });
+    return () => {
+      cancelled = true;
     };
-  });
+  }, []);
+
+  if (!items || items.length === 0) return null;
 
   return (
     <section className="bg-background-alt">
@@ -41,7 +45,7 @@ export function TestimonialsSection() {
             {cmsOr(cms, "title", t("home.testimonials.title"))}
           </h2>
           <Button
-            href="/avis"
+            href="/temoignages"
             variant="ghost"
             className="self-start uppercase tracking-wide text-accent sm:self-auto"
           >
@@ -49,29 +53,17 @@ export function TestimonialsSection() {
           </Button>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="space-y-4">
           {items.map((item) => (
-            <article
-              key={item.key}
-              className="flex gap-4 rounded-2xl bg-background p-5"
-            >
-              <div className="relative size-14 shrink-0 overflow-hidden rounded-full">
-                <Image
-                  src={item.image}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="56px"
-                />
-              </div>
-              <div className="space-y-2">
-                <Stars />
-                <p className="text-sm italic leading-relaxed text-foreground/90">
-                  “{item.quote}”
-                </p>
-                <p className="text-sm font-medium text-muted">— {item.name}</p>
-              </div>
-            </article>
+            <TestimonialCard
+              key={item.id}
+              item={item}
+              badge={
+                item.kind === "diagnostic"
+                  ? t("reviews.diagnosticBadge")
+                  : undefined
+              }
+            />
           ))}
         </div>
       </div>

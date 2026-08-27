@@ -1,10 +1,6 @@
 import {
   SITE_NAME,
   CONTACT_EMAIL,
-  COMPANY_LEGAL_NAME,
-  COMPANY_ADDRESS,
-  COMPANY_SIRET,
-  COMPANY_VAT,
   absoluteUrl,
 } from "@/lib/site";
 import type { OrderRow } from "@/lib/infrastructure/supabase/order-types";
@@ -66,12 +62,7 @@ function receiptBodyHtml(order: OrderRow, includePrintButton: boolean): string {
     )
     .join("");
 
-  const legalBits = [
-    escapeHtml(COMPANY_LEGAL_NAME),
-    COMPANY_ADDRESS ? escapeHtml(COMPANY_ADDRESS) : null,
-    COMPANY_SIRET ? `SIRET ${escapeHtml(COMPANY_SIRET)}` : null,
-    COMPANY_VAT ? `TVA ${escapeHtml(COMPANY_VAT)}` : null,
-  ].filter(Boolean);
+  const legalBits = [escapeHtml(SITE_NAME)];
 
   return `<!DOCTYPE html>
 <html lang="fr">
@@ -163,11 +154,7 @@ function receiptBodyHtml(order: OrderRow, includePrintButton: boolean): string {
       Merci pour votre commande.<br/>
       Contact : ${escapeHtml(CONTACT_EMAIL)} · ${escapeHtml(absoluteUrl("/"))}<br/>
       ${legalBits.join(" · ")}
-      ${
-        !COMPANY_VAT
-          ? "<br/>Montants exprimés en TTC."
-          : ""
-      }
+      <br/>Montants exprimés en TTC.
     </p>
     ${
       includePrintButton

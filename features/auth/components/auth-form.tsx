@@ -34,6 +34,7 @@ export function AuthForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [referralCode, setReferralCode] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
 
@@ -72,6 +73,10 @@ export function AuthForm({
     void run(async () => {
       setError(null);
       setInfo(null);
+      if (mode === "signup" && !acceptedTerms) {
+        setError(t("auth.acceptTermsRequired"));
+        return;
+      }
       if (mode === "signup") persistReferralCode();
       const message = await signInWithGoogle(redirectTo);
       if (message) setError(message);
@@ -98,6 +103,10 @@ export function AuthForm({
       }
 
       persistReferralCode();
+      if (!acceptedTerms) {
+        setError(t("auth.acceptTermsRequired"));
+        return;
+      }
       const result = await signUp(email, password);
 
       if (result.error) {
@@ -129,6 +138,35 @@ export function AuthForm({
         <p className="rounded-xl bg-background-alt px-4 py-3 text-sm text-muted">
           {t("auth.notConfigured")}
         </p>
+      ) : null}
+
+      {mode === "signup" ? (
+        <label className="flex items-start gap-3 text-sm text-muted">
+          <input
+            type="checkbox"
+            required
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            className="mt-1 size-4 shrink-0 rounded border-border accent-primary"
+          />
+          <span>
+            {t("auth.acceptTermsLead")}{" "}
+            <Link
+              href="/conditions-utilisation"
+              className="text-primary underline decoration-accent decoration-2 underline-offset-4 hover:text-accent"
+            >
+              {t("legal.nav.terms")}
+            </Link>{" "}
+            {t("auth.acceptTermsAnd")}{" "}
+            <Link
+              href="/confidentialite"
+              className="text-primary underline decoration-accent decoration-2 underline-offset-4 hover:text-accent"
+            >
+              {t("legal.nav.privacy")}
+            </Link>
+            .
+          </span>
+        </label>
       ) : null}
 
       <Button

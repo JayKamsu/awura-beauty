@@ -1,29 +1,60 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { ProductColorSwatch } from "@/components/ui/product-card";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import { useCart } from "@/features/cart/context/cart-provider";
 import { useFavorites } from "@/features/favorites/context/favorites-provider";
 import { formatPrice } from "@/lib/format/price";
 import { GAMME_COMPLETE_SLUG } from "@/lib/domain/bundle";
+import {
+  parseProductColorKey,
+  type ProductColorKey,
+} from "@/lib/domain/product-color";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
 /** Props du panneau d'achat produit. */
 type ProductPurchasePanelProps = {
   product: ProductRow;
+  /** Couleur préselectionnée depuis `?couleur=`. */
+  initialColor?: string | null;
 };
 
+/** Première couleur valide : query `couleur` si elle existe, sinon la première variante. */
+function firstValidColor(
+  variants: ProductColorKey[],
+  raw?: string | null,
+): ProductColorKey | null {
+  const fromUrl = parseProductColorKey(raw);
+  if (fromUrl && variants.includes(fromUrl)) return fromUrl;
+  return variants[0] ?? null;
+}
+
 /** Panneau d'achat sticky d'une fiche produit : prix, stock, sélecteur de quantité et ajout au panier. */
-export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
+export function ProductPurchasePanel({
+  product,
+  initialColor,
+}: ProductPurchasePanelProps) {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();
   const { addItem } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const colorKeys = product.color_variants;
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [selectedColor, setSelectedColor] = useState<ProductColorKey | null>(
+    () => firstValidColor(colorKeys, initialColor),
+  );
+
+  useEffect(() => {
+    if (!selectedColor || !colorKeys.length) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("couleur", selectedColor);
+    window.history.replaceState(null, "", `${url.pathname}${url.search}`);
+  }, [selectedColor, colorKeys.length]);
 
   const lowStock = product.stock > 0 && product.stock <= 5;
   const outOfStock = product.stock <= 0;
@@ -36,8 +67,12 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
   const discountPercent = hasDiscount
     ? Math.round((1 - product.price / product.compare_at_price!) * 100)
     : 0;
+  const displayName = selectedColor
+    ? `${product.name} — ${t(`shop.colors.${selectedColor}`)}`
+    : product.name;
+  const colorRequired = colorKeys.length > 0 && !selectedColor;
   const handleAdd = () => {
-    if (outOfStock) return;
+    if (outOfStock || colorRequired) return;
     addItem(
       {
         productId: product.id,
@@ -45,6 +80,7 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
         name: product.name,
         unitPrice: product.price,
         imageUrl: product.image_url,
+        colorKey: selectedColor,
       },
       quantity,
     );
@@ -132,6 +168,44 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
               ? t("shop.lowStock", { count: product.stock })
               : t("shop.inStock")}
         </p>
+
+        {colorKeys.length ? (
+          <fieldset className="space-y-3">
+            <legend className="sr-only">{t("shop.colorLabel")}</legend>
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-accent">
+                {t("shop.colorLabel")}
+              </p>
+              <p className="text-sm text-primary" aria-live="polite">
+                {selectedColor
+                  ? t(`shop.colors.${selectedColor}`)
+                  : t("shop.chooseColor")}
+              </p>
+            </div>
+            <div
+              className="flex flex-wrap gap-3"
+              role="radiogroup"
+              aria-label={t("shop.colorLabel")}
+            >
+              {colorKeys.map((key) => {
+                const selected = selectedColor === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    aria-label={t(`shop.colors.${key}`)}
+                    onClick={() => setSelectedColor(key)}
+                    className="rounded-full transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                  >
+                    <ProductColorSwatch colorKey={key} selected={selected} />
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+        ) : null}
       </div>
 
       <div className="space-y-4 border-t border-border pt-8">
@@ -169,7 +243,7 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
             size="lg"
             className="min-w-[12rem] flex-1 sm:flex-none"
             onClick={handleAdd}
-            disabled={outOfStock}
+            disabled={outOfStock || colorRequired}
           >
             {t("shop.addToCartButton")}
           </Button>
@@ -202,7 +276,7 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
 
         {added ? (
           <p className="text-sm text-primary" role="status">
-            {t("shop.addedToCart", { name: product.name })}{" "}
+            {t("shop.addedToCart", { name: displayName })}{" "}
             <Link href="/panier" className="underline underline-offset-4 hover:text-accent">
               {t("shop.viewCart")}
             </Link>

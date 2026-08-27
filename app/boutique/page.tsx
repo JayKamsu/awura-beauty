@@ -8,6 +8,9 @@ import { getSiteBrandSettings } from "@/lib/infrastructure/supabase/site-brand";
 import { ShopPageHeader } from "@/features/shop/components/shop-page-header";
 import type { ProductSort } from "@/lib/infrastructure/supabase/types";
 
+/** Recalcule la boutique au plus toutes les 60s, et tout de suite après une écriture admin. */
+export const revalidate = 60;
+
 const VALID_SORTS: ProductSort[] = ["recent", "price_asc", "price_desc", "name_asc"];
 
 type BoutiquePageProps = {
