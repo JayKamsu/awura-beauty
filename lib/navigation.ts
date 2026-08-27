@@ -6,7 +6,6 @@ export const MAIN_NAV_ITEMS = [
   { href: "/", key: "nav.home" },
   { href: "/boutique", key: "nav.shop" },
   { href: "/diagnostic-capillaire", key: "nav.diagnostic" },
-  { href: "/temoignages", key: "nav.testimonials" },
   { href: "/a-propos", key: "nav.about" },
   { href: "/blog", key: "nav.blog" },
   { href: "/contact", key: "nav.contact" },
@@ -27,7 +26,6 @@ export const MOBILE_BOTTOM_NAV = [
 
 /** Liens secondaires (menu hamburger mobile). */
 export const MOBILE_MORE_NAV = [
-  { href: "/temoignages", key: "nav.testimonials" },
   { href: "/a-propos", key: "nav.about" },
   { href: "/blog", key: "nav.blog" },
   { href: "/contact", key: "nav.contact" },

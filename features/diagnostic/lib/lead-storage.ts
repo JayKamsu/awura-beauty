@@ -11,6 +11,8 @@ export type DiagnosticLead = {
   concern?: string;
   goal?: string;
   slot?: string;
+  /** Canal choisi depuis l'accueil : en ligne ou présentiel. */
+  channel?: "online" | "physical";
 };
 
 /** Lit le lead diagnostic stocké en session, ou `null` si absent/corrompu. */

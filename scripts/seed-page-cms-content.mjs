@@ -65,8 +65,8 @@ const SEED = {
     },
     {
       id: "feature",
-      title: "Lotion Active Repousse",
-      body: "Hydratante et fortifiante — une lotion naturelle pour stimuler la pousse et renforcer ta couronne.",
+      title: "Réserver mon diagnostic",
+      body: "Quelques informations pour préparer un conseil vraiment adapté à ta couronne. Choisis un diagnostic en ligne ou en présentiel.",
       cta_label: "Réserver mon diagnostic",
     },
     {

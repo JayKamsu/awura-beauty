@@ -38,3 +38,5 @@ create policy site_testimonials_public_read
   for select
   to anon, authenticated
   using (published = true);
+
+notify pgrst, 'reload schema';

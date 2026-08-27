@@ -13,6 +13,7 @@ export type {
   DiagnosticQuestion,
   DiagnosticQuestionChannel,
   DiagnosticRecord,
+  DiagnosticResultDraft,
   DiagnosticRoutineStep,
   DiagnosticSettings,
   DiagnosticSlot,

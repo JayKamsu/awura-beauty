@@ -8,6 +8,11 @@ import { AdminEmptyState } from "@/features/admin/components/admin-empty-state";
 import { AdminFeedback } from "@/features/admin/components/admin-feedback";
 import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
+import {
+  clearAdminDraft,
+  readAdminDraft,
+  writeAdminDraft,
+} from "@/features/admin/lib/admin-form-draft";
 import { RescheduleAppointmentPicker } from "@/features/diagnostic/components/reschedule-appointment-picker";
 import { buildDiagnosticResultTemplate } from "@/lib/application/diagnostic/result-template";
 import { AWURA_PRODUCT_SLUGS } from "@/lib/application/diagnostic/recommend";
@@ -18,9 +23,14 @@ import type {
   DiagnosticContentBlock,
   DiagnosticPhoto,
   DiagnosticQuestion,
+  DiagnosticResultDraft,
   DiagnosticSettings,
   DiagnosticSlot,
   DiagnosticSlotOverride,
+} from "@/lib/domain/diagnostic";
+import {
+  isDiagnosticResultDraftEmpty,
+  parseDiagnosticResultDraft,
 } from "@/lib/domain/diagnostic";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import type { AdminDiagnosticListItem } from "@/lib/infrastructure/supabase/diagnostic-admin";
@@ -288,6 +298,31 @@ function DiagnosticContentBlockEditor({
 type Tab = "results" | "appointments" | "sendResult" | "settings";
 type SettingsTab = "questions" | "pricing" | "availability";
 
+const DIAGNOSTIC_RESULT_DRAFT_KEY = "diagnostic-result";
+const CALL_NOTES_DRAFT_KEY = "diagnostic-call-notes";
+
+type ResultForm = DiagnosticResultDraft;
+
+/** Formulaire de bilan vide (envoi manuel, sans RDV). */
+function emptyResultForm(): ResultForm {
+  return {
+    appointmentId: "",
+    title: "",
+    summary: "",
+    scalpAnalysis: "",
+    detailedFeedback: "",
+    content: [],
+    slugs: [],
+    notifyClient: true,
+  };
+}
+
+type DiagnosticUiDraft = {
+  tab?: Tab;
+  preparingFor: string | null;
+  resultForm: ResultForm;
+};
+
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0] as const;
 
 const APPOINTMENT_STATUS_TONE: Record<DiagnosticAppointmentStatus, string> = {
@@ -327,17 +362,11 @@ export function AdminDiagnosticPanel() {
     kind: "blocked" as "open" | "blocked",
     note: "",
   });
-  const [resultForm, setResultForm] = useState({
-    appointmentId: "",
-    title: "",
-    summary: "",
-    scalpAnalysis: "",
-    detailedFeedback: "",
-    content: [] as DiagnosticContentBlock[],
-    slugs: [] as string[],
-    notifyClient: true,
-  });
+  const [resultForm, setResultForm] = useState<ResultForm>(emptyResultForm);
   const [sendingResult, setSendingResult] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
+  const [draftReady, setDraftReady] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
   const [preparingFor, setPreparingFor] = useState<string | null>(null);
   const [reschedulingId, setReschedulingId] = useState<string | null>(null);
   const [callNotes, setCallNotes] = useState<Record<string, string>>({});
@@ -376,6 +405,69 @@ export function AdminDiagnosticPanel() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    const saved = readAdminDraft<DiagnosticUiDraft>(DIAGNOSTIC_RESULT_DRAFT_KEY);
+    const parsed = saved?.resultForm
+      ? parseDiagnosticResultDraft(saved.resultForm)
+      : null;
+    if (parsed && !isDiagnosticResultDraftEmpty(parsed)) {
+      setResultForm(parsed);
+      setPreparingFor(saved?.preparingFor ?? null);
+      if (saved?.tab) setTab(saved.tab);
+      setDraftRestored(true);
+    }
+    setDraftReady(true);
+  }, []);
+
+  useEffect(() => {
+    const saved = readAdminDraft<Record<string, string>>(CALL_NOTES_DRAFT_KEY);
+    if (saved && typeof saved === "object") setCallNotes(saved);
+  }, []);
+
+  useEffect(() => {
+    if (!draftReady) return;
+    const timer = window.setTimeout(() => {
+      if (Object.keys(callNotes).length === 0) {
+        clearAdminDraft(CALL_NOTES_DRAFT_KEY);
+        return;
+      }
+      writeAdminDraft(CALL_NOTES_DRAFT_KEY, callNotes);
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [draftReady, callNotes]);
+
+  useEffect(() => {
+    if (!draftReady) return;
+    if (isDiagnosticResultDraftEmpty(resultForm)) {
+      clearAdminDraft(DIAGNOSTIC_RESULT_DRAFT_KEY);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      writeAdminDraft(DIAGNOSTIC_RESULT_DRAFT_KEY, {
+        tab,
+        preparingFor,
+        resultForm,
+      } satisfies DiagnosticUiDraft);
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [draftReady, resultForm, tab, preparingFor]);
+
+  useEffect(() => {
+    if (!draftReady || !resultForm.appointmentId) return;
+    if (isDiagnosticResultDraftEmpty(resultForm)) return;
+    const timer = window.setTimeout(() => {
+      void adminFetch("/api/admin/diagnostic/appointments", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: resultForm.appointmentId,
+          resultDraft: resultForm,
+        }),
+      });
+    }, 1600);
+    return () => window.clearTimeout(timer);
+  }, [draftReady, resultForm, adminFetch]);
 
   const saveSettings = async () => {
     if (!settings) return;
@@ -492,20 +584,70 @@ export function AdminDiagnosticPanel() {
   };
 
   const prepareResultFor = (appointment: DiagnosticAppointment) => {
-    setResultForm((prev) => ({
-      ...prev,
+    const fromDb = appointment.resultDraft;
+    const localMatches = resultForm.appointmentId === appointment.id;
+    const source =
+      fromDb && !isDiagnosticResultDraftEmpty(fromDb)
+        ? fromDb
+        : localMatches && !isDiagnosticResultDraftEmpty(resultForm)
+          ? resultForm
+          : null;
+    setResultForm({
       appointmentId: appointment.id,
       title:
-        prev.title ||
+        source?.title ||
         t("admin.diagnostic.defaultPhysicalTitle", {
           name: appointment.fullName,
         }),
-      content: prev.content.length
-        ? prev.content
+      summary: source?.summary ?? "",
+      scalpAnalysis: source?.scalpAnalysis ?? "",
+      detailedFeedback: source?.detailedFeedback ?? "",
+      content: source?.content.length
+        ? source.content
         : buildDiagnosticResultTemplate(appointment.fullName),
-    }));
+      slugs: source?.slugs ?? [],
+      notifyClient: source?.notifyClient ?? true,
+    });
     setPreparingFor(appointment.fullName);
     setTab("sendResult");
+  };
+
+  const saveResultDraft = async () => {
+    writeAdminDraft(DIAGNOSTIC_RESULT_DRAFT_KEY, {
+      tab: "sendResult",
+      preparingFor,
+      resultForm,
+    } satisfies DiagnosticUiDraft);
+    if (!resultForm.appointmentId) {
+      setFeedback({
+        tone: "success",
+        message: t("admin.diagnostic.draftSavedLocal"),
+      });
+      return;
+    }
+    setSavingDraft(true);
+    setFeedback(null);
+    const res = await adminFetch("/api/admin/diagnostic/appointments", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: resultForm.appointmentId,
+        resultDraft: resultForm,
+      }),
+    });
+    setSavingDraft(false);
+    if (!res.ok) {
+      setFeedback({
+        tone: "error",
+        message: t("admin.diagnostic.draftSaveError"),
+      });
+      return;
+    }
+    setFeedback({
+      tone: "success",
+      message: t("admin.diagnostic.draftSaved"),
+    });
+    await load();
   };
 
   const applyResultTemplate = () => {
@@ -554,17 +696,10 @@ export function AdminDiagnosticPanel() {
       });
       return;
     }
-    setResultForm({
-      appointmentId: "",
-      title: "",
-      summary: "",
-      scalpAnalysis: "",
-      detailedFeedback: "",
-      content: [],
-      slugs: [],
-      notifyClient: true,
-    });
+    setResultForm(emptyResultForm());
     setPreparingFor(null);
+    setDraftRestored(false);
+    clearAdminDraft(DIAGNOSTIC_RESULT_DRAFT_KEY);
     setFeedback({
       tone: "success",
       message: json.linkedToUser
@@ -780,6 +915,12 @@ export function AdminDiagnosticPanel() {
                       >
                         {t(`admin.diagnostic.appointmentStatus.${a.status}`)}
                       </span>
+                      {a.resultDraft &&
+                      !isDiagnosticResultDraftEmpty(a.resultDraft) ? (
+                        <span className="inline-flex rounded-full bg-accent/15 px-2.5 py-0.5 text-xs font-medium text-accent">
+                          {t("admin.diagnostic.draftBadge")}
+                        </span>
+                      ) : null}
                     </div>
                   </div>
 
@@ -945,6 +1086,12 @@ export function AdminDiagnosticPanel() {
             <p className="text-sm text-muted">{t("admin.diagnostic.sendResultHint")}</p>
           </div>
 
+          {draftRestored ? (
+            <p className="rounded-xl bg-primary/10 px-3 py-2 text-sm text-primary">
+              {t("admin.diagnostic.draftRestored")}
+            </p>
+          ) : null}
+
           {preparingFor ? (
             <p className="rounded-xl bg-accent/10 px-3 py-2 text-sm text-accent">
               {t("admin.diagnostic.preparingFor", { name: preparingFor })}
@@ -967,8 +1114,21 @@ export function AdminDiagnosticPanel() {
                 className="w-full rounded-xl border border-border bg-background px-3 py-2"
                 value={resultForm.appointmentId}
                 onChange={(e) => {
-                  setResultForm({ ...resultForm, appointmentId: e.target.value });
-                  if (!e.target.value) setPreparingFor(null);
+                  const id = e.target.value;
+                  const appointment = appointments.find((item) => item.id === id);
+                  if (
+                    appointment?.resultDraft &&
+                    !isDiagnosticResultDraftEmpty(appointment.resultDraft)
+                  ) {
+                    setResultForm({
+                      ...appointment.resultDraft,
+                      appointmentId: id,
+                    });
+                    setPreparingFor(appointment.fullName);
+                    return;
+                  }
+                  setResultForm({ ...resultForm, appointmentId: id });
+                  setPreparingFor(id ? (appointment?.fullName ?? null) : null);
                 }}
               >
                 <option value="">{t("admin.diagnostic.noAppointment")}</option>
@@ -1134,14 +1294,25 @@ export function AdminDiagnosticPanel() {
               />
               {t("admin.diagnostic.notifyClient")}
             </label>
-            <Button
-              type="button"
-              pending={sendingResult}
-              onClick={() => void sendResult()}
-              className="w-full sm:w-auto"
-            >
-              {t("admin.diagnostic.sendResult")}
-            </Button>
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <Button
+                type="button"
+                variant="primary-outline"
+                pending={savingDraft}
+                onClick={() => void saveResultDraft()}
+                className="w-full sm:w-auto"
+              >
+                {t("admin.diagnostic.saveDraft")}
+              </Button>
+              <Button
+                type="button"
+                pending={sendingResult}
+                onClick={() => void sendResult()}
+                className="w-full sm:w-auto"
+              >
+                {t("admin.diagnostic.sendResult")}
+              </Button>
+            </div>
           </section>
         </div>
       ) : null}

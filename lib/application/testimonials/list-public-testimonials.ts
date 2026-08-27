@@ -5,14 +5,23 @@ import {
 } from "@/lib/infrastructure/supabase/order-reviews";
 import { listPublishedSiteTestimonials } from "@/lib/infrastructure/supabase/site-testimonials";
 
-/** Fusionne témoignages site, diagnostic et avis produits, du plus récent au plus ancien. */
+const ALL_KINDS: PublicTestimonial["kind"][] = ["site", "diagnostic", "product"];
+
+/** Fusionne témoignages (site, diagnostic, produits) du plus récent au plus ancien. */
 export async function listPublicTestimonialFeed(
   limit = 100,
+  kinds: PublicTestimonial["kind"][] = ALL_KINDS,
 ): Promise<PublicTestimonial[]> {
+  const includeSite = kinds.includes("site");
+  const includeDiagnostic = kinds.includes("diagnostic");
+  const includeProduct = kinds.includes("product");
+
   const [site, diagnostic, products] = await Promise.all([
-    listPublishedSiteTestimonials(limit),
-    listPublicDiagnosticTestimonials(limit),
-    listPublicReviews(limit),
+    includeSite ? listPublishedSiteTestimonials(limit) : Promise.resolve([]),
+    includeDiagnostic
+      ? listPublicDiagnosticTestimonials(limit)
+      : Promise.resolve([]),
+    includeProduct ? listPublicReviews(limit) : Promise.resolve([]),
   ]);
 
   const feed: PublicTestimonial[] = [

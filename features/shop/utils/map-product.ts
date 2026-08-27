@@ -15,6 +15,7 @@ export function toProductCardData(product: ProductRow): ProductCardData {
     lifestyleImage: product.lifestyle_image_url,
     isNew: product.is_new,
     productType: product.product_type,
+    category: product.category,
     stock: product.stock,
     colorVariants: product.color_variants,
   };

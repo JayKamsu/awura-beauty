@@ -31,6 +31,7 @@ function mapRow(row: Record<string, unknown>): DiagnosticAppointment {
       ? String(row.stripe_session_id)
       : null,
     notes: String(row.notes ?? ""),
+    resultDraft: null,
     createdAt: String(row.created_at),
   };
 }

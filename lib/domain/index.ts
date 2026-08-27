@@ -36,6 +36,7 @@ export type {
   DiagnosticProfile,
   DiagnosticQuestion,
   DiagnosticRecord,
+  DiagnosticResultDraft,
   DiagnosticRoutineStep,
   DiagnosticSettings,
   DiagnosticSlot,

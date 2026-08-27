@@ -12,10 +12,12 @@ import type {
   DiagnosticQuestion,
   DiagnosticQuestionChannel,
   DiagnosticRecord,
+  DiagnosticResultDraft,
   DiagnosticRoutineStep,
   DiagnosticSettings,
   DiagnosticSlotOverride,
 } from "@/lib/domain/diagnostic";
+import { parseDiagnosticResultDraft } from "@/lib/domain/diagnostic";
 import { getFallbackQuestionnaire } from "@/lib/application/diagnostic/fallback-questionnaire";
 
 const DEFAULT_SETTINGS: DiagnosticSettings = {
@@ -454,6 +456,7 @@ function mapAppointment(row: Record<string, unknown>): DiagnosticAppointment {
       ? String(row.stripe_session_id)
       : null,
     notes: String(row.notes ?? ""),
+    resultDraft: parseDiagnosticResultDraft(row.result_draft),
     photos: Array.isArray(row.photos)
       ? (row.photos as DiagnosticAppointment["photos"])
       : undefined,
@@ -576,13 +579,15 @@ export async function createAppointment(input: {
   return mapAppointment(data as Record<string, unknown>);
 }
 
-/** Met à jour partiellement un rendez-vous (statut, session Stripe, notes, créneau, user lié) — admin, service_role requis. */
+/** Met à jour partiellement un rendez-vous (statut, session Stripe, notes, brouillon de bilan, créneau, user lié) — admin, service_role requis. */
 export async function updateAppointment(
   id: string,
   patch: {
     status?: DiagnosticAppointmentStatus;
     stripeSessionId?: string | null;
     notes?: string;
+    /** Brouillon de bilan ; `null` pour l'effacer après envoi. */
+    resultDraft?: DiagnosticResultDraft | null;
     userId?: string | null;
     startsAt?: string;
     endsAt?: string;
@@ -599,6 +604,7 @@ export async function updateAppointment(
   if (patch.stripeSessionId !== undefined)
     payload.stripe_session_id = patch.stripeSessionId;
   if (patch.notes !== undefined) payload.notes = patch.notes;
+  if (patch.resultDraft !== undefined) payload.result_draft = patch.resultDraft;
   if (patch.userId !== undefined) payload.user_id = patch.userId;
   if (patch.startsAt !== undefined) payload.starts_at = patch.startsAt;
   if (patch.endsAt !== undefined) payload.ends_at = patch.endsAt;

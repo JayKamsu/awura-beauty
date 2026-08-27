@@ -12,6 +12,11 @@ import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
 import { AdminSearchField } from "@/features/admin/components/admin-search-field";
 import { ConfirmDeleteButton } from "@/features/admin/components/confirm-delete-button";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
+import {
+  clearAdminDraft,
+  readAdminDraft,
+  writeAdminDraft,
+} from "@/features/admin/lib/admin-form-draft";
 import { formatPrice } from "@/lib/format/price";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 import { notifyCatalogChanged } from "@/lib/application/catalog-sync";
@@ -46,6 +51,32 @@ const emptyForm = {
   bundleComponents: [] as BundleComponentDraft[],
 };
 
+type ProductForm = typeof emptyForm;
+
+type ProductFormDraft = {
+  form: ProductForm;
+  slugTouched: boolean;
+  modalOpen: boolean;
+};
+
+const PRODUCT_FORM_DRAFT_KEY = "product-form";
+
+/** True si le formulaire produit a du contenu à conserver en changeant de page. */
+function isProductFormDirty(form: ProductForm): boolean {
+  return Boolean(
+    form.id ||
+      form.name.trim() ||
+      form.slug.trim() ||
+      form.short_description.trim() ||
+      form.description.trim() ||
+      form.ingredients.trim() ||
+      form.usage.trim() ||
+      form.image_url.trim() ||
+      form.qr_url.trim() ||
+      form.bundleComponents.length > 0,
+  );
+}
+
 const fieldClass =
   "min-h-12 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-base outline-none focus:border-accent sm:min-h-11 sm:text-sm";
 
@@ -70,6 +101,7 @@ export function AdminProductsPanel() {
   const [form, setForm] = useState(emptyForm);
   const [slugTouched, setSlugTouched] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [draftReady, setDraftReady] = useState(false);
   const [newCategoryLabel, setNewCategoryLabel] = useState("");
   const [newCategoryType, setNewCategoryType] = useState<"hair_care" | "accessory">(
     "hair_care",
@@ -102,6 +134,32 @@ export function AdminProductsPanel() {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    const saved = readAdminDraft<ProductFormDraft>(PRODUCT_FORM_DRAFT_KEY);
+    if (saved?.form && isProductFormDirty(saved.form)) {
+      setForm({ ...emptyForm, ...saved.form });
+      setSlugTouched(Boolean(saved.slugTouched));
+      setModalOpen(Boolean(saved.modalOpen));
+    }
+    setDraftReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!draftReady) return;
+    if (!isProductFormDirty(form)) {
+      clearAdminDraft(PRODUCT_FORM_DRAFT_KEY);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      writeAdminDraft(PRODUCT_FORM_DRAFT_KEY, {
+        form,
+        slugTouched,
+        modalOpen,
+      } satisfies ProductFormDraft);
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [draftReady, form, slugTouched, modalOpen]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return products;
@@ -132,6 +190,10 @@ export function AdminProductsPanel() {
   }, [categories, products]);
 
   const openCreate = () => {
+    if (isProductFormDirty(form)) {
+      setModalOpen(true);
+      return;
+    }
     const defaultCategory = categories[0];
     setForm({
       ...emptyForm,
@@ -187,8 +249,13 @@ export function AdminProductsPanel() {
 
   const closeModal = () => {
     setModalOpen(false);
+  };
+
+  const discardProductDraft = () => {
+    clearAdminDraft(PRODUCT_FORM_DRAFT_KEY);
     setForm(emptyForm);
     setSlugTouched(false);
+    setModalOpen(false);
   };
 
   const setName = (name: string) => {
@@ -285,7 +352,7 @@ export function AdminProductsPanel() {
       }
 
       setFeedback({ tone: "success", message: t("admin.saveSuccess") });
-      closeModal();
+      discardProductDraft();
       await load();
       notifyCatalogChanged();
     });
@@ -301,7 +368,7 @@ export function AdminProductsPanel() {
       return;
     }
     setFeedback({ tone: "success", message: t("admin.deleteSuccess") });
-    if (form.id === id) closeModal();
+    if (form.id === id) discardProductDraft();
     await load();
     notifyCatalogChanged();
   };
@@ -389,6 +456,30 @@ export function AdminProductsPanel() {
 
       {feedback ? (
         <AdminFeedback tone={feedback.tone} message={feedback.message} />
+      ) : null}
+
+      {draftReady && isProductFormDirty(form) ? (
+        <p className="flex flex-wrap items-center gap-2 rounded-xl bg-primary/10 px-3 py-2 text-sm text-primary">
+          <span>{t("admin.productDraftRestored")}</span>
+          {!modalOpen ? (
+            <Button
+              type="button"
+              size="md"
+              variant="primary-outline"
+              onClick={() => setModalOpen(true)}
+            >
+              {t("admin.resumeProductDraft")}
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            size="md"
+            variant="ghost"
+            onClick={discardProductDraft}
+          >
+            {t("admin.discardProductDraft")}
+          </Button>
+        </p>
       ) : null}
 
       <section className="space-y-4">

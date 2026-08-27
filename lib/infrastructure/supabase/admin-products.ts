@@ -1,4 +1,9 @@
 import { parseColorVariants } from "@/lib/domain/product-color";
+import {
+  formatIngredientList,
+  formatProductLead,
+  formatProductProse,
+} from "@/lib/format/product-copy";
 import { createAdminSupabaseClient } from "@/lib/infrastructure/supabase/client";
 import {
   getDemoProducts,
@@ -70,10 +75,10 @@ export async function adminUpsertProduct(
       input.compare_at_price !== null && input.compare_at_price !== undefined
         ? Number(input.compare_at_price)
         : null,
-    description: input.description,
-    short_description: input.short_description,
-    ingredients: input.ingredients,
-    usage: input.usage,
+    description: formatProductProse(input.description),
+    short_description: formatProductLead(input.short_description),
+    ingredients: formatIngredientList(input.ingredients),
+    usage: formatProductProse(input.usage),
     image_url: input.image_url,
     ingredients_image_url: input.ingredients_image_url,
     lifestyle_image_url: input.lifestyle_image_url,

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import { formatPrice } from "@/lib/format/price";
+import { formatProductLead } from "@/lib/format/product-copy";
 import { useCart } from "@/features/cart/context/cart-provider";
 import { useFavorites } from "@/features/favorites/context/favorites-provider";
 import {
@@ -27,6 +28,8 @@ export type ProductCardData = {
   lifestyleImage?: string | null;
   isNew?: boolean;
   productType?: "hair_care" | "accessory";
+  /** Catégorie boutique (fibres, casques, accessoires…) pour le groupement de la grille. */
+  category?: string;
   stock?: number;
   /** Variantes couleur : si renseigné, l'ajout panier se fait depuis la fiche. */
   colorVariants?: ProductColorKey[];
@@ -63,6 +66,8 @@ export function ProductColorSwatch({
 type ProductCardProps = {
   product: ProductCardData;
   onAddToCart?: (product: ProductCardData) => void;
+  /** Carte plus petite, pour le rail horizontal mobile de la boutique. */
+  compact?: boolean;
 };
 
 function isCoarsePointer(): boolean {
@@ -71,7 +76,7 @@ function isCoarsePointer(): boolean {
 }
 
 /** Carte produit avec visuel, prix et ajout rapide au panier. */
-export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+export function ProductCard({ product, onAddToCart, compact = false }: ProductCardProps) {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();
   const { addItem } = useCart();
@@ -116,8 +121,12 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   };
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl bg-background-alt/60">
-      <div className="relative aspect-[4/5] w-full overflow-hidden bg-background-alt">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl bg-background-alt/60">
+      <div
+        className={`relative w-full overflow-hidden bg-background-alt ${
+          compact ? "aspect-[3/4] sm:aspect-[4/5]" : "aspect-[4/5]"
+        }`}
+      >
         <div className="absolute left-3 top-3 z-20 flex flex-col gap-1.5">
           {product.isNew ? (
             <span className="rounded-md bg-primary px-2.5 py-1 text-[10px] font-semibold tracking-wider text-background">
@@ -143,7 +152,9 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
               e.stopPropagation();
               toggleFavorite(product.id);
             }}
-            className="flex size-8 items-center justify-center rounded-full bg-background/90 text-primary shadow-sm backdrop-blur transition hover:bg-background sm:size-9"
+            className={`flex items-center justify-center rounded-full bg-background/90 text-primary shadow-sm backdrop-blur transition hover:bg-background ${
+              compact ? "size-7 sm:size-9" : "size-8 sm:size-9"
+            }`}
             aria-label={
               isFavorite(product.id)
                 ? t("shop.removeFromFavorites", { name: product.name })
@@ -194,7 +205,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
               alt={product.name}
               fill
               className="object-cover transition duration-500 [@media(hover:hover)]:group-hover:scale-105"
-              sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 20vw"
+              sizes={
+                compact
+                  ? "(max-width: 640px) 42vw, (max-width: 1280px) 33vw, 20vw"
+                  : "(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 20vw"
+              }
             />
           </span>
           {hasIngredientsImage ? (
@@ -211,7 +226,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                 alt={t("shop.ingredientAlt", { name: product.name })}
                 fill
                 className="object-cover"
-                sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 20vw"
+              sizes={
+                compact
+                  ? "(max-width: 640px) 42vw, (max-width: 1280px) 33vw, 20vw"
+                  : "(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 20vw"
+              }
               />
             </span>
           ) : null}
@@ -236,17 +255,37 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
-        <h3 className="font-serif text-base leading-snug text-primary sm:text-xl">
+      <div
+        className={`flex flex-1 flex-col ${
+          compact ? "gap-1.5 p-2.5 sm:gap-2 sm:p-4" : "gap-2 p-3 sm:p-4"
+        }`}
+      >
+        <h3
+          className={`font-serif leading-snug text-primary ${
+            compact ? "line-clamp-2 text-sm sm:text-xl" : "text-base sm:text-xl"
+          }`}
+        >
           <Link href={href} className="transition hover:text-accent">
             {product.name}
           </Link>
         </h3>
-        <p className="line-clamp-2 text-xs text-muted sm:text-sm">
-          {product.shortDescription}
+        <p
+          className={`line-clamp-2 text-muted ${
+            compact ? "hidden text-sm sm:block" : "text-xs sm:text-sm"
+          }`}
+        >
+          {formatProductLead(product.shortDescription)}
         </p>
-        <div className="mt-auto flex flex-col gap-2 pt-2 sm:gap-3 sm:pt-3">
-          <p className="flex flex-wrap items-baseline gap-1.5 text-sm font-medium text-primary sm:text-base">
+        <div
+          className={`mt-auto flex flex-col ${
+            compact ? "gap-1.5 pt-1.5 sm:gap-3 sm:pt-3" : "gap-2 pt-2 sm:gap-3 sm:pt-3"
+          }`}
+        >
+          <p
+            className={`flex flex-wrap items-baseline gap-1.5 font-medium text-primary ${
+              compact ? "text-xs sm:text-base" : "text-sm sm:text-base"
+            }`}
+          >
             <span>{formatPrice(product.price, currency, i18n.language)}</span>
             {hasDiscount ? (
               <span className="text-xs font-normal text-muted line-through sm:text-sm">
@@ -264,10 +303,16 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           {hasColors ? (
             <Link
               href={href}
-              className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 text-background transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:h-11"
+              className={`inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 text-background transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+                compact ? "h-8 sm:h-11" : "h-10 sm:h-11"
+              }`}
               aria-label={t("shop.chooseColorAria", { name: product.name })}
             >
-              <span className="text-xs font-medium uppercase tracking-wide sm:text-sm">
+              <span
+                className={`font-medium uppercase tracking-wide sm:text-sm ${
+                  compact ? "text-[10px]" : "text-xs"
+                }`}
+              >
                 {t("shop.chooseColor")}
               </span>
             </Link>
@@ -275,12 +320,14 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             <button
               type="button"
               onClick={handleAdd}
-              className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 text-background transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:h-11"
+              className={`inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 text-background transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+                compact ? "h-8 sm:h-11" : "h-10 sm:h-11"
+              }`}
               aria-label={t("shop.addToCart", { name: product.name })}
             >
               <svg
                 viewBox="0 0 24 24"
-                className="size-4.5 shrink-0 sm:size-5"
+                className={`shrink-0 sm:size-5 ${compact ? "size-4" : "size-4.5"}`}
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.75"
@@ -288,7 +335,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                 <path d="M6 7h12l-1 11H7L6 7Z" />
                 <path d="M9 7V5.5A3 3 0 0 1 15 5.5V7" />
               </svg>
-              <span className="text-xs font-medium uppercase tracking-wide sm:text-sm">
+              <span
+                className={`font-medium uppercase tracking-wide sm:text-sm ${
+                  compact ? "text-[10px]" : "text-xs"
+                }`}
+              >
                 {t("shop.addToCartButton")}
               </span>
             </button>

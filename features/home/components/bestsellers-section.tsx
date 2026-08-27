@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ui/product-card";
@@ -7,12 +8,55 @@ import {
   cmsOr,
   usePageCmsFields,
 } from "@/features/cms/context/page-cms-context";
-import { BESTSELLERS } from "@/features/home/data/content";
+import { toProductCardData } from "@/features/shop/utils/map-product";
+import { CATALOG_SYNC_CHANNEL } from "@/lib/application/catalog-sync";
+import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
-/** Section « meilleures ventes » de la page d'accueil : grille des produits phares avec lien vers la boutique complète. */
+const HOME_PRODUCT_COUNT = 5;
+
+/** Charge les produits du catalogue public pour la grille d'accueil. */
+async function fetchHomeProducts(): Promise<ProductRow[]> {
+  const res = await fetch(`/api/catalog/products?pageSize=24`, {
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  const json = (await res.json()) as { products?: ProductRow[] };
+  const products = json.products ?? [];
+  const featured = [
+    ...products.filter((product) => product.is_new),
+    ...products.filter((product) => !product.is_new),
+  ];
+  return featured.slice(0, HOME_PRODUCT_COUNT);
+}
+
+/** Section « meilleures ventes » de la page d'accueil : grille des produits du catalogue (admin). */
 export function BestsellersSection() {
   const { t } = useTranslation();
   const cms = usePageCmsFields("bestsellers");
+  const [products, setProducts] = useState<ProductRow[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = () => {
+      void fetchHomeProducts().then((rows) => {
+        if (!cancelled) setProducts(rows);
+      });
+    };
+
+    load();
+
+    const broadcast =
+      typeof BroadcastChannel === "undefined"
+        ? null
+        : new BroadcastChannel(CATALOG_SYNC_CHANNEL);
+    if (broadcast) broadcast.onmessage = load;
+
+    return () => {
+      cancelled = true;
+      broadcast?.close();
+    };
+  }, []);
 
   return (
     <section className="bg-background">
@@ -31,24 +75,18 @@ export function BestsellersSection() {
           </Button>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
-          {BESTSELLERS.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={{
-                id: product.id,
-                slug: product.id,
-                name: t(product.nameKey),
-                shortDescription: t(product.descriptionKey),
-                price: product.price,
-                image: product.image,
-                ingredientImage: product.ingredientImage,
-                lifestyleImage: product.lifestyleImage,
-                isNew: product.isNew,
-              }}
-            />
-          ))}
-        </div>
+        {products.length === 0 ? (
+          <p className="text-muted">{t("home.bestsellers.empty")}</p>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={toProductCardData(product)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

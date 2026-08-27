@@ -13,6 +13,7 @@ import {
 import { writeDiagnosticLead } from "@/features/diagnostic/lib/lead-storage";
 import { HOME_IMAGES } from "@/features/home/data/content";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
+import type { DiagnosticChannel } from "@/lib/domain/diagnostic";
 import { getMyProfile } from "@/lib/infrastructure/supabase/profiles";
 import { profileFullName } from "@/lib/infrastructure/supabase/profile-types";
 
@@ -36,6 +37,7 @@ export function FeatureDiagnosticSection() {
   const [hairType, setHairType] = useState("");
   const [concern, setConcern] = useState("");
   const [goal, setGoal] = useState("");
+  const [channel, setChannel] = useState<DiagnosticChannel | "">("");
   const [profileFilled, setProfileFilled] = useState(false);
 
   useEffect(() => {
@@ -95,8 +97,11 @@ export function FeatureDiagnosticSection() {
         hairType,
         concern,
         goal,
+        channel: channel || "physical",
       });
-      router.push("/diagnostic-capillaire?mode=physical");
+      router.push(
+        `/diagnostic-capillaire?mode=${channel === "online" ? "online" : "physical"}`,
+      );
     });
   };
 
@@ -228,6 +233,29 @@ export function FeatureDiagnosticSection() {
                       </option>
                     ))
                   : null}
+              </select>
+            </label>
+            <label className="block space-y-1.5 text-sm sm:col-span-2">
+              <span className="sr-only">
+                {t("home.diagnostic.fields.channel")}
+              </span>
+              <select
+                required
+                className={fieldClass}
+                value={channel}
+                onChange={(e) =>
+                  setChannel(e.target.value as DiagnosticChannel | "")
+                }
+              >
+                <option value="">
+                  {t("home.diagnostic.fields.channel")}
+                </option>
+                <option value="online">
+                  {t("home.diagnostic.fields.channelOnline")}
+                </option>
+                <option value="physical">
+                  {t("home.diagnostic.fields.channelPhysical")}
+                </option>
               </select>
             </label>
             <div className="sm:col-span-2">

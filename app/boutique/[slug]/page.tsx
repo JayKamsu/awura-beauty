@@ -5,29 +5,24 @@ import { ProductDetails } from "@/features/shop/components/product-details";
 import { ProductGallery } from "@/features/shop/components/product-gallery";
 import { ProductPurchasePanel } from "@/features/shop/components/product-purchase-panel";
 import { RelatedProducts } from "@/features/shop/components/related-products";
+import { ProductReviewsSection } from "@/features/reviews/components/product-reviews";
 import {
   getBundleComponents,
   getProductBySlug,
   getRelatedProducts,
   getTutorialForProduct,
-  listAllProductSlugs,
 } from "@/lib/infrastructure/supabase";
+import { getProductReviewSummary } from "@/lib/infrastructure/supabase/order-reviews";
 import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo/json-ld";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
-/** Recalcule la fiche au plus toutes les 60s, et tout de suite après une écriture admin. */
-export const revalidate = 60;
+/** Recalcule la fiche à chaque requête pour afficher les modifications admin tout de suite. */
+export const dynamic = "force-dynamic";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ couleur?: string | string[] }>;
 };
-
-/** Génère statiquement les slugs de tous les produits pour le pré-rendu. */
-export async function generateStaticParams() {
-  const slugs = await listAllProductSlugs();
-  return slugs.map((slug) => ({ slug }));
-}
 
 /** Construit les métadonnées SEO du produit à partir de son slug, avec fallback si introuvable. */
 export async function generateMetadata({
@@ -46,8 +41,8 @@ export async function generateMetadata({
 }
 
 /**
- * Page produit : affiche la galerie, le panneau d'achat, les détails et les produits liés,
- * avec le JSON-LD produit et fil d'Ariane pour le SEO.
+ * Page produit : galerie, panneau d'achat (note + avis), détails, avis clientes
+ * et produits liés, avec JSON-LD produit et fil d'Ariane.
  */
 export default async function ProductPage({
   params,
@@ -59,10 +54,11 @@ export default async function ProductPage({
 
   if (!product) notFound();
 
-  const [related, tutorial, bundleComponents] = await Promise.all([
+  const [related, tutorial, bundleComponents, reviewSummary] = await Promise.all([
     getRelatedProducts(product, 4),
     getTutorialForProduct(product.slug),
     product.is_bundle ? getBundleComponents(product.id) : Promise.resolve([]),
+    getProductReviewSummary(product.id),
   ]);
 
   const gallery = [
@@ -96,7 +92,7 @@ export default async function ProductPage({
       className="flex w-full flex-1 flex-col"
       data-awura-universe={product.universe === "child" ? "child" : undefined}
     >
-      <JsonLd data={productJsonLd(product)} />
+      <JsonLd data={productJsonLd(product, reviewSummary)} />
       <JsonLd
         data={breadcrumbJsonLd([
           { name: "Accueil", path: "/" },
@@ -113,6 +109,7 @@ export default async function ProductPage({
             initialColor={
               Array.isArray(query.couleur) ? query.couleur[0] : query.couleur
             }
+            reviewSummary={reviewSummary}
           />
         </div>
       </div>
@@ -123,6 +120,11 @@ export default async function ProductPage({
           tutorialSlug={tutorial?.slug ?? null}
           bundleComponents={bundleComponents}
         />
+        {reviewSummary.count > 0 ? (
+          <div className="mt-12 border-t border-border pt-12">
+            <ProductReviewsSection summary={reviewSummary} />
+          </div>
+        ) : null}
       </div>
 
       <div className="border-t border-border bg-background">

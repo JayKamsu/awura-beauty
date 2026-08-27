@@ -32,6 +32,12 @@ const FALLBACK_LABELS: Record<
     es: "Fibra de plátano",
     product_type: "accessory",
   },
+  "casques-chauffants": {
+    fr: "Casques chauffants",
+    en: "Heating caps",
+    es: "Cascos térmicos",
+    product_type: "accessory",
+  },
   accessoires: { fr: "Accessoires", en: "Accessories", es: "Accesorios", product_type: "accessory" },
 };
 

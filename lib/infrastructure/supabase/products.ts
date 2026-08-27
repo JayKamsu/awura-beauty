@@ -116,7 +116,9 @@ function mapRow(row: Record<string, unknown>): ProductRow {
   };
 }
 
-/** Liste paginée des produits avec filtres catégorie/univers/recherche/prix/stock/tri ; retombe sur le catalogue local si Supabase échoue ou est vide. */
+/** Liste paginée des produits avec filtres catégorie/univers/recherche/prix/stock/tri.
+ *  Sans Supabase (local sans env) : catalogue de démo. Dès que Supabase est configuré,
+ *  on ne retombe jamais sur ce catalogue fantôme — les modifications admin sont la source. */
 export async function listProducts(
   params: ListProductsParams = {},
 ): Promise<ListProductsResult> {
@@ -173,19 +175,15 @@ export async function listProducts(
   const { data, error, count } = await query.range(from, to);
 
   if (error) {
-    return paginate(filterFallback(params), page, pageSize, "fallback");
-  }
-
-  // Table vide / non seedée → fallback local
-  if (
-    (count === 0 || !data) &&
-    (!category || category === "all") &&
-    !universe &&
-    !productType &&
-    !search &&
-    page <= 1
-  ) {
-    return paginate(filterFallback(params), page, pageSize, "fallback");
+    console.error("[catalog] listProducts", error.message);
+    return {
+      products: [],
+      total: 0,
+      page: Math.max(1, page),
+      pageSize,
+      totalPages: 1,
+      source: "supabase",
+    };
   }
 
   const rows = data ?? [];
@@ -202,7 +200,7 @@ export async function listProducts(
   };
 }
 
-/** Récupère un produit par slug (Supabase puis fallback local) ; pour la Gamme Complète, le stock affiché est le minimum des composants. */
+/** Récupère un produit par slug (Supabase si configuré, sinon catalogue local) ; pour la Gamme Complète, le stock affiché est le minimum des composants. */
 export async function getProductBySlug(slug: string): Promise<ProductRow | null> {
   const supabase = createSupabaseClient();
   let product: ProductRow | null = null;
@@ -214,12 +212,14 @@ export async function getProductBySlug(slug: string): Promise<ProductRow | null>
       .eq("slug", slug)
       .maybeSingle();
 
-    if (!error && data) {
+    if (error) {
+      console.error("[catalog] getProductBySlug", error.message);
+      return null;
+    }
+    if (data) {
       product = mapRow(data as Record<string, unknown>);
     }
-  }
-
-  if (!product) {
+  } else {
     product = FALLBACK_PRODUCTS.find((row) => row.slug === slug) ?? null;
   }
 
@@ -270,6 +270,7 @@ export async function getRelatedProducts(
     if (others && others.length > 0) {
       return others.map((row) => mapRow(row as Record<string, unknown>));
     }
+    return [];
   }
 
   const sameCategory = FALLBACK_PRODUCTS.filter(
@@ -280,14 +281,16 @@ export async function getRelatedProducts(
   return FALLBACK_PRODUCTS.filter((item) => item.id !== product.id).slice(0, limit);
 }
 
-/** Tous les slugs produits (génération de routes statiques), Supabase puis fallback local. */
+/** Tous les slugs produits (génération de routes), Supabase si configuré sinon catalogue local. */
 export async function listAllProductSlugs(): Promise<string[]> {
   const supabase = createSupabaseClient();
   if (supabase) {
-    const { data } = await supabase.from("products").select("slug");
-    if (data && data.length > 0) {
-      return data.map((row) => String((row as { slug: string }).slug));
+    const { data, error } = await supabase.from("products").select("slug");
+    if (error) {
+      console.error("[catalog] listAllProductSlugs", error.message);
+      return [];
     }
+    return (data ?? []).map((row) => String((row as { slug: string }).slug));
   }
   return FALLBACK_PRODUCTS.map((product) => product.slug);
 }
@@ -305,12 +308,14 @@ export async function getProductsBySlugs(
       .select("*")
       .in("slug", slugs);
 
-    if (!error && data && data.length > 0) {
-      const mapped = data.map((row) => mapRow(row as Record<string, unknown>));
-      return slugs
-        .map((slug) => mapped.find((product) => product.slug === slug))
-        .filter(Boolean) as ProductRow[];
+    if (error) {
+      console.error("[catalog] getProductsBySlugs", error.message);
+      return [];
     }
+    const mapped = (data ?? []).map((row) => mapRow(row as Record<string, unknown>));
+    return slugs
+      .map((slug) => mapped.find((product) => product.slug === slug))
+      .filter(Boolean) as ProductRow[];
   }
 
   return slugs
@@ -326,12 +331,14 @@ export async function getProductsByIds(ids: string[]): Promise<ProductRow[]> {
   if (supabase) {
     const { data, error } = await supabase.from("products").select("*").in("id", ids);
 
-    if (!error && data && data.length > 0) {
-      const mapped = data.map((row) => mapRow(row as Record<string, unknown>));
-      return ids
-        .map((id) => mapped.find((product) => product.id === id))
-        .filter(Boolean) as ProductRow[];
+    if (error) {
+      console.error("[catalog] getProductsByIds", error.message);
+      return [];
     }
+    const mapped = (data ?? []).map((row) => mapRow(row as Record<string, unknown>));
+    return ids
+      .map((id) => mapped.find((product) => product.id === id))
+      .filter(Boolean) as ProductRow[];
   }
 
   return ids

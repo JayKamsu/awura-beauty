@@ -6,6 +6,8 @@ import type { PublicTestimonial } from "@/lib/domain/testimonial";
 type TestimonialCardProps = {
   item: PublicTestimonial;
   badge?: string;
+  /** Tronque la citation (accueil) pour garder une carte compacte. */
+  compact?: boolean;
 };
 
 function initials(name: string): string {
@@ -18,7 +20,7 @@ function initials(name: string): string {
 }
 
 /** Carte témoignage (photo ou initiales, note, citation, attribution). */
-export function TestimonialCard({ item, badge }: TestimonialCardProps) {
+export function TestimonialCard({ item, badge, compact = false }: TestimonialCardProps) {
   const name = item.authorName || badge || "";
   const inner = (
     <>
@@ -39,7 +41,11 @@ export function TestimonialCard({ item, badge }: TestimonialCardProps) {
       </div>
       <div className="min-w-0 space-y-2">
         <Stars value={item.rating} />
-        <p className="text-sm italic leading-relaxed text-foreground/90">
+        <p
+          className={`text-sm italic leading-relaxed text-foreground/90 ${
+            compact ? "line-clamp-6" : ""
+          }`}
+        >
           “{item.quote}”
         </p>
         <p className="text-sm font-medium text-muted">
@@ -55,7 +61,7 @@ export function TestimonialCard({ item, badge }: TestimonialCardProps) {
   );
 
   const className =
-    "flex gap-4 rounded-2xl bg-background p-5";
+    "flex h-full gap-4 rounded-2xl bg-background p-5";
 
   if (item.href) {
     return (

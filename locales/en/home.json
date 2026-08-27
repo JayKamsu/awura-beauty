@@ -32,6 +32,7 @@
       "title": "Our Best-Sellers",
       "subtitle": "Awura essentials loved for elevating your crown every day.",
       "seeAll": "See the full shop",
+      "empty": "Shop products will appear here.",
       "newBadge": "New",
       "openImage": "Enlarge image of {{name}}",
       "addToCart": "Add {{name}} to cart",
@@ -68,9 +69,9 @@
       "pairLabel": "Product {{number}} · composition"
     },
     "feature": {
-      "eyebrow": "Signature care",
-      "title": "Active Growth Lotion",
-      "description": "Hydrating and fortifying — a natural lotion to support growth and strengthen your crown.",
+      "eyebrow": "Awura diagnostic",
+      "title": "Book my diagnostic",
+      "description": "A few details so we can prepare advice tailored to your crown. Choose an online or in-person diagnostic.",
       "cta": "Book my diagnostic",
       "ctaOnline": "Free online diagnostic",
       "ctaPhysical": "In-person €39.80",
@@ -80,9 +81,9 @@
       "imageAlt": "Healthy long hair with Awura lotion"
     },
     "diagnostic": {
-      "title": "Personalized Hair Diagnostic",
+      "title": "Book my diagnostic",
       "tagline": "Understand. Adapt. Transform.",
-      "subtitle": "A few details so we can prepare advice tailored to your crown.",
+      "subtitle": "A few details so we can prepare advice tailored to your crown. Choose an online or in-person diagnostic.",
       "submit": "Book my diagnostic",
       "success": "Thank you! We'll get back to you shortly to confirm your slot.",
       "fields": {
@@ -94,6 +95,9 @@
         "hairType": "Hair type",
         "concern": "Main concern",
         "goal": "Hair goal",
+        "channel": "Online or in person",
+        "channelOnline": "Online — free diagnostic",
+        "channelPhysical": "In person — appointment €39.80",
         "slot": "Preferred slot",
         "selectPlaceholder": "Select…"
       },
@@ -128,7 +132,7 @@
   },
   "reviews": {
     "title": "Testimonials",
-    "subtitle": "What clients say about Awura Beauty — care, hair diagnostic and guidance.",
+    "subtitle": "Testimonials from clients after an Awura Beauty hair diagnostic.",
     "empty": "No testimonials yet.",
     "ratingLabel": "{{rating}} / 5",
     "seeProduct": "View product",

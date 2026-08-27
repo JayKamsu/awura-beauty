@@ -7,6 +7,7 @@ import { createSupabaseClient } from "@/lib/infrastructure/supabase/client";
 
 function isCatalogPath(pathname: string) {
   return (
+    pathname === "/" ||
     pathname === "/boutique" ||
     pathname.startsWith("/boutique/") ||
     pathname === "/recherche" ||

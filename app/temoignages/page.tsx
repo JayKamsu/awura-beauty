@@ -11,13 +11,13 @@ export const revalidate = 60;
 export const metadata: Metadata = buildPageMetadata({
   title: "Témoignages",
   description:
-    "Témoignages de clientes Awura Beauty : soins, diagnostic capillaire et routines pour cheveux texturés.",
+    "Témoignages de clientes Awura Beauty après un diagnostic capillaire.",
   path: "/temoignages",
 });
 
 /** Page publique des témoignages clients (site, diagnostic, produits). */
 export default async function TemoignagesPage() {
-  const reviews = await listPublicTestimonialFeed();
+  const reviews = await listPublicTestimonialFeed(100, ["site", "diagnostic"]);
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-4 py-14 md:px-6">

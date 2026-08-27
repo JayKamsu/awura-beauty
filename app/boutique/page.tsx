@@ -2,16 +2,18 @@ import { ShopFiltersBar } from "@/features/shop/components/shop-filters-bar";
 import { ShopPagination } from "@/features/shop/components/shop-pagination";
 import { ProductGrid } from "@/features/shop/components/product-grid";
 import { toProductCardData } from "@/features/shop/utils/map-product";
-import { listProducts } from "@/lib/infrastructure/supabase";
+import { catalogPort } from "@/lib/application/container";
 import { listProductCategories } from "@/lib/infrastructure/supabase/product-categories";
 import { getSiteBrandSettings } from "@/lib/infrastructure/supabase/site-brand";
 import { ShopPageHeader } from "@/features/shop/components/shop-page-header";
 import type { ProductSort } from "@/lib/infrastructure/supabase/types";
 
-/** Recalcule la boutique au plus toutes les 60s, et tout de suite après une écriture admin. */
-export const revalidate = 60;
+/** Recalcule la boutique à chaque requête pour afficher les modifications admin tout de suite. */
+export const dynamic = "force-dynamic";
 
 const VALID_SORTS: ProductSort[] = ["recent", "price_asc", "price_desc", "name_asc"];
+/** Catalogue Awura : tous les produits sur une page (pagination seulement si le catalogue dépasse ce seuil). */
+const BOUTIQUE_PAGE_SIZE = 100;
 
 type BoutiquePageProps = {
   searchParams: Promise<{
@@ -27,8 +29,8 @@ type BoutiquePageProps = {
 };
 
 /**
- * Page boutique : liste les produits filtrés par catégorie, univers, recherche,
- * prix et stock, avec tri et pagination — tient compte des réglages de marque
+ * Page boutique : liste tous les produits filtrés (catégorie, univers, recherche,
+ * prix, stock, tri) sur une même page — tient compte des réglages de marque
  * (univers enfant activé ou non).
  */
 export default async function BoutiquePage({ searchParams }: BoutiquePageProps) {
@@ -51,7 +53,7 @@ export default async function BoutiquePage({ searchParams }: BoutiquePageProps) 
     : "recent";
 
   const [result, categories] = await Promise.all([
-    listProducts({
+    catalogPort.listProducts({
       category: category === "all" ? null : category,
       universe,
       query: query || null,
@@ -60,7 +62,7 @@ export default async function BoutiquePage({ searchParams }: BoutiquePageProps) 
       inStockOnly,
       sort,
       page,
-      pageSize: 8,
+      pageSize: BOUTIQUE_PAGE_SIZE,
     }),
     listProductCategories(),
   ]);

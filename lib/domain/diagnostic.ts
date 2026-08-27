@@ -56,6 +56,85 @@ export type DiagnosticContentBlock =
   | { type: "list"; items: string[]; ordered?: boolean }
   | { type: "link"; text: string; url: string };
 
+/** Brouillon de bilan diagnostic, persisté jusqu'à l'envoi au client. */
+export type DiagnosticResultDraft = {
+  appointmentId: string;
+  title: string;
+  summary: string;
+  scalpAnalysis: string;
+  detailedFeedback: string;
+  content: DiagnosticContentBlock[];
+  slugs: string[];
+  notifyClient: boolean;
+};
+
+function parseContentBlocks(raw: unknown): DiagnosticContentBlock[] {
+  if (!Array.isArray(raw)) return [];
+  const blocks: DiagnosticContentBlock[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const block = item as {
+      type?: string;
+      text?: unknown;
+      items?: unknown;
+      ordered?: unknown;
+      url?: unknown;
+    };
+    if (
+      block.type === "heading" ||
+      block.type === "subheading" ||
+      block.type === "paragraph"
+    ) {
+      blocks.push({ type: block.type, text: String(block.text ?? "") });
+    } else if (block.type === "list") {
+      blocks.push({
+        type: "list",
+        items: Array.isArray(block.items) ? block.items.map(String) : [],
+        ordered: Boolean(block.ordered),
+      });
+    } else if (block.type === "link") {
+      blocks.push({
+        type: "link",
+        text: String(block.text ?? ""),
+        url: String(block.url ?? ""),
+      });
+    }
+  }
+  return blocks;
+}
+
+/** Normalise un JSON inconnu en brouillon de bilan, ou `null` s'il est invalide. */
+export function parseDiagnosticResultDraft(
+  raw: unknown,
+): DiagnosticResultDraft | null {
+  if (!raw || typeof raw !== "object") return null;
+  const row = raw as Record<string, unknown>;
+  return {
+    appointmentId: String(row.appointmentId ?? ""),
+    title: String(row.title ?? ""),
+    summary: String(row.summary ?? ""),
+    scalpAnalysis: String(row.scalpAnalysis ?? ""),
+    detailedFeedback: String(row.detailedFeedback ?? ""),
+    content: parseContentBlocks(row.content),
+    slugs: Array.isArray(row.slugs) ? row.slugs.map(String) : [],
+    notifyClient: row.notifyClient !== false,
+  };
+}
+
+/** Indique si le brouillon n'a encore aucun contenu rédigé. */
+export function isDiagnosticResultDraftEmpty(
+  draft: DiagnosticResultDraft,
+): boolean {
+  return (
+    !draft.title.trim() &&
+    !draft.summary.trim() &&
+    !draft.scalpAnalysis.trim() &&
+    !draft.detailedFeedback.trim() &&
+    draft.content.length === 0 &&
+    draft.slugs.length === 0
+  );
+}
+
 /** Profil capillaire résultant d'un diagnostic (recommandations + contenu éditorial). */
 export type DiagnosticProfile = {
   key: string;
@@ -206,6 +285,8 @@ export type DiagnosticAppointment = {
   currency: string;
   stripeSessionId: string | null;
   notes: string;
+  /** Brouillon de bilan à envoyer plus tard (null = aucun). */
+  resultDraft: DiagnosticResultDraft | null;
   /** Photos jointes (face, profils, arrière, pointes) — chemins de stockage privé. */
   photos?: DiagnosticPhoto[];
   /** Nombre de fois où le RDV a été replanifié (client ou admin). */

@@ -6,6 +6,9 @@ import {
 } from "@/features/search/lib/filter-results";
 import { catalogPort, contentPort } from "@/lib/application/container";
 
+/** Recalcule la recherche à chaque requête pour coller au catalogue admin. */
+export const dynamic = "force-dynamic";
+
 type RecherchePageProps = {
   searchParams: Promise<{ q?: string }>;
 };

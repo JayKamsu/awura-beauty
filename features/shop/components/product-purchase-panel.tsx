@@ -8,12 +8,18 @@ import { ProductColorSwatch } from "@/components/ui/product-card";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import { useCart } from "@/features/cart/context/cart-provider";
 import { useFavorites } from "@/features/favorites/context/favorites-provider";
+import {
+  ProductRatingSummary,
+  ProductReviewsCarousel,
+} from "@/features/reviews/components/product-reviews";
 import { formatPrice } from "@/lib/format/price";
+import { formatProductLead } from "@/lib/format/product-copy";
 import { GAMME_COMPLETE_SLUG } from "@/lib/domain/bundle";
 import {
   parseProductColorKey,
   type ProductColorKey,
 } from "@/lib/domain/product-color";
+import type { ProductReviewSummary } from "@/lib/infrastructure/supabase/order-reviews";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
 /** Props du panneau d'achat produit. */
@@ -21,6 +27,8 @@ type ProductPurchasePanelProps = {
   product: ProductRow;
   /** Couleur préselectionnée depuis `?couleur=`. */
   initialColor?: string | null;
+  /** Note et avis du produit, affichés sous le titre et sous l'ajout au panier. */
+  reviewSummary?: ProductReviewSummary;
 };
 
 /** Première couleur valide : query `couleur` si elle existe, sinon la première variante. */
@@ -37,6 +45,7 @@ function firstValidColor(
 export function ProductPurchasePanel({
   product,
   initialColor,
+  reviewSummary,
 }: ProductPurchasePanelProps) {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();
@@ -134,8 +143,11 @@ export function ProductPurchasePanel({
           <h1 className="font-serif text-4xl leading-tight text-primary sm:text-5xl">
             {product.name}
           </h1>
+          {reviewSummary ? (
+            <ProductRatingSummary summary={reviewSummary} />
+          ) : null}
           <p className="max-w-md text-base leading-relaxed text-muted">
-            {product.short_description}
+            {formatProductLead(product.short_description)}
           </p>
         </div>
 
@@ -281,6 +293,10 @@ export function ProductPurchasePanel({
               {t("shop.viewCart")}
             </Link>
           </p>
+        ) : null}
+
+        {reviewSummary ? (
+          <ProductReviewsCarousel summary={reviewSummary} />
         ) : null}
       </div>
 

@@ -6,6 +6,12 @@ import { useTranslation } from "react-i18next";
 import { ProductQr } from "@/components/brand/product-qr";
 import { useBrandSettings } from "@/components/brand/brand-settings-provider";
 import { resolveProductQrTarget } from "@/lib/application/brand/qr";
+import {
+  formatIngredientList,
+  formatProductLead,
+  formatProductParagraphs,
+  splitParagraphs,
+} from "@/lib/format/product-copy";
 import { absoluteUrl } from "@/lib/site";
 import type { BundleComponent, ProductRow } from "@/lib/infrastructure/supabase/types";
 
@@ -19,19 +25,22 @@ type ProductDetailsProps = {
 };
 
 function splitIngredients(value: string) {
-  return value
-    .split(/[,;]/)
-    .map((item) => item.trim())
+  return formatIngredientList(value)
+    .split(", ")
     .filter(Boolean);
 }
 
 function splitUsageSteps(value: string) {
-  const parts = value
-    .split(/[.!?]+/)
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .map((item) => (/[.!?]$/.test(item) ? item : `${item}.`));
-  return parts.length > 1 ? parts : [value];
+  const fromLines = splitParagraphs(value);
+  const source = fromLines.length > 1 ? fromLines : [value];
+  const parts = source.flatMap((block) =>
+    block
+      .split(/[.!?]+/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .map((item) => formatProductLead(item)),
+  );
+  return parts.length > 0 ? parts : [];
 }
 
 /** Bénéfices : short_description découpé, sinon description courte. */
@@ -41,13 +50,13 @@ function splitBenefits(product: ProductRow): string[] {
     .split(/\s+[–—-]\s+/)
     .map((s) => s.trim())
     .filter(Boolean);
-  if (byDash.length >= 2) return byDash.slice(0, 3);
+  if (byDash.length >= 2) return byDash.slice(0, 3).map(formatProductLead);
   const byBullet = raw
     .split(/[•·|]/)
     .map((s) => s.trim())
     .filter(Boolean);
-  if (byBullet.length >= 2) return byBullet.slice(0, 3);
-  return [raw].filter(Boolean).slice(0, 1);
+  if (byBullet.length >= 2) return byBullet.slice(0, 3).map(formatProductLead);
+  return [raw].filter(Boolean).slice(0, 1).map(formatProductLead);
 }
 
 /**
@@ -65,6 +74,7 @@ export function ProductDetails({
   const ingredients = splitIngredients(product.ingredients);
   const usageSteps = splitUsageSteps(product.usage);
   const benefits = splitBenefits(product);
+  const descriptionParagraphs = formatProductParagraphs(product.description);
   const isAccessory = product.product_type === "accessory";
   const hasManualQrOverride = Boolean(product.qr_url?.trim());
   const showQr = Boolean(tutorialSlug) || hasManualQrOverride;
@@ -88,10 +98,14 @@ export function ProductDetails({
         <h2 className="font-serif text-3xl text-primary sm:text-4xl">
           {product.name}
         </h2>
-        {product.description ? (
-          <p className="max-w-prose text-base leading-relaxed text-muted">
-            {product.description}
-          </p>
+        {descriptionParagraphs.length > 0 ? (
+          <div className="max-w-prose space-y-3">
+            {descriptionParagraphs.map((paragraph) => (
+              <p key={paragraph} className="text-base leading-relaxed text-muted">
+                {paragraph}
+              </p>
+            ))}
+          </div>
         ) : null}
       </header>
 

@@ -18,14 +18,11 @@ export function TestimonialsSection() {
 
   useEffect(() => {
     let cancelled = false;
-    void fetch("/api/testimonials?limit=6")
+    void fetch("/api/testimonials?limit=8")
       .then((res) => res.json())
       .then((json: { testimonials?: PublicTestimonial[] }) => {
         if (cancelled) return;
-        const list = json.testimonials ?? [];
-        const withPhoto = list.filter((item) => item.imageUrl);
-        const without = list.filter((item) => !item.imageUrl);
-        setItems([...withPhoto, ...without].slice(0, 3));
+        setItems((json.testimonials ?? []).slice(0, 4));
       })
       .catch(() => {
         if (!cancelled) setItems([]);
@@ -53,11 +50,12 @@ export function TestimonialsSection() {
           </Button>
         </div>
 
-        <div className="space-y-4">
+        <div className="grid gap-4 md:grid-cols-2">
           {items.map((item) => (
             <TestimonialCard
               key={item.id}
               item={item}
+              compact
               badge={
                 item.kind === "diagnostic"
                   ? t("reviews.diagnosticBadge")

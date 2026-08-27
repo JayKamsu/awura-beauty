@@ -26,6 +26,16 @@ if (!i18n.isInitialized) {
     supportedLngs: [...supportedLocales],
     interpolation: { escapeValue: false },
   });
+} else {
+  for (const lng of supportedLocales) {
+    i18n.addResourceBundle(
+      lng,
+      "translation",
+      localeResources[lng].translation,
+      true,
+      true,
+    );
+  }
 }
 
 export default i18n;

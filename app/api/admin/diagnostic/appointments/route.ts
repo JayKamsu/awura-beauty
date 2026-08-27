@@ -8,7 +8,10 @@ import {
   listAllHairDiagnostics,
   updateAppointment,
 } from "@/lib/infrastructure/supabase/diagnostic-admin";
-import type { DiagnosticAppointmentStatus } from "@/lib/domain/diagnostic";
+import {
+  parseDiagnosticResultDraft,
+  type DiagnosticAppointmentStatus,
+} from "@/lib/domain/diagnostic";
 
 /** Liste les rendez-vous diagnostic, ou l'historique si `kind=history` (admin). */
 export async function GET(request: Request) {
@@ -24,7 +27,9 @@ export async function GET(request: Request) {
   return NextResponse.json({ appointments });
 }
 
-/** Met à jour le statut, les notes, ou replanifie un rendez-vous diagnostic (admin). */
+const MAX_RESULT_DRAFT_BYTES = 200_000;
+
+/** Met à jour le statut, les notes, le brouillon de bilan, ou replanifie un rendez-vous diagnostic (admin). */
 export async function PATCH(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -32,6 +37,7 @@ export async function PATCH(request: Request) {
     id?: string;
     status?: DiagnosticAppointmentStatus;
     notes?: string;
+    resultDraft?: unknown;
     startsAt?: string;
   };
   if (!body.id) {
@@ -55,9 +61,29 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ appointment: result.appointment });
   }
 
+  let resultDraft:
+    | ReturnType<typeof parseDiagnosticResultDraft>
+    | null
+    | undefined;
+  if ("resultDraft" in body) {
+    if (body.resultDraft === null) {
+      resultDraft = null;
+    } else {
+      const parsed = parseDiagnosticResultDraft(body.resultDraft);
+      if (!parsed) {
+        return NextResponse.json({ error: "Invalid draft" }, { status: 400 });
+      }
+      if (JSON.stringify(parsed).length > MAX_RESULT_DRAFT_BYTES) {
+        return NextResponse.json({ error: "Draft too large" }, { status: 400 });
+      }
+      resultDraft = { ...parsed, appointmentId: body.id };
+    }
+  }
+
   const appointment = await updateAppointment(body.id, {
     status: body.status,
     notes: body.notes,
+    resultDraft,
   });
   if (!appointment) {
     return NextResponse.json({ error: "Update failed" }, { status: 500 });

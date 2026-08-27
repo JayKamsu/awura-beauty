@@ -201,12 +201,16 @@ export function ShopFiltersBar({
       {accessoryCategories.length > 0 ? (
         <div className="space-y-2.5">
           <p className="text-xs font-medium uppercase tracking-[0.14em] text-accent">
-            {t("shop.groupAccessories")}
+            {t("shop.accessoryFiltersLabel", {
+              defaultValue: "Fibres, casques & accessoires",
+            })}
           </p>
           <div
             className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible"
             role="list"
-            aria-label={t("shop.groupAccessories")}
+            aria-label={t("shop.accessoryFiltersLabel", {
+              defaultValue: "Fibres, casques & accessoires",
+            })}
           >
             {accessoryCategories.map((c) => {
               const selected = current === c.slug;

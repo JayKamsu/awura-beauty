@@ -47,6 +47,7 @@ export type ProductCategory =
   | "soin"
   | "routine"
   | "fibres-de-bananier"
+  | "casques-chauffants"
   | "accessoires";
 
 /** Tri appliqué à la liste des produits. */

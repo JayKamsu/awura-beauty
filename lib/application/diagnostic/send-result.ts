@@ -136,8 +136,13 @@ export async function sendDiagnosticResultToClient(
     };
   }
 
-  if (appointmentId && input.markAppointmentCompleted !== false) {
-    await updateAppointment(appointmentId, { status: "completed" });
+  if (appointmentId) {
+    await updateAppointment(appointmentId, {
+      ...(input.markAppointmentCompleted !== false
+        ? { status: "completed" as const }
+        : {}),
+      resultDraft: null,
+    });
   }
 
   if (notify && userId) {

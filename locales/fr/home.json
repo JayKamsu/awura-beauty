@@ -32,6 +32,7 @@
       "title": "Nos Best-Sellers",
       "subtitle": "Les essentiels Awura plébiscités pour sublimer ta couronne au quotidien.",
       "seeAll": "Voir toute la boutique",
+      "empty": "Les produits de la boutique apparaîtront ici.",
       "newBadge": "Nouveau",
       "openImage": "Agrandir l'image de {{name}}",
       "addToCart": "Ajouter {{name}} au panier",
@@ -68,9 +69,9 @@
       "pairLabel": "Produit {{number}} · composition"
     },
     "feature": {
-      "eyebrow": "Soin signature",
-      "title": "Lotion Active Repousse",
-      "description": "Hydratante et fortifiante — une lotion naturelle pour stimuler la pousse et renforcer ta couronne.",
+      "eyebrow": "Diagnostic Awura",
+      "title": "Réserver mon diagnostic",
+      "description": "Quelques informations pour préparer un conseil vraiment adapté à ta couronne. Choisis un diagnostic en ligne ou en présentiel.",
       "cta": "Réserver mon diagnostic",
       "ctaOnline": "Diagnostic gratuit en ligne",
       "ctaPhysical": "RDV présentiel 39,80 €",
@@ -80,9 +81,9 @@
       "imageAlt": "Cheveux longs en bonne santé avec lotion Awura"
     },
     "diagnostic": {
-      "title": "Diagnostic Capillaire Personnalisé",
+      "title": "Réserver mon diagnostic",
       "tagline": "Comprendre. Adapter. Transformer.",
-      "subtitle": "Quelques informations pour préparer un conseil vraiment adapté à ta couronne.",
+      "subtitle": "Quelques informations pour préparer un conseil vraiment adapté à ta couronne. Choisis un diagnostic en ligne ou en présentiel.",
       "submit": "Réserver mon diagnostic",
       "success": "Merci ! Nous te recontactons rapidement pour confirmer ton créneau.",
       "fields": {
@@ -94,6 +95,9 @@
         "hairType": "Type de cheveux",
         "concern": "Problématique principale",
         "goal": "Objectif capillaire",
+        "channel": "En ligne ou en présentiel",
+        "channelOnline": "En ligne — diagnostic gratuit",
+        "channelPhysical": "En présentiel — RDV 39,80 €",
         "slot": "Créneau souhaité",
         "selectPlaceholder": "Sélectionner…"
       },
@@ -128,7 +132,7 @@
   },
   "reviews": {
     "title": "Témoignages",
-    "subtitle": "Ce que les clientes disent d'Awura Beauty — soins, diagnostic capillaire et accompagnement.",
+    "subtitle": "Témoignages de clientes après un diagnostic capillaire Awura Beauty.",
     "empty": "Aucun témoignage pour le moment.",
     "ratingLabel": "{{rating}} / 5",
     "seeProduct": "Voir le produit",

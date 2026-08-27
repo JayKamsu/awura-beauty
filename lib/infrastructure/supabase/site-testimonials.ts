@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "crypto";
+import { createHash, randomBytes } from "node:crypto";
 import {
   TESTIMONIAL_INVITE_TTL_DAYS,
   type SiteTestimonialRow,
@@ -151,8 +151,11 @@ export async function adminListInvites(): Promise<TestimonialInviteRow[]> {
     .select("*")
     .order("created_at", { ascending: false })
     .limit(50);
-  if (error || !data) return [];
-  return data.map((row) => mapInvite(row as Record<string, unknown>));
+  if (error) {
+    console.error("[testimonials] list invites", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => mapInvite(row as Record<string, unknown>));
 }
 
 /** Enregistre une invitation (hash du jeton uniquement). */
@@ -171,7 +174,10 @@ export async function insertTestimonialInvite(input: {
     })
     .select("*")
     .maybeSingle();
-  if (error || !data) return null;
+  if (error || !data) {
+    console.error("[testimonials] insert invite", error?.message);
+    return null;
+  }
   return mapInvite(data as Record<string, unknown>);
 }
 

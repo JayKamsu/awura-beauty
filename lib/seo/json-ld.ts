@@ -122,14 +122,17 @@ export function faqJsonLd() {
 }
 
 /** JSON-LD Product/Offer pour une fiche produit, avec disponibilité dérivée du stock. */
-export function productJsonLd(product: {
-  name: string;
-  description: string;
-  slug: string;
-  price: number;
-  image_url: string;
-  stock: number;
-}) {
+export function productJsonLd(
+  product: {
+    name: string;
+    description: string;
+    slug: string;
+    price: number;
+    image_url: string;
+    stock: number;
+  },
+  rating?: { average: number; count: number } | null,
+) {
   return {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -141,6 +144,17 @@ export function productJsonLd(product: {
       "@type": "Brand",
       name: SITE_NAME,
     },
+    ...(rating && rating.count > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: rating.average.toFixed(1),
+            reviewCount: rating.count,
+            bestRating: "5",
+            worstRating: "1",
+          },
+        }
+      : {}),
     offers: {
       "@type": "Offer",
       url: absoluteUrl(`/boutique/${product.slug}`),

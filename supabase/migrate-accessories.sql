@@ -16,6 +16,7 @@ create index if not exists products_product_type_idx on public.products (product
 insert into public.product_categories (slug, label, label_en, label_es, position, product_type)
 values
   ('fibres-de-bananier', 'Fibres de bananier', 'Banana fiber', 'Fibra de plátano', 60, 'accessory'),
+  ('casques-chauffants', 'Casques chauffants', 'Heating caps', 'Cascos térmicos', 65, 'accessory'),
   ('accessoires', 'Accessoires', 'Accessories', 'Accesorios', 70, 'accessory')
 on conflict (slug) do update set product_type = excluded.product_type;
 
@@ -47,7 +48,7 @@ insert into public.products (
     'Appliquer le soin, enfiler le casque, brancher et régler la durée (15 à 20 minutes). Laisser agir puis rincer.',
     '/images/products/produit-3-masque.jpg',
     '', null,
-    'accessoires', 'accessory', true, 12, 0, '', 'adult'
+    'casques-chauffants', 'accessory', true, 12, 0, '', 'adult'
   ),
   (
     'chouchou-satin',

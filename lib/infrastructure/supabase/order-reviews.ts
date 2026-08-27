@@ -61,6 +61,46 @@ export async function listReviewsForProduct(
   return data.map((row) => mapReview(row as Record<string, unknown>));
 }
 
+/** Avis produit prêt à afficher sur la fiche (sans identité cliente). */
+export type ProductReviewItem = {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+};
+
+/** Note moyenne, volume d'avis et liste pour une fiche produit. */
+export type ProductReviewSummary = {
+  average: number;
+  count: number;
+  reviews: ProductReviewItem[];
+};
+
+/** Calcule la note agrégée d'un produit et prépare les avis commentés. */
+export async function getProductReviewSummary(
+  productId: string,
+): Promise<ProductReviewSummary> {
+  const rows = await listReviewsForProduct(productId);
+  const rated = rows.filter((row) => row.rating >= 1 && row.rating <= 5);
+  const count = rated.length;
+  const average =
+    count === 0
+      ? 0
+      : Math.round(
+          (rated.reduce((sum, row) => sum + row.rating, 0) / count) * 10,
+        ) / 10;
+  return {
+    average,
+    count,
+    reviews: rated.map((row) => ({
+      id: row.id,
+      rating: row.rating,
+      comment: row.comment.trim(),
+      createdAt: row.createdAt,
+    })),
+  };
+}
+
 /** Tous les avis produits, tous produits confondus (admin, service_role requis). */
 export async function listAllReviews(): Promise<OrderReviewRow[]> {
   const supabase = createAdminSupabaseClient();

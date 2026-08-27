@@ -32,6 +32,7 @@
       "title": "Nuestros Best-Sellers",
       "subtitle": "Los esenciales Awura para realzar tu corona cada día.",
       "seeAll": "Ver toda la tienda",
+      "empty": "Los productos de la tienda aparecerán aquí.",
       "newBadge": "Nuevo",
       "openImage": "Ampliar la imagen de {{name}}",
       "addToCart": "Añadir {{name}} al carrito",
@@ -68,9 +69,9 @@
       "pairLabel": "Producto {{number}} · composición"
     },
     "feature": {
-      "eyebrow": "Cuidado firma",
-      "title": "Loción Activa Crecimiento",
-      "description": "Hidratante y fortificante — una loción natural para estimular el crecimiento y fortalecer tu corona.",
+      "eyebrow": "Diagnóstico Awura",
+      "title": "Reservar mi diagnóstico",
+      "description": "Algunos datos para preparar un consejo realmente adaptado a tu corona. Elige un diagnóstico online o presencial.",
       "cta": "Reservar mi diagnóstico",
       "ctaOnline": "Diagnóstico online gratis",
       "ctaPhysical": "Cita presencial 39,80 €",
@@ -80,9 +81,9 @@
       "imageAlt": "Cabello largo saludable con loción Awura"
     },
     "diagnostic": {
-      "title": "Diagnóstico Capilar Personalizado",
+      "title": "Reservar mi diagnóstico",
       "tagline": "Comprender. Adaptar. Transformar.",
-      "subtitle": "Algunos datos para preparar un consejo realmente adaptado a tu corona.",
+      "subtitle": "Algunos datos para preparar un consejo realmente adaptado a tu corona. Elige un diagnóstico online o presencial.",
       "submit": "Reservar mi diagnóstico",
       "success": "¡Gracias! Te contactaremos pronto para confirmar tu cita.",
       "fields": {
@@ -94,6 +95,9 @@
         "hairType": "Tipo de cabello",
         "concern": "Problema principal",
         "goal": "Objetivo capilar",
+        "channel": "Online o presencial",
+        "channelOnline": "Online — diagnóstico gratuito",
+        "channelPhysical": "Presencial — cita 39,80 €",
         "slot": "Franja deseada",
         "selectPlaceholder": "Seleccionar…"
       },
@@ -128,7 +132,7 @@
   },
   "reviews": {
     "title": "Testimonios",
-    "subtitle": "Lo que dicen las clientas de Awura Beauty: cuidados, diagnóstico capilar y acompañamiento.",
+    "subtitle": "Testimonios de clientas después de un diagnóstico capilar Awura Beauty.",
     "empty": "Aún no hay testimonios.",
     "ratingLabel": "{{rating}} / 5",
     "seeProduct": "Ver producto",
