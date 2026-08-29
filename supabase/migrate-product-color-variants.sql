@@ -11,3 +11,9 @@ where slug = 'casque-chauffant';
 update public.products
 set color_variants = array['noir', 'blond', 'acajou']::text[]
 where slug = 'fibre-bananier-naturelle';
+
+alter table public.products
+  add column if not exists color_images jsonb not null default '{}'::jsonb;
+
+notify pgrst, 'reload schema';
+

@@ -68,11 +68,14 @@ export {
   formatProductNameWithColor,
   isProductColorKey,
   parseColorVariants,
+  parseColorImages,
   parseProductColorKey,
+  pruneColorImages,
   productColorLabel,
   resolveLineColor,
+  resolveProductImageForColor,
 } from "@/lib/domain/product-color";
-export type { ProductColorKey } from "@/lib/domain/product-color";
+export type { ProductColorKey, ProductColorImageMap } from "@/lib/domain/product-color";
 
 export type {
   PublicTestimonial,

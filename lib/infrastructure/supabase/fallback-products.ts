@@ -30,6 +30,7 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     qr_url: "",
     universe: "adult",
     color_variants: [],
+    color_images: {},
   },
   {
     id: "00000000-0000-4000-8000-000000000002",
@@ -56,6 +57,7 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     qr_url: "",
     universe: "adult",
     color_variants: [],
+    color_images: {},
   },
   {
     id: "00000000-0000-4000-8000-000000000003",
@@ -82,6 +84,7 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     qr_url: "",
     universe: "adult",
     color_variants: [],
+    color_images: {},
   },
   {
     id: "00000000-0000-4000-8000-000000000004",
@@ -108,6 +111,7 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     qr_url: "",
     universe: "adult",
     color_variants: [],
+    color_images: {},
   },
   {
     id: "00000000-0000-4000-8000-000000000005",
@@ -133,6 +137,7 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     qr_url: "",
     universe: "adult",
     color_variants: [],
+    color_images: {},
   },
   {
     id: "00000000-0000-4000-8000-000000000006",
@@ -160,6 +165,7 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     qr_url: "",
     universe: "adult",
     color_variants: [],
+    color_images: {},
   },
   {
     id: "00000000-0000-4000-8000-000000000007",
@@ -185,6 +191,7 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     qr_url: "",
     universe: "adult",
     color_variants: ["noir", "blond", "acajou"],
+    color_images: {},
   },
   {
     id: "00000000-0000-4000-8000-000000000008",
@@ -210,6 +217,7 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     qr_url: "",
     universe: "adult",
     color_variants: ["noir", "rose-clair"],
+    color_images: {},
   },
   {
     id: "00000000-0000-4000-8000-000000000009",
@@ -235,6 +243,7 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     qr_url: "",
     universe: "adult",
     color_variants: [],
+    color_images: {},
   },
   {
     id: "00000000-0000-4000-8000-00000000000a",
@@ -260,6 +269,7 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     qr_url: "",
     universe: "adult",
     color_variants: [],
+    color_images: {},
   },
   {
     id: "00000000-0000-4000-8000-00000000000b",
@@ -285,6 +295,7 @@ export const FALLBACK_PRODUCTS: ProductRow[] = [
     qr_url: "",
     universe: "adult",
     color_variants: [],
+    color_images: {},
   },
 ];
 

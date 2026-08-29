@@ -1,4 +1,5 @@
 import type { ProductCardData } from "@/components/ui/product-card";
+import { toProductCardData } from "@/features/shop/utils/map-product";
 import type { BlogPost } from "@/lib/infrastructure/supabase/blog-types";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
@@ -48,19 +49,5 @@ export function filterPostsByQuery(posts: BlogPost[], query: string): BlogPost[]
 
 /** Convertit une ligne produit en données de carte produit pour l'affichage des résultats de recherche. */
 export function toSearchProductCard(product: ProductRow): ProductCardData {
-  return {
-    id: product.id,
-    slug: product.slug,
-    name: product.name,
-    shortDescription: product.short_description,
-    price: product.price,
-    image: product.image_url,
-    ingredientImage: product.ingredients_image_url || undefined,
-    lifestyleImage: product.lifestyle_image_url,
-    isNew: product.is_new,
-    productType: product.product_type,
-    category: product.category,
-    stock: product.stock,
-    colorVariants: product.color_variants,
-  };
+  return toProductCardData(product);
 }

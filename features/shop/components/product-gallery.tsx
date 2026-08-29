@@ -1,31 +1,47 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-/** Image de galerie produit, avec étiquette optionnelle (produit / ingrédients / lifestyle). */
-type GalleryImage = {
+/** Image de galerie produit, avec étiquette optionnelle (produit / ingrédients / lifestyle / couleur). */
+export type GalleryImage = {
   src: string;
   alt: string;
-  labelKey?: "shop.galleryProduct" | "shop.galleryIngredients" | "shop.galleryLifestyle";
+  labelKey?:
+    | "shop.galleryProduct"
+    | "shop.galleryIngredients"
+    | "shop.galleryLifestyle"
+    | "shop.galleryColor";
 };
 
 /** Props de la galerie produit. */
 type ProductGalleryProps = {
   images: GalleryImage[];
+  /** Image à afficher en premier (photo de la couleur choisie). */
+  featuredSrc?: string | null;
 };
 
 /** Galerie produit avec image principale et vignettes cliquables (dédoublonne les images par URL). */
-export function ProductGallery({ images }: ProductGalleryProps) {
-  const unique = images.filter(
-    (item, index, list) =>
-      item.src && list.findIndex((entry) => entry.src === item.src) === index,
+export function ProductGallery({ images, featuredSrc }: ProductGalleryProps) {
+  const unique = useMemo(
+    () =>
+      images.filter(
+        (item, index, list) =>
+          item.src && list.findIndex((entry) => entry.src === item.src) === index,
+      ),
+    [images],
   );
   const [activeIndex, setActiveIndex] = useState(0);
-  const active = unique[activeIndex] ?? unique[0];
   const { t } = useTranslation();
 
+  useEffect(() => {
+    if (!featuredSrc) return;
+    const index = unique.findIndex((item) => item.src === featuredSrc);
+    if (index >= 0) setActiveIndex(index);
+  }, [featuredSrc, unique]);
+
+  const active = unique[activeIndex] ?? unique[0];
   if (!active) return null;
 
   return (
@@ -39,8 +55,10 @@ export function ProductGallery({ images }: ProductGalleryProps) {
             fill
             priority={index === 0}
             sizes="(max-width: 1024px) 100vw, 50vw"
-            className={`object-cover transition-opacity duration-500 ease-out ${
-              index === activeIndex ? "opacity-100" : "opacity-0"
+            className={`absolute inset-0 object-cover transition-opacity duration-500 ease-out ${
+              index === activeIndex
+                ? "z-10 opacity-100"
+                : "pointer-events-none z-0 opacity-0"
             }`}
           />
         ))}

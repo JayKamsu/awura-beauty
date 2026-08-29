@@ -21,7 +21,7 @@ export function HeroSection() {
 
   return (
     <section className="relative overflow-hidden bg-background">
-      <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 md:px-6 lg:grid-cols-2 lg:gap-12 lg:py-20">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 pt-4 pb-12 md:px-6 md:pt-6 md:pb-14 lg:grid-cols-2 lg:items-stretch lg:gap-12 lg:pt-16 lg:pb-20">
         <div className="order-2 space-y-8 lg:order-1">
           <div className="space-y-5">
             {cmsTitle ? (
@@ -74,10 +74,10 @@ export function HeroSection() {
           </div>
         </div>
 
-        <div className="relative order-1 mx-auto w-full max-w-md lg:order-2 lg:max-w-none">
+        <div className="relative order-1 mx-auto w-full max-w-md lg:order-2 lg:mx-0 lg:flex lg:h-full lg:max-w-none">
           <div
             aria-hidden
-            className="pointer-events-none absolute -right-4 -top-6 z-0 opacity-20"
+            className="pointer-events-none absolute -right-4 -top-4 z-0 opacity-20 lg:-top-2"
           >
             <Image
               src="/images/brand/logo-orange.png"
@@ -88,7 +88,7 @@ export function HeroSection() {
               aria-hidden
             />
           </div>
-          <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem]">
+          <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[2rem] lg:aspect-auto lg:h-full">
             <Image
               src={heroImage}
               alt={t("home.hero.imageAlt")}

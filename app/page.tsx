@@ -47,7 +47,10 @@ export default function Home() {
         {sections
           .filter((section) => section.enabled)
           .map((section) => (
-            <div key={section.id}>{SECTION_MAP[section.id] ?? null}</div>
+            <div
+              key={section.id}
+              className={section.id === "promises" ? "max-lg:hidden" : undefined}
+            >{SECTION_MAP[section.id] ?? null}</div>
           ))}
       </main>
     </PageCmsProvider>

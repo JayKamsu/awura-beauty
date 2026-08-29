@@ -12,6 +12,7 @@ import {
   formatProductParagraphs,
   splitParagraphs,
 } from "@/lib/format/product-copy";
+import { resolveIngredientsImageUrl } from "@/features/shop/utils/map-product";
 import { absoluteUrl } from "@/lib/site";
 import type { BundleComponent, ProductRow } from "@/lib/infrastructure/supabase/types";
 
@@ -75,6 +76,8 @@ export function ProductDetails({
   const usageSteps = splitUsageSteps(product.usage);
   const benefits = splitBenefits(product);
   const descriptionParagraphs = formatProductParagraphs(product.description);
+  const ingredientsImage = resolveIngredientsImageUrl(product);
+  const showComposition = ingredients.length > 0 || Boolean(ingredientsImage);
   const isAccessory = product.product_type === "accessory";
   const hasManualQrOverride = Boolean(product.qr_url?.trim());
   const showQr = Boolean(tutorialSlug) || hasManualQrOverride;
@@ -149,36 +152,40 @@ export function ProductDetails({
         </p>
       </div>
 
-      {ingredients.length > 0 ? (
-        <div className="grid gap-8 lg:grid-cols-2">
+      {showComposition ? (
+        <div className="grid items-start gap-8 lg:grid-cols-2">
           <div className="space-y-4">
             <h3 className="font-serif text-2xl text-primary">
               {isAccessory ? t("shop.materialTitle") : t("shop.ingredientsTitle")}
             </h3>
-            <p className="text-sm text-muted">
-              {isAccessory ? t("shop.materialIntro") : t("shop.ingredientsIntro")}
-            </p>
-            <ul className="flex flex-wrap gap-2">
-              {ingredients.map((ingredient) => (
-                <li
-                  key={ingredient}
-                  className="rounded-xl border border-border bg-background px-3.5 py-1.5 text-sm text-primary"
-                >
-                  {ingredient}
-                </li>
-              ))}
-            </ul>
+            {ingredients.length > 0 ? (
+              <>
+                <p className="text-sm text-muted">
+                  {isAccessory ? t("shop.materialIntro") : t("shop.ingredientsIntro")}
+                </p>
+                <ul className="flex flex-wrap gap-2">
+                  {ingredients.map((ingredient) => (
+                    <li
+                      key={ingredient}
+                      className="rounded-xl border border-border bg-background px-3.5 py-1.5 text-sm text-primary"
+                    >
+                      {ingredient}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
           </div>
-          {product.ingredients_image_url ? (
-            <div className="relative min-h-[14rem] overflow-hidden rounded-2xl bg-background">
+          {ingredientsImage ? (
+            <figure className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-background">
               <Image
-                src={product.ingredients_image_url}
+                src={ingredientsImage}
                 alt={t("shop.ingredientAlt", { name: product.name })}
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 40vw"
               />
-            </div>
+            </figure>
           ) : null}
         </div>
       ) : null}

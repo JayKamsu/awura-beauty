@@ -9,6 +9,9 @@ export const PRODUCT_COLOR_KEYS = [
 /** Clé de variante couleur persistée (panier, commande, admin). */
 export type ProductColorKey = (typeof PRODUCT_COLOR_KEYS)[number];
 
+/** Photo associée à une variante couleur (clé → URL). */
+export type ProductColorImageMap = Partial<Record<ProductColorKey, string>>;
+
 const COLOR_KEY_SET = new Set<string>(PRODUCT_COLOR_KEYS);
 
 const LABELS: Record<ProductColorKey, Record<"fr" | "en" | "es", string>> = {
@@ -49,6 +52,44 @@ export function parseColorVariants(raw: unknown): ProductColorKey[] {
     result.push(key);
   }
   return result;
+}
+
+/** Parse la map JSON des photos par couleur (ignore les clés / URLs invalides). */
+export function parseColorImages(raw: unknown): ProductColorImageMap {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const result: ProductColorImageMap = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (!isProductColorKey(key)) continue;
+    const url = String(value ?? "").trim();
+    if (url) result[key] = url;
+  }
+  return result;
+}
+
+/** Ne conserve que les photos des variantes encore proposées. */
+export function pruneColorImages(
+  variants: ProductColorKey[],
+  images: ProductColorImageMap,
+): ProductColorImageMap {
+  const allowed = new Set(variants);
+  const result: ProductColorImageMap = {};
+  for (const key of PRODUCT_COLOR_KEYS) {
+    const url = images[key];
+    if (url && allowed.has(key)) result[key] = url;
+  }
+  return result;
+}
+
+/** Visuel produit pour une couleur : photo de variante si elle existe, sinon image principale. */
+export function resolveProductImageForColor(
+  product: { image_url: string; color_images?: ProductColorImageMap },
+  colorKey: ProductColorKey | null | undefined,
+): string {
+  if (colorKey) {
+    const src = product.color_images?.[colorKey]?.trim();
+    if (src) return src;
+  }
+  return product.image_url;
 }
 
 /** Libellé d'une couleur pour reçus / Stripe (catalogue en français de référence). */

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ProductColorSwatch } from "@/components/ui/product-card";
+import { ProductGallery, type GalleryImage } from "@/features/shop/components/product-gallery";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import { useCart } from "@/features/cart/context/cart-provider";
 import { useFavorites } from "@/features/favorites/context/favorites-provider";
@@ -17,6 +18,7 @@ import { formatProductLead } from "@/lib/format/product-copy";
 import { GAMME_COMPLETE_SLUG } from "@/lib/domain/bundle";
 import {
   parseProductColorKey,
+  resolveProductImageForColor,
   type ProductColorKey,
 } from "@/lib/domain/product-color";
 import type { ProductReviewSummary } from "@/lib/infrastructure/supabase/order-reviews";
@@ -25,9 +27,19 @@ import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 /** Props du panneau d'achat produit. */
 type ProductPurchasePanelProps = {
   product: ProductRow;
-  /** Couleur préselectionnée depuis `?couleur=`. */
-  initialColor?: string | null;
+  /** Couleur actuellement sélectionnée. */
+  selectedColor: ProductColorKey | null;
+  /** Met à jour la couleur choisie. */
+  onSelectedColorChange: (key: ProductColorKey) => void;
   /** Note et avis du produit, affichés sous le titre et sous l'ajout au panier. */
+  reviewSummary?: ProductReviewSummary;
+};
+
+/** Props du bloc galerie + achat d'une fiche produit. */
+type ProductShowcaseProps = {
+  product: ProductRow;
+  images: GalleryImage[];
+  initialColor?: string | null;
   reviewSummary?: ProductReviewSummary;
 };
 
@@ -41,19 +53,17 @@ function firstValidColor(
   return variants[0] ?? null;
 }
 
-/** Panneau d'achat sticky d'une fiche produit : prix, stock, sélecteur de quantité et ajout au panier. */
-export function ProductPurchasePanel({
+/**
+ * Galerie + panneau d'achat : la photo principale suit la couleur choisie.
+ */
+export function ProductShowcase({
   product,
+  images,
   initialColor,
   reviewSummary,
-}: ProductPurchasePanelProps) {
-  const { t, i18n } = useTranslation();
-  const { currency } = usePreferences();
-  const { addItem } = useCart();
-  const { isFavorite, toggleFavorite } = useFavorites();
+}: ProductShowcaseProps) {
+  const { t } = useTranslation();
   const colorKeys = product.color_variants;
-  const [quantity, setQuantity] = useState(1);
-  const [added, setAdded] = useState(false);
   const [selectedColor, setSelectedColor] = useState<ProductColorKey | null>(
     () => firstValidColor(colorKeys, initialColor),
   );
@@ -64,6 +74,46 @@ export function ProductPurchasePanel({
     url.searchParams.set("couleur", selectedColor);
     window.history.replaceState(null, "", `${url.pathname}${url.search}`);
   }, [selectedColor, colorKeys.length]);
+
+  const featuredSrc = resolveProductImageForColor(product, selectedColor);
+  const galleryImages: GalleryImage[] = selectedColor
+    ? [
+        {
+          src: featuredSrc,
+          alt: `${product.name} — ${t(`shop.colors.${selectedColor}`)}`,
+          labelKey: featuredSrc !== product.image_url ? "shop.galleryColor" : "shop.galleryProduct",
+        },
+        ...images,
+      ]
+    : images;
+
+  return (
+    <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
+      <ProductGallery images={galleryImages} featuredSrc={featuredSrc} />
+      <ProductPurchasePanel
+        product={product}
+        selectedColor={selectedColor}
+        onSelectedColorChange={setSelectedColor}
+        reviewSummary={reviewSummary}
+      />
+    </div>
+  );
+}
+
+/** Panneau d'achat sticky d'une fiche produit : prix, stock, sélecteur de quantité et ajout au panier. */
+export function ProductPurchasePanel({
+  product,
+  selectedColor,
+  onSelectedColorChange,
+  reviewSummary,
+}: ProductPurchasePanelProps) {
+  const { t, i18n } = useTranslation();
+  const { currency } = usePreferences();
+  const { addItem } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const colorKeys = product.color_variants;
+  const [quantity, setQuantity] = useState(1);
+  const [added, setAdded] = useState(false);
 
   const lowStock = product.stock > 0 && product.stock <= 5;
   const outOfStock = product.stock <= 0;
@@ -88,7 +138,7 @@ export function ProductPurchasePanel({
         slug: product.slug,
         name: product.name,
         unitPrice: product.price,
-        imageUrl: product.image_url,
+        imageUrl: resolveProductImageForColor(product, selectedColor),
         colorKey: selectedColor,
       },
       quantity,
@@ -208,7 +258,7 @@ export function ProductPurchasePanel({
                     role="radio"
                     aria-checked={selected}
                     aria-label={t(`shop.colors.${key}`)}
-                    onClick={() => setSelectedColor(key)}
+                    onClick={() => onSelectedColorChange(key)}
                     className="rounded-full transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                   >
                     <ProductColorSwatch colorKey={key} selected={selected} />

@@ -1,6 +1,6 @@
 /**
- * Exécute migrate-page-cms-storage-push-chat.sql via DATABASE_URL.
- * Usage : node supabase/run-migration-once.mjs
+ * Exécute un fichier SQL via DATABASE_URL (prod).
+ * Usage : node supabase/run-migration-once.mjs <fichier.sql>
  */
 import { readFileSync, existsSync } from "node:fs";
 
@@ -30,8 +30,15 @@ if (!databaseUrl) {
 }
 
 const { default: pg } = await import("pg");
-const sqlPath = "supabase/migrate-page-cms-storage-push-chat.sql";
-const sql = readFileSync(sqlPath, "utf8");
+const sqlPath = process.argv[2];
+if (!sqlPath) {
+  console.error("Usage: node supabase/run-migration-once.mjs <fichier.sql>");
+  process.exit(1);
+}
+if (!existsSync(sqlPath)) {
+  console.error("SQL file missing:", sqlPath);
+  process.exit(1);
+}
 
 const client = new pg.Client({
   connectionString: databaseUrl,
@@ -40,7 +47,8 @@ const client = new pg.Client({
 
 await client.connect();
 try {
-  await client.query(sql);
+  await client.query(readFileSync(sqlPath, "utf8"));
+  await client.query("notify pgrst, 'reload schema'");
   console.log("MIGRATION_OK:", sqlPath);
 } catch (error) {
   console.error("MIGRATION_ERROR:", error.message);

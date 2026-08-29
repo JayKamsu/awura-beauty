@@ -1,4 +1,4 @@
-import { parseColorVariants } from "@/lib/domain/product-color";
+import { parseColorImages, parseColorVariants, pruneColorImages } from "@/lib/domain/product-color";
 import {
   formatIngredientList,
   formatProductLead,
@@ -39,6 +39,7 @@ function mapRow(row: Record<string, unknown>): ProductRow {
     qr_url: String(row.qr_url ?? ""),
     universe: row.universe === "child" ? "child" : "adult",
     color_variants: parseColorVariants(row.color_variants),
+    color_images: parseColorImages(row.color_images),
     created_at: row.created_at ? String(row.created_at) : undefined,
   };
 }
@@ -91,6 +92,10 @@ export async function adminUpsertProduct(
     qr_url: String(input.qr_url ?? ""),
     universe: input.universe === "child" ? "child" : "adult",
     color_variants: parseColorVariants(input.color_variants),
+    color_images: pruneColorImages(
+      parseColorVariants(input.color_variants),
+      parseColorImages(input.color_images),
+    ),
   };
 
   if (supabase) {

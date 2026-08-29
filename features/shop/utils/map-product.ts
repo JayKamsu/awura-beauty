@@ -36,6 +36,38 @@ export function isFibreProduct(product: CatalogIdentity): boolean {
   );
 }
 
+const DEFAULT_INGREDIENT_IMAGES: Record<string, string> = {
+  "beurre-capillaire": "/images/ingredients/ingredient-1.jpg",
+  "demelant-nourrissant": "/images/ingredients/ingredient-2.jpg",
+  "masque-capillaire": "/images/ingredients/ingredient-3.jpg",
+  "nutrition-royale": "/images/ingredients/ingredient-3.jpg",
+  "lotion-repousse": "/images/ingredients/ingredient-4.jpg",
+  "savon-solide": "/images/ingredients/ingredient-5.jpg",
+  "gamme-complete": "/images/ingredients/ingredient-1.jpg",
+};
+
+function normalizeAssetUrl(url: string | null | undefined): string {
+  return (url ?? "").trim().split("?")[0];
+}
+
+/**
+ * Image de composition à afficher sur la fiche / les cartes.
+ * Ignore une URL vide ou identique au visuel produit, et retombe sur
+ * les photos ingrédients du catalogue pour les soins Awura.
+ */
+export function resolveIngredientsImageUrl(product: {
+  slug: string;
+  image_url?: string | null;
+  ingredients_image_url?: string | null;
+}): string | null {
+  const productImage = normalizeAssetUrl(product.image_url);
+  const stored = (product.ingredients_image_url ?? "").trim();
+  if (stored && normalizeAssetUrl(stored) !== productImage) return stored;
+  const fallback = DEFAULT_INGREDIENT_IMAGES[product.slug];
+  if (fallback && fallback !== productImage) return fallback;
+  return null;
+}
+
 /** Convertit une ligne produit (base de données) en données de carte produit pour l'affichage. */
 export function toProductCardData(product: ProductRow): ProductCardData {
   return {
@@ -46,7 +78,7 @@ export function toProductCardData(product: ProductRow): ProductCardData {
     price: product.price,
     image: product.image_url,
     compareAtPrice: product.compare_at_price,
-    ingredientImage: product.ingredients_image_url || undefined,
+    ingredientImage: resolveIngredientsImageUrl(product) || undefined,
     lifestyleImage: product.lifestyle_image_url,
     isNew: product.is_new,
     productType: product.product_type,

@@ -1,4 +1,4 @@
-import { parseColorVariants } from "@/lib/domain/product-color";
+import { parseColorImages, parseColorVariants } from "@/lib/domain/product-color";
 import { createSupabaseClient } from "@/lib/infrastructure/supabase/client";
 import { FALLBACK_PRODUCTS } from "@/lib/infrastructure/supabase/fallback-products";
 import { getBundleComponents } from "@/lib/infrastructure/supabase/bundles";
@@ -117,6 +117,7 @@ function mapRow(row: Record<string, unknown>): ProductRow {
     qr_url: String(row.qr_url ?? ""),
     universe: row.universe === "child" ? "child" : "adult",
     color_variants: parseColorVariants(row.color_variants),
+    color_images: parseColorImages(row.color_images),
     created_at: row.created_at ? String(row.created_at) : undefined,
   };
 }

@@ -32,7 +32,7 @@ const PROMISES = [
   },
 ] as const;
 
-/** Section « promesses » de la page d'accueil : met en avant les engagements de la marque (expertise, naturel, résultats, amour). */
+/** Section « promesses » de la page d'accueil (tablette et plus) : expertise, naturel, résultats, amour. */
 export function PromisesSection() {
   const { t } = useTranslation();
   const cms = usePageCmsFields("promises");
@@ -50,7 +50,7 @@ export function PromisesSection() {
   });
 
   return (
-    <section className="bg-background-alt">
+    <section className="hidden bg-background-alt lg:block">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0 md:px-6 lg:py-16">
         {items.map((promise, index) => (
           <PromiseItem

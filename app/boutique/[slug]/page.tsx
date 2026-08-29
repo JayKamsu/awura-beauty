@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/seo/json-ld";
 import { ProductDetails } from "@/features/shop/components/product-details";
-import { ProductGallery } from "@/features/shop/components/product-gallery";
-import { ProductPurchasePanel } from "@/features/shop/components/product-purchase-panel";
+import { ProductShowcase } from "@/features/shop/components/product-purchase-panel";
+import { type GalleryImage } from "@/features/shop/components/product-gallery";
 import { RelatedProducts } from "@/features/shop/components/related-products";
 import { ProductReviewsSection } from "@/features/reviews/components/product-reviews";
+import { resolveIngredientsImageUrl } from "@/features/shop/utils/map-product";
 import {
   getBundleComponents,
   getProductBySlug,
@@ -61,15 +62,16 @@ export default async function ProductPage({
     getProductReviewSummary(product.id),
   ]);
 
+  const ingredientsImage = resolveIngredientsImageUrl(product);
   const gallery = [
     {
       src: product.image_url,
       alt: product.name,
       labelKey: "shop.galleryProduct" as const,
     },
-    product.ingredients_image_url
+    ingredientsImage
       ? {
-          src: product.ingredients_image_url,
+          src: ingredientsImage,
           alt: `${product.name} — ingredients`,
           labelKey: "shop.galleryIngredients" as const,
         }
@@ -81,11 +83,7 @@ export default async function ProductPage({
           labelKey: "shop.galleryLifestyle" as const,
         }
       : null,
-  ].filter(Boolean) as Array<{
-    src: string;
-    alt: string;
-    labelKey: "shop.galleryProduct" | "shop.galleryIngredients" | "shop.galleryLifestyle";
-  }>;
+  ].filter(Boolean) as GalleryImage[];
 
   return (
     <main
@@ -102,16 +100,14 @@ export default async function ProductPage({
       />
 
       <div className="mx-auto w-full max-w-7xl px-4 py-10 md:px-6 md:py-14">
-        <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
-          <ProductGallery images={gallery} />
-          <ProductPurchasePanel
-            product={product}
-            initialColor={
-              Array.isArray(query.couleur) ? query.couleur[0] : query.couleur
-            }
-            reviewSummary={reviewSummary}
-          />
-        </div>
+        <ProductShowcase
+          product={product}
+          images={gallery}
+          initialColor={
+            Array.isArray(query.couleur) ? query.couleur[0] : query.couleur
+          }
+          reviewSummary={reviewSummary}
+        />
       </div>
 
       <div className="mx-auto w-full max-w-7xl px-4 pb-10 md:px-6 md:pb-14">

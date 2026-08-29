@@ -20,7 +20,7 @@ import {
 import { formatPrice } from "@/lib/format/price";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 import { notifyCatalogChanged } from "@/lib/application/catalog-sync";
-import { PRODUCT_COLOR_KEYS, type ProductColorKey } from "@/lib/domain/product-color";
+import { PRODUCT_COLOR_KEYS, type ProductColorImageMap, type ProductColorKey } from "@/lib/domain/product-color";
 import type { ProductCategory } from "@/lib/infrastructure/supabase/product-categories";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
@@ -48,6 +48,7 @@ const emptyForm = {
   qr_url: "",
   universe: "adult" as "adult" | "child",
   color_variants: [] as ProductColorKey[],
+  color_images: {} as ProductColorImageMap,
   bundleComponents: [] as BundleComponentDraft[],
 };
 
@@ -241,6 +242,7 @@ export function AdminProductsPanel() {
       qr_url: product.qr_url ?? "",
       universe: product.universe === "child" ? "child" : "adult",
       color_variants: product.color_variants ?? [],
+      color_images: product.color_images ?? {},
       bundleComponents,
     });
     setSlugTouched(true);
@@ -289,6 +291,29 @@ export function AdminProductsPanel() {
     setForm((prev) => ({ ...prev, [field]: json.url! }));
   };
 
+  const uploadColorImage = async (file: File, colorKey: ProductColorKey) => {
+    setUploading(`color:${colorKey}`);
+    const body = new FormData();
+    body.append("file", file);
+    const response = await adminFetch("/api/admin/upload", {
+      method: "POST",
+      body,
+    });
+    const json = (await response.json()) as { url?: string; error?: string };
+    setUploading(null);
+    if (!response.ok || !json.url) {
+      setFeedback({
+        tone: "error",
+        message: json.error ?? t("admin.uploadError"),
+      });
+      return;
+    }
+    setForm((prev) => ({
+      ...prev,
+      color_images: { ...prev.color_images, [colorKey]: json.url! },
+    }));
+  };
+
   const save = () => {
     void run(async () => {
       setFeedback(null);
@@ -306,7 +331,7 @@ export function AdminProductsPanel() {
         ingredients: form.ingredients,
         usage: form.usage,
         image_url: form.image_url,
-        ingredients_image_url: form.ingredients_image_url || form.image_url,
+        ingredients_image_url: form.ingredients_image_url.trim(),
         lifestyle_image_url: form.lifestyle_image_url || null,
         category: form.category,
         product_type: form.product_type,
@@ -317,6 +342,7 @@ export function AdminProductsPanel() {
         qr_url: form.qr_url.trim(),
         universe: form.universe,
         color_variants: form.color_variants,
+        color_images: form.color_images,
       };
 
       const response = await adminFetch("/api/admin/products", {
@@ -928,44 +954,100 @@ export function AdminProductsPanel() {
                 <span className="text-muted">{t("admin.fields.is_new")}</span>
               </label>
 
-              <fieldset className="space-y-2">
+              <fieldset className="space-y-3">
                 <legend className="text-sm text-muted">
                   {t("admin.fields.color_variants")}
                 </legend>
                 <p className="text-xs text-muted">
                   {t("admin.fields.color_variantsHint")}
                 </p>
-                <div className="flex flex-wrap gap-3">
+                <div className="space-y-3">
                   {PRODUCT_COLOR_KEYS.map((key) => {
                     const checked = form.color_variants.includes(key);
+                    const colorImage = form.color_images[key] ?? "";
                     return (
-                      <label
+                      <div
                         key={key}
-                        className="flex min-h-11 items-center gap-2 text-sm"
+                        className="space-y-2 rounded-xl border border-border p-3"
                       >
-                        <input
-                          type="checkbox"
-                          className="size-5"
-                          checked={checked}
-                          onChange={(e) =>
-                            setForm((prev) => ({
-                              ...prev,
-                              color_variants: e.target.checked
-                                ? PRODUCT_COLOR_KEYS.filter(
-                                    (item) =>
-                                      item === key ||
-                                      prev.color_variants.includes(item),
-                                  )
-                                : prev.color_variants.filter(
-                                    (item) => item !== key,
-                                  ),
-                            }))
-                          }
-                        />
-                        <span className="text-muted">
-                          {t(`shop.colors.${key}`)}
-                        </span>
-                      </label>
+                        <label className="flex min-h-11 items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            className="size-5"
+                            checked={checked}
+                            onChange={(e) =>
+                              setForm((prev) => {
+                                const color_variants = e.target.checked
+                                  ? PRODUCT_COLOR_KEYS.filter(
+                                      (item) =>
+                                        item === key ||
+                                        prev.color_variants.includes(item),
+                                    )
+                                  : prev.color_variants.filter(
+                                      (item) => item !== key,
+                                    );
+                                const color_images = { ...prev.color_images };
+                                if (!e.target.checked) delete color_images[key];
+                                return { ...prev, color_variants, color_images };
+                              })
+                            }
+                          />
+                          <span className="text-muted">
+                            {t(`shop.colors.${key}`)}
+                          </span>
+                        </label>
+                        {checked ? (
+                          <div className="space-y-2 pl-7">
+                            <span className="block text-xs text-muted">
+                              {t("admin.uploadColorImage", {
+                                color: t(`shop.colors.${key}`),
+                              })}
+                            </span>
+                            {colorImage ? (
+                              <div className="space-y-2">
+                                <div className="relative h-24 w-24 overflow-hidden rounded-xl bg-background-alt">
+                                  <Image
+                                    src={colorImage}
+                                    alt=""
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  className="text-sm text-accent hover:text-accent-light"
+                                  onClick={() =>
+                                    setForm((prev) => {
+                                      const color_images = { ...prev.color_images };
+                                      delete color_images[key];
+                                      return { ...prev, color_images };
+                                    })
+                                  }
+                                >
+                                  {t("admin.removeImage")}
+                                </button>
+                              </div>
+                            ) : null}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              capture="environment"
+                              className="block w-full text-sm"
+                              disabled={Boolean(uploading)}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                void uploadColorImage(file, key);
+                              }}
+                            />
+                            {uploading === `color:${key}` ? (
+                              <span className="block text-xs text-muted">
+                                {t("admin.uploading")}
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </div>
                     );
                   })}
                 </div>
