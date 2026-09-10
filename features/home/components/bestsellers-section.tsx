@@ -12,21 +12,14 @@ import { toProductCardData } from "@/features/shop/utils/map-product";
 import { CATALOG_SYNC_CHANNEL } from "@/lib/application/catalog-sync";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
-const HOME_PRODUCT_COUNT = 5;
-
-/** Charge les produits du catalogue public pour la grille d'accueil. */
+/** Charge les best-sellers de l'accueil, dans l'ordre fixé (crème, shampoing, démêlant, fibre, gamme complète). */
 async function fetchHomeProducts(): Promise<ProductRow[]> {
-  const res = await fetch(`/api/catalog/products?pageSize=24`, {
+  const res = await fetch(`/api/catalog/products?bestsellers=1`, {
     cache: "no-store",
   });
   if (!res.ok) return [];
   const json = (await res.json()) as { products?: ProductRow[] };
-  const products = json.products ?? [];
-  const featured = [
-    ...products.filter((product) => product.is_new),
-    ...products.filter((product) => !product.is_new),
-  ];
-  return featured.slice(0, HOME_PRODUCT_COUNT);
+  return json.products ?? [];
 }
 
 /** Section « meilleures ventes » de la page d'accueil : grille des produits du catalogue (admin). */
@@ -81,6 +74,7 @@ export function BestsellersSection() {
           <ProductRail
             products={products.map(toProductCardData)}
             label={t("shop.productsRail")}
+            singleRow
           />
         )}
       </div>

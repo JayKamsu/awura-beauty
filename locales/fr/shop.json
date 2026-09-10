@@ -7,6 +7,7 @@
     "searchPlaceholder": "Rechercher un soin, un accessoire…",
     "groupHairCare": "Soins capillaires",
     "groupFibres": "Fibres de bananier",
+    "groupFibresAccessories": "Fibres de bananier & accessoires",
     "groupHelmets": "Casques chauffants",
     "groupAccessories": "Accessoires",
     "accessoryFiltersLabel": "Accessoires",
@@ -15,6 +16,7 @@
     "bundleBadge": "Offre promo",
     "bundleContentsTitle": "Ce que contient l'offre",
     "moreFilters": "Plus de filtres",
+    "filtersShort": "Filtres",
     "sortLabel": "Trier",
     "sort": {
       "recent": "Plus récents",

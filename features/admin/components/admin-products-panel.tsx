@@ -43,6 +43,7 @@ const emptyForm = {
   product_type: "hair_care" as "hair_care" | "accessory",
   is_bundle: false,
   is_new: false,
+  is_active: true,
   stock: 10,
   shipping_fee: 0,
   qr_url: "",
@@ -237,6 +238,7 @@ export function AdminProductsPanel() {
       product_type: product.product_type,
       is_bundle: product.is_bundle,
       is_new: product.is_new,
+      is_active: product.is_active !== false,
       stock: product.stock,
       shipping_fee: product.shipping_fee ?? 0,
       qr_url: product.qr_url ?? "",
@@ -337,6 +339,7 @@ export function AdminProductsPanel() {
         product_type: form.product_type,
         is_bundle: isBundle,
         is_new: form.is_new,
+        is_active: form.is_active,
         stock: Number(form.stock),
         shipping_fee: Number(form.shipping_fee) || 0,
         qr_url: form.qr_url.trim(),
@@ -399,6 +402,29 @@ export function AdminProductsPanel() {
     notifyCatalogChanged();
   };
 
+  const toggleActive = async (product: ProductRow) => {
+    const { created_at: _createdAt, ...rest } = product;
+    const response = await adminFetch("/api/admin/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...rest, is_active: !product.is_active }),
+    });
+    const json = (await response.json()) as { error?: string };
+    if (!response.ok) {
+      setFeedback({
+        tone: "error",
+        message: json.error ?? t("admin.saveError"),
+      });
+      return;
+    }
+    setFeedback({
+      tone: "success",
+      message: t("admin.saveSuccess"),
+    });
+    await load();
+    notifyCatalogChanged();
+  };
+
   const createCategory = () => {
     void run(async () => {
       const label = newCategoryLabel.trim();
@@ -453,6 +479,14 @@ export function AdminProductsPanel() {
         onClick={() => void openEdit(product)}
       >
         {t("admin.edit")}
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        className="min-h-11 flex-1 sm:flex-none"
+        onClick={() => void toggleActive(product)}
+      >
+        {product.is_active ? t("admin.hideProduct") : t("admin.showProduct")}
       </Button>
       <ConfirmDeleteButton
         label={t("admin.delete")}
@@ -572,6 +606,11 @@ export function AdminProductsPanel() {
                             {t("admin.bundleBadge")}
                           </span>
                         ) : null}
+                        {product.is_active === false ? (
+                          <span className="rounded-full bg-muted/40 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-muted">
+                            {t("admin.hiddenBadge")}
+                          </span>
+                        ) : null}
                       </div>
                       <p className="mt-0.5 text-sm text-muted">
                         {product.category}
@@ -660,6 +699,11 @@ export function AdminProductsPanel() {
                           {product.is_bundle ? (
                             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-primary">
                               {t("admin.bundleBadge")}
+                            </span>
+                          ) : null}
+                          {product.is_active === false ? (
+                            <span className="rounded-full bg-muted/40 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-muted">
+                              {t("admin.hiddenBadge")}
                             </span>
                           ) : null}
                         </span>
@@ -952,6 +996,25 @@ export function AdminProductsPanel() {
                   }
                 />
                 <span className="text-muted">{t("admin.fields.is_new")}</span>
+              </label>
+              <label className="flex min-h-12 items-center gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-5"
+                  checked={form.is_active}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      is_active: e.target.checked,
+                    }))
+                  }
+                />
+                <span className="text-muted">
+                  {t("admin.fields.is_active")}
+                  <span className="mt-0.5 block text-xs">
+                    {t("admin.fields.is_activeHint")}
+                  </span>
+                </span>
               </label>
 
               <fieldset className="space-y-3">

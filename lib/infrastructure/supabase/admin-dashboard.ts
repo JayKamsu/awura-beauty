@@ -2,6 +2,12 @@ import { listAllOrders } from "@/lib/infrastructure/supabase/orders";
 import { adminListProducts } from "@/lib/infrastructure/supabase/admin-products";
 import { getLoyaltyProfilesByIds } from "@/lib/infrastructure/supabase/loyalty";
 import {
+  getSiteVisitStats,
+  type AdminVisitCountry,
+  type AdminVisitSource,
+  type AdminVisitStats,
+} from "@/lib/infrastructure/supabase/site-visits";
+import {
   isAbandonedPendingOrder,
   paymentBadgeStatus,
   type OrderRow,
@@ -59,6 +65,8 @@ export type AdminDashboardTopProduct = {
   revenue: number;
 };
 
+export type { AdminVisitCountry, AdminVisitSource, AdminVisitStats };
+
 /** KPIs du dashboard admin : commandes/CA sur différentes fenêtres, hors paniers abandonnés jamais payés. */
 export type AdminDashboardStats = {
   ordersToday: number;
@@ -77,6 +85,12 @@ export type AdminDashboardStats = {
   statusBreakdown30d: AdminDashboardStatusBreakdown;
   methodBreakdown30d: AdminDashboardMethodBreakdown;
   topProducts30d: AdminDashboardTopProduct[];
+  visitorsToday: number;
+  visitorsYesterday: number;
+  visitors7d: number;
+  visitsToday: number;
+  sources30d: AdminVisitSource[];
+  countries30d: AdminVisitCountry[];
 };
 
 function startOfToday() {
@@ -120,9 +134,10 @@ function mostFrequent<T extends string>(values: T[]): T | null {
 export async function getAdminDashboardStats(
   lowStockThreshold = 5,
 ): Promise<AdminDashboardStats> {
-  const [allOrders, products] = await Promise.all([
+  const [allOrders, products, visitStats] = await Promise.all([
     listAllOrders(),
     adminListProducts(),
+    getSiteVisitStats(),
   ]);
   // Paniers abandonnés (jamais payés) : hors KPI, ils ne sont pas des ventes ni de vraies commandes à traiter.
   const orders = allOrders.filter((order) => !isAbandonedPendingOrder(order));
@@ -226,6 +241,7 @@ export async function getAdminDashboardStats(
     statusBreakdown30d,
     methodBreakdown30d,
     topProducts30d,
+    ...visitStats,
   };
 }
 

@@ -7,6 +7,7 @@
     "searchPlaceholder": "Buscar un cuidado, un accesorio…",
     "groupHairCare": "Cuidado capilar",
     "groupFibres": "Fibra de plátano",
+    "groupFibresAccessories": "Fibra de plátano y accesorios",
     "groupHelmets": "Cascos térmicos",
     "groupAccessories": "Accesorios",
     "accessoryFiltersLabel": "Accesorios",
@@ -15,6 +16,7 @@
     "bundleBadge": "Oferta promo",
     "bundleContentsTitle": "Qué incluye la oferta",
     "moreFilters": "Más filtros",
+    "filtersShort": "Filtros",
     "sortLabel": "Ordenar",
     "sort": {
       "recent": "Más recientes",

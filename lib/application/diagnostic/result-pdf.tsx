@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, renderToBuffer, Link } from "@react-pdf/renderer";
 import type { DiagnosticContentBlock, DiagnosticRecord } from "@/lib/domain/diagnostic";
+import { isSafeHttpUrl } from "@/lib/domain/diagnostic";
 
 const styles = StyleSheet.create({
   page: {
@@ -89,6 +90,13 @@ function ContentBlock({ block, index }: { block: DiagnosticContentBlock; index: 
     );
   }
   if (block.type === "link") {
+    if (!isSafeHttpUrl(block.url)) {
+      return block.text ? (
+        <Text key={index} style={styles.paragraph}>
+          {block.text}
+        </Text>
+      ) : null;
+    }
     return (
       <Link key={index} src={block.url} style={styles.link}>
         {block.text || block.url}

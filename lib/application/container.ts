@@ -47,6 +47,7 @@ import {
   getProductsBySlugs,
   getRelatedProducts,
   listAllProductSlugs,
+  listHomeBestsellers,
   listProducts,
 } from "@/lib/infrastructure/supabase/products";
 import {
@@ -58,6 +59,7 @@ export const catalogPort: CatalogPort = {
   listProducts,
   getProductBySlug,
   getProductsBySlugs,
+  listHomeBestsellers,
   getRelatedProducts,
   listAllProductSlugs,
 };

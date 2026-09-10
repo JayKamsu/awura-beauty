@@ -56,6 +56,45 @@ export type DiagnosticContentBlock =
   | { type: "list"; items: string[]; ordered?: boolean }
   | { type: "link"; text: string; url: string };
 
+/** Lien vers un produit externe (hors boutique Awura) à inclure dans le bilan. */
+export type DiagnosticExternalProductLink = {
+  label: string;
+  url: string;
+};
+
+const MAX_EXTERNAL_PRODUCT_LINKS = 20;
+const MAX_EXTERNAL_LINK_LABEL = 120;
+const MAX_EXTERNAL_LINK_URL = 500;
+
+/** Indique si l’URL est un lien http(s) sûr (exclut javascript:, data:, etc.). */
+export function isSafeHttpUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url.trim());
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+/** Normalise un JSON inconnu en liste de liens produits externes (ignore les URLs non http(s)). */
+export function parseExternalProductLinks(
+  raw: unknown,
+): DiagnosticExternalProductLink[] {
+  if (!Array.isArray(raw)) return [];
+  const links: DiagnosticExternalProductLink[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const row = item as { label?: unknown; url?: unknown };
+    const label = String(row.label ?? "").trim().slice(0, MAX_EXTERNAL_LINK_LABEL);
+    const url = String(row.url ?? "").trim().slice(0, MAX_EXTERNAL_LINK_URL);
+    if (!label && !url) continue;
+    if (url && !isSafeHttpUrl(url)) continue;
+    links.push({ label: label || url, url });
+    if (links.length >= MAX_EXTERNAL_PRODUCT_LINKS) break;
+  }
+  return links;
+}
+
 /** Brouillon de bilan diagnostic, persisté jusqu'à l'envoi au client. */
 export type DiagnosticResultDraft = {
   appointmentId: string;
@@ -285,6 +324,8 @@ export type DiagnosticAppointment = {
   currency: string;
   stripeSessionId: string | null;
   notes: string;
+  /** Liens produits externes (hors boutique) à injecter dans le modèle de bilan. */
+  externalProductLinks: DiagnosticExternalProductLink[];
   /** Brouillon de bilan à envoyer plus tard (null = aucun). */
   resultDraft: DiagnosticResultDraft | null;
   /** Photos jointes (face, profils, arrière, pointes) — chemins de stockage privé. */

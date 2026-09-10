@@ -12,12 +12,16 @@ import type {
   DiagnosticQuestion,
   DiagnosticQuestionChannel,
   DiagnosticRecord,
+  DiagnosticExternalProductLink,
   DiagnosticResultDraft,
   DiagnosticRoutineStep,
   DiagnosticSettings,
   DiagnosticSlotOverride,
 } from "@/lib/domain/diagnostic";
-import { parseDiagnosticResultDraft } from "@/lib/domain/diagnostic";
+import {
+  parseDiagnosticResultDraft,
+  parseExternalProductLinks,
+} from "@/lib/domain/diagnostic";
 import { getFallbackQuestionnaire } from "@/lib/application/diagnostic/fallback-questionnaire";
 
 const DEFAULT_SETTINGS: DiagnosticSettings = {
@@ -456,6 +460,7 @@ function mapAppointment(row: Record<string, unknown>): DiagnosticAppointment {
       ? String(row.stripe_session_id)
       : null,
     notes: String(row.notes ?? ""),
+    externalProductLinks: parseExternalProductLinks(row.external_product_links),
     resultDraft: parseDiagnosticResultDraft(row.result_draft),
     photos: Array.isArray(row.photos)
       ? (row.photos as DiagnosticAppointment["photos"])
@@ -586,6 +591,8 @@ export async function updateAppointment(
     status?: DiagnosticAppointmentStatus;
     stripeSessionId?: string | null;
     notes?: string;
+    /** Liens produits externes ; tableau vide pour tout retirer. */
+    externalProductLinks?: DiagnosticExternalProductLink[];
     /** Brouillon de bilan ; `null` pour l'effacer après envoi. */
     resultDraft?: DiagnosticResultDraft | null;
     userId?: string | null;
@@ -604,6 +611,9 @@ export async function updateAppointment(
   if (patch.stripeSessionId !== undefined)
     payload.stripe_session_id = patch.stripeSessionId;
   if (patch.notes !== undefined) payload.notes = patch.notes;
+  if (patch.externalProductLinks !== undefined) {
+    payload.external_product_links = patch.externalProductLinks;
+  }
   if (patch.resultDraft !== undefined) payload.result_draft = patch.resultDraft;
   if (patch.userId !== undefined) payload.user_id = patch.userId;
   if (patch.startsAt !== undefined) payload.starts_at = patch.startsAt;

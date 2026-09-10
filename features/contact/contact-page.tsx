@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
+import { WITHDRAWAL_PATH } from "@/lib/legal/pages";
 import { CONTACT_EMAIL } from "@/lib/site";
 
 const SUBJECT_KEYS = [
@@ -12,6 +13,7 @@ const SUBJECT_KEYS = [
   "diagnostic",
   "shipping",
   "returns",
+  "withdrawal",
   "partnership",
   "other",
 ] as const;
@@ -33,7 +35,11 @@ export function ContactPageContent() {
   const fieldClass =
     "w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none transition placeholder:text-muted/70 focus:border-accent";
 
-  const showOrderNumber = subject === "order" || subject === "shipping" || subject === "returns";
+  const showOrderNumber =
+    subject === "order" ||
+    subject === "shipping" ||
+    subject === "returns" ||
+    subject === "withdrawal";
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -99,6 +105,17 @@ export function ContactPageContent() {
             ))}
           </select>
         </label>
+
+        {subject === "withdrawal" ? (
+          <div className="space-y-3 rounded-2xl bg-background-alt px-4 py-4">
+            <p className="text-sm leading-relaxed text-muted">
+              {t("contact.withdrawalHint")}
+            </p>
+            <Button href={WITHDRAWAL_PATH} size="md">
+              {t("legal.withdrawHere")}
+            </Button>
+          </div>
+        ) : null}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="space-y-1.5 text-sm">

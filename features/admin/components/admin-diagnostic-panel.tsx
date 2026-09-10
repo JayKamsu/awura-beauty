@@ -14,13 +14,14 @@ import {
   writeAdminDraft,
 } from "@/features/admin/lib/admin-form-draft";
 import { RescheduleAppointmentPicker } from "@/features/diagnostic/components/reschedule-appointment-picker";
-import { buildDiagnosticResultTemplate } from "@/lib/application/diagnostic/result-template";
+import { buildDiagnosticResultTemplate, withExternalProductLinks } from "@/lib/application/diagnostic/result-template";
 import { AWURA_PRODUCT_SLUGS } from "@/lib/application/diagnostic/recommend";
 import type {
   DiagnosticAppointment,
   DiagnosticAppointmentStatus,
   DiagnosticAvailabilityRule,
   DiagnosticContentBlock,
+  DiagnosticExternalProductLink,
   DiagnosticPhoto,
   DiagnosticQuestion,
   DiagnosticResultDraft,
@@ -30,7 +31,9 @@ import type {
 } from "@/lib/domain/diagnostic";
 import {
   isDiagnosticResultDraftEmpty,
+  isSafeHttpUrl,
   parseDiagnosticResultDraft,
+  parseExternalProductLinks,
 } from "@/lib/domain/diagnostic";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import type { AdminDiagnosticListItem } from "@/lib/infrastructure/supabase/diagnostic-admin";
@@ -295,11 +298,100 @@ function DiagnosticContentBlockEditor({
   );
 }
 
+const MAX_EXTERNAL_LINKS_UI = 20;
+
+/** Conserve les lignes en cours de saisie (y compris URL encore incomplète). */
+function asLinkRows(raw: unknown): DiagnosticExternalProductLink[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.slice(0, MAX_EXTERNAL_LINKS_UI).map((item) => {
+    if (!item || typeof item !== "object") return { label: "", url: "" };
+    const row = item as { label?: unknown; url?: unknown };
+    return { label: String(row.label ?? ""), url: String(row.url ?? "") };
+  });
+}
+
+/** Éditeur label + URL pour les produits externes d’une réservation. */
+function ExternalProductLinksEditor({
+  links,
+  onChange,
+  onSave,
+  saving,
+}: {
+  links: DiagnosticExternalProductLink[];
+  onChange: (links: DiagnosticExternalProductLink[]) => void;
+  onSave?: () => void;
+  saving?: boolean;
+}) {
+  const { t } = useTranslation();
+  const rows = links.length > 0 ? links : [{ label: "", url: "" }];
+
+  return (
+    <div className="space-y-2">
+      {rows.map((link, index) => (
+        <div key={index} className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <input
+            className="w-full rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm"
+            placeholder={t("admin.diagnostic.externalLinksPlaceholderLabel")}
+            value={link.label}
+            onChange={(e) => {
+              const next = rows.map((row, i) =>
+                i === index ? { ...row, label: e.target.value } : row,
+              );
+              onChange(next);
+            }}
+          />
+          <input
+            className="w-full rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm"
+            placeholder={t("admin.diagnostic.externalLinksPlaceholderUrl")}
+            value={link.url}
+            onChange={(e) => {
+              const next = rows.map((row, i) =>
+                i === index ? { ...row, url: e.target.value } : row,
+              );
+              onChange(next);
+            }}
+          />
+          <button
+            type="button"
+            className="shrink-0 text-xs text-accent hover:text-accent-light"
+            onClick={() => onChange(rows.filter((_, i) => i !== index))}
+          >
+            {t("admin.diagnostic.externalLinksRemove")}
+          </button>
+        </div>
+      ))}
+      <div className="flex flex-wrap gap-2">
+        {rows.length < MAX_EXTERNAL_LINKS_UI ? (
+          <button
+            type="button"
+            className="text-xs text-accent hover:text-accent-light"
+            onClick={() => onChange([...rows, { label: "", url: "" }])}
+          >
+            + {t("admin.diagnostic.externalLinksAdd")}
+          </button>
+        ) : null}
+        {onSave ? (
+          <Button
+            type="button"
+            size="md"
+            variant="ghost"
+            pending={saving}
+            onClick={onSave}
+          >
+            {t("admin.diagnostic.externalLinksSave")}
+          </Button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 type Tab = "results" | "appointments" | "sendResult" | "settings";
 type SettingsTab = "questions" | "pricing" | "availability";
 
 const DIAGNOSTIC_RESULT_DRAFT_KEY = "diagnostic-result";
 const CALL_NOTES_DRAFT_KEY = "diagnostic-call-notes";
+const EXTERNAL_LINKS_DRAFT_KEY = "diagnostic-external-links";
 
 type ResultForm = DiagnosticResultDraft;
 
@@ -371,6 +463,10 @@ export function AdminDiagnosticPanel() {
   const [reschedulingId, setReschedulingId] = useState<string | null>(null);
   const [callNotes, setCallNotes] = useState<Record<string, string>>({});
   const [savingNotesId, setSavingNotesId] = useState<string | null>(null);
+  const [externalLinksDraft, setExternalLinksDraft] = useState<
+    Record<string, DiagnosticExternalProductLink[]>
+  >({});
+  const [savingLinksId, setSavingLinksId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -426,6 +522,16 @@ export function AdminDiagnosticPanel() {
   }, []);
 
   useEffect(() => {
+    const saved = readAdminDraft<Record<string, unknown>>(EXTERNAL_LINKS_DRAFT_KEY);
+    if (!saved || typeof saved !== "object") return;
+    const next: Record<string, DiagnosticExternalProductLink[]> = {};
+    for (const [id, raw] of Object.entries(saved)) {
+      next[id] = asLinkRows(raw);
+    }
+    setExternalLinksDraft(next);
+  }, []);
+
+  useEffect(() => {
     if (!draftReady) return;
     const timer = window.setTimeout(() => {
       if (Object.keys(callNotes).length === 0) {
@@ -436,6 +542,18 @@ export function AdminDiagnosticPanel() {
     }, 400);
     return () => window.clearTimeout(timer);
   }, [draftReady, callNotes]);
+
+  useEffect(() => {
+    if (!draftReady) return;
+    const timer = window.setTimeout(() => {
+      if (Object.keys(externalLinksDraft).length === 0) {
+        clearAdminDraft(EXTERNAL_LINKS_DRAFT_KEY);
+        return;
+      }
+      writeAdminDraft(EXTERNAL_LINKS_DRAFT_KEY, externalLinksDraft);
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [draftReady, externalLinksDraft]);
 
   useEffect(() => {
     if (!draftReady) return;
@@ -570,6 +688,14 @@ export function AdminDiagnosticPanel() {
     URL.revokeObjectURL(url);
   };
 
+  const linksFor = (id: string): DiagnosticExternalProductLink[] => {
+    if (!id) return [];
+    if (externalLinksDraft[id] !== undefined) return externalLinksDraft[id];
+    return (
+      appointments.find((item) => item.id === id)?.externalProductLinks ?? []
+    );
+  };
+
   const saveCallNotes = async (id: string) => {
     const notes = callNotes[id];
     if (notes === undefined) return;
@@ -583,6 +709,41 @@ export function AdminDiagnosticPanel() {
     await load();
   };
 
+  const saveExternalLinks = async (id: string) => {
+    const raw = linksFor(id);
+    if (raw.some((link) => link.url.trim() && !isSafeHttpUrl(link.url))) {
+      setFeedback({
+        tone: "error",
+        message: t("admin.diagnostic.externalLinksSaveError"),
+      });
+      return;
+    }
+    const links = parseExternalProductLinks(raw);
+    setSavingLinksId(id);
+    setFeedback(null);
+    const res = await adminFetch("/api/admin/diagnostic/appointments", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, externalProductLinks: links }),
+    });
+    setSavingLinksId(null);
+    if (!res.ok) {
+      setFeedback({
+        tone: "error",
+        message: t("admin.diagnostic.externalLinksSaveError"),
+      });
+      return;
+    }
+    setExternalLinksDraft((prev) => ({ ...prev, [id]: links }));
+    if (resultForm.appointmentId === id) {
+      setResultForm((prev) => ({
+        ...prev,
+        content: withExternalProductLinks(prev.content, links),
+      }));
+    }
+    await load();
+  };
+
   const prepareResultFor = (appointment: DiagnosticAppointment) => {
     const fromDb = appointment.resultDraft;
     const localMatches = resultForm.appointmentId === appointment.id;
@@ -592,6 +753,7 @@ export function AdminDiagnosticPanel() {
         : localMatches && !isDiagnosticResultDraftEmpty(resultForm)
           ? resultForm
           : null;
+    const links = parseExternalProductLinks(linksFor(appointment.id));
     setResultForm({
       appointmentId: appointment.id,
       title:
@@ -603,8 +765,8 @@ export function AdminDiagnosticPanel() {
       scalpAnalysis: source?.scalpAnalysis ?? "",
       detailedFeedback: source?.detailedFeedback ?? "",
       content: source?.content.length
-        ? source.content
-        : buildDiagnosticResultTemplate(appointment.fullName),
+        ? withExternalProductLinks(source.content, links)
+        : buildDiagnosticResultTemplate(appointment.fullName, links),
       slugs: source?.slugs ?? [],
       notifyClient: source?.notifyClient ?? true,
     });
@@ -633,6 +795,9 @@ export function AdminDiagnosticPanel() {
       body: JSON.stringify({
         id: resultForm.appointmentId,
         resultDraft: resultForm,
+        externalProductLinks: parseExternalProductLinks(
+          linksFor(resultForm.appointmentId),
+        ),
       }),
     });
     setSavingDraft(false);
@@ -651,9 +816,10 @@ export function AdminDiagnosticPanel() {
   };
 
   const applyResultTemplate = () => {
+    const links = parseExternalProductLinks(linksFor(resultForm.appointmentId));
     setResultForm((prev) => ({
       ...prev,
-      content: buildDiagnosticResultTemplate(preparingFor ?? ""),
+      content: buildDiagnosticResultTemplate(preparingFor ?? "", links),
     }));
   };
 
@@ -997,6 +1163,37 @@ export function AdminDiagnosticPanel() {
                       </div>
                     </details>
 
+                    {/* Liens produits externes : injectés dans le modèle de bilan */}
+                    <details className="rounded-xl border border-border bg-background-alt/60 px-3 py-2.5">
+                      <summary className="cursor-pointer text-sm font-medium text-primary">
+                        {t("admin.diagnostic.externalLinksLabel")}
+                        {a.externalProductLinks?.length ? (
+                          <span className="ml-2 font-normal text-muted">
+                            ·{" "}
+                            {t("admin.diagnostic.externalLinksSaved", {
+                              count: a.externalProductLinks.length,
+                            })}
+                          </span>
+                        ) : null}
+                      </summary>
+                      <div className="mt-2.5 space-y-2">
+                        <p className="text-xs text-muted">
+                          {t("admin.diagnostic.externalLinksHint")}
+                        </p>
+                        <ExternalProductLinksEditor
+                          links={linksFor(a.id)}
+                          onChange={(links) =>
+                            setExternalLinksDraft((prev) => ({
+                              ...prev,
+                              [a.id]: links,
+                            }))
+                          }
+                          saving={savingLinksId === a.id}
+                          onSave={() => void saveExternalLinks(a.id)}
+                        />
+                      </div>
+                    </details>
+
                     {/* Gestion du RDV : replanifier, annuler, calendrier — moins fréquent */}
                     <details className="rounded-xl border border-border px-3 py-2.5">
                       <summary className="cursor-pointer text-sm font-medium text-muted">
@@ -1123,6 +1320,10 @@ export function AdminDiagnosticPanel() {
                     setResultForm({
                       ...appointment.resultDraft,
                       appointmentId: id,
+                      content: withExternalProductLinks(
+                        appointment.resultDraft.content,
+                        parseExternalProductLinks(linksFor(id)),
+                      ),
                     });
                     setPreparingFor(appointment.fullName);
                     return;
@@ -1272,6 +1473,27 @@ export function AdminDiagnosticPanel() {
                 );
               })}
             </div>
+            {resultForm.appointmentId ? (
+              <div className="space-y-2 border-t border-border pt-3">
+                <p className="text-sm font-medium text-primary">
+                  {t("admin.diagnostic.externalLinksLabel")}
+                </p>
+                <p className="text-xs text-muted">
+                  {t("admin.diagnostic.externalLinksHint")}
+                </p>
+                <ExternalProductLinksEditor
+                  links={linksFor(resultForm.appointmentId)}
+                  onChange={(links) =>
+                    setExternalLinksDraft((prev) => ({
+                      ...prev,
+                      [resultForm.appointmentId]: links,
+                    }))
+                  }
+                  saving={savingLinksId === resultForm.appointmentId}
+                  onSave={() => void saveExternalLinks(resultForm.appointmentId)}
+                />
+              </div>
+            ) : null}
           </section>
 
           {/* 5. Envoi */}

@@ -62,6 +62,7 @@ export {
   getProductsBySlugs,
   getRelatedProducts,
   listAllProductSlugs,
+  listHomeBestsellers,
   listProducts,
 } from "./products";
 export { getBundleComponents } from "./bundles";

@@ -9,6 +9,7 @@
       "returns": "Devoluciones",
       "privacy": "RGPD"
     },
+    "withdrawHere": "Renunciar al contrato aquí",
     "company": {
       "eyebrow": "Identidad",
       "title": "Información de la empresa",
@@ -32,7 +33,7 @@
         "correspondence": {
           "title": "Correspondencia",
           "body": [
-            "Toda correspondencia oficial (desistimiento, reclamación, derechos RGPD) se realiza por e-mail a {{email}}.",
+            "Toda correspondencia oficial (reclamación, derechos RGPD) se realiza por e-mail a {{email}}. El desistimiento se ejerce en línea en « Renunciar al contrato aquí ».",
             "La recogida en tienda, cuando se ofrece en el pago, se realiza en la dirección comunicada en la confirmación del pedido."
           ]
         },
@@ -145,7 +146,7 @@
         "withdrawal": {
           "title": "Desistimiento y devoluciones",
           "body": [
-            "El derecho de desistimiento y las modalidades de devolución se detallan en la política de devolución. Para productos cosméticos desprecintados se aplican las excepciones del Código de consumo francés."
+            "El derecho de desistimiento se ejerce en línea mediante « Renunciar al contrato aquí » (/retractation), o por e-mail a {{email}}. Las modalidades y excepciones (cosméticos desprecintados) se detallan en la política de devolución."
           ]
         },
         "diagnostic": {
@@ -186,7 +187,7 @@
           "title": "Plazo de 14 días",
           "body": [
             "Conforme a los artículos L221-18 y siguientes del Código de consumo francés, dispones de 14 días desde la recepción del paquete (o la puesta a disposición en Point Relais / recogida) para desistir, sin motivar tu decisión.",
-            "Para ejercerlo, escribe a {{email}} indicando el número de pedido y los productos. Puedes usar el formulario de contacto (asunto « Devolución / reclamación »)."
+            "Para ejercerlo, utiliza la función en línea « Renunciar al contrato aquí » (también en el pie de página, el pago y tus pedidos). Recibirás un acuse de recibo por e-mail."
           ]
         },
         "cosmetics": {
@@ -199,7 +200,7 @@
         "process": {
           "title": "Cómo devolver un producto",
           "body": [
-            "1. Contacta {{email}} en el plazo de 14 días. 2. Confirmamos la elegibilidad y la dirección de devolución por e-mail. 3. Devuelve los productos en los 14 días siguientes a tu decisión, en un embalaje protector.",
+            "1. Declara tu desistimiento en « Renunciar al contrato aquí ». 2. Confirmamos la elegibilidad y la dirección de devolución por e-mail. 3. Devuelve los productos en los 14 días siguientes a tu decisión, en un embalaje protector.",
             "Los gastos de devolución corren a tu cargo, salvo error nuestro, producto defectuoso o no conforme."
           ]
         },
@@ -248,23 +249,26 @@
             "Cuenta y pedido: identidad, e-mail, teléfono, dirección de entrega, historial de compras, pagos (identificadores Stripe/PayPal, nunca el número completo de tarjeta), puntos de fidelidad.",
             "Diagnóstico: respuestas al cuestionario, notas y fotos que envías, citas, y enlace de videollamada si aplica.",
             "Técnicos: registros necesarios para la seguridad, idioma y divisa, tema de visualización, carrito local, tokens de sesión y, en producción, trazas de error (Sentry) con textos ocultos.",
-            "Mensajes: contenidos que envías por el chat de soporte, el formulario de contacto o las opiniones."
+            "Medición de audiencia: identificador local anónimo, página de llegada, fuente (referente o UTM) y país aproximado de la red, para las estadísticas del panel. Sin publicidad dirigida ni cesión a redes publicitarias.",
+            "Mensajes: contenidos que envías por el chat de soporte, el formulario de contacto o las opiniones.",
+            "Desistimiento: nombre, apellidos, referencia de pedido, detalle del contrato y e-mail de acuse, para registrar tu declaración y enviarte el acuse de recibo."
           ]
         },
         "purposes": {
           "title": "Finalidades",
           "body": [
-            "Ejecutar pedidos y envíos (Colissimo, Mondial Relay, recogida), emitir facturas y recibos, gestionar la cuenta, la fidelidad y las opiniones.",
+            "Ejecutar pedidos y envíos (Colissimo, Mondial Relay, recogida), emitir facturas y recibos, gestionar la cuenta, la fidelidad, las opiniones y las declaraciones de desistimiento.",
             "Prestar el diagnóstico capilar y las citas asociadas.",
-            "Garantizar la seguridad del sitio, el soporte y mejorar el servicio (estadísticas de error; sin publicidad comportamental de terceros en el sitio)."
+            "Garantizar la seguridad del sitio, el soporte y mejorar el servicio (estadísticas de error; sin publicidad comportamental de terceros en el sitio).",
+            "Medir la audiencia del sitio (número de visitantes y procedencia) para el panel interno."
           ]
         },
         "basis": {
           "title": "Bases jurídicas",
           "body": [
             "Ejecución del contrato: cuenta, pedido, entrega, diagnóstico de pago.",
-            "Obligación legal: facturación, contabilidad, respuestas a las autoridades.",
-            "Interés legítimo: seguridad, prevención del fraude, mejora del sitio.",
+            "Obligación legal: facturación, contabilidad, desistimiento (L221-21 / D221-5), respuestas a las autoridades.",
+            "Interés legítimo: seguridad, prevención del fraude, mejora del sitio, medición de audiencia de primera parte.",
             "Consentimiento: notificaciones push, cookies no esenciales si las hubiera, fotos de diagnóstico más allá de lo estrictamente necesario."
           ]
         },
@@ -279,6 +283,7 @@
           "title": "Cookies y almacenamiento local",
           "body": [
             "El sitio usa cookies y almacenamiento local estrictamente necesarios: sesión de autenticación, carrito, idioma, divisa, tema. No requieren consentimiento como cookies de seguimiento.",
+            "Un identificador local de medición de audiencia (almacenamiento local, primera parte, 13 meses) permite contar visitantes y su procedencia. No se comparte con terceros.",
             "{{siteName}} no deposita cookies publicitarias de terceros. Los prestadores de pago y de inicio de sesión (Stripe, PayPal, Google) pueden depositar las suyas en sus flujos."
           ]
         },
@@ -287,8 +292,10 @@
           "body": [
             "Datos de cuenta: hasta la supresión de la cuenta, luego archivo limitado si aplica una obligación legal.",
             "Pedidos y facturas: 10 años (obligaciones contables).",
+            "Declaraciones de desistimiento: el tiempo necesario como prueba del contrato y para las obligaciones legales.",
             "Diagnóstico y fotos: durante el acompañamiento, luego supresión o anonimización a petición, salvo necesidad de prueba en un litigio.",
-            "Registros técnicos y errores: duración limitada, proporcionada a la seguridad."
+            "Registros técnicos y errores: duración limitada, proporcionada a la seguridad.",
+            "Medición de audiencia: 13 meses como máximo, luego supresión."
           ]
         },
         "rights": {
@@ -311,6 +318,27 @@
           ]
         }
       }
+    },
+    "withdrawalForm": {
+      "eyebrow": "Desistimiento",
+      "intro": "Declara aquí tu decisión de desistir de un contrato celebrado en awurabeauty.com. La función es gratuita y está disponible durante los 14 días legales. Recibirás un acuse de recibo por e-mail (soporte duradero).",
+      "firstName": "Nombre",
+      "lastName": "Apellidos",
+      "orderRef": "Número o referencia de pedido",
+      "orderRefPlaceholder": "Ej. los 8 primeros caracteres de tu pedido",
+      "orderDate": "Fecha de pedido o de recepción",
+      "orderDatePlaceholder": "Ej. 10 de septiembre de 2026",
+      "optional": "opcional",
+      "contractDetails": "Productos o contrato afectados",
+      "contractDetailsPlaceholder": "Indica los cuidados o accesorios que deseas devolver, y cualquier detalle útil.",
+      "ackEmail": "E-mail para el acuse de recibo",
+      "ackEmailHint": "Enviamos a esta dirección la confirmación con fecha y hora de tu desistimiento.",
+      "legalNote": "Los productos cosméticos desprecintados no pueden devolverse por razones de higiene (art. L221-28 5.º). El reembolso se realiza tras la recepción de los productos, según la política de devolución.",
+      "confirm": "Confirmar el desistimiento",
+      "successTitle": "Desistimiento registrado",
+      "successBody": "Tu declaración se recibió el {{date}}. Se envió un acuse de recibo a {{email}}. Consérvalo: acredita tu desistimiento.",
+      "error": "No se ha podido registrar tu declaración. Inténtalo de nuevo en un momento.",
+      "ackFailed": "No se ha podido confirmar tu declaración por e-mail. Vuelve a intentarlo o escríbenos si continúa."
     }
   }
 }

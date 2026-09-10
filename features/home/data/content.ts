@@ -77,14 +77,14 @@ export const CATALOG: HomeProduct[] = [
 /** Alias page d’accueil : les 5 produits */
 export const BESTSELLERS = CATALOG;
 
-/** Images statiques utilisées par les sections de la page d'accueil (hero, avatars). */
+/** Images statiques utilisées par les sections de la page d'accueil (hero, pastilles preuve sociale). */
 export const HOME_IMAGES = {
   hero: "/images/products/produit-1-beurre.jpg",
   feature: "/images/products/produit-4-lotion.jpg",
   featureProduct: "/images/products/produit-4-lotion.jpg",
   avatars: [
-    "/images/products/produit-1-beurre.jpg",
-    "/images/products/produit-2-demelant.jpg",
-    "/images/products/produit-5-savon.jpg",
+    "/images/ingredients/ingredient-1.jpg",
+    "/images/ingredients/ingredient-3.jpg",
+    "/images/ingredients/ingredient-5.jpg",
   ],
 } as const;

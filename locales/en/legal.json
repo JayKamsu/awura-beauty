@@ -9,6 +9,7 @@
       "returns": "Returns",
       "privacy": "Privacy"
     },
+    "withdrawHere": "Withdraw from the contract here",
     "company": {
       "eyebrow": "Identity",
       "title": "Company information",
@@ -32,7 +33,7 @@
         "correspondence": {
           "title": "Correspondence",
           "body": [
-            "Official correspondence (withdrawal, complaints, GDPR requests) is sent by email to {{email}}.",
+            "Official correspondence (complaints, GDPR requests) is sent by email to {{email}}. Withdrawal is exercised online via “Withdraw from the contract here”.",
             "In-store pickup, when offered at checkout, takes place at the address given in the order confirmation."
           ]
         },
@@ -145,7 +146,7 @@
         "withdrawal": {
           "title": "Withdrawal and returns",
           "body": [
-            "The right of withdrawal and return process are detailed in the returns policy. Unsealed cosmetics are subject to exceptions under the French Consumer Code."
+            "The right of withdrawal is exercised online via “Withdraw from the contract here” (/retractation), or by email to {{email}}. Terms and exceptions (unsealed cosmetics) are detailed in the returns policy."
           ]
         },
         "diagnostic": {
@@ -186,7 +187,7 @@
           "title": "14-day period",
           "body": [
             "Under articles L221-18 et seq. of the French Consumer Code, you have 14 days from receipt of the parcel (or availability at a pickup point / in-store) to withdraw, without giving a reason.",
-            "To exercise this right, write to {{email}} with your order number and the products concerned. You may use the contact form (subject “Return / complaint”)."
+            "To exercise this right, use the online feature “Withdraw from the contract here” (also in the footer, checkout and your orders). An acknowledgement of receipt will be emailed to you."
           ]
         },
         "cosmetics": {
@@ -199,7 +200,7 @@
         "process": {
           "title": "How to return a product",
           "body": [
-            "1. Contact {{email}} within 14 days. 2. We confirm eligibility and the return address by email. 3. Send the products back within 14 days of your decision, in protective packaging.",
+            "1. Submit your withdrawal via “Withdraw from the contract here”. 2. We confirm eligibility and the return address by email. 3. Send the products back within 14 days of your decision, in protective packaging.",
             "Return shipping is at your expense, except where we made an error, or the product is defective or non-conforming."
           ]
         },
@@ -248,23 +249,26 @@
             "Account and orders: identity, email, phone, shipping address, purchase history, payments (Stripe/PayPal IDs, never the full card number), loyalty points.",
             "Diagnostic: questionnaire answers, notes and photos you send, appointment slots, and a video-call link if applicable.",
             "Technical: security logs, language and currency, display theme, local cart, session tokens, and in production error traces (Sentry) with text masked.",
-            "Messages: content you send via support chat, the contact form or reviews."
+            "Audience measurement: anonymous local identifier, landing page, source (referrer or UTM) and approximate network country, for dashboard statistics. No targeted advertising, no sharing with ad networks.",
+            "Messages: content you send via support chat, the contact form or reviews.",
+            "Withdrawal: first name, last name, order reference, contract details and acknowledgement email, to record your declaration and send the acknowledgement of receipt."
           ]
         },
         "purposes": {
           "title": "Purposes",
           "body": [
-            "To fulfil orders and delivery (Colissimo, Mondial Relay, pickup), issue invoices and receipts, manage the account, loyalty and reviews.",
+            "To fulfil orders and delivery (Colissimo, Mondial Relay, pickup), issue invoices and receipts, manage the account, loyalty, reviews and withdrawal declarations.",
             "To provide the hair diagnostic and related appointments.",
-            "To keep the site secure, support customers, and improve the service (error stats; no third-party behavioural advertising on the site)."
+            "To keep the site secure, support customers, and improve the service (error stats; no third-party behavioural advertising on the site).",
+            "To measure site traffic (visitor numbers and sources) for the internal dashboard."
           ]
         },
         "basis": {
           "title": "Legal bases",
           "body": [
             "Contract performance: account, order, delivery, paid diagnostic.",
-            "Legal obligation: invoicing, accounting, responses to authorities.",
-            "Legitimate interest: security, fraud prevention, site improvement.",
+            "Legal obligation: invoicing, accounting, withdrawal (L221-21 / D221-5), responses to authorities.",
+            "Legitimate interest: security, fraud prevention, site improvement, first-party audience measurement.",
             "Consent: push notifications, non-essential cookies if any, diagnostic photos beyond what is strictly necessary."
           ]
         },
@@ -279,6 +283,7 @@
           "title": "Cookies and local storage",
           "body": [
             "The site uses strictly necessary cookies and local storage: auth session, cart, language, currency, theme. They do not require consent as tracking cookies.",
+            "A first-party local audience-measurement identifier (local storage, 13-month retention) counts visitors and their sources. It is not shared with third parties.",
             "{{siteName}} does not set third-party advertising cookies. Payment and login providers (Stripe, PayPal, Google) may set their own cookies during their flows."
           ]
         },
@@ -287,8 +292,10 @@
           "body": [
             "Account data: until account deletion, then limited archiving if a legal duty applies.",
             "Orders and invoices: 10 years (accounting duties).",
+            "Withdrawal declarations: for as long as needed as evidence of the contract and to meet legal duties.",
             "Diagnostic and photos: for the duration of the service, then deletion or anonymisation on request, unless needed as evidence in a dispute.",
-            "Technical logs and errors: a limited period proportionate to security."
+            "Technical logs and errors: a limited period proportionate to security.",
+            "Audience measurement: 13 months at most, then deletion."
           ]
         },
         "rights": {
@@ -311,6 +318,27 @@
           ]
         }
       }
+    },
+    "withdrawalForm": {
+      "eyebrow": "Withdrawal",
+      "intro": "Declare here your decision to withdraw from a contract concluded on awurabeauty.com. The feature is free and available during the 14-day legal period. An acknowledgement of receipt will be emailed to you (durable medium).",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "orderRef": "Order number or reference",
+      "orderRefPlaceholder": "E.g. the first 8 characters of your order",
+      "orderDate": "Order or delivery date",
+      "orderDatePlaceholder": "E.g. 10 September 2026",
+      "optional": "optional",
+      "contractDetails": "Products or contract concerned",
+      "contractDetailsPlaceholder": "List the products you wish to return, and any useful detail.",
+      "ackEmail": "Email for the acknowledgement of receipt",
+      "ackEmailHint": "We send the time-stamped confirmation of your withdrawal to this address.",
+      "legalNote": "Unsealed cosmetic products cannot be returned for hygiene reasons (art. L221-28 5°). Refunds follow receipt of returned goods, as set out in the returns policy.",
+      "confirm": "Confirm withdrawal",
+      "successTitle": "Withdrawal recorded",
+      "successBody": "Your declaration was received on {{date}}. An acknowledgement of receipt was sent to {{email}}. Keep it: it evidences your withdrawal.",
+      "error": "We could not record your declaration. Please try again shortly.",
+      "ackFailed": "Your declaration could not be confirmed by email. Please try again, or write to us if it continues."
     }
   }
 }

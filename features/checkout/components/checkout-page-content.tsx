@@ -22,6 +22,7 @@ import {
 } from "@/features/checkout/components/checkout-brand-marks";
 import type { RelayPoint } from "@/lib/domain";
 import { formatPrice } from "@/lib/format/price";
+import { WITHDRAWAL_PATH } from "@/lib/legal/pages";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 import type {
   PaymentMethod,
@@ -894,6 +895,14 @@ export function CheckoutPageContent() {
               className="text-primary underline decoration-accent decoration-2 underline-offset-4 hover:text-accent"
             >
               {t("legal.nav.privacy")}
+            </Link>
+            .{" "}
+            {t("checkout.withdrawNotice")}{" "}
+            <Link
+              href={WITHDRAWAL_PATH}
+              className="text-primary underline decoration-accent decoration-2 underline-offset-4 hover:text-accent"
+            >
+              {t("legal.withdrawHere")}
             </Link>
             .
           </span>

@@ -1,11 +1,13 @@
 "use client";
 
 import { JsonLd } from "@/components/seo/json-ld";
+import { Button } from "@/components/ui/button";
 import { CompanyCard } from "@/features/legal/company-card";
 import { LegalNav } from "@/features/legal/legal-nav";
 import {
   LEGAL_PAGES,
   LEGAL_UPDATED_ISO,
+  WITHDRAWAL_PATH,
   type LegalSlug,
 } from "@/lib/legal/pages";
 import { breadcrumbJsonLd } from "@/lib/seo/json-ld";
@@ -121,6 +123,12 @@ export function LegalPage({ slug }: { slug: LegalSlug }) {
       </header>
 
       <LegalNav current={slug} />
+
+      {slug === "politique-de-retour" ? (
+        <Button href={WITHDRAWAL_PATH} size="lg">
+          {t("legal.withdrawHere")}
+        </Button>
+      ) : null}
 
       {showCompanyFirst ? <CompanyCard /> : null}
 

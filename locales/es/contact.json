@@ -19,9 +19,11 @@
       "diagnostic": "Diagnóstico capilar",
       "shipping": "Envío",
       "returns": "Devolución / reclamación",
+      "withdrawal": "Desistimiento / reembolso 14 días",
       "partnership": "Colaboración / prensa",
       "other": "Otra solicitud"
     },
+    "withdrawalHint": "Para ejercer tu derecho de desistimiento en 14 días, usa el formulario en línea: recibirás un acuse de recibo por e-mail. También puedes escribir abajo si tienes una pregunta sobre un reembolso en curso.",
     "optional": "opcional",
     "orderNumberPlaceholder": "Ej. AWURA-10234",
     "submit": "Enviar mensaje",

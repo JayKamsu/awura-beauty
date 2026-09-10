@@ -23,6 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/mentions-legales",
     "/conditions-utilisation",
     "/politique-de-retour",
+    "/retractation",
     "/confidentialite",
   ].map((path) => ({
     url: `${base}${path || "/"}`,
@@ -33,6 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         : path.startsWith("/mentions") ||
             path.startsWith("/conditions") ||
             path.startsWith("/politique") ||
+            path.startsWith("/retractation") ||
             path.startsWith("/confidentialite") ||
             path.startsWith("/informations")
           ? "monthly"
@@ -49,6 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
               : path.startsWith("/mentions") ||
                   path.startsWith("/conditions") ||
                   path.startsWith("/politique") ||
+                  path.startsWith("/retractation") ||
                   path.startsWith("/confidentialite") ||
                   path.startsWith("/informations")
                 ? 0.4

@@ -13,15 +13,13 @@ type ProductGridProps = {
   products: ProductCardData[];
 };
 
-/** Classe un produit : fibre de bananier, accessoire (dont casque), ou soin. */
-function accessoryKind(
-  product: ProductCardData,
-): "fibres" | "other" | null {
-  if (isFibreProduct(product)) return "fibres";
-  if (product.productType === "accessory" || isHelmetProduct(product)) {
-    return "other";
-  }
-  return null;
+/** Indique si le produit est une fibre, un casque ou un accessoire. */
+function isAccessoryOrFibre(product: ProductCardData): boolean {
+  return (
+    isFibreProduct(product) ||
+    product.productType === "accessory" ||
+    isHelmetProduct(product)
+  );
 }
 
 type ShopSectionProps = {
@@ -30,7 +28,7 @@ type ShopSectionProps = {
   railLabel: string;
 };
 
-/** Section titrée d'une famille de produits (soins, fibres, accessoires). */
+/** Section titrée d'une famille de produits (soins, fibres et accessoires). */
 function ShopSection({ title, products, railLabel }: ShopSectionProps) {
   if (products.length === 0) return null;
   return (
@@ -42,8 +40,8 @@ function ShopSection({ title, products, railLabel }: ShopSectionProps) {
 }
 
 /**
- * Grille de cartes produits pour la boutique. Soins, fibres de bananier
- * et accessoires (casque chauffant inclus) sont affichés en sections distinctes.
+ * Grille de cartes produits pour la boutique. Les soins sont séparés des
+ * fibres de bananier et accessoires, regroupés dans une même section.
  */
 export function ProductGrid({ products }: ProductGridProps) {
   const { t } = useTranslation();
@@ -54,25 +52,21 @@ export function ProductGrid({ products }: ProductGridProps) {
     );
   }
 
-  const fibres = products.filter((p) => accessoryKind(p) === "fibres");
-  const accessories = products.filter((p) => accessoryKind(p) === "other");
-  const groupedIds = new Set([...fibres, ...accessories].map((p) => p.id));
-  const hairCare = products.filter((p) => !groupedIds.has(p.id));
+  const accessories = [
+    ...products.filter((p) => isFibreProduct(p)),
+    ...products.filter((p) => isAccessoryOrFibre(p) && !isFibreProduct(p)),
+  ];
+  const accessoryIds = new Set(accessories.map((p) => p.id));
+  const hairCare = products.filter((p) => !accessoryIds.has(p.id));
 
-  const sections = [hairCare, fibres, accessories].filter(
-    (group) => group.length > 0,
-  );
-  const showTitles = sections.length > 1 || fibres.length > 0;
-
+  const railLabel = t("shop.productsRail");
   const count = (
     <p className="text-sm text-muted">
       {t("shop.productsCount", { count: products.length })}
     </p>
   );
 
-  const railLabel = t("shop.productsRail");
-
-  if (!showTitles) {
+  if (hairCare.length === 0 || accessories.length === 0) {
     return (
       <div className="space-y-5">
         {count}
@@ -90,14 +84,7 @@ export function ProductGrid({ products }: ProductGridProps) {
         railLabel={railLabel}
       />
       <ShopSection
-        title={t("shop.groupFibres", {
-          defaultValue: "Fibres de bananier",
-        })}
-        products={fibres}
-        railLabel={railLabel}
-      />
-      <ShopSection
-        title={t("shop.groupAccessories")}
+        title={t("shop.groupFibresAccessories")}
         products={accessories}
         railLabel={railLabel}
       />

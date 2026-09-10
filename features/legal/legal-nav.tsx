@@ -1,12 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { LEGAL_PAGES, LEGAL_SLUGS, type LegalSlug } from "@/lib/legal/pages";
+import { LEGAL_PAGES, LEGAL_SLUGS, WITHDRAWAL_PATH, type LegalSlug } from "@/lib/legal/pages";
 
-/** Navigation secondaire entre les pages légales. */
-export function LegalNav({ current }: { current: LegalSlug }) {
+const NAV_LINK =
+  "rounded-full px-3.5 py-1.5 text-sm transition";
+const NAV_ACTIVE = "bg-primary text-background";
+const NAV_IDLE = "bg-background-alt text-muted hover:text-primary";
+
+/** Navigation secondaire entre les pages légales et le formulaire de rétractation. */
+export function LegalNav({ current }: { current?: LegalSlug }) {
   const { t } = useTranslation();
+  const pathname = usePathname();
+  const withdrawalActive = pathname === WITHDRAWAL_PATH;
 
   return (
     <nav
@@ -20,16 +28,19 @@ export function LegalNav({ current }: { current: LegalSlug }) {
             key={slug}
             href={`/${slug}`}
             aria-current={active ? "page" : undefined}
-            className={`rounded-full px-3.5 py-1.5 text-sm transition ${
-              active
-                ? "bg-primary text-background"
-                : "bg-background-alt text-muted hover:text-primary"
-            }`}
+            className={`${NAV_LINK} ${active ? NAV_ACTIVE : NAV_IDLE}`}
           >
             {t(`legal.nav.${LEGAL_PAGES[slug].i18nKey}`)}
           </Link>
         );
       })}
+      <Link
+        href={WITHDRAWAL_PATH}
+        aria-current={withdrawalActive ? "page" : undefined}
+        className={`${NAV_LINK} ${withdrawalActive ? NAV_ACTIVE : NAV_IDLE}`}
+      >
+        {t("legal.withdrawHere")}
+      </Link>
     </nav>
   );
 }

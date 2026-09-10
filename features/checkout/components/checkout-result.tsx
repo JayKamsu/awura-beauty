@@ -13,6 +13,7 @@ import {
   resolvePaymentStatus,
 } from "@/lib/application/checkout/payment-status";
 import { formatPrice } from "@/lib/format/price";
+import { WITHDRAWAL_PATH } from "@/lib/legal/pages";
 import { listMyOrders } from "@/lib/infrastructure/supabase/orders";
 import type { OrderRow } from "@/lib/infrastructure/supabase/order-types";
 
@@ -174,6 +175,15 @@ export function CheckoutResult({
         <Button href="/boutique" variant="primary-outline" size="lg">
           {t("cart.continueShopping")}
         </Button>
+        {status === "success" && orderId ? (
+          <Button
+            href={`${WITHDRAWAL_PATH}?commande=${encodeURIComponent(orderId)}`}
+            variant="ghost"
+            size="lg"
+          >
+            {t("legal.withdrawHere")}
+          </Button>
+        ) : null}
       </div>
       {status === "success" ? (
         <p className="text-sm text-muted">

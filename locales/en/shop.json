@@ -7,6 +7,7 @@
     "searchPlaceholder": "Search a care product, an accessory…",
     "groupHairCare": "Hair care",
     "groupFibres": "Banana fiber",
+    "groupFibresAccessories": "Banana fiber & accessories",
     "groupHelmets": "Heating caps",
     "groupAccessories": "Accessories",
     "accessoryFiltersLabel": "Accessories",
@@ -15,6 +16,7 @@
     "bundleBadge": "Promo offer",
     "bundleContentsTitle": "What's included in the offer",
     "moreFilters": "More filters",
+    "filtersShort": "Filters",
     "sortLabel": "Sort",
     "sort": {
       "recent": "Newest",

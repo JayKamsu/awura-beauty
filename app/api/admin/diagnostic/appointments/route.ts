@@ -9,8 +9,11 @@ import {
   updateAppointment,
 } from "@/lib/infrastructure/supabase/diagnostic-admin";
 import {
+  isSafeHttpUrl,
   parseDiagnosticResultDraft,
+  parseExternalProductLinks,
   type DiagnosticAppointmentStatus,
+  type DiagnosticExternalProductLink,
 } from "@/lib/domain/diagnostic";
 
 /** Liste les rendez-vous diagnostic, ou l'historique si `kind=history` (admin). */
@@ -29,7 +32,7 @@ export async function GET(request: Request) {
 
 const MAX_RESULT_DRAFT_BYTES = 200_000;
 
-/** Met à jour le statut, les notes, le brouillon de bilan, ou replanifie un rendez-vous diagnostic (admin). */
+/** Met à jour le statut, les notes, les liens produits, le brouillon de bilan, ou replanifie un rendez-vous diagnostic (admin). */
 export async function PATCH(request: Request) {
   const auth = await requireAdminFromRequest(request);
   if ("error" in auth) return auth.error;
@@ -37,6 +40,7 @@ export async function PATCH(request: Request) {
     id?: string;
     status?: DiagnosticAppointmentStatus;
     notes?: string;
+    externalProductLinks?: unknown;
     resultDraft?: unknown;
     startsAt?: string;
   };
@@ -80,9 +84,30 @@ export async function PATCH(request: Request) {
     }
   }
 
+  let externalProductLinks: DiagnosticExternalProductLink[] | undefined;
+  if ("externalProductLinks" in body) {
+    if (!Array.isArray(body.externalProductLinks)) {
+      return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    }
+    for (const item of body.externalProductLinks) {
+      const url =
+        item && typeof item === "object"
+          ? String((item as { url?: unknown }).url ?? "").trim()
+          : "";
+      if (url && !isSafeHttpUrl(url)) {
+        return NextResponse.json(
+          { error: "Invalid product link" },
+          { status: 400 },
+        );
+      }
+    }
+    externalProductLinks = parseExternalProductLinks(body.externalProductLinks);
+  }
+
   const appointment = await updateAppointment(body.id, {
     status: body.status,
     notes: body.notes,
+    externalProductLinks,
     resultDraft,
   });
   if (!appointment) {

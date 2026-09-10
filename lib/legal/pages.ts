@@ -1,5 +1,8 @@
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
+/** URL de la fonctionnalité de rétractation en ligne (art. L221-21 / D221-5). */
+export const WITHDRAWAL_PATH = "/retractation";
+
 /** Slug d’une page légale publique (URL racine `/{slug}`). */
 export const LEGAL_SLUGS = [
   "informations-entreprise",
@@ -13,7 +16,7 @@ export const LEGAL_SLUGS = [
 export type LegalSlug = (typeof LEGAL_SLUGS)[number];
 
 /** Date de dernière mise à jour des textes légaux (ISO calendaire). */
-export const LEGAL_UPDATED_ISO = "2026-08-18";
+export const LEGAL_UPDATED_ISO = "2026-09-10";
 
 type LegalPageConfig = {
   slug: LegalSlug;

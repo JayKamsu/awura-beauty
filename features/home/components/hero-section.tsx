@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Stars } from "@/components/ui/stars";
@@ -9,6 +10,26 @@ import {
   usePageCmsFields,
 } from "@/features/cms/context/page-cms-context";
 import { HOME_IMAGES } from "@/features/home/data/content";
+import type { PublicTestimonial } from "@/lib/domain/testimonial";
+
+function avatarSourcesFromTestimonials(
+  items: PublicTestimonial[],
+  fallback: readonly string[],
+): string[] {
+  const fromClients = [
+    ...new Set(
+      items
+        .filter((item) => item.kind === "site" && item.imageUrl)
+        .map((item) => item.imageUrl as string),
+    ),
+  ];
+  const merged = [...fromClients];
+  for (const src of fallback) {
+    if (merged.length >= 3) break;
+    if (!merged.includes(src)) merged.push(src);
+  }
+  return merged.slice(0, 3);
+}
 
 /** Bannière principale de la page d'accueil : accroche, CTA vers le diagnostic/la boutique et preuve sociale. */
 export function HeroSection() {
@@ -18,10 +39,32 @@ export function HeroSection() {
   const subtitle = cmsOr(cms, "subtitle", t("home.hero.subtitle"));
   const heroImage = cmsOr(cms, "image_url", HOME_IMAGES.hero);
   const ctaLabel = cms.cta_label?.trim();
+  const [avatars, setAvatars] = useState<string[]>([...HOME_IMAGES.avatars]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/testimonials?limit=12&kinds=site")
+      .then((res) => res.json())
+      .then((json: { testimonials?: PublicTestimonial[] }) => {
+        if (cancelled) return;
+        setAvatars(
+          avatarSourcesFromTestimonials(
+            json.testimonials ?? [],
+            HOME_IMAGES.avatars,
+          ),
+        );
+      })
+      .catch(() => {
+        /* conserve les visuels de secours */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
-    <section className="relative overflow-hidden bg-background">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 pt-4 pb-12 md:px-6 md:pt-6 md:pb-14 lg:grid-cols-2 lg:items-stretch lg:gap-12 lg:pt-16 lg:pb-20">
+    <section className="relative flex min-h-[calc(100dvh-var(--awura-chrome-top,4.5rem)-5rem)] flex-col overflow-hidden bg-background lg:min-h-[calc(100dvh-var(--awura-chrome-top,5.5rem))]">
+      <div className="mx-auto grid w-full max-w-7xl flex-1 gap-8 px-4 py-6 md:px-6 lg:grid-cols-2 lg:items-stretch lg:gap-12 lg:py-8">
         <div className="order-2 space-y-8 lg:order-1">
           <div className="space-y-5">
             {cmsTitle ? (
@@ -51,7 +94,7 @@ export function HeroSection() {
 
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex -space-x-2">
-              {HOME_IMAGES.avatars.map((src, index) => (
+              {avatars.map((src, index) => (
                 <div
                   key={src}
                   className="relative size-10 overflow-hidden rounded-full border-2 border-background"

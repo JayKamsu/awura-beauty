@@ -29,9 +29,12 @@ alter table public.products
 
 alter table public.products enable row level security;
 
+alter table public.products
+  add column if not exists is_active boolean not null default true;
+
 drop policy if exists "Products are publicly readable" on public.products;
 create policy "Products are publicly readable"
-  on public.products for select to anon, authenticated using (true);
+  on public.products for select to anon, authenticated using (is_active = true);
 
 insert into public.products (
   slug, name, price, short_description, description, ingredients, usage,

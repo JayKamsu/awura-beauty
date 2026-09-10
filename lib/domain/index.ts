@@ -30,6 +30,7 @@ export type {
   DiagnosticAnswers,
   DiagnosticAppointment,
   DiagnosticChannel,
+  DiagnosticExternalProductLink,
   DiagnosticLocale,
   DiagnosticOption,
   DiagnosticPhoto,
@@ -44,6 +45,11 @@ export type {
   HabitsAnswer,
   HairTypeAnswer,
   ScalpAnswer,
+} from "@/lib/domain/diagnostic";
+
+export {
+  isSafeHttpUrl,
+  parseExternalProductLinks,
 } from "@/lib/domain/diagnostic";
 
 export type {
@@ -124,6 +130,17 @@ export {
   buildOrderTotals,
 } from "@/lib/domain/loyalty";
 export type { LoyaltyReason } from "@/lib/domain/loyalty";
+
+export {
+  parseWithdrawalInput,
+} from "@/lib/domain/withdrawal";
+export type { WithdrawalDeclaration } from "@/lib/domain/withdrawal";
+
+export {
+  classifyVisitSource,
+  parseSiteVisitInput,
+} from "@/lib/domain/site-visit";
+export type { SiteVisitInput } from "@/lib/domain/site-visit";
 
 export {
   DEFAULT_ABOUT_SECTIONS,

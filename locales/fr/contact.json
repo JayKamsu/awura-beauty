@@ -19,9 +19,11 @@
       "diagnostic": "Diagnostic capillaire",
       "shipping": "Livraison",
       "returns": "Retour / réclamation",
+      "withdrawal": "Rétractation / remboursement 14 jours",
       "partnership": "Partenariat / presse",
       "other": "Autre demande"
     },
+    "withdrawalHint": "Pour exercer ton droit de rétractation sous 14 jours, utilise le formulaire en ligne : tu reçois un accusé de réception par e-mail. Tu peux aussi nous écrire ci-dessous pour une question sur un remboursement en cours.",
     "optional": "facultatif",
     "orderNumberPlaceholder": "Ex. AWURA-10234",
     "submit": "Envoyer le message",

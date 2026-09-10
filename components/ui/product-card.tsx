@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -15,24 +15,24 @@ import {
 } from "@/lib/domain/product-color";
 import { isFibreProduct } from "@/features/shop/utils/map-product";
 
-/** Données produit nécessaires à l'affichage d'une carte dans une grille boutique. */
+/** DonnÃ©es produit nÃ©cessaires Ã  l'affichage d'une carte dans une grille boutique. */
 export type ProductCardData = {
   id: string;
   slug: string;
   name: string;
   shortDescription: string;
   price: number;
-  /** Prix barré (avant réduction) ; undefined/null = pas de réduction. */
+  /** Prix barrÃ© (avant rÃ©duction) ; undefined/null = pas de rÃ©duction. */
   compareAtPrice?: number | null;
   image: string;
   ingredientImage?: string;
   lifestyleImage?: string | null;
   isNew?: boolean;
   productType?: "hair_care" | "accessory";
-  /** Catégorie boutique (fibres, casques, accessoires…) pour le groupement de la grille. */
+  /** CatÃ©gorie boutique (fibres, casques, accessoiresâ€¦) pour le groupement de la grille. */
   category?: string;
   stock?: number;
-  /** Variantes couleur : si renseigné, l'ajout panier se fait depuis la fiche. */
+  /** Variantes couleur : si renseignÃ©, l'ajout panier se fait depuis la fiche. */
   colorVariants?: ProductColorKey[];
 };
 
@@ -42,7 +42,7 @@ type ProductColorSwatchProps = {
   size?: "sm" | "md";
 };
 
-/** Pastille visuelle d'une couleur produit (tokens swatch du thème). */
+/** Pastille visuelle d'une couleur produit (tokens swatch du thÃ¨me). */
 export function ProductColorSwatch({
   colorKey,
   selected = false,
@@ -71,19 +71,12 @@ type ProductCardProps = {
   compact?: boolean;
 };
 
-function isCoarsePointer(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia("(hover: none), (pointer: coarse)").matches;
-}
-
 /** Carte produit avec visuel, prix et ajout rapide au panier. */
 export function ProductCard({ product, onAddToCart, compact = false }: ProductCardProps) {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();
   const { addItem } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
-  /** Mobile / tactile : bascule manuelle (desktop = hover CSS). */
-  const [touchReveal, setTouchReveal] = useState(false);
   const [added, setAdded] = useState(false);
 
   const hasIngredientsImage = Boolean(product.ingredientImage);
@@ -115,12 +108,6 @@ export function ProductCard({ product, onAddToCart, compact = false }: ProductCa
     window.setTimeout(() => setAdded(false), 1800);
   };
 
-  const handleMediaClick = (event: React.MouseEvent) => {
-    if (!hasIngredientsImage || !isCoarsePointer()) return;
-    event.preventDefault();
-    setTouchReveal((value) => !value);
-  };
-
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl bg-background-alt/60">
       <div
@@ -128,7 +115,7 @@ export function ProductCard({ product, onAddToCart, compact = false }: ProductCa
           compact ? "aspect-[3/4] sm:aspect-[4/5]" : "aspect-[4/5]"
         }`}
       >
-        <div className="absolute left-3 top-3 z-20 flex flex-col gap-1.5">
+        <div className="pointer-events-none absolute left-3 top-3 z-20 flex flex-col gap-1.5">
           {product.isNew ? (
             <span className="rounded-md bg-primary px-2.5 py-1 text-[10px] font-semibold tracking-wider text-background">
               {t("shop.newBadge")}
@@ -177,35 +164,42 @@ export function ProductCard({ product, onAddToCart, compact = false }: ProductCa
             </svg>
           </button>
           {product.stock === 0 ? (
-            <span className="rounded-md bg-foreground/80 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-background">
+            <span className="pointer-events-none rounded-md bg-foreground/80 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-background">
               {t("shop.outOfStock")}
             </span>
           ) : null}
         </div>
 
-        <Link
-          href={href}
-          className="absolute inset-0 z-0 block"
-          aria-label={t("shop.viewProduct")}
-          onClick={handleMediaClick}
+        <span
+          aria-hidden
+          className={`absolute inset-0 transition-[opacity,transform] duration-500 ease-out ${
+            hasIngredientsImage
+              ? "[@media(hover:hover)]:group-hover:scale-95 [@media(hover:hover)]:group-hover:opacity-0"
+              : ""
+          }`}
         >
+          <Image
+            src={product.image}
+            alt=""
+            fill
+            className="object-cover transition duration-500 [@media(hover:hover)]:group-hover:scale-105"
+            sizes={
+              compact
+                ? "(max-width: 640px) 42vw, (max-width: 1280px) 33vw, 20vw"
+                : "(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 20vw"
+            }
+          />
+        </span>
+        {hasIngredientsImage ? (
           <span
             aria-hidden
-            className={`absolute inset-0 transition-[opacity,transform] duration-500 ease-out ${
-              touchReveal
-                ? "pointer-events-none scale-95 opacity-0"
-                : "scale-100 opacity-100"
-            } ${
-              hasIngredientsImage
-                ? "[@media(hover:hover)]:group-hover:pointer-events-none [@media(hover:hover)]:group-hover:scale-95 [@media(hover:hover)]:group-hover:opacity-0"
-                : ""
-            }`}
+            className="pointer-events-none absolute inset-0 scale-95 opacity-0 transition-[opacity,transform] duration-500 ease-out [@media(hover:hover)]:group-hover:scale-100 [@media(hover:hover)]:group-hover:opacity-100"
           >
             <Image
-              src={product.image}
-              alt={product.name}
+              src={product.ingredientImage!}
+              alt=""
               fill
-              className="object-cover transition duration-500 [@media(hover:hover)]:group-hover:scale-105"
+              className="object-cover"
               sizes={
                 compact
                   ? "(max-width: 640px) 42vw, (max-width: 1280px) 33vw, 20vw"
@@ -213,47 +207,13 @@ export function ProductCard({ product, onAddToCart, compact = false }: ProductCa
               }
             />
           </span>
-          {hasIngredientsImage ? (
-            <span
-              aria-hidden
-              className={`absolute inset-0 transition-[opacity,transform] duration-500 ease-out ${
-                touchReveal
-                  ? "scale-100 opacity-100"
-                  : "pointer-events-none scale-95 opacity-0"
-              } [@media(hover:hover)]:group-hover:pointer-events-auto [@media(hover:hover)]:group-hover:scale-100 [@media(hover:hover)]:group-hover:opacity-100`}
-            >
-              <Image
-                src={product.ingredientImage!}
-                alt={t("shop.ingredientAlt", { name: product.name })}
-                fill
-                className="object-cover"
-              sizes={
-                compact
-                  ? "(max-width: 640px) 42vw, (max-width: 1280px) 33vw, 20vw"
-                  : "(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 20vw"
-              }
-              />
-            </span>
-          ) : null}
-        </Link>
-
-        {hasIngredientsImage ? (
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-3 z-10 flex justify-center gap-1.5 [@media(hover:hover)]:hidden"
-            aria-hidden
-          >
-            <span
-              className={`size-1.5 rounded-full transition ${
-                touchReveal ? "bg-background/50" : "bg-background"
-              }`}
-            />
-            <span
-              className={`size-1.5 rounded-full transition ${
-                touchReveal ? "bg-background" : "bg-background/50"
-              }`}
-            />
-          </div>
         ) : null}
+
+        <Link
+          href={href}
+          className="absolute inset-0 z-10"
+          aria-label={t("shop.viewProduct")}
+        />
       </div>
 
       <div
@@ -266,7 +226,7 @@ export function ProductCard({ product, onAddToCart, compact = false }: ProductCa
             compact ? "line-clamp-2 text-sm sm:text-xl" : "text-base sm:text-xl"
           }`}
         >
-          <Link href={href} className="transition hover:text-accent">
+          <Link href={href} className="relative z-10 transition hover:text-accent">
             {product.name}
           </Link>
         </h3>

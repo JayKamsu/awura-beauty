@@ -19,9 +19,11 @@
       "diagnostic": "Hair diagnostic",
       "shipping": "Shipping",
       "returns": "Return / complaint",
+      "withdrawal": "Withdrawal / 14-day refund",
       "partnership": "Partnership / press",
       "other": "Other request"
     },
+    "withdrawalHint": "To exercise your 14-day right of withdrawal, use the online form: you will receive an acknowledgement of receipt by email. You can also write below if you have a question about a refund in progress.",
     "optional": "optional",
     "orderNumberPlaceholder": "e.g. AWURA-10234",
     "submit": "Send message",

@@ -26,6 +26,8 @@ export type ProductRow = {
   /** true = ce produit est une offre promo regroupant plusieurs produits (voir bundle_items). */
   is_bundle: boolean;
   is_new: boolean;
+  /** false = masqué de la boutique, de l'accueil et des fiches publiques (admin uniquement). */
+  is_active: boolean;
   stock: number;
   /** Supplément livraison unitaire (€), hors retrait sur place. */
   shipping_fee: number;

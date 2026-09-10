@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BreakdownDonut,
+  RankedCountBars,
   RevenueTrendChart,
   TopProductsBars,
   toMethodBreakdownEntries,
@@ -28,6 +29,21 @@ const QUICK_LINKS = [
   { href: "/admin/pages", key: "managePages" },
   { href: "/admin/contenu", key: "manageContent" },
 ] as const;
+
+function sourceLabel(key: string, t: (k: string) => string) {
+  const i18nKey = `admin.dashboard.source.${key}`;
+  const label = t(i18nKey);
+  return label === i18nKey ? key : label;
+}
+
+function countryLabel(code: string, locale: string, unknown: string) {
+  if (!code) return unknown;
+  try {
+    return new Intl.DisplayNames([locale], { type: "region" }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
 
 function deltaFrom(current: number, previous: number) {
   if (previous === 0) return current === 0 ? 0 : null;
@@ -117,6 +133,21 @@ export function AdminDashboardPanel() {
 
   const revenueDelta = deltaFrom(stats.revenueToday, stats.revenueYesterday);
   const ordersDelta = deltaFrom(stats.ordersThisWeek, stats.ordersPreviousWeek);
+  const visitorsDelta = deltaFrom(stats.visitorsToday, stats.visitorsYesterday);
+  const sourceEntries = (stats.sources30d ?? []).map((item) => ({
+    key: item.key,
+    label: sourceLabel(item.key, t),
+    count: item.visitors,
+  }));
+  const countryEntries = (stats.countries30d ?? []).map((item) => ({
+    key: item.country || "unknown",
+    label: countryLabel(
+      item.country,
+      i18n.language,
+      t("admin.dashboard.countryUnknown"),
+    ),
+    count: item.visitors,
+  }));
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
@@ -124,6 +155,50 @@ export function AdminDashboardPanel() {
         title={t("admin.dashboardTitle")}
         subtitle={t("admin.dashboardSubtitle")}
       />
+
+      <section className="space-y-4">
+        <h2 className="font-serif text-2xl text-primary">
+          {t("admin.dashboard.trafficTitle")}
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <StatTile
+            label={t("admin.dashboard.visitorsToday")}
+            value={stats.visitorsToday ?? 0}
+            delta={visitorsDelta}
+            deltaLabel={t("admin.dashboard.vsYesterday")}
+          />
+          <StatTile
+            label={t("admin.dashboard.visitsToday")}
+            value={stats.visitsToday ?? 0}
+          />
+          <StatTile
+            label={t("admin.dashboard.visitors7d")}
+            value={stats.visitors7d ?? 0}
+          />
+        </div>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <section className="space-y-3 rounded-2xl border border-border p-4 sm:p-5">
+            <h3 className="font-serif text-xl text-primary">
+              {t("admin.dashboard.sourcesTitle")}
+            </h3>
+            <p className="text-xs text-muted">{t("admin.dashboard.sourcesHint")}</p>
+            <RankedCountBars
+              entries={sourceEntries}
+              emptyMessage={t("admin.dashboard.trafficEmpty")}
+            />
+          </section>
+          <section className="space-y-3 rounded-2xl border border-border p-4 sm:p-5">
+            <h3 className="font-serif text-xl text-primary">
+              {t("admin.dashboard.countriesTitle")}
+            </h3>
+            <p className="text-xs text-muted">{t("admin.dashboard.countriesHint")}</p>
+            <RankedCountBars
+              entries={countryEntries}
+              emptyMessage={t("admin.dashboard.trafficEmpty")}
+            />
+          </section>
+        </div>
+      </section>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile

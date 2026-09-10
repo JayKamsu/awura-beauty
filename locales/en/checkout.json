@@ -92,6 +92,7 @@
     "usePointsOption": "{{points}} pts (−{{amount}})",
     "acceptTermsLead": "I accept the",
     "acceptTermsAnd": "and the",
-    "acceptTermsRequired": "Please accept the terms to continue."
+    "acceptTermsRequired": "Please accept the terms to continue.",
+    "withdrawNotice": "You can exercise your right of withdrawal online:"
   }
 }

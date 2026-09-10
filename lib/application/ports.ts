@@ -33,6 +33,7 @@ export type CatalogPort = {
   listProducts: (params?: ListProductsParams) => Promise<ListProductsResult>;
   getProductBySlug: (slug: string) => Promise<ProductRow | null>;
   getProductsBySlugs: (slugs: string[]) => Promise<ProductRow[]>;
+  listHomeBestsellers: () => Promise<ProductRow[]>;
   getRelatedProducts: (product: ProductRow, limit?: number) => Promise<ProductRow[]>;
   listAllProductSlugs: () => Promise<string[]>;
 };

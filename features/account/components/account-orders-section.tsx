@@ -19,6 +19,7 @@ import {
   resolvePaymentStatus,
 } from "@/lib/application/checkout/payment-status";
 import { formatPrice } from "@/lib/format/price";
+import { WITHDRAWAL_PATH } from "@/lib/legal/pages";
 import { toIntlLocale } from "@/lib/i18n/intl-locale";
 import type { OrderRow, ShippingStatus } from "@/lib/infrastructure/supabase/order-types";
 
@@ -256,6 +257,16 @@ export function AccountOrdersSection({
                           onClick={() => void openReceipt(order)}
                         >
                           {t("account.previewReceipt")}
+                        </Button>
+                      ) : null}
+                      {paid ? (
+                        <Button
+                          href={`${WITHDRAWAL_PATH}?commande=${encodeURIComponent(order.id)}`}
+                          variant="ghost"
+                          size="md"
+                          className="mt-2"
+                        >
+                          {t("legal.withdrawHere")}
                         </Button>
                       ) : null}
                     </div>

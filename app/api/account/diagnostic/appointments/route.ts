@@ -6,6 +6,7 @@ import {
 import { getUserFromAccessToken } from "@/lib/infrastructure/supabase/admin-auth";
 import { createAdminSupabaseClient } from "@/lib/infrastructure/supabase/client";
 import type { DiagnosticAppointment } from "@/lib/domain/diagnostic";
+import { parseExternalProductLinks } from "@/lib/domain/diagnostic";
 
 function bearer(request: Request): string | null {
   const header = request.headers.get("authorization");
@@ -31,6 +32,7 @@ function mapRow(row: Record<string, unknown>): DiagnosticAppointment {
       ? String(row.stripe_session_id)
       : null,
     notes: String(row.notes ?? ""),
+    externalProductLinks: parseExternalProductLinks(row.external_product_links),
     resultDraft: null,
     createdAt: String(row.created_at),
   };

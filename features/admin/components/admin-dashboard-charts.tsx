@@ -294,6 +294,46 @@ export function TopProductsBars({
   );
 }
 
+/** Classement en barres de comptes (sources, pays…). */
+export function RankedCountBars({
+  entries,
+  emptyMessage,
+}: {
+  entries: BreakdownEntry[];
+  emptyMessage: string;
+}) {
+  if (entries.length === 0) {
+    return (
+      <p className="rounded-xl bg-background-alt px-4 py-6 text-center text-sm text-muted">
+        {emptyMessage}
+      </p>
+    );
+  }
+
+  const max = Math.max(...entries.map((entry) => entry.count));
+
+  return (
+    <ul className="space-y-3">
+      {entries.map((entry) => (
+        <li key={entry.key} className="space-y-1">
+          <div className="flex items-baseline justify-between gap-3 text-sm">
+            <span className="min-w-0 truncate font-medium text-primary">
+              {entry.label}
+            </span>
+            <span className="shrink-0 text-muted">{entry.count}</span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-background-alt">
+            <div
+              className="h-full rounded-full bg-accent"
+              style={{ width: `${max ? (entry.count / max) * 100 : 0}%` }}
+            />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /** Convertit la répartition des statuts de paiement en entrées affichables par le donut. */
 export function toStatusBreakdownEntries(
   breakdown: AdminDashboardStatusBreakdown,

@@ -9,6 +9,7 @@
       "returns": "Retours",
       "privacy": "RGPD"
     },
+    "withdrawHere": "Renoncer au contrat ici",
     "company": {
       "eyebrow": "Identité",
       "title": "Informations de l’entreprise",
@@ -32,7 +33,7 @@
         "correspondence": {
           "title": "Correspondance",
           "body": [
-            "Toute correspondance officielle (rétractation, réclamation, exercice des droits RGPD) se fait par e-mail à {{email}}.",
+            "Toute correspondance officielle (réclamation, exercice des droits RGPD) se fait par e-mail à {{email}}. La rétractation s’exerce en ligne via la page « Renoncer au contrat ici ».",
             "Le retrait sur place, lorsqu’il est proposé au checkout, se fait à l’adresse communiquée lors de la confirmation de commande."
           ]
         },
@@ -145,7 +146,7 @@
         "withdrawal": {
           "title": "Rétractation et retours",
           "body": [
-            "Le droit de rétractation et les modalités de retour sont détaillés dans la politique de retour. Pour les produits cosmétiques descellés, des exceptions prévues par le Code de la consommation s’appliquent."
+            "Le droit de rétractation s’exerce en ligne via la fonctionnalité « Renoncer au contrat ici » (/retractation), ou par e-mail à {{email}}. Les modalités et exceptions (produits cosmétiques descellés) sont détaillées dans la politique de retour."
           ]
         },
         "diagnostic": {
@@ -186,7 +187,7 @@
           "title": "Délai de 14 jours",
           "body": [
             "Conformément aux articles L221-18 et suivants du Code de la consommation, tu disposes de 14 jours à compter de la réception du colis (ou de la mise à disposition en Point Relais / retrait) pour te rétracter, sans avoir à motiver ta décision.",
-            "Pour exercer ce droit, écris à {{email}} en indiquant ton numéro de commande et les produits concernés. Tu peux utiliser le formulaire de contact (sujet « Retour / réclamation »)."
+            "Pour exercer ce droit, utilise la fonctionnalité en ligne « Renoncer au contrat ici » (également accessible depuis le pied de page, le checkout et tes commandes). Un accusé de réception te sera envoyé par e-mail."
           ]
         },
         "cosmetics": {
@@ -199,7 +200,7 @@
         "process": {
           "title": "Comment retourner un produit",
           "body": [
-            "1. Contacte {{email}} dans le délai de 14 jours. 2. Nous te confirmons l’éligibilité et l’adresse de retour par e-mail. 3. Renvoie les produits sous 14 jours suivant la communication de ta décision, dans un emballage protecteur.",
+            "1. Déclare ta rétractation via « Renoncer au contrat ici ». 2. Nous te confirmons l’éligibilité et l’adresse de retour par e-mail. 3. Renvoie les produits sous 14 jours suivant la communication de ta décision, dans un emballage protecteur.",
             "Les frais de retour sont à ta charge, sauf erreur de notre part, produit défectueux ou non conforme."
           ]
         },
@@ -248,23 +249,26 @@
             "Compte et commande : identité, e-mail, téléphone, adresse de livraison, historique d’achats, paiements (identifiants Stripe/PayPal, jamais le numéro de carte complet), points de fidélité.",
             "Diagnostic : réponses au questionnaire, notes et photos que tu transmets, créneaux de rendez-vous, éventuellement lien de visio.",
             "Technique : logs nécessaires à la sécurité, langue et devise, thème d’affichage, panier local, jetons de session, et, en production, traces d’erreur (Sentry) avec textes masqués.",
-            "Messages : contenus que tu envoies via le chat support, le formulaire de contact ou les avis."
+            "Mesure d’audience : identifiant local anonyme, page d’arrivée, source (référent ou UTM) et pays approximatif du réseau, pour les statistiques du tableau de bord. Pas de publicité ciblée, pas de partage à des régies.",
+            "Messages : contenus que tu envoies via le chat support, le formulaire de contact ou les avis.",
+            "Rétractation : prénom, nom, référence de commande, détail du contrat et e-mail d’accusé, pour enregistrer ta déclaration et t’envoyer l’accusé de réception."
           ]
         },
         "purposes": {
           "title": "Finalités",
           "body": [
-            "Exécuter les commandes et la livraison (Colissimo, Mondial Relay, retrait), émettre les factures et reçus, gérer le compte, la fidélité et les avis.",
+            "Exécuter les commandes et la livraison (Colissimo, Mondial Relay, retrait), émettre les factures et reçus, gérer le compte, la fidélité, les avis et les déclarations de rétractation.",
             "Fournir le diagnostic capillaire et les rendez-vous associés.",
-            "Assurer la sécurité du site, le support client, et améliorer le service (statistiques d’erreur, pas de publicité comportementale tierce sur le site)."
+            "Assurer la sécurité du site, le support client, et améliorer le service (statistiques d’erreur, pas de publicité comportementale tierce sur le site).",
+            "Mesurer la fréquentation du site (nombre de visiteurs et provenance) pour le tableau de bord interne."
           ]
         },
         "basis": {
           "title": "Bases légales",
           "body": [
             "Exécution du contrat : compte, commande, livraison, diagnostic payant.",
-            "Obligation légale : facturation, comptabilité, réponses aux autorités.",
-            "Intérêt légitime : sécurité, prévention de la fraude, amélioration du site.",
+            "Obligation légale : facturation, comptabilité, rétractation (L221-21 / D221-5), réponses aux autorités.",
+            "Intérêt légitime : sécurité, prévention de la fraude, amélioration du site, mesure d’audience première partie.",
             "Consentement : notifications push, cookies non essentiels le cas échéant, photos de diagnostic facultatives au-delà du strict nécessaire."
           ]
         },
@@ -279,6 +283,7 @@
           "title": "Cookies et stockage local",
           "body": [
             "Le site utilise des cookies et un stockage local strictement nécessaires : session d’authentification, panier, langue, devise, thème. Ils ne requièrent pas de consentement au titre des cookies traceurs.",
+            "Un identifiant local de mesure d’audience (stockage local, première partie, conservation 13 mois) permet de compter les visiteurs et leur provenance. Il n’est pas partagé avec des tiers.",
             "Aucun cookie publicitaire tiers n’est déposé par {{siteName}}. Les prestataires de paiement et de connexion (Stripe, PayPal, Google) peuvent déposer leurs propres cookies lors de leur parcours."
           ]
         },
@@ -287,8 +292,10 @@
           "body": [
             "Données de compte : jusqu’à la suppression du compte, puis archivage limité si une obligation légale s’applique.",
             "Commandes et factures : 10 ans (obligations comptables).",
+            "Déclarations de rétractation : durée nécessaire à la preuve du contrat et aux obligations légales.",
             "Diagnostic et photos : le temps de l’accompagnement, puis suppression ou anonymisation sur demande, sauf besoin de preuve d’un litige.",
-            "Logs techniques et erreurs : durée limitée, proportionnée à la sécurité."
+            "Logs techniques et erreurs : durée limitée, proportionnée à la sécurité.",
+            "Mesure d’audience : 13 mois maximum, puis suppression."
           ]
         },
         "rights": {
@@ -311,6 +318,27 @@
           ]
         }
       }
+    },
+    "withdrawalForm": {
+      "eyebrow": "Rétractation",
+      "intro": "Déclare ici ta décision de te rétracter d’un contrat conclu sur awurabeauty.com. La fonctionnalité est gratuite et disponible pendant les 14 jours légaux. Un accusé de réception te sera envoyé par e-mail (support durable).",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "orderRef": "Numéro ou référence de commande",
+      "orderRefPlaceholder": "Ex. les 8 premiers caractères de ta commande",
+      "orderDate": "Date de commande ou de réception",
+      "orderDatePlaceholder": "Ex. 10 septembre 2026",
+      "optional": "facultatif",
+      "contractDetails": "Produits ou contrat concernés",
+      "contractDetailsPlaceholder": "Indique les soins ou accessoires que tu souhaites renvoyer, et toute précision utile.",
+      "ackEmail": "E-mail pour l’accusé de réception",
+      "ackEmailHint": "Nous t’envoyons sur cette adresse la confirmation horodatée de ta rétractation.",
+      "legalNote": "Les produits cosmétiques descellés ne peuvent pas être retournés pour des raisons d’hygiène (art. L221-28 5°). Le remboursement intervient après réception des produits retournés, dans les conditions de la politique de retour.",
+      "confirm": "Confirmer la rétractation",
+      "successTitle": "Rétractation enregistrée",
+      "successBody": "Ta déclaration a été reçue le {{date}}. Un accusé de réception a été envoyé à {{email}}. Conserve-le : il fait foi de ta rétractation.",
+      "error": "Impossible d’enregistrer ta déclaration. Réessaie dans un instant.",
+      "ackFailed": "Ta déclaration n’a pas pu être confirmée par e-mail. Réessaie, ou écris-nous si le problème continue."
     }
   }
 }

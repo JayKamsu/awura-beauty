@@ -69,7 +69,7 @@ export default async function BoutiquePage({ searchParams }: BoutiquePageProps) 
 
   return (
     <main
-      className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-10 px-4 py-14 md:px-6"
+      className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-8 md:gap-8 md:px-6 md:py-12"
       data-awura-universe={universe === "child" ? "child" : undefined}
     >
       <ShopPageHeader />

@@ -11,7 +11,7 @@
 - Promesse : hydrater, démêler, fortifier et sublimer la couronne
 - Langues du site : français (principal), anglais, espagnol
 - Contact : Care@awurabeauty.com
-- Pages légales : [mentions](https://awurabeauty.com/mentions-legales), [conditions](https://awurabeauty.com/conditions-utilisation), [retours](https://awurabeauty.com/politique-de-retour), [RGPD](https://awurabeauty.com/confidentialite), [entreprise](https://awurabeauty.com/informations-entreprise)
+- Pages légales : [mentions](https://awurabeauty.com/mentions-legales), [conditions](https://awurabeauty.com/conditions-utilisation), [retours](https://awurabeauty.com/politique-de-retour), [rétractation en ligne](https://awurabeauty.com/retractation), [RGPD](https://awurabeauty.com/confidentialite), [entreprise](https://awurabeauty.com/informations-entreprise)
 - Boutique : https://awurabeauty.com/boutique
 - Diagnostic : https://awurabeauty.com/diagnostic-capillaire
 

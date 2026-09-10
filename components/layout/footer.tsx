@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { BrandLogo } from "@/components/ui/brand-logo";
-import { LEGAL_PAGES, LEGAL_SLUGS } from "@/lib/legal/pages";
+import { LEGAL_PAGES, LEGAL_SLUGS, WITHDRAWAL_PATH } from "@/lib/legal/pages";
 import { CONTACT_EMAIL } from "@/lib/site";
 
 const FOOTER_BLOCKS = [
@@ -85,6 +85,12 @@ export function Footer() {
                 >
                   {t("footer.contactLink")}
                 </Link>
+                <Link
+                  href={WITHDRAWAL_PATH}
+                  className="mt-2 block font-medium text-on-brand underline decoration-accent decoration-2 underline-offset-4 transition hover:text-accent"
+                >
+                  {t("legal.withdrawHere")}
+                </Link>
               </div>
             ) : null}
           </div>
@@ -104,6 +110,12 @@ export function Footer() {
               {t(`legal.nav.${LEGAL_PAGES[slug].i18nKey}`)}
             </Link>
           ))}
+          <Link
+            href={WITHDRAWAL_PATH}
+            className="text-on-brand underline decoration-accent decoration-2 underline-offset-4 transition hover:text-accent"
+          >
+            {t("legal.withdrawHere")}
+          </Link>
         </nav>
         <p>
           © {year} {t("footer.brand")} — {t("footer.rights")}

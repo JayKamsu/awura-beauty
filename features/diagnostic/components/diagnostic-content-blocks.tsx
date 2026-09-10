@@ -1,4 +1,5 @@
 import type { DiagnosticContentBlock } from "@/lib/domain/diagnostic";
+import { isSafeHttpUrl } from "@/lib/domain/diagnostic";
 
 type DiagnosticContentBlocksProps = {
   blocks: DiagnosticContentBlock[];
@@ -46,6 +47,13 @@ export function DiagnosticContentBlocks({ blocks }: DiagnosticContentBlocksProps
           );
         }
         if (block.type === "link") {
+          if (!isSafeHttpUrl(block.url)) {
+            return block.text ? (
+              <p key={index} className="text-sm text-muted">
+                {block.text}
+              </p>
+            ) : null;
+          }
           return (
             <p key={index} className="text-sm">
               <a

@@ -28,6 +28,7 @@ function mapProductRow(row: Record<string, unknown>): ProductRow {
     product_type: row.product_type === "accessory" ? "accessory" : "hair_care",
     is_bundle: Boolean(row.is_bundle),
     is_new: Boolean(row.is_new),
+    is_active: row.is_active !== false,
     stock: Number(row.stock ?? 0),
     shipping_fee: Number(row.shipping_fee ?? 0),
     qr_url: String(row.qr_url ?? ""),
