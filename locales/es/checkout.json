@@ -9,7 +9,8 @@
     "shippingFree": "Gratis",
     "freeShippingApplied": "Envío gratis (umbral alcanzado).",
     "total": "Total",
-    "pickupNotice": "Recogerás el pedido en persona. Indica un teléfono para contactarte.",
+    "pickupNotice": "Deja tu número para que podamos contactarte en la entrega.",
+    "pickupPhone": "Número para contactarte",
     "payment": "Pago",
     "summary": "Resumen",
     "email": "E-mail",
@@ -35,7 +36,7 @@
         "hint": "Recogida en un punto cercano"
       },
       "pickup": {
-        "label": "Recogida en tienda",
+        "label": "Entrega en mano",
         "hint": "Vienes a buscar el pedido tú mismo/a"
       }
     },

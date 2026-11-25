@@ -4,6 +4,7 @@ import { userIdFromRequest } from "@/lib/application/checkout/request-user";
 import { resolveCheckoutShipping } from "@/lib/application/checkout/shipping-options";
 import { createPayPalOrder } from "@/lib/infrastructure/payments/paypal";
 import { createOrder } from "@/lib/infrastructure/supabase/orders";
+import { resolvePickupPlace } from "@/lib/infrastructure/supabase/shipping-rates";
 
 type PayPalCreateBody = {
   email: string;
@@ -51,13 +52,16 @@ export async function POST(request: Request) {
   }
 
   const currency = body.currency || "EUR";
+  const pickupPlace =
+    shipping.shippingCarrier === "pickup" ? await resolvePickupPlace() : "";
   const shippingAddress =
     shipping.shippingCarrier === "pickup"
       ? {
           ...body.shippingAddress,
-          line1: body.shippingAddress.line1 || "Retrait sur place",
-          city: body.shippingAddress.city || "—",
-          postalCode: body.shippingAddress.postalCode || "00000",
+          line1: pickupPlace,
+          city: "",
+          postalCode: "",
+          country: body.shippingAddress.country || "France",
         }
       : body.shippingAddress;
 

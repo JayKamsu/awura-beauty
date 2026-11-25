@@ -1,4 +1,8 @@
 import {
+  DEFAULT_PICKUP_ADDRESS,
+  pickupAddressFromRates,
+} from "@/lib/domain/pickup";
+import {
   createAdminSupabaseClient,
   createSupabaseClient,
 } from "@/lib/infrastructure/supabase/client";
@@ -10,6 +14,8 @@ export type ShippingRateRow = {
   enabled: boolean;
   base_fee: number;
   free_shipping_min: number | null;
+  /** Lieu de remise à main propre. Renseigné seulement pour le transporteur pickup. */
+  pickup_address: string | null;
   updated_at: string;
 };
 
@@ -19,6 +25,7 @@ const DEFAULT_RATES: ShippingRateRow[] = [
     enabled: true,
     base_fee: 5.9,
     free_shipping_min: 80,
+    pickup_address: null,
     updated_at: new Date().toISOString(),
   },
   {
@@ -26,6 +33,7 @@ const DEFAULT_RATES: ShippingRateRow[] = [
     enabled: true,
     base_fee: 4.5,
     free_shipping_min: 80,
+    pickup_address: null,
     updated_at: new Date().toISOString(),
   },
   {
@@ -33,6 +41,7 @@ const DEFAULT_RATES: ShippingRateRow[] = [
     enabled: true,
     base_fee: 0,
     free_shipping_min: null,
+    pickup_address: DEFAULT_PICKUP_ADDRESS,
     updated_at: new Date().toISOString(),
   },
 ];
@@ -46,8 +55,18 @@ function mapRate(row: Record<string, unknown>): ShippingRateRow {
       row.free_shipping_min === null || row.free_shipping_min === undefined
         ? null
         : Number(row.free_shipping_min),
+    pickup_address:
+      row.carrier === "pickup"
+        ? String(row.pickup_address ?? "").trim() || DEFAULT_PICKUP_ADDRESS
+        : null,
     updated_at: String(row.updated_at ?? new Date().toISOString()),
   };
+}
+
+/** Lieu de remise à main propre enregistré (ou le défaut Val de Fontenay). */
+export async function resolvePickupPlace(): Promise<string> {
+  const rates = await listShippingRates();
+  return pickupAddressFromRates(rates);
 }
 
 /** Tarifs de livraison par transporteur ; retombe sur des valeurs par défaut si Supabase est vide/indisponible. */
@@ -71,6 +90,7 @@ export async function upsertShippingRates(
     enabled: boolean;
     base_fee: number;
     free_shipping_min: number | null;
+    pickup_address?: string | null;
   }>,
 ): Promise<{ ok: boolean; error: string | null }> {
   const supabase = createAdminSupabaseClient();
@@ -83,6 +103,10 @@ export async function upsertShippingRates(
     enabled: rate.enabled,
     base_fee: rate.base_fee,
     free_shipping_min: rate.free_shipping_min,
+    pickup_address:
+      rate.carrier === "pickup"
+        ? rate.pickup_address?.trim() || DEFAULT_PICKUP_ADDRESS
+        : null,
     updated_at: new Date().toISOString(),
   }));
 

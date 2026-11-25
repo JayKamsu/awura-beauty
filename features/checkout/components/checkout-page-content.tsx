@@ -21,6 +21,10 @@ import {
   StripeMark,
 } from "@/features/checkout/components/checkout-brand-marks";
 import type { RelayPoint } from "@/lib/domain";
+import {
+  DEFAULT_PICKUP_ADDRESS,
+  pickupAddressFromRates,
+} from "@/lib/domain/pickup";
 import { formatPrice } from "@/lib/format/price";
 import { WITHDRAWAL_PATH } from "@/lib/legal/pages";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
@@ -81,6 +85,7 @@ export function CheckoutPageContent() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("stripe");
   const [shippingCarrier, setShippingCarrier] =
     useState<ShippingCarrier>("laposte");
+  const [pickupAddress, setPickupAddress] = useState(DEFAULT_PICKUP_ADDRESS);
   const [enabledCarriers, setEnabledCarriers] =
     useState<ShippingCarrier[]>(ALL_CARRIERS);
   const [selectedRelay, setSelectedRelay] = useState<RelayPoint | null>(null);
@@ -204,7 +209,11 @@ export function CheckoutPageContent() {
     })
       .then(async (res) => {
         const json = (await res.json()) as {
-          rates?: Array<{ carrier: ShippingCarrier; enabled: boolean }>;
+          rates?: Array<{
+            carrier: ShippingCarrier;
+            enabled: boolean;
+            pickup_address?: string | null;
+          }>;
           subtotal?: number;
           shippingFee?: number;
           total?: number;
@@ -222,6 +231,7 @@ export function CheckoutPageContent() {
         };
         if (cancelled) return;
         if (json.rates?.length) {
+          setPickupAddress(pickupAddressFromRates(json.rates));
           const enabled = json.rates
             .filter((rate) => rate.enabled)
             .map((rate) => rate.carrier)
@@ -291,13 +301,9 @@ export function CheckoutPageContent() {
 
   const shippingAddress = {
     fullName,
-    line1:
-      shippingCarrier === "pickup"
-        ? line1.trim() || "Retrait sur place"
-        : line1,
-    city: shippingCarrier === "pickup" ? city.trim() || "—" : city,
-    postalCode:
-      shippingCarrier === "pickup" ? postalCode.trim() || "00000" : postalCode,
+    line1: shippingCarrier === "pickup" ? pickupAddress : line1,
+    city: shippingCarrier === "pickup" ? "" : city,
+    postalCode: shippingCarrier === "pickup" ? "" : postalCode,
     country,
     phone: phone.trim() || undefined,
     email: email.trim() || undefined,
@@ -615,7 +621,9 @@ export function CheckoutPageContent() {
                     {t(`checkout.carriers.${carrier}.label`)}
                   </span>
                   <span className="mt-1 block text-sm text-muted">
-                    {t(`checkout.carriers.${carrier}.hint`)}
+                    {carrier === "pickup"
+                      ? pickupAddress
+                      : t(`checkout.carriers.${carrier}.hint`)}
                   </span>
                 </button>
               );
@@ -642,9 +650,10 @@ export function CheckoutPageContent() {
           </div>
 
           {shippingCarrier === "pickup" ? (
-            <p className="rounded-2xl bg-background-alt px-4 py-3 text-sm text-muted">
-              {t("checkout.pickupNotice")}
-            </p>
+            <div className="rounded-2xl bg-background-alt px-4 py-3 text-sm">
+              <p className="font-medium text-primary">{pickupAddress}</p>
+              <p className="mt-1 text-muted">{t("checkout.pickupNotice")}</p>
+            </div>
           ) : null}
 
           {profileLoading ? (
@@ -687,7 +696,11 @@ export function CheckoutPageContent() {
                 />
               </label>
               <label className="space-y-1.5 text-sm sm:col-span-2">
-                <span className="text-muted">{t("checkout.phone")}</span>
+                <span className="text-muted">
+                  {shippingCarrier === "pickup"
+                    ? t("checkout.pickupPhone")
+                    : t("checkout.phone")}
+                </span>
                 <input
                   required={
                     shippingCarrier === "mondial_relay" ||

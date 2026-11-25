@@ -31,7 +31,7 @@ import {
 import type { ProductCategory } from "@/lib/infrastructure/supabase/product-categories";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
-type BundleComponentDraft = { productId: string; quantity: number };
+type BundleComponentDraft = { productId: string; quantity: number; name?: string };
 
 const emptyForm = {
   id: "",
@@ -239,10 +239,11 @@ export function AdminProductsPanel() {
       const json = (await res.json()) as {
         components?: Array<{ product: ProductRow; quantity: number }>;
       };
-      bundleComponents = (json.components ?? []).map((c) => ({
-        productId: c.product.id,
-        quantity: c.quantity,
-      }));
+      bundleComponents = (json.components ?? []).flatMap((c) => {
+        const product = Array.isArray(c.product) ? c.product[0] : c.product;
+        if (!product?.id) return [];
+        return [{ productId: product.id, quantity: c.quantity, name: product.name }];
+      });
     }
     setForm({
       id: product.id,
@@ -1152,26 +1153,60 @@ export function AdminProductsPanel() {
                 {form.is_bundle ? (
                   <div className="space-y-2">
                     <p className="text-xs text-muted">{t("admin.bundleComponentsHint")}</p>
-                    {form.bundleComponents.map((component, index) => (
+                    {form.bundleComponents.map((component, index) => {
+                      const choices = products.filter(
+                        (p) => !p.is_bundle && p.id !== form.id,
+                      );
+                      const selected =
+                        choices.find((p) => p.id === component.productId)?.name ||
+                        component.name ||
+                        "";
+                      return (
                       <div key={index} className="flex items-center gap-2">
-                        <select
-                          className={`${fieldClass} min-w-0 flex-1`}
-                          value={component.productId}
-                          onChange={(e) => {
-                            const next = [...form.bundleComponents];
-                            next[index] = { ...component, productId: e.target.value };
-                            update("bundleComponents", next);
-                          }}
-                        >
-                          <option value="">{t("admin.bundleComponentSelect")}</option>
-                          {products
-                            .filter((p) => !p.is_bundle && p.id !== form.id)
-                            .map((p) => (
+                        <div className="relative min-w-0 flex-1">
+                          <select
+                            className={`${fieldClass} relative z-0 min-w-0 text-transparent`}
+                            value={component.productId}
+                            onChange={(e) => {
+                              const productId = e.target.value;
+                              const next = [...form.bundleComponents];
+                              next[index] = {
+                                ...component,
+                                productId,
+                                name: choices.find((p) => p.id === productId)?.name ?? "",
+                              };
+                              update("bundleComponents", next);
+                            }}
+                          >
+                            <option value="">{t("admin.bundleComponentSelect")}</option>
+                            {component.productId &&
+                            !choices.some((p) => p.id === component.productId) ? (
+                              <option value={component.productId}>
+                                {component.name || component.productId}
+                              </option>
+                            ) : null}
+                            {choices.map((p) => (
                               <option key={p.id} value={p.id}>
                                 {p.name}
                               </option>
                             ))}
-                        </select>
+                          </select>
+                          <span
+                            className={`pointer-events-none absolute inset-y-0 left-3 right-8 z-10 flex items-center truncate text-sm ${
+                              selected ? "text-foreground" : "text-muted"
+                            }`}
+                          >
+                            {selected || t("admin.bundleComponentSelect")}
+                          </span>
+                          <span
+                            aria-hidden
+                            className="pointer-events-none absolute inset-y-0 right-3 z-10 flex items-center text-muted"
+                          >
+                            <svg viewBox="0 0 20 20" className="size-4" fill="currentColor">
+                              <path d="M5.5 7.5 10 12l4.5-4.5" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+                            </svg>
+                          </span>
+                        </div>
                         <input
                           type="number"
                           min={1}
@@ -1202,7 +1237,8 @@ export function AdminProductsPanel() {
                           ✕
                         </button>
                       </div>
-                    ))}
+                      );
+                    })}
                     <Button
                       type="button"
                       size="md"

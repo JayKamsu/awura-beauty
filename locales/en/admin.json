@@ -327,6 +327,8 @@
     "shippingBaseFee": "Base fee (€)",
     "shippingFreeMin": "Free shipping from (€)",
     "shippingFreeMinHint": "Empty = no free shipping / banner ignores this carrier. The site banner uses the lowest threshold among enabled carriers.",
+    "pickupAddress": "Handover address",
+    "pickupAddressHint": "Shown at checkout. The customer leaves a number so you can reach them.",
     "shippingFeeLine": "Shipping included: {{amount}}",
     "pickupNoLabel": "Store pickup — no label to generate.",
     "markPickupReady": "Mark ready for pickup (notifies customer)",
@@ -489,7 +491,7 @@
     "carriers": {
       "laposte": "Colissimo (home)",
       "mondial_relay": "Mondial Relay",
-      "pickup": "Store pickup"
+      "pickup": "In-person handover"
     },
     "payments": {
       "refundHint": "For a real money refund, do it in Stripe or PayPal, then mark the order as refunded here.",

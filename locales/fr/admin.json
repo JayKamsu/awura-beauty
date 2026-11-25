@@ -334,6 +334,8 @@
     "shippingBaseFee": "Frais de base (€)",
     "shippingFreeMin": "Livraison offerte dès (€)",
     "shippingFreeMinHint": "Vide = pas d’offre / bandeau masqué pour ce transporteur. Le bandeau du site utilise le plus bas seuil des transporteurs activés.",
+    "pickupAddress": "Adresse de remise",
+    "pickupAddressHint": "Affichée au checkout. La personne laisse son numéro pour être contactée.",
     "shippingFeeLine": "Dont livraison : {{amount}}",
     "pickupNoLabel": "Retrait sur place — pas d’étiquette à générer.",
     "markPickupReady": "Marquer prêt au retrait (notifie le client)",
@@ -545,7 +547,7 @@
     "carriers": {
       "laposte": "Colissimo (domicile)",
       "mondial_relay": "Mondial Relay",
-      "pickup": "Retrait sur place"
+      "pickup": "Remise à main propre"
     },
     "payments": {
       "refundHint": "Pour un vrai remboursement d’argent, fais-le dans Stripe ou PayPal, puis marque la commande remboursée ici.",

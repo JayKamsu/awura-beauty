@@ -9,7 +9,8 @@
     "shippingFree": "Offerte",
     "freeShippingApplied": "Livraison offerte (seuil atteint).",
     "total": "Total",
-    "pickupNotice": "Tu viendras récupérer ta commande sur place. Indique un téléphone pour être contacté(e).",
+    "pickupNotice": "Laisse ton numéro pour qu’on puisse te contacter au moment de la remise.",
+    "pickupPhone": "Numéro pour te contacter",
     "payment": "Paiement",
     "summary": "Récapitulatif",
     "email": "E-mail",
@@ -35,7 +36,7 @@
         "hint": "Retrait dans un Point Relais près de chez toi"
       },
       "pickup": {
-        "label": "Retrait sur place",
+        "label": "Remise à main propre",
         "hint": "Tu viens chercher ta commande toi-même"
       }
     },

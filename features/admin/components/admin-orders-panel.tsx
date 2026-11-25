@@ -532,9 +532,14 @@ export function AdminOrdersPanel() {
                                     </span>
                                     <br />
                                     {order.shipping_address.line1}
-                                    <br />
-                                    {order.shipping_address.postalCode}{" "}
-                                    {order.shipping_address.city}
+                                    {order.shipping_address.postalCode ||
+                                    order.shipping_address.city ? (
+                                      <>
+                                        <br />
+                                        {order.shipping_address.postalCode}{" "}
+                                        {order.shipping_address.city}
+                                      </>
+                                    ) : null}
                                     {order.shipping_address.phone ? (
                                       <>
                                         <br />

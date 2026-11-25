@@ -21,6 +21,7 @@ type PutBody = {
     enabled: boolean;
     base_fee: number;
     free_shipping_min: number | null;
+    pickup_address?: string | null;
   }>;
 };
 
@@ -55,6 +56,8 @@ export async function PUT(request: Request) {
         Number.isNaN(Number(rate.free_shipping_min))
           ? null
           : Number(rate.free_shipping_min),
+      pickup_address:
+        rate.carrier === "pickup" ? String(rate.pickup_address ?? "") : null,
     })),
   );
 

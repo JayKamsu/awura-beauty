@@ -6,6 +6,7 @@ import {
 import { userIdFromRequest } from "@/lib/application/checkout/request-user";
 import { resolveCheckoutShipping } from "@/lib/application/checkout/shipping-options";
 import { container } from "@/lib/application/container";
+import { resolvePickupPlace } from "@/lib/infrastructure/supabase/shipping-rates";
 
 type StripeCheckoutBody = {
   email: string;
@@ -25,16 +26,18 @@ type StripeCheckoutBody = {
   pointsToRedeem?: number;
 };
 
-function normalizeAddress(
+async function normalizeAddress(
   address: StripeCheckoutBody["shippingAddress"],
   carrier: string,
 ) {
   if (carrier !== "pickup") return address;
+  const place = await resolvePickupPlace();
   return {
     ...address,
-    line1: address.line1 || "Retrait sur place",
-    city: address.city || "—",
-    postalCode: address.postalCode || "00000",
+    line1: place,
+    city: "",
+    postalCode: "",
+    country: address.country || "France",
   };
 }
 
@@ -70,7 +73,7 @@ export async function POST(request: Request) {
 
   const currency = body.currency || "EUR";
   const origin = new URL(request.url).origin;
-  const shippingAddress = normalizeAddress(
+  const shippingAddress = await normalizeAddress(
     body.shippingAddress,
     shipping.shippingCarrier,
   );

@@ -9,7 +9,8 @@
     "shippingFree": "Free",
     "freeShippingApplied": "Free shipping (threshold reached).",
     "total": "Total",
-    "pickupNotice": "You’ll pick up your order in person. Please provide a phone number so we can reach you.",
+    "pickupNotice": "Leave your number so we can reach you at handover.",
+    "pickupPhone": "Number to reach you",
     "payment": "Payment",
     "summary": "Summary",
     "email": "Email",
@@ -35,7 +36,7 @@
         "hint": "Pick up at a nearby Parcel shop"
       },
       "pickup": {
-        "label": "Store pickup",
+        "label": "In-person handover",
         "hint": "Come collect your order yourself"
       }
     },

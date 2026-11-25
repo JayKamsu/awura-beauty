@@ -7,6 +7,7 @@ import { AdminFeedback } from "@/features/admin/components/admin-feedback";
 import { AdminPageHeader } from "@/features/admin/components/admin-page-header";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
+import { DEFAULT_PICKUP_ADDRESS } from "@/lib/domain/pickup";
 import type { ShippingCarrier } from "@/lib/infrastructure/supabase/order-types";
 
 /** Brouillon de formulaire pour les tarifs de livraison par transporteur. */
@@ -15,6 +16,7 @@ type RateForm = {
   enabled: boolean;
   base_fee: string;
   free_shipping_min: string;
+  pickup_address: string;
 };
 
 const CARRIERS: ShippingCarrier[] = ["laposte", "mondial_relay", "pickup"];
@@ -40,6 +42,7 @@ export function AdminShippingPanel() {
         enabled: boolean;
         base_fee: number;
         free_shipping_min: number | null;
+        pickup_address?: string | null;
       }>;
     };
     const byCarrier = new Map((json.rates ?? []).map((r) => [r.carrier, r]));
@@ -54,6 +57,10 @@ export function AdminShippingPanel() {
             row?.free_shipping_min === null || row?.free_shipping_min === undefined
               ? ""
               : String(row.free_shipping_min),
+          pickup_address:
+            carrier === "pickup"
+              ? row?.pickup_address?.trim() || DEFAULT_PICKUP_ADDRESS
+              : "",
         };
       }),
     );
@@ -79,6 +86,7 @@ export function AdminShippingPanel() {
               rate.free_shipping_min.trim() === ""
                 ? null
                 : Number(rate.free_shipping_min),
+            pickup_address: rate.carrier === "pickup" ? rate.pickup_address : null,
           })),
         }),
       });
@@ -136,6 +144,27 @@ export function AdminShippingPanel() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
+                {rate.carrier === "pickup" ? (
+                  <label className="space-y-1 text-sm sm:col-span-2">
+                    <span className="text-muted">{t("admin.pickupAddress")}</span>
+                    <input
+                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-foreground"
+                      value={rate.pickup_address}
+                      onChange={(e) =>
+                        setRates((prev) =>
+                          prev.map((row, i) =>
+                            i === index
+                              ? { ...row, pickup_address: e.target.value }
+                              : row,
+                          ),
+                        )
+                      }
+                    />
+                    <span className="block text-xs text-muted">
+                      {t("admin.pickupAddressHint")}
+                    </span>
+                  </label>
+                ) : null}
                 <label className="space-y-1 text-sm">
                   <span className="text-muted">{t("admin.shippingBaseFee")}</span>
                   <input

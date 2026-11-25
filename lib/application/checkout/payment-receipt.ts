@@ -144,7 +144,11 @@ function receiptBodyHtml(order: OrderRow, includePrintButton: boolean): string {
         ? `<div style="margin-top:28px;font-family:system-ui,sans-serif;font-size:14px">
             <strong>Adresse</strong><br/>
             ${escapeHtml(address.line1)}<br/>
-            ${escapeHtml(address.postalCode)} ${escapeHtml(address.city)}<br/>
+            ${
+              [address.postalCode, address.city].some((part) => part?.trim())
+                ? `${escapeHtml(address.postalCode)} ${escapeHtml(address.city)}<br/>`
+                : ""
+            }
             ${escapeHtml(address.country)}
           </div>`
         : ""

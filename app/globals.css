@@ -92,11 +92,29 @@
   --font-serif: var(--font-awura-sans);
 }
 
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
 body {
   background: var(--awura-background);
   color: var(--awura-foreground);
   font-family: var(--font-awura-sans), ui-sans-serif, sans-serif;
   font-weight: 400;
+}
+
+/* Le padding vertical d'un select natif masque le libellé (Safari, fond sombre). */
+select {
+  padding-block: 0;
+}
+
+select option {
+  color: var(--awura-foreground);
+  background-color: var(--awura-background);
 }
 
 /* Titres maquette : Montserrat ExtraBold (font-serif = display brand) */

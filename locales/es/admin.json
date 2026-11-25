@@ -327,6 +327,8 @@
     "shippingBaseFee": "Tarifa base (€)",
     "shippingFreeMin": "Envío gratis desde (€)",
     "shippingFreeMinHint": "Vacío = sin oferta / la franja ignora este transportista. La franja del sitio usa el umbral más bajo de los transportistas activos.",
+    "pickupAddress": "Dirección de entrega",
+    "pickupAddressHint": "Visible en el checkout. La persona deja su número para que puedas contactarla.",
     "shippingFeeLine": "Envío incluido: {{amount}}",
     "pickupNoLabel": "Recogida en tienda — no hay etiqueta que generar.",
     "markPickupReady": "Marcar lista para recogida (notifica al cliente)",
@@ -489,7 +491,7 @@
     "carriers": {
       "laposte": "Colissimo (domicilio)",
       "mondial_relay": "Mondial Relay",
-      "pickup": "Recogida en tienda"
+      "pickup": "Entrega en mano"
     },
     "payments": {
       "refundHint": "Para un reembolso real, hazlo en Stripe o PayPal, luego marca el pedido como reembolsado aquí.",

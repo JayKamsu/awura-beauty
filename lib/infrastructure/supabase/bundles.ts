@@ -56,11 +56,15 @@ export async function getBundleComponents(
   if (error || !data) return [];
 
   return (data as unknown as Array<Record<string, unknown>>)
-    .filter((row) => row.component)
-    .map((row) => ({
-      product: mapProductRow(row.component as Record<string, unknown>),
-      quantity: Number(row.quantity ?? 1),
-    }));
+    .map((row) => {
+      const embedded = Array.isArray(row.component) ? row.component[0] : row.component;
+      if (!embedded || typeof embedded !== "object") return null;
+      return {
+        product: mapProductRow(embedded as Record<string, unknown>),
+        quantity: Number(row.quantity ?? 1),
+      };
+    })
+    .filter((row): row is BundleComponent => row !== null);
 }
 
 /** Remplace intégralement les composants d'un bundle (admin, service_role requis). */
