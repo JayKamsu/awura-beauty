@@ -28,7 +28,7 @@ type SiteShellProps = {
   children: ReactNode;
 };
 
-/** Mesure le bandeau + header pour que le hero occupe exactement le reste de l'écran. */
+/** Bandeau + header, fixés en haut au scroll, et mesurés pour le hero. */
 function ChromeTop({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -50,7 +50,11 @@ function ChromeTop({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return <div ref={ref}>{children}</div>;
+  return (
+    <div ref={ref} className="sticky top-0 z-40">
+      {children}
+    </div>
+  );
 }
 
 function isStandaloneApp(): boolean {
