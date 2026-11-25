@@ -311,11 +311,15 @@ export function ProductPurchasePanel({
                         : colorLabel
                     }
                     onClick={() => onSelectedColorChange(key)}
-                    className={`rounded-full transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
-                      colorAvailable <= 0 ? "opacity-40" : ""
-                    }`}
+                    className="relative rounded-full transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                   >
                     <ProductColorSwatch colorKey={key} selected={selected} />
+                    {colorAvailable <= 0 ? (
+                      <span
+                        className="pointer-events-none absolute left-1/2 top-1/2 h-px w-8 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-foreground"
+                        aria-hidden
+                      />
+                    ) : null}
                   </button>
                 );
               })}
