@@ -12,6 +12,8 @@
     "groupAccessories": "Accessoires",
     "accessoryFiltersLabel": "Accessoires",
     "accessoryBadge": "Accessoire",
+    "gammeBadge": "Gamme",
+    "bundleIncludes": "Les soins inclus",
     "discountBadge": "-{{percent}}%",
     "bundleBadge": "Offre promo",
     "bundleContentsTitle": "Ce que contient l'offre",
@@ -47,6 +49,13 @@
       "rose-clair": "Rose clair",
       "blond": "Blond",
       "acajou": "Acajou"
+    },
+    "gammeItems": {
+      "savon-solide": "Savon",
+      "demelant-nourrissant": "Démêlant",
+      "masque-capillaire": "Masque",
+      "lotion-repousse": "Lotion",
+      "beurre-capillaire": "Beurre"
     },
     "addedToCart": "{{name}} ajouté au panier.",
     "viewCart": "Voir le panier",

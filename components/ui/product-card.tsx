@@ -14,6 +14,7 @@ import {
   type ProductColorKey,
 } from "@/lib/domain/product-color";
 import { isFibreProduct } from "@/features/shop/utils/map-product";
+import { GAMME_COMPLETE_COMPONENT_SLUGS } from "@/lib/domain/bundle";
 
 /** DonnÃ©es produit nÃ©cessaires Ã  l'affichage d'une carte dans une grille boutique. */
 export type ProductCardData = {
@@ -28,12 +29,18 @@ export type ProductCardData = {
   ingredientImage?: string;
   lifestyleImage?: string | null;
   isNew?: boolean;
+  /** Pack de plusieurs soins (gamme complète). */
+  isBundle?: boolean;
   productType?: "hair_care" | "accessory";
   /** CatÃ©gorie boutique (fibres, casques, accessoiresâ€¦) pour le groupement de la grille. */
   category?: string;
   stock?: number;
   /** Variantes couleur : si renseignÃ©, l'ajout panier se fait depuis la fiche. */
   colorVariants?: ProductColorKey[];
+  /** Photo de chaque teinte, pour le survol d'une fibre ou d'un accessoire coloré. */
+  colorImages?: Partial<Record<ProductColorKey, string>>;
+  /** Soins inclus dans une gamme, photos quand le catalogue les fournit. */
+  bundleItems?: Array<{ slug: string; name: string; image?: string }>;
 };
 
 type ProductColorSwatchProps = {
@@ -80,6 +87,14 @@ export function ProductCard({ product, onAddToCart, compact = false }: ProductCa
   const hasIngredientsImage = Boolean(product.ingredientImage);
   const colorVariants = product.colorVariants ?? [];
   const hasColors = colorVariants.length > 0;
+  const isBundle = Boolean(product.isBundle);
+  const hoverMode = isBundle
+    ? "bundle"
+    : hasColors
+      ? "colors"
+      : hasIngredientsImage
+        ? "ingredients"
+        : "photo";
   const href = hasColors
     ? `/boutique/${product.slug}?couleur=${colorVariants[0]}`
     : `/boutique/${product.slug}`;
@@ -119,7 +134,12 @@ export function ProductCard({ product, onAddToCart, compact = false }: ProductCa
               {t("shop.newBadge")}
             </span>
           ) : null}
-          {product.productType === "accessory" && !isFibreProduct(product) ? (
+          {isBundle ? (
+            <span className="rounded-md bg-accent px-2.5 py-1 text-[10px] font-semibold tracking-wider text-background">
+              {t("shop.gammeBadge")}
+            </span>
+          ) : null}
+          {product.productType === "accessory" && !isFibreProduct(product) && !isBundle ? (
             <span className="rounded-md bg-accent px-2.5 py-1 text-[10px] font-semibold tracking-wider text-background">
               {t("shop.accessoryBadge")}
             </span>
@@ -171,7 +191,7 @@ export function ProductCard({ product, onAddToCart, compact = false }: ProductCa
         <span
           aria-hidden
           className={`absolute inset-0 transition-[opacity,transform] duration-500 ease-out ${
-            hasIngredientsImage
+            hoverMode === "ingredients"
               ? "[@media(hover:hover)]:group-hover:scale-95 [@media(hover:hover)]:group-hover:opacity-0"
               : ""
           }`}
@@ -188,13 +208,13 @@ export function ProductCard({ product, onAddToCart, compact = false }: ProductCa
             }
           />
         </span>
-        {hasIngredientsImage ? (
+        {hoverMode === "ingredients" && product.ingredientImage ? (
           <span
             aria-hidden
             className="pointer-events-none absolute inset-0 scale-95 opacity-0 transition-[opacity,transform] duration-500 ease-out [@media(hover:hover)]:group-hover:scale-100 [@media(hover:hover)]:group-hover:opacity-100"
           >
             <Image
-              src={product.ingredientImage!}
+              src={product.ingredientImage}
               alt=""
               fill
               className="object-cover"
@@ -205,6 +225,54 @@ export function ProductCard({ product, onAddToCart, compact = false }: ProductCa
               }
             />
           </span>
+        ) : null}
+        {hoverMode === "colors" ? (
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center gap-2 bg-gradient-to-t from-background via-background/80 to-transparent px-2 pb-3 pt-10 opacity-0 transition-opacity duration-300 [@media(hover:hover)]:group-hover:opacity-100">
+            {colorVariants.map((key) => {
+              const src = product.colorImages?.[key];
+              return (
+                <span key={key} className="flex min-w-0 flex-col items-center gap-1">
+                  {src ? (
+                    <span className="relative size-11 overflow-hidden rounded-xl border border-border">
+                      <Image src={src} alt="" fill className="object-cover" sizes="44px" />
+                    </span>
+                  ) : (
+                    <ProductColorSwatch colorKey={key} size="sm" />
+                  )}
+                  <span className="max-w-14 truncate text-[10px] font-medium text-primary">
+                    {t(`shop.colors.${key}`)}
+                  </span>
+                </span>
+              );
+            })}
+          </div>
+        ) : null}
+        {hoverMode === "bundle" ? (
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-20 flex flex-col justify-end bg-background/85 p-3 opacity-0 transition-opacity duration-300 [@media(hover:hover)]:group-hover:opacity-100">
+            <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.14em] text-accent">
+              {t("shop.bundleIncludes")}
+            </p>
+            <ul className="grid grid-cols-5 gap-1.5">
+              {GAMME_COMPLETE_COMPONENT_SLUGS.map((slug) => {
+                const item = product.bundleItems?.find((entry) => entry.slug === slug);
+                const label = item?.name || t(`shop.gammeItems.${slug}`);
+                return (
+                  <li key={slug} className="min-w-0 text-center">
+                    {item?.image ? (
+                      <span className="relative mb-1 block aspect-square overflow-hidden rounded-lg">
+                        <Image src={item.image} alt="" fill className="object-cover" sizes="64px" />
+                      </span>
+                    ) : (
+                      <span className="mb-1 block aspect-square rounded-lg bg-background-alt" />
+                    )}
+                    <span className="line-clamp-2 text-[9px] leading-tight text-primary">
+                      {label}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         ) : null}
 
         <Link

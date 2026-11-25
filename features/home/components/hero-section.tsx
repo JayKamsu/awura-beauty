@@ -10,48 +10,34 @@ import {
   usePageCmsFields,
 } from "@/features/cms/context/page-cms-context";
 import { HOME_IMAGES } from "@/features/home/data/content";
+import { heroAvatarSources } from "@/features/home/lib/hero-avatars";
 import type { PublicTestimonial } from "@/lib/domain/testimonial";
 
-function avatarSourcesFromTestimonials(
-  items: PublicTestimonial[],
-  fallback: readonly string[],
-): string[] {
-  const fromClients = [
-    ...new Set(
-      items
-        .filter((item) => item.kind === "site" && item.imageUrl)
-        .map((item) => item.imageUrl as string),
-    ),
-  ];
-  const merged = [...fromClients];
-  for (const src of fallback) {
-    if (merged.length >= 3) break;
-    if (!merged.includes(src)) merged.push(src);
-  }
-  return merged.slice(0, 3);
-}
-
 /** Bannière principale de la page d'accueil : accroche, CTA vers le diagnostic/la boutique et preuve sociale. */
-export function HeroSection() {
+export function HeroSection({
+  initialAvatars = [],
+}: {
+  initialAvatars?: string[];
+}) {
   const { t } = useTranslation();
   const cms = usePageCmsFields("hero");
   const cmsTitle = cms.title?.trim();
   const subtitle = cmsOr(cms, "subtitle", t("home.hero.subtitle"));
   const heroImage = cmsOr(cms, "image_url", HOME_IMAGES.hero);
   const ctaLabel = cms.cta_label?.trim();
-  const [avatars, setAvatars] = useState<string[]>([...HOME_IMAGES.avatars]);
+  const [avatars, setAvatars] = useState<string[]>(
+    initialAvatars.length > 0 ? initialAvatars : [...HOME_IMAGES.avatars],
+  );
 
   useEffect(() => {
+    if (initialAvatars.length > 0) return;
     let cancelled = false;
     void fetch("/api/testimonials?limit=12&kinds=site")
       .then((res) => res.json())
       .then((json: { testimonials?: PublicTestimonial[] }) => {
         if (cancelled) return;
         setAvatars(
-          avatarSourcesFromTestimonials(
-            json.testimonials ?? [],
-            HOME_IMAGES.avatars,
-          ),
+          heroAvatarSources(json.testimonials ?? [], HOME_IMAGES.avatars),
         );
       })
       .catch(() => {
@@ -60,7 +46,7 @@ export function HeroSection() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initialAvatars.length]);
 
   return (
     <section className="relative flex min-h-[calc(100dvh-var(--awura-chrome-top,4.5rem)-5rem)] flex-col overflow-hidden bg-background lg:min-h-[calc(100dvh-var(--awura-chrome-top,5.5rem))]">

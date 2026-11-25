@@ -9,7 +9,7 @@ import {
   accountPanelClass,
 } from "@/features/account/components/account-section";
 import { useAuth } from "@/features/auth/context/auth-provider";
-import { toProductCardData } from "@/features/shop/utils/map-product";
+import { toProductCardList } from "@/features/shop/utils/map-product";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
 /** Section Mon compte listant les produits que le client a mis en favoris. */
@@ -66,8 +66,8 @@ export function AccountFavoritesSection() {
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={toProductCardData(product)} />
+          {toProductCardList(products).map((product) => (
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}

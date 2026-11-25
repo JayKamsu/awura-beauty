@@ -12,7 +12,11 @@ import { CATALOG } from "@/features/home/data/content";
  * Galerie botanique — compositions plantes / actifs en cercles doux,
  * rythme décalé (esprit maquette Awura).
  */
-export function IngredientsSection() {
+export function IngredientsSection({
+  images = [],
+}: {
+  images?: ReadonlyArray<{ id: string; image: string }>;
+}) {
   const { t } = useTranslation();
   const cms = usePageCmsFields("ingredients");
 
@@ -41,7 +45,10 @@ export function IngredientsSection() {
             >
               <div className="relative aspect-square w-full max-w-[11.5rem] overflow-hidden rounded-full bg-background shadow-lg ring-4 ring-background">
                 <Image
-                  src={product.ingredientImage}
+                  src={
+                    images.find((item) => item.id === product.id)?.image ||
+                    product.ingredientImage
+                  }
                   alt={t("home.ingredients.pairAlt", {
                     name: t(product.nameKey),
                   })}

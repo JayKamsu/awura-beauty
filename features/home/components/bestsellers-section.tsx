@@ -8,7 +8,7 @@ import {
   cmsOr,
   usePageCmsFields,
 } from "@/features/cms/context/page-cms-context";
-import { toProductCardData } from "@/features/shop/utils/map-product";
+import { toProductCardList } from "@/features/shop/utils/map-product";
 import { CATALOG_SYNC_CHANNEL } from "@/lib/application/catalog-sync";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
@@ -23,21 +23,27 @@ async function fetchHomeProducts(): Promise<ProductRow[]> {
 }
 
 /** Section « meilleures ventes » de la page d'accueil : grille des produits du catalogue (admin). */
-export function BestsellersSection() {
+export function BestsellersSection({
+  initialProducts = [],
+  catalog = [],
+}: {
+  initialProducts?: ProductRow[];
+  catalog?: ProductRow[];
+}) {
   const { t } = useTranslation();
   const cms = usePageCmsFields("bestsellers");
-  const [products, setProducts] = useState<ProductRow[]>([]);
+  const [products, setProducts] = useState<ProductRow[]>(initialProducts);
 
   useEffect(() => {
     let cancelled = false;
 
     const load = () => {
       void fetchHomeProducts().then((rows) => {
-        if (!cancelled) setProducts(rows);
+        if (!cancelled && rows.length > 0) setProducts(rows);
       });
     };
 
-    load();
+    if (initialProducts.length === 0) load();
 
     const broadcast =
       typeof BroadcastChannel === "undefined"
@@ -72,7 +78,7 @@ export function BestsellersSection() {
           <p className="text-muted">{t("home.bestsellers.empty")}</p>
         ) : (
           <ProductRail
-            products={products.map(toProductCardData)}
+            products={toProductCardList(products, [...catalog, ...products])}
             label={t("shop.productsRail")}
             singleRow
           />

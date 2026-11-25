@@ -1,7 +1,7 @@
 import { ShopFiltersBar } from "@/features/shop/components/shop-filters-bar";
 import { ShopPagination } from "@/features/shop/components/shop-pagination";
 import { ProductGrid } from "@/features/shop/components/product-grid";
-import { toProductCardData } from "@/features/shop/utils/map-product";
+import { toProductCardList } from "@/features/shop/utils/map-product";
 import { catalogPort } from "@/lib/application/container";
 import { listProductCategories } from "@/lib/infrastructure/supabase/product-categories";
 import { getSiteBrandSettings } from "@/lib/infrastructure/supabase/site-brand";
@@ -84,7 +84,7 @@ export default async function BoutiquePage({ searchParams }: BoutiquePageProps) 
         inStockOnly={inStockOnly}
         sort={sort}
       />
-      <ProductGrid products={result.products.map(toProductCardData)} />
+      <ProductGrid products={toProductCardList(result.products)} />
       <ShopPagination
         page={result.page}
         totalPages={result.totalPages}

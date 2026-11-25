@@ -1412,6 +1412,7 @@ export function AdminDiagnosticPanel() {
       {!loading && tab === "appointments" ? (
         <div className="space-y-6">
           <GoogleAgendaCard />
+          <div className="grid items-start gap-6 lg:grid-cols-2">
           {(
             [
               {
@@ -1431,10 +1432,10 @@ export function AdminDiagnosticPanel() {
                 items: onlineAppointments,
               },
             ] as const
-          ).map((section, index) => (
+          ).map((section) => (
             <section
               key={section.key}
-              className={index === 0 ? "space-y-2" : "space-y-2 border-t border-border pt-5"}
+              className="min-w-0 space-y-2"
             >
               <h2 className="font-serif text-xl text-primary">{section.title}</h2>
               {section.items.length === 0 ? (
@@ -1472,6 +1473,7 @@ export function AdminDiagnosticPanel() {
               )}
             </section>
           ))}
+          </div>
         </div>
       ) : null}
 

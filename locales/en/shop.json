@@ -12,6 +12,8 @@
     "groupAccessories": "Accessories",
     "accessoryFiltersLabel": "Accessories",
     "accessoryBadge": "Accessory",
+    "gammeBadge": "Set",
+    "bundleIncludes": "Included care",
     "discountBadge": "-{{percent}}%",
     "bundleBadge": "Promo offer",
     "bundleContentsTitle": "What's included in the offer",
@@ -47,6 +49,13 @@
       "rose-clair": "Light pink",
       "blond": "Blonde",
       "acajou": "Mahogany"
+    },
+    "gammeItems": {
+      "savon-solide": "Soap",
+      "demelant-nourrissant": "Detangler",
+      "masque-capillaire": "Mask",
+      "lotion-repousse": "Lotion",
+      "beurre-capillaire": "Butter"
     },
     "addedToCart": "{{name}} added to cart.",
     "viewCart": "View cart",

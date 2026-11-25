@@ -1,58 +1,36 @@
-"use client";
+import { HomePage } from "@/features/home/components/home-page";
+import { heroAvatarSources } from "@/features/home/lib/hero-avatars";
+import { CATALOG, HOME_IMAGES } from "@/features/home/data/content";
+import { resolveIngredientsImageUrl } from "@/features/shop/utils/map-product";
+import { listPublicTestimonialFeed } from "@/lib/application/testimonials/list-public-testimonials";
+import { catalogPort, container } from "@/lib/application/container";
 
-import { useEffect, useState, type ReactNode } from "react";
-import { useTranslation } from "react-i18next";
-import { BestsellersSection } from "@/features/home/components/bestsellers-section";
-import { FeatureDiagnosticSection } from "@/features/home/components/feature-diagnostic-section";
-import { HeroSection } from "@/features/home/components/hero-section";
-import { IngredientsSection } from "@/features/home/components/ingredients-section";
-import { PromisesSection } from "@/features/home/components/promises-section";
-import { TestimonialsSection } from "@/features/home/components/testimonials-section";
-import { PageCmsProvider } from "@/features/cms/context/page-cms-context";
-import {
-  DEFAULT_HOME_SECTIONS,
-  type PageSectionConfig,
-  type PageSectionId,
-} from "@/lib/domain/page-layout";
+/** Recalcule l'accueil à chaque visite pour afficher les photos du catalogue, pas les visuels de secours. */
+export const dynamic = "force-dynamic";
 
-const SECTION_MAP: Partial<Record<PageSectionId, ReactNode>> = {
-  hero: <HeroSection />,
-  promises: <PromisesSection />,
-  bestsellers: <BestsellersSection />,
-  ingredients: <IngredientsSection />,
-  feature: <FeatureDiagnosticSection />,
-  testimonials: <TestimonialsSection />,
-};
+/** Page d'accueil : sections CMS et photos produit déjà résolues dans le HTML. */
+export default async function Page() {
+  const ingredientSlugs = CATALOG.map((product) => product.id);
+  const [layout, bestsellers, testimonials, ingredientRows] = await Promise.all([
+    container.pages.getPageLayout("home", "fr"),
+    catalogPort.listHomeBestsellers(),
+    listPublicTestimonialFeed(12, ["site"]),
+    catalogPort.getProductsBySlugs(ingredientSlugs),
+  ]);
 
-export default function Home() {
-  const { i18n } = useTranslation();
-  const [sections, setSections] =
-    useState<PageSectionConfig[]>(DEFAULT_HOME_SECTIONS);
-
-  useEffect(() => {
-    const locale = i18n.language?.slice(0, 2) || "fr";
-    void fetch(`/api/pages/home?locale=${locale}`)
-      .then((res) => res.json())
-      .then((json: { layout?: { sections?: PageSectionConfig[] } }) => {
-        if (json.layout?.sections?.length) {
-          setSections(json.layout.sections);
-        }
-      })
-      .catch(() => undefined);
-  }, [i18n.language]);
+  const ingredientImages = CATALOG.map((product) => {
+    const row = ingredientRows.find((item) => item.slug === product.id);
+    const live = row ? resolveIngredientsImageUrl(row) : null;
+    return { id: product.id, image: live || product.ingredientImage };
+  });
 
   return (
-    <PageCmsProvider sections={sections}>
-      <main className="flex w-full flex-1 flex-col">
-        {sections
-          .filter((section) => section.enabled)
-          .map((section) => (
-            <div
-              key={section.id}
-              className={section.id === "promises" ? "max-lg:hidden" : undefined}
-            >{SECTION_MAP[section.id] ?? null}</div>
-          ))}
-      </main>
-    </PageCmsProvider>
+    <HomePage
+      initialSections={layout.sections}
+      initialBestsellers={bestsellers}
+      initialAvatars={heroAvatarSources(testimonials, HOME_IMAGES.avatars)}
+      ingredientImages={ingredientImages}
+      careProducts={ingredientRows}
+    />
   );
 }

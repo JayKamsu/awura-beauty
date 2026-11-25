@@ -2,7 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 import { ProductCard } from "@/components/ui/product-card";
-import { toProductCardData } from "@/features/shop/utils/map-product";
+import { toProductCardList } from "@/features/shop/utils/map-product";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
 /** Props des produits associés. */
@@ -22,8 +22,8 @@ export function RelatedProducts({ products }: RelatedProductsProps) {
         {t("shop.relatedTitle")}
       </h2>
       <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:gap-x-5 sm:gap-y-8 md:grid-cols-3 lg:grid-cols-4">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={toProductCardData(product)} />
+        {toProductCardList(products).map((product) => (
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
     </section>

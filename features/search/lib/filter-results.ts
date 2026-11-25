@@ -48,6 +48,9 @@ export function filterPostsByQuery(posts: BlogPost[], query: string): BlogPost[]
 }
 
 /** Convertit une ligne produit en données de carte produit pour l'affichage des résultats de recherche. */
-export function toSearchProductCard(product: ProductRow): ProductCardData {
-  return toProductCardData(product);
+export function toSearchProductCard(
+  product: ProductRow,
+  catalog: ProductRow[] = [],
+): ProductCardData {
+  return toProductCardData(product, catalog);
 }

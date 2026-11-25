@@ -2,8 +2,8 @@ import { SearchPageContent } from "@/features/search/components/search-page-cont
 import {
   filterPostsByQuery,
   filterProductsByQuery,
-  toSearchProductCard,
 } from "@/features/search/lib/filter-results";
+import { toProductCardList } from "@/features/shop/utils/map-product";
 import { catalogPort, contentPort } from "@/lib/application/container";
 
 /** Recalcule la recherche à chaque requête pour coller au catalogue admin. */
@@ -27,9 +27,8 @@ export default async function RecherchePage({ searchParams }: RecherchePageProps
     contentPort.listBlogPosts(),
   ]);
 
-  const products = filterProductsByQuery(productsResult.products, query).map(
-    toSearchProductCard,
-  );
+  const matched = filterProductsByQuery(productsResult.products, query);
+  const products = toProductCardList(matched, productsResult.products);
   const posts = filterPostsByQuery(postsResult.posts, query);
 
   return (

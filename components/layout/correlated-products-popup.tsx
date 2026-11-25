@@ -6,11 +6,9 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { usePreferences } from "@/components/providers/preferences-provider";
+import { CART_ADDED_EVENT, type CartAddedDetail } from "@/features/cart/context/cart-provider";
 import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 import { formatPrice } from "@/lib/format/price";
-
-const STORAGE_KEY = "awura-correlated-popup";
-const SHOW_DELAY_MS = 2800;
 
 const ROUTINE_SLUGS = [
   "beurre-capillaire",
@@ -46,60 +44,63 @@ function isQuietPath(pathname: string): boolean {
   );
 }
 
-/** Soins qui se complètent : la routine capillaire, sans le produit déjà ouvert. */
+/** Soins qui se complètent : la routine capillaire, sans les produits déjà choisis. */
 function pickCorrelated(
   products: PopupProduct[],
-  currentSlug: string | null,
+  excludeSlugs: ReadonlySet<string>,
 ): PopupProduct[] {
   const pool = products.filter(
-    (product) => product.is_active !== false && !product.is_bundle && product.image_url,
+    (product) =>
+      product.is_active !== false &&
+      !product.is_bundle &&
+      product.image_url &&
+      !excludeSlugs.has(product.slug),
   );
-  const current = currentSlug
-    ? pool.find((product) => product.slug === currentSlug)
-    : undefined;
-  const others = pool.filter((product) => product.slug !== current?.slug);
-  const formulas = others.filter((product) => product.product_type !== "accessory");
+  const formulas = pool.filter((product) => product.product_type !== "accessory");
   const ranked = [...formulas].sort(
     (a, b) => routineRank(a.slug) - routineRank(b.slug),
   );
   return ranked.slice(0, 3);
 }
 
-/** Pop-up public : trois produits de la routine qui se complètent, une fois par session. */
+/** Pop-up public : trois produits de la routine, à l'ajout d'un produit au panier. */
 export function CorrelatedProductsPopup() {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();
   const pathname = usePathname();
   const dialogRef = useRef<HTMLDivElement>(null);
+  const catalogRef = useRef<PopupProduct[] | null>(null);
   const [products, setProducts] = useState<PopupProduct[]>([]);
   const [open, setOpen] = useState(false);
 
   useFocusTrap(open, dialogRef);
 
   useEffect(() => {
-    if (isQuietPath(pathname)) return;
-    if (window.sessionStorage.getItem(STORAGE_KEY) === "1") return;
-
     let cancelled = false;
-    const timer = window.setTimeout(() => {
+
+    const onAdded = (event: Event) => {
+      if (isQuietPath(pathname)) return;
+      const slug = (event as CustomEvent<CartAddedDetail>).detail?.slug;
+      if (!slug) return;
       void (async () => {
-        const response = await fetch("/api/catalog/products?pageSize=24");
-        if (!response.ok || cancelled) return;
-        const json = (await response.json()) as { products?: PopupProduct[] };
-        const currentSlug = pathname.startsWith("/boutique/")
-          ? pathname.slice("/boutique/".length).split("/")[0]
-          : null;
-        const picked = pickCorrelated(json.products ?? [], currentSlug || null);
-        if (cancelled || picked.length < 2) return;
+        if (!catalogRef.current) {
+          const response = await fetch("/api/catalog/products?pageSize=24");
+          if (!response.ok || cancelled) return;
+          const json = (await response.json()) as { products?: PopupProduct[] };
+          catalogRef.current = json.products ?? [];
+        }
+        if (cancelled) return;
+        const picked = pickCorrelated(catalogRef.current, new Set([slug]));
+        if (picked.length < 2) return;
         setProducts(picked);
         setOpen(true);
-        window.sessionStorage.setItem(STORAGE_KEY, "1");
       })();
-    }, SHOW_DELAY_MS);
+    };
 
+    window.addEventListener(CART_ADDED_EVENT, onAdded);
     return () => {
       cancelled = true;
-      window.clearTimeout(timer);
+      window.removeEventListener(CART_ADDED_EVENT, onAdded);
     };
   }, [pathname]);
 

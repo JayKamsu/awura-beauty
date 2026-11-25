@@ -36,6 +36,12 @@ type CartContextValue = {
 const CART_KEY = "awura-cart";
 const CartContext = createContext<CartContextValue | null>(null);
 
+/** Événement émis quand un produit entre dans le panier pour la première fois. */
+export const CART_ADDED_EVENT = "awura-cart-added";
+
+/** Produit qui vient d'être ajouté au panier. */
+export type CartAddedDetail = { slug: string };
+
 /** Identifiant unique d'une ligne panier (produit + couleur). */
 export function cartLineKey(
   item: Pick<CartItem, "productId" | "colorKey">,
@@ -78,6 +84,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
               : entry,
           );
         }
+        queueMicrotask(() => {
+          window.dispatchEvent(
+            new CustomEvent<CartAddedDetail>(CART_ADDED_EVENT, {
+              detail: { slug: item.slug },
+            }),
+          );
+        });
         return [...current, { ...item, quantity }];
       });
     },

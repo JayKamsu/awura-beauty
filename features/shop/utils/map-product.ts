@@ -1,5 +1,9 @@
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 import type { ProductCardData } from "@/components/ui/product-card";
+import {
+  GAMME_COMPLETE_COMPONENT_SLUGS,
+  isGammeCompleteSlug,
+} from "@/lib/domain/bundle";
 
 /** Catégorie boutique des fibres de bananier. */
 export const FIBRES_CATEGORY = "fibres-de-bananier";
@@ -43,7 +47,6 @@ const DEFAULT_INGREDIENT_IMAGES: Record<string, string> = {
   "nutrition-royale": "/images/ingredients/ingredient-3.jpg",
   "lotion-repousse": "/images/ingredients/ingredient-4.jpg",
   "savon-solide": "/images/ingredients/ingredient-5.jpg",
-  "gamme-complete": "/images/ingredients/ingredient-1.jpg",
 };
 
 function normalizeAssetUrl(url: string | null | undefined): string {
@@ -69,7 +72,24 @@ export function resolveIngredientsImageUrl(product: {
 }
 
 /** Convertit une ligne produit (base de données) en données de carte produit pour l'affichage. */
-export function toProductCardData(product: ProductRow): ProductCardData {
+export function toProductCardData(
+  product: ProductRow,
+  catalog: ProductRow[] = [],
+): ProductCardData {
+  const bundle = product.is_bundle || isGammeCompleteSlug(product.slug);
+  const fibre = isFibreProduct(product);
+  const bySlug = new Map(catalog.map((row) => [row.slug, row]));
+  const bundleItems = bundle
+    ? GAMME_COMPLETE_COMPONENT_SLUGS.map((slug) => {
+        const row = bySlug.get(slug);
+        return {
+          slug,
+          name: row?.name ?? "",
+          image: row?.image_url || undefined,
+        };
+      })
+    : undefined;
+
   return {
     id: product.id,
     slug: product.slug,
@@ -78,12 +98,24 @@ export function toProductCardData(product: ProductRow): ProductCardData {
     price: product.price,
     image: product.image_url,
     compareAtPrice: product.compare_at_price,
-    ingredientImage: resolveIngredientsImageUrl(product) || undefined,
+    ingredientImage:
+      bundle || fibre ? undefined : resolveIngredientsImageUrl(product) || undefined,
     lifestyleImage: product.lifestyle_image_url,
     isNew: product.is_new,
+    isBundle: bundle,
     productType: product.product_type,
     category: product.category,
     stock: product.stock,
     colorVariants: product.color_variants,
+    colorImages: product.color_images,
+    bundleItems,
   };
+}
+
+/** Cartes d'une liste, avec les photos des soins de la gamme quand ils sont dans le catalogue. */
+export function toProductCardList(
+  products: ProductRow[],
+  catalog: ProductRow[] = products,
+): ProductCardData[] {
+  return products.map((product) => toProductCardData(product, catalog));
 }
