@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import {
   readAdminDraft,
   writeAdminDraft,
 } from "@/features/admin/lib/admin-form-draft";
+import { DiagnosticContentBlocks } from "@/features/diagnostic/components/diagnostic-content-blocks";
 import { RescheduleAppointmentPicker } from "@/features/diagnostic/components/reschedule-appointment-picker";
 import { buildDiagnosticResultTemplate, withExternalProductLinks } from "@/lib/application/diagnostic/result-template";
 import { AWURA_PRODUCT_SLUGS } from "@/lib/application/diagnostic/recommend";
@@ -512,6 +514,277 @@ function GoogleAgendaCard() {
   );
 }
 
+/** Vrai dès que l'heure du rendez-vous est atteinte. */
+function appointmentHasStarted(startsAt: string): boolean {
+  const time = new Date(startsAt).getTime();
+  return Number.isFinite(time) && time <= Date.now();
+}
+
+const COMPACT_ACTION =
+  "text-xs font-medium uppercase tracking-[0.06em] text-primary transition hover:text-accent";
+
+/** Ligne compacte d'un rendez-vous : le bilan et les notes n'apparaissent qu'une fois le créneau commencé. */
+function AppointmentCard({
+  appointment,
+  locale,
+  notesValue,
+  savingNotes,
+  rescheduling,
+  adminFetch,
+  onNotesChange,
+  onSaveNotes,
+  onPrepare,
+  onComplete,
+  onCancel,
+  onDownloadIcs,
+  onToggleReschedule,
+  onRescheduleDone,
+  onCancelReschedule,
+}: {
+  appointment: DiagnosticAppointment;
+  locale: string;
+  notesValue: string;
+  savingNotes: boolean;
+  rescheduling: boolean;
+  adminFetch: ReturnType<typeof useAdminFetch>;
+  onNotesChange: (value: string) => void;
+  onSaveNotes: () => void;
+  onPrepare: () => void;
+  onComplete: () => void;
+  onCancel: () => void;
+  onDownloadIcs: () => void;
+  onToggleReschedule: () => void;
+  onRescheduleDone: () => Promise<void>;
+  onCancelReschedule: () => void;
+}) {
+  const { t } = useTranslation();
+  const online = appointment.channel === "online";
+  const started = appointmentHasStarted(appointment.startsAt);
+  const open =
+    appointment.status === "pending_payment" || appointment.status === "confirmed";
+  const canPrepare =
+    started &&
+    (appointment.status === "confirmed" || appointment.status === "completed");
+  const canJoin =
+    online &&
+    (appointment.status === "confirmed" || appointment.status === "completed");
+  const notesLabel = online
+    ? t("admin.diagnostic.callNotesLabel")
+    : t("admin.diagnostic.visitNotesLabel");
+  const notesPlaceholder = online
+    ? t("admin.diagnostic.callNotesPlaceholder")
+    : t("admin.diagnostic.visitNotesPlaceholder");
+  const notesSaved = online
+    ? t("admin.diagnostic.callNotesSaved")
+    : t("admin.diagnostic.visitNotesSaved");
+
+  return (
+    <li className="rounded-2xl border border-border px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="min-w-0">
+          <p className="truncate font-medium text-primary">{appointment.fullName}</p>
+          <p className="truncate text-xs text-muted">
+            {formatDateTime(locale, appointment.startsAt)}
+            {" · "}
+            {appointment.email}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${APPOINTMENT_STATUS_TONE[appointment.status]}`}
+          >
+            {t(`admin.diagnostic.appointmentStatus.${appointment.status}`)}
+          </span>
+          {appointment.resultDraft &&
+          !isDiagnosticResultDraftEmpty(appointment.resultDraft) ? (
+            <span className="inline-flex rounded-full bg-accent/15 px-2.5 py-0.5 text-xs font-medium text-accent">
+              {t("admin.diagnostic.draftBadge")}
+            </span>
+          ) : null}
+          {canPrepare ? (
+            <button
+              type="button"
+              className="rounded-full border border-primary px-3 py-1 text-xs font-medium uppercase tracking-[0.06em] text-primary transition hover:bg-primary/10"
+              onClick={onPrepare}
+            >
+              {t("admin.diagnostic.prepareResult")}
+            </button>
+          ) : null}
+          {canJoin ? (
+            <Link
+              href={`/diagnostic-capillaire/visio/${appointment.id}`}
+              className={COMPACT_ACTION}
+            >
+              {t("admin.diagnostic.joinVideo")}
+            </Link>
+          ) : null}
+        </div>
+      </div>
+
+      {appointment.photos?.length ? (
+        <DiagnosticPhotosStrip photos={appointment.photos} adminFetch={adminFetch} />
+      ) : null}
+
+      {canPrepare ? (
+        <details className="mt-2">
+          <summary className="cursor-pointer text-xs font-medium text-muted">
+            {notesLabel}
+            {appointment.notes ? (
+              <span className="font-normal"> · {notesSaved}</span>
+            ) : null}
+          </summary>
+          <div className="mt-2 space-y-2">
+            <textarea
+              id={`call-notes-${appointment.id}`}
+              className="min-h-20 w-full rounded-lg border border-border bg-background px-2.5 py-2 text-xs text-foreground outline-none focus:border-accent"
+              placeholder={notesPlaceholder}
+              value={notesValue}
+              onChange={(e) => onNotesChange(e.target.value)}
+            />
+            <button
+              type="button"
+              className={COMPACT_ACTION}
+              disabled={savingNotes}
+              onClick={onSaveNotes}
+            >
+              {t("admin.diagnostic.saveCallNotes")}
+            </button>
+          </div>
+        </details>
+      ) : null}
+
+      <details className="mt-1">
+        <summary className="cursor-pointer text-xs font-medium text-muted">
+          {t("admin.diagnostic.manageAppointment")}
+        </summary>
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
+          <button type="button" className={COMPACT_ACTION} onClick={onDownloadIcs}>
+            {t("admin.diagnostic.addToCalendar")}
+          </button>
+          {open ? (
+            <button type="button" className={COMPACT_ACTION} onClick={onToggleReschedule}>
+              {t("diagnostic.reschedule.cta")}
+            </button>
+          ) : null}
+          {started && appointment.status === "confirmed" ? (
+            <button type="button" className={COMPACT_ACTION} onClick={onComplete}>
+              {t("admin.diagnostic.markCompleted")}
+            </button>
+          ) : null}
+          {open ? (
+            <button
+              type="button"
+              className="text-xs font-medium uppercase tracking-[0.06em] text-muted transition hover:text-primary"
+              onClick={onCancel}
+            >
+              {t("admin.diagnostic.cancel")}
+            </button>
+          ) : null}
+        </div>
+        {rescheduling ? (
+          <div className="mt-3 border-t border-border pt-3">
+            <RescheduleAppointmentPicker
+              currentStartsAt={appointment.startsAt}
+              fetchSlots={async (from, to) => {
+                const res = await adminFetch(
+                  `/api/diagnostic/slots?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+                );
+                if (!res.ok) return [];
+                const json = (await res.json()) as { slots?: DiagnosticSlot[] };
+                return json.slots ?? [];
+              }}
+              onConfirm={async (startsAt) => {
+                const res = await adminFetch("/api/admin/diagnostic/appointments", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ id: appointment.id, startsAt }),
+                });
+                const json = (await res.json()) as { error?: string };
+                if (!res.ok) return { ok: false, error: json.error };
+                await onRescheduleDone();
+                return { ok: true };
+              }}
+              onCancel={onCancelReschedule}
+            />
+          </div>
+        ) : null}
+      </details>
+    </li>
+  );
+}
+
+/** Aperçu du bilan tel que la cliente le verra dans son compte. */
+function ResultPreview({
+  title,
+  scalpAnalysis,
+  summary,
+  detailedFeedback,
+  content,
+  slugs,
+}: {
+  title: string;
+  scalpAnalysis: string;
+  summary: string;
+  detailedFeedback: string;
+  content: DiagnosticContentBlock[];
+  slugs: string[];
+}) {
+  const { t } = useTranslation();
+  const letter = content.length > 0;
+  const fallback = (detailedFeedback.trim() || summary.trim());
+  const hasBody = Boolean(
+    title.trim() || scalpAnalysis.trim() || fallback || letter || slugs.length,
+  );
+
+  return (
+    <aside className="lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto">
+      <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-muted">
+        {t("admin.diagnostic.previewTitle")}
+      </p>
+      <div className="space-y-3 rounded-2xl border border-border bg-background p-4">
+        {hasBody ? (
+          <>
+            <p className="font-serif text-xl text-primary">
+              {title.trim() || t("admin.diagnostic.previewUntitled")}
+            </p>
+            {scalpAnalysis.trim() ? (
+              <div className="space-y-1 rounded-xl bg-background-alt p-3">
+                <p className="text-sm font-medium text-primary">
+                  {t("admin.diagnostic.scalpAnalysis")}
+                </p>
+                <p className="whitespace-pre-wrap text-sm text-muted">{scalpAnalysis}</p>
+              </div>
+            ) : null}
+            {letter ? (
+              <DiagnosticContentBlocks blocks={content} />
+            ) : fallback ? (
+              <p className="whitespace-pre-wrap text-sm text-muted">{fallback}</p>
+            ) : null}
+            {slugs.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-primary">
+                  {t("admin.diagnostic.resultProducts")}
+                </p>
+                <ul className="flex flex-wrap gap-2">
+                  {slugs.map((slug) => (
+                    <li key={slug}>
+                      <span className="inline-flex rounded-xl border border-border px-3 py-1 text-xs text-accent">
+                        {slug.replaceAll("-", " ")}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <p className="text-sm text-muted">{t("admin.diagnostic.previewEmpty")}</p>
+        )}
+      </div>
+    </aside>
+  );
+}
+
 /** Panneau admin du diagnostic capillaire : résultats, rendez-vous, envoi de résultat et réglages. */
 export function AdminDiagnosticPanel() {
   const { t, i18n } = useTranslation();
@@ -964,6 +1237,8 @@ export function AdminDiagnosticPanel() {
   ];
 
   const onlineHistory = history.filter((row) => row.channel === "online");
+  const physicalAppointments = appointments.filter((item) => item.channel !== "online");
+  const onlineAppointments = appointments.filter((item) => item.channel === "online");
   const physicalHistory = history.filter((row) => row.channel !== "online");
 
   return (
@@ -1135,229 +1410,74 @@ export function AdminDiagnosticPanel() {
       ) : null}
 
       {!loading && tab === "appointments" ? (
-        <div className="space-y-3">
+        <div className="space-y-6">
           <GoogleAgendaCard />
-          {appointments.length === 0 ? (
-            <AdminEmptyState message={t("admin.diagnostic.appointmentsEmpty")} />
-          ) : (
-            <ul className="space-y-3">
-              {appointments.map((a) => (
-                <li
-                  key={a.id}
-                  className="overflow-hidden rounded-2xl border border-border"
-                >
-                  {/* En-tête : identité + statut, toujours visibles en un coup d'œil */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-background-alt px-4 py-3">
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-primary">{a.fullName}</p>
-                      <p className="text-xs text-muted">{a.email}</p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-                        {a.channel === "online"
-                          ? t("admin.diagnostic.channel.online")
-                          : t("admin.diagnostic.channel.physical")}
-                      </span>
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${APPOINTMENT_STATUS_TONE[a.status]}`}
-                      >
-                        {t(`admin.diagnostic.appointmentStatus.${a.status}`)}
-                      </span>
-                      {a.resultDraft &&
-                      !isDiagnosticResultDraftEmpty(a.resultDraft) ? (
-                        <span className="inline-flex rounded-full bg-accent/15 px-2.5 py-0.5 text-xs font-medium text-accent">
-                          {t("admin.diagnostic.draftBadge")}
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 p-4 text-sm">
-                    <p className="font-medium text-primary">
-                      {formatDateTime(i18n.language, a.startsAt)}
-                    </p>
-
-                    {a.photos?.length ? (
-                      <DiagnosticPhotosStrip photos={a.photos} adminFetch={adminFetch} />
-                    ) : null}
-
-                    {/* Actions principales : ce que l'admin fait le plus souvent */}
-                    <div className="flex flex-wrap gap-2 border-t border-border pt-3">
-                      <Button
-                        type="button"
-                        size="md"
-                        variant="primary-outline"
-                        onClick={() => prepareResultFor(a)}
-                      >
-                        {t("admin.diagnostic.prepareResult")}
-                      </Button>
-                      {a.channel === "online" &&
-                      (a.status === "confirmed" || a.status === "completed") ? (
-                        <Button
-                          href={`/diagnostic-capillaire/visio/${a.id}`}
-                          size="md"
-                          variant="primary-outline"
-                        >
-                          {t("admin.diagnostic.joinVideo")}
-                        </Button>
-                      ) : null}
-                      {a.status === "confirmed" ? (
-                        <Button
-                          type="button"
-                          size="md"
-                          variant="ghost"
-                          onClick={() => void updateAppointmentStatus(a.id, "completed")}
-                        >
-                          {t("admin.diagnostic.markCompleted")}
-                        </Button>
-                      ) : null}
-                    </div>
-
-                    {/* Notes d'appel : repliées, consultées après l'entretien */}
-                    <details className="rounded-xl border border-border bg-background-alt/60 px-3 py-2.5">
-                      <summary className="cursor-pointer text-sm font-medium text-primary">
-                        {t("admin.diagnostic.callNotesLabel")}
-                        {a.notes ? (
-                          <span className="ml-2 font-normal text-muted">
-                            · {t("admin.diagnostic.callNotesSaved")}
-                          </span>
-                        ) : null}
-                      </summary>
-                      <div className="mt-2.5 space-y-2">
-                        <textarea
-                          id={`call-notes-${a.id}`}
-                          className="min-h-20 w-full rounded-lg border border-border bg-background px-2.5 py-2 text-xs text-foreground outline-none focus:border-accent"
-                          placeholder={t("admin.diagnostic.callNotesPlaceholder")}
-                          value={callNotes[a.id] ?? a.notes ?? ""}
-                          onChange={(e) =>
-                            setCallNotes((prev) => ({ ...prev, [a.id]: e.target.value }))
-                          }
-                        />
-                        <Button
-                          type="button"
-                          size="md"
-                          variant="ghost"
-                          pending={savingNotesId === a.id}
-                          onClick={() => void saveCallNotes(a.id)}
-                        >
-                          {t("admin.diagnostic.saveCallNotes")}
-                        </Button>
-                      </div>
-                    </details>
-
-                    {/* Liens produits externes : injectés dans le modèle de bilan */}
-                    <details className="rounded-xl border border-border bg-background-alt/60 px-3 py-2.5">
-                      <summary className="cursor-pointer text-sm font-medium text-primary">
-                        {t("admin.diagnostic.externalLinksLabel")}
-                        {a.externalProductLinks?.length ? (
-                          <span className="ml-2 font-normal text-muted">
-                            ·{" "}
-                            {t("admin.diagnostic.externalLinksSaved", {
-                              count: a.externalProductLinks.length,
-                            })}
-                          </span>
-                        ) : null}
-                      </summary>
-                      <div className="mt-2.5 space-y-2">
-                        <p className="text-xs text-muted">
-                          {t("admin.diagnostic.externalLinksHint")}
-                        </p>
-                        <ExternalProductLinksEditor
-                          links={linksFor(a.id)}
-                          onChange={(links) =>
-                            setExternalLinksDraft((prev) => ({
-                              ...prev,
-                              [a.id]: links,
-                            }))
-                          }
-                          saving={savingLinksId === a.id}
-                          onSave={() => void saveExternalLinks(a.id)}
-                        />
-                      </div>
-                    </details>
-
-                    {/* Gestion du RDV : replanifier, annuler, calendrier — moins fréquent */}
-                    <details className="rounded-xl border border-border px-3 py-2.5">
-                      <summary className="cursor-pointer text-sm font-medium text-muted">
-                        {t("admin.diagnostic.manageAppointment")}
-                      </summary>
-                      <div className="mt-2.5 flex flex-wrap gap-2">
-                        <Button
-                          type="button"
-                          size="md"
-                          variant="ghost"
-                          onClick={() => void downloadAppointmentIcs(a.id)}
-                        >
-                          {t("admin.diagnostic.addToCalendar")}
-                        </Button>
-                        {a.status === "pending_payment" || a.status === "confirmed" ? (
-                          <Button
-                            type="button"
-                            size="md"
-                            variant="ghost"
-                            onClick={() =>
-                              setReschedulingId((prev) => (prev === a.id ? null : a.id))
-                            }
-                          >
-                            {t("diagnostic.reschedule.cta")}
-                          </Button>
-                        ) : null}
-                        {a.status === "pending_payment" || a.status === "confirmed" ? (
-                          <Button
-                            type="button"
-                            size="md"
-                            variant="ghost"
-                            onClick={() => void updateAppointmentStatus(a.id, "cancelled")}
-                          >
-                            {t("admin.diagnostic.cancel")}
-                          </Button>
-                        ) : null}
-                      </div>
-
-                      {reschedulingId === a.id ? (
-                        <div className="mt-4 border-t border-border pt-4">
-                          <RescheduleAppointmentPicker
-                            currentStartsAt={a.startsAt}
-                            fetchSlots={async (from, to) => {
-                              const res = await adminFetch(
-                                `/api/diagnostic/slots?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
-                              );
-                              if (!res.ok) return [];
-                              const json = (await res.json()) as { slots?: DiagnosticSlot[] };
-                              return json.slots ?? [];
-                            }}
-                            onConfirm={async (startsAt) => {
-                              const res = await adminFetch(
-                                "/api/admin/diagnostic/appointments",
-                                {
-                                  method: "PATCH",
-                                  headers: { "Content-Type": "application/json" },
-                                  body: JSON.stringify({ id: a.id, startsAt }),
-                                },
-                              );
-                              const json = (await res.json()) as { error?: string };
-                              if (!res.ok) {
-                                return { ok: false, error: json.error };
-                              }
-                              setReschedulingId(null);
-                              await load();
-                              return { ok: true };
-                            }}
-                            onCancel={() => setReschedulingId(null)}
-                          />
-                        </div>
-                      ) : null}
-                    </details>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+          {(
+            [
+              {
+                key: "physical",
+                title: t("admin.diagnostic.physicalAppointmentsSection", {
+                  count: physicalAppointments.length,
+                }),
+                empty: t("admin.diagnostic.physicalAppointmentsEmpty"),
+                items: physicalAppointments,
+              },
+              {
+                key: "online",
+                title: t("admin.diagnostic.onlineAppointmentsSection", {
+                  count: onlineAppointments.length,
+                }),
+                empty: t("admin.diagnostic.onlineAppointmentsEmpty"),
+                items: onlineAppointments,
+              },
+            ] as const
+          ).map((section, index) => (
+            <section
+              key={section.key}
+              className={index === 0 ? "space-y-2" : "space-y-2 border-t border-border pt-5"}
+            >
+              <h2 className="font-serif text-xl text-primary">{section.title}</h2>
+              {section.items.length === 0 ? (
+                <p className="text-sm text-muted">{section.empty}</p>
+              ) : (
+                <ul className="space-y-2">
+                  {section.items.map((a) => (
+                    <AppointmentCard
+                      key={a.id}
+                      appointment={a}
+                      locale={i18n.language}
+                      notesValue={callNotes[a.id] ?? a.notes ?? ""}
+                      savingNotes={savingNotesId === a.id}
+                      rescheduling={reschedulingId === a.id}
+                      adminFetch={adminFetch}
+                      onNotesChange={(value) =>
+                        setCallNotes((prev) => ({ ...prev, [a.id]: value }))
+                      }
+                      onSaveNotes={() => void saveCallNotes(a.id)}
+                      onPrepare={() => prepareResultFor(a)}
+                      onComplete={() => void updateAppointmentStatus(a.id, "completed")}
+                      onCancel={() => void updateAppointmentStatus(a.id, "cancelled")}
+                      onDownloadIcs={() => void downloadAppointmentIcs(a.id)}
+                      onToggleReschedule={() =>
+                        setReschedulingId((prev) => (prev === a.id ? null : a.id))
+                      }
+                      onRescheduleDone={async () => {
+                        setReschedulingId(null);
+                        await load();
+                      }}
+                      onCancelReschedule={() => setReschedulingId(null)}
+                    />
+                  ))}
+                </ul>
+              )}
+            </section>
+          ))}
         </div>
       ) : null}
 
       {!loading && tab === "sendResult" ? (
-        <div className="max-w-2xl space-y-5">
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,22rem)]">
+          <div className="min-w-0 space-y-5">
           <div>
             <h2 className="font-serif text-2xl text-primary">
               {t("admin.diagnostic.sendResultTitle")}
@@ -1618,6 +1738,15 @@ export function AdminDiagnosticPanel() {
               </Button>
             </div>
           </section>
+          </div>
+          <ResultPreview
+            title={resultForm.title}
+            scalpAnalysis={resultForm.scalpAnalysis}
+            summary={resultForm.summary}
+            detailedFeedback={resultForm.detailedFeedback}
+            content={resultForm.content}
+            slugs={resultForm.slugs}
+          />
         </div>
       ) : null}
 

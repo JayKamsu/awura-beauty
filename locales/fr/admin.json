@@ -68,12 +68,17 @@
         "youtube": "YouTube",
         "x": "X / Twitter",
         "linkedin": "LinkedIn"
-      }
+      },
+      "visitsCount": "{{count}} visite(s)",
+      "salesTitle": "Ventes",
+      "operationsTitle": "À traiter",
+      "seeAll": "Tout voir",
+      "lowStockHint": "{{count}} produit(s) à réapprovisionner",
+      "paymentsSection": "Paiements"
     },
     "ordersTitle": "Gestion des commandes",
     "paymentsTitle": "Paiements",
     "paymentsSubtitle": "État Stripe / PayPal, suivi des paiements et actions admin.",
-    "paymentsStatusHint": "État des connexions aux prestataires de paiement. « Prêt » = toutes les clés nécessaires sont configurées côté serveur et les paiements en ligne fonctionnent. « Incomplet » = au moins une clé manque, les paiements par ce moyen sont désactivés.",
     "paymentsListTitle": "Commandes & transactions",
     "diagnosticTitle": "Diagnostic capillaire",
     "diagnosticSubtitle": "Diagnostics en ligne, RDV présentiel, questions et tarifs.",
@@ -129,7 +134,7 @@
       "removeImage": "Supprimer la photo",
       "productReviewsTitle": "Avis par produit",
       "addProduct": "Ajouter un avis sur un produit",
-      "addProductHint": "L’avis apparaît sur la fiche du produit choisi. Supprime ici les avis de test.",
+      "addProductHint": "L’avis apparaît sur la fiche du produit choisi.",
       "chooseProduct": "Produit",
       "comment": "Commentaire",
       "editorial": "Ajouté par Awura"
@@ -335,7 +340,6 @@
     "markPickupDone": "Marquer récupérée (notifie le client)",
     "statusUpdated": "Statut mis à jour — client notifié.",
     "save": "Enregistrer",
-    "loading": "Chargement…",
     "brandTitle": "Marque & design",
     "brandSubtitle": "Duafe, logos, QR produits, univers Adulte / Enfant — tout gérable ici.",
     "brandDuafe": "Symbole Duafe",
@@ -544,16 +548,6 @@
       "pickup": "Retrait sur place"
     },
     "payments": {
-      "ready": "Prêt",
-      "incomplete": "Incomplet",
-      "stripePublishable": "Clé publishable",
-      "stripeSecret": "Clé secrète",
-      "stripeWebhook": "Webhook secret",
-      "paypalClient": "Client ID",
-      "paypalSecret": "Secret",
-      "paypalLiveApi": "API Live (pas Sandbox)",
-      "openStripeDashboard": "Ouvrir le dashboard Stripe",
-      "openPaypalDashboard": "Ouvrir le dashboard PayPal",
       "refundHint": "Pour un vrai remboursement d’argent, fais-le dans Stripe ou PayPal, puis marque la commande remboursée ici.",
       "empty": "Aucun paiement pour ces filtres.",
       "markPaid": "Marquer payée",
@@ -574,7 +568,7 @@
       },
       "tabHints": {
         "results": "Historique des diagnostics remplis en ligne ou réalisés en présentiel.",
-        "appointments": "Rendez-vous de diagnostic présentiel : confirme, annule ou rejoins la visio.",
+        "appointments": "Rendez-vous présentiel et en ligne, chacun dans sa liste. Le bilan se prépare une fois le rendez-vous commencé.",
         "sendResult": "Rédige et envoie le bilan capillaire d’une cliente (en ligne ou après un RDV).",
         "settings": "Questions du diagnostic, tarifs et horaires de disponibilité."
       },
@@ -583,6 +577,10 @@
       "physicalResultsSection": "Présentiel ({{count}})",
       "historyEmpty": "Aucun diagnostic en ligne pour le moment.",
       "appointmentsEmpty": "Aucun rendez-vous pour le moment.",
+      "physicalAppointmentsSection": "Présentiel ({{count}})",
+      "onlineAppointmentsSection": "En ligne ({{count}})",
+      "physicalAppointmentsEmpty": "Aucun rendez-vous en présentiel.",
+      "onlineAppointmentsEmpty": "Aucun rendez-vous en ligne.",
       "googleAgendaTitle": "Google Agenda",
       "googleAgendaBody": "Chaque rendez-vous confirmé est ajouté à l’agenda de {{organizer}} et fusionné avec {{sync}}.",
       "googleAgendaHint": "Pour voir tout le calendrier à côté de ton agenda Gmail : Google Agenda → Autres agendas → À partir de l’URL, puis colle ce lien.",
@@ -676,6 +674,9 @@
         "completed": "Terminé"
       },
       "sendResultTitle": "Envoyer un bilan au client",
+      "previewTitle": "Aperçu cliente",
+      "previewEmpty": "Le bilan s’affichera ici au fur et à mesure de la rédaction.",
+      "previewUntitled": "Bilan sans titre",
       "sendResultHint": "Pour un RDV présentiel : note l’analyse trichogramme, le suivi de routine et la liste de produits recommandés. Le bilan sera visible dans Mon compte → Diagnostics du client (+ notification push si son compte est lié).",
       "sectionClient": "Client & rendez-vous",
       "sectionSummary": "Résumé rapide",
@@ -707,6 +708,9 @@
       "callNotesLabel": "Notes prises pendant l'appel",
       "callNotesSaved": "des notes enregistrées",
       "callNotesPlaceholder": "Note libre pendant l'entretien (pas de retranscription automatique)…",
+      "visitNotesLabel": "Notes du rendez-vous",
+      "visitNotesSaved": "des notes enregistrées",
+      "visitNotesPlaceholder": "Note libre pendant le rendez-vous…",
       "saveCallNotes": "Enregistrer les notes",
       "externalLinksLabel": "Liens produits externes",
       "externalLinksHint": "Produits hors boutique Awura : enregistrés ici, ils sont ajoutés dans le modèle de bilan (section « Produits externes recommandés »).",
@@ -746,6 +750,26 @@
         "5": "Vendredi",
         "6": "Samedi"
       }
+    },
+    "outOfStock": "Rupture",
+    "formImagesHint": "La première image est l’image principale de la fiche.",
+    "colorImageSet": "Photo dédiée ajoutée",
+    "colorImageMissing": "Pas de photo dédiée : l’image principale sera utilisée",
+    "bundleQuantity": "Quantité",
+    "formStatus": "Statut",
+    "formPricing": "Prix",
+    "formOrganization": "Organisation",
+    "discountPreview": "Affiché avec −{{percent}} % de réduction",
+    "productsFilter": {
+      "label": "Filtrer les produits",
+      "all": "Tous",
+      "active": "En ligne",
+      "hidden": "Masqués",
+      "low": "Stock faible"
+    },
+    "productsColumns": {
+      "visible": "En ligne",
+      "actions": "Actions"
     }
   }
 }

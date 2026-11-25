@@ -68,7 +68,13 @@
         "youtube": "YouTube",
         "x": "X / Twitter",
         "linkedin": "LinkedIn"
-      }
+      },
+      "visitsCount": "{{count}} visita(s)",
+      "salesTitle": "Ventas",
+      "operationsTitle": "Por atender",
+      "seeAll": "Ver todo",
+      "lowStockHint": "{{count}} producto(s) por reponer",
+      "paymentsSection": "Pagos"
     },
     "ordersTitle": "Gestión de pedidos",
     "paymentsTitle": "Pagos",
@@ -127,7 +133,7 @@
       "removeImage": "Quitar la foto",
       "productReviewsTitle": "Opiniones por producto",
       "addProduct": "Añadir una opinión a un producto",
-      "addProductHint": "La opinión aparece en la ficha del producto elegido. Elimina aquí las opiniones de prueba.",
+      "addProductHint": "La opinión aparece en la ficha del producto elegido.",
       "chooseProduct": "Producto",
       "comment": "Comentario",
       "editorial": "Añadida por Awura"
@@ -327,7 +333,6 @@
     "markPickupDone": "Marcar recogida (notifica al cliente)",
     "statusUpdated": "Estado actualizado — cliente notificado.",
     "save": "Guardar",
-    "loading": "Cargando…",
     "brandTitle": "Marca y diseño",
     "brandSubtitle": "Duafe, logos, QR de productos, universos Adulto / Niño — todo gestionable aquí.",
     "brandDuafe": "Símbolo Duafe",
@@ -487,16 +492,6 @@
       "pickup": "Recogida en tienda"
     },
     "payments": {
-      "ready": "Listo",
-      "incomplete": "Incompleto",
-      "stripePublishable": "Clave publicable",
-      "stripeSecret": "Clave secreta",
-      "stripeWebhook": "Secreto webhook",
-      "paypalClient": "Client ID",
-      "paypalSecret": "Secret",
-      "paypalLiveApi": "API Live (no Sandbox)",
-      "openStripeDashboard": "Abrir dashboard Stripe",
-      "openPaypalDashboard": "Abrir dashboard PayPal",
       "refundHint": "Para un reembolso real, hazlo en Stripe o PayPal, luego marca el pedido como reembolsado aquí.",
       "empty": "Ningún pago para estos filtros.",
       "markPaid": "Marcar pagado",
@@ -522,6 +517,10 @@
       "physicalResultsSection": "Resultados presenciales ({{count}})",
       "historyEmpty": "Todavía no hay diagnósticos online.",
       "appointmentsEmpty": "Todavía no hay citas.",
+      "physicalAppointmentsSection": "Presencial ({{count}})",
+      "onlineAppointmentsSection": "En línea ({{count}})",
+      "physicalAppointmentsEmpty": "No hay citas presenciales.",
+      "onlineAppointmentsEmpty": "No hay citas en línea.",
       "googleAgendaTitle": "Google Calendar",
       "googleAgendaBody": "Cada cita confirmada se añade al calendario de {{organizer}} y se fusiona con {{sync}}.",
       "googleAgendaHint": "Para ver todo el calendario junto al de Gmail: Google Calendar → Otros calendarios → Desde URL, y pega este enlace.",
@@ -563,6 +562,9 @@
       "markCompleted": "Completado",
       "cancel": "Cancelar",
       "sendResultTitle": "Enviar un resultado a la clienta",
+      "previewTitle": "Vista previa",
+      "previewEmpty": "El informe aparecerá aquí a medida que lo redactes.",
+      "previewUntitled": "Informe sin título",
       "sendResultHint": "Presencial: anota el tricograma, el seguimiento de rutina y la lista de productos. Visible en Mi cuenta → Diagnósticos (+ push si hay cuenta).",
       "sectionClient": "Clienta y cita",
       "sectionSummary": "Resumen rápido",
@@ -593,6 +595,9 @@
       "callNotesLabel": "Notas tomadas durante la llamada",
       "callNotesSaved": "notas guardadas",
       "callNotesPlaceholder": "Notas libres durante la entrevista (sin transcripción automática)…",
+      "visitNotesLabel": "Notas de la cita",
+      "visitNotesSaved": "notas guardadas",
+      "visitNotesPlaceholder": "Notas libres durante la cita…",
       "saveCallNotes": "Guardar notas",
       "externalLinksLabel": "Enlaces de productos externos",
       "externalLinksHint": "Productos fuera de la tienda Awura: se guardan aquí y se añaden a la plantilla del informe (« Productos externos recomendados »).",
@@ -630,6 +635,26 @@
         "5": "Viernes",
         "6": "Sábado"
       }
+    },
+    "outOfStock": "Agotado",
+    "formImagesHint": "La primera imagen es la imagen principal de la ficha.",
+    "colorImageSet": "Foto propia añadida",
+    "colorImageMissing": "Sin foto propia: se usará la imagen principal",
+    "bundleQuantity": "Cantidad",
+    "formStatus": "Estado",
+    "formPricing": "Precio",
+    "formOrganization": "Organización",
+    "discountPreview": "Se muestra con −{{percent}} % de descuento",
+    "productsFilter": {
+      "label": "Filtrar productos",
+      "all": "Todos",
+      "active": "En línea",
+      "hidden": "Ocultos",
+      "low": "Stock bajo"
+    },
+    "productsColumns": {
+      "visible": "En línea",
+      "actions": "Acciones"
     }
   }
 }

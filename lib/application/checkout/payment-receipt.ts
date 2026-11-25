@@ -23,7 +23,7 @@ function escapeHtml(value: string) {
 const PAYMENT_LABEL: Record<string, string> = {
   stripe: "Carte (Stripe)",
   paypal: "PayPal",
-  manual: "Commande manuelle / test",
+  manual: "Commande manuelle",
 };
 
 const CARRIER_LABEL: Record<string, string> = {

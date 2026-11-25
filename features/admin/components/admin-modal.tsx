@@ -11,6 +11,8 @@ type AdminModalProps = {
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
+  /** Largeur desktop : `md` (défaut) ou `lg` pour les formulaires en deux colonnes. */
+  size?: "md" | "lg";
 };
 
 /** Modal admin : plein écran sur mobile, centrée sur desktop. */
@@ -19,6 +21,7 @@ export function AdminModal({
   onClose,
   children,
   footer,
+  size = "md",
 }: AdminModalProps) {
   const { t } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -50,7 +53,7 @@ export function AdminModal({
         aria-modal="true"
         aria-labelledby="admin-modal-title"
         tabIndex={-1}
-        className="flex h-full w-full max-w-3xl flex-col overflow-hidden bg-background shadow-lg outline-none sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:border sm:border-border"
+        className={`flex h-full w-full ${size === "lg" ? "max-w-5xl" : "max-w-3xl"} flex-col overflow-hidden bg-background shadow-lg outline-none sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:border sm:border-border`}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
           <h2

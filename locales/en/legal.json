@@ -117,7 +117,7 @@
         "orders": {
           "title": "Orders",
           "body": [
-            "The contract is formed when payment is confirmed (Stripe, PayPal) or when a test order is accepted. A confirmation email and receipt are sent.",
+            "The contract is formed when payment is confirmed (Stripe, PayPal). A confirmation email and receipt are sent.",
             "You must check the delivery address, pickup point or in-store pickup choice before paying."
           ]
         },

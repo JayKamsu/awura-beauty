@@ -68,7 +68,13 @@
         "youtube": "YouTube",
         "x": "X / Twitter",
         "linkedin": "LinkedIn"
-      }
+      },
+      "visitsCount": "{{count}} visit(s)",
+      "salesTitle": "Sales",
+      "operationsTitle": "To handle",
+      "seeAll": "See all",
+      "lowStockHint": "{{count}} product(s) to restock",
+      "paymentsSection": "Payments"
     },
     "ordersTitle": "Order management",
     "paymentsTitle": "Payments",
@@ -127,7 +133,7 @@
       "removeImage": "Remove photo",
       "productReviewsTitle": "Reviews by product",
       "addProduct": "Add a review on a product",
-      "addProductHint": "The review appears on the chosen product page. Delete test reviews here.",
+      "addProductHint": "The review appears on the chosen product page.",
       "chooseProduct": "Product",
       "comment": "Comment",
       "editorial": "Added by Awura"
@@ -327,7 +333,6 @@
     "markPickupDone": "Mark picked up (notifies customer)",
     "statusUpdated": "Status updated — customer notified.",
     "save": "Save",
-    "loading": "Loading…",
     "brandTitle": "Brand & design",
     "brandSubtitle": "Duafe, logos, product QR codes, Adult / Child universes — all managed here.",
     "brandDuafe": "Duafe symbol",
@@ -487,16 +492,6 @@
       "pickup": "Store pickup"
     },
     "payments": {
-      "ready": "Ready",
-      "incomplete": "Incomplete",
-      "stripePublishable": "Publishable key",
-      "stripeSecret": "Secret key",
-      "stripeWebhook": "Webhook secret",
-      "paypalClient": "Client ID",
-      "paypalSecret": "Secret",
-      "paypalLiveApi": "Live API (not Sandbox)",
-      "openStripeDashboard": "Open Stripe dashboard",
-      "openPaypalDashboard": "Open PayPal dashboard",
       "refundHint": "For a real money refund, do it in Stripe or PayPal, then mark the order as refunded here.",
       "empty": "No payments for these filters.",
       "markPaid": "Mark paid",
@@ -522,6 +517,10 @@
       "physicalResultsSection": "In-person results ({{count}})",
       "historyEmpty": "No online diagnostics yet.",
       "appointmentsEmpty": "No appointments yet.",
+      "physicalAppointmentsSection": "In person ({{count}})",
+      "onlineAppointmentsSection": "Online ({{count}})",
+      "physicalAppointmentsEmpty": "No in-person appointments.",
+      "onlineAppointmentsEmpty": "No online appointments.",
       "googleAgendaTitle": "Google Calendar",
       "googleAgendaBody": "Each confirmed appointment is added to the {{organizer}} calendar and merged with {{sync}}.",
       "googleAgendaHint": "To show the whole calendar beside your Gmail calendar: Google Calendar → Other calendars → From URL, then paste this link.",
@@ -563,6 +562,9 @@
       "markCompleted": "Completed",
       "cancel": "Cancel",
       "sendResultTitle": "Send a result to the client",
+      "previewTitle": "Client preview",
+      "previewEmpty": "The report will appear here as you write it.",
+      "previewUntitled": "Untitled report",
       "sendResultHint": "In person: record trichogram analysis, routine follow-up and product list. Visible under My account → Diagnostics (+ push if linked account).",
       "sectionClient": "Client & appointment",
       "sectionSummary": "Quick summary",
@@ -593,6 +595,9 @@
       "callNotesLabel": "Notes taken during the call",
       "callNotesSaved": "notes saved",
       "callNotesPlaceholder": "Free-form notes during the interview (no automatic transcript)…",
+      "visitNotesLabel": "Appointment notes",
+      "visitNotesSaved": "notes saved",
+      "visitNotesPlaceholder": "Free-form notes during the appointment…",
       "saveCallNotes": "Save notes",
       "externalLinksLabel": "External product links",
       "externalLinksHint": "Products outside the Awura shop: saved here, they are added to the result template (“Recommended external products”).",
@@ -630,6 +635,26 @@
         "5": "Friday",
         "6": "Saturday"
       }
+    },
+    "outOfStock": "Out of stock",
+    "formImagesHint": "The first image is the product’s main image.",
+    "colorImageSet": "Dedicated photo added",
+    "colorImageMissing": "No dedicated photo: the main image will be used",
+    "bundleQuantity": "Quantity",
+    "formStatus": "Status",
+    "formPricing": "Pricing",
+    "formOrganization": "Organization",
+    "discountPreview": "Shown with −{{percent}}% off",
+    "productsFilter": {
+      "label": "Filter products",
+      "all": "All",
+      "active": "Live",
+      "hidden": "Hidden",
+      "low": "Low stock"
+    },
+    "productsColumns": {
+      "visible": "Live",
+      "actions": "Actions"
     }
   }
 }

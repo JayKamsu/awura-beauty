@@ -117,7 +117,7 @@
         "orders": {
           "title": "Pedidos",
           "body": [
-            "El contrato se forma cuando se confirma el pago (Stripe, PayPal) o cuando se acepta un pedido de prueba. Recibes un e-mail de confirmación y un recibo.",
+            "El contrato se forma cuando se confirma el pago (Stripe, PayPal). Recibes un e-mail de confirmación y un recibo.",
             "Debes comprobar la dirección de entrega, el Point Relais o la recogida en tienda antes de pagar."
           ]
         },

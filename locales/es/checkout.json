@@ -22,8 +22,6 @@
     "loading": "Preparando…",
     "payStripe": "Pagar con Stripe",
     "preparePaypal": "Continuar con PayPal",
-    "payManual": "Pedir sin pago (prueba)",
-    "manualNotice": "Stripe y PayPal aún no están configurados. Puedes hacer un pedido de prueba: se confirmará y el envío (etiqueta) seguirá el proceso normal.",
     "paymentError": "No se pudo iniciar el pago. Comprueba la configuración.",
     "paypalNotConfigured": "PayPal no está configurado (falta NEXT_PUBLIC_PAYPAL_CLIENT_ID).",
     "stripeNotConfigured": "Stripe no está configurado (falta NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY).",
@@ -61,8 +59,8 @@
     "phoneRequiredPickup": "El teléfono es obligatorio para la recogida en tienda.",
     "methods": {
       "manual": {
-        "label": "Pedido de prueba",
-        "hint": "Sin Stripe / PayPal — para validar el flujo"
+        "label": "Pedido manual",
+        "hint": "Registrado por el equipo"
       },
       "stripe": {
         "label": "Stripe",

@@ -19,26 +19,6 @@ import {
   type PaymentMethod,
 } from "@/lib/infrastructure/supabase/order-types";
 
-/** État de configuration des passerelles de paiement (Stripe, PayPal) affiché à l'admin. */
-type PaymentsStatus = {
-  livePaymentsEnabled: boolean;
-  stripe: {
-    ready: boolean;
-    publishable: boolean;
-    secret: boolean;
-    webhook: boolean;
-    dashboardUrl: string;
-  };
-  paypal: {
-    ready: boolean;
-    clientId: boolean;
-    secret: boolean;
-    liveApi: boolean;
-    apiBase: string;
-    dashboardUrl: string;
-  };
-};
-
 const METHOD_FILTERS = ["all", "stripe", "paypal", "manual"] as const;
 const STATUS_FILTERS = [
   "all",
@@ -57,12 +37,11 @@ function statusTone(status: string): string {
   return "bg-background-alt text-muted";
 }
 
-/** Panneau admin des paiements : diagnostic Stripe/PayPal et gestion manuelle des statuts de commande. */
+/** Panneau admin des paiements : suivi et gestion manuelle des statuts de commande. */
 export function AdminPaymentsPanel() {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();
   const adminFetch = useAdminFetch();
-  const [status, setStatus] = useState<PaymentsStatus | null>(null);
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -80,15 +59,10 @@ export function AdminPaymentsPanel() {
 
   const load = useCallback(async (opts?: { silent?: boolean }) => {
     if (!opts?.silent) setLoading(true);
-    const [statusRes, ordersRes] = await Promise.all([
-      adminFetch("/api/admin/payments/status"),
-      adminFetch(
-        `/api/admin/orders${includeAbandoned ? "?includeAbandoned=1" : ""}`,
-      ),
-    ]);
-    const statusJson = (await statusRes.json()) as PaymentsStatus;
+    const ordersRes = await adminFetch(
+      `/api/admin/orders${includeAbandoned ? "?includeAbandoned=1" : ""}`,
+    );
     const ordersJson = (await ordersRes.json()) as { orders?: OrderRow[] };
-    if (statusRes.ok) setStatus(statusJson);
     setOrders(ordersJson.orders ?? []);
     setLoading(false);
   }, [adminFetch, includeAbandoned]);
@@ -147,13 +121,6 @@ export function AdminPaymentsPanel() {
     });
   };
 
-  const checkItem = (ok: boolean, label: string) => (
-    <li className="flex items-center gap-2 text-sm">
-      <span className={ok ? "text-primary" : "text-accent"}>{ok ? "✓" : "✗"}</span>
-      <span className="text-muted">{label}</span>
-    </li>
-  );
-
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-4 py-8 md:px-6">
       <AdminPageHeader
@@ -165,97 +132,6 @@ export function AdminPaymentsPanel() {
         <AdminFeedback tone={feedback.tone} message={feedback.message} />
       ) : null}
 
-      <section className="space-y-3">
-        <p className="text-sm text-muted">{t("admin.paymentsStatusHint")}</p>
-        {status ? (
-          <div className="grid gap-4 md:grid-cols-2">
-            <section className="space-y-3 rounded-2xl border border-border p-5 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="font-serif text-xl text-primary">Stripe</h2>
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-                    status.stripe.ready
-                      ? "bg-primary/10 text-primary"
-                      : "bg-accent/15 text-accent"
-                  }`}
-                >
-                  <span
-                    className={`size-1.5 rounded-full ${
-                      status.stripe.ready ? "bg-primary" : "bg-accent"
-                    }`}
-                  />
-                  {status.stripe.ready
-                    ? t("admin.payments.ready")
-                    : t("admin.payments.incomplete")}
-                </span>
-              </div>
-              <ul className="space-y-1.5 rounded-xl bg-background-alt p-3">
-                {checkItem(
-                  status.stripe.publishable,
-                  t("admin.payments.stripePublishable"),
-                )}
-                {checkItem(status.stripe.secret, t("admin.payments.stripeSecret"))}
-                {checkItem(
-                  status.stripe.webhook,
-                  t("admin.payments.stripeWebhook"),
-                )}
-              </ul>
-              <a
-                href={status.stripe.dashboardUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-light"
-              >
-                {t("admin.payments.openStripeDashboard")} →
-              </a>
-            </section>
-
-            <section className="space-y-3 rounded-2xl border border-border p-5 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="font-serif text-xl text-primary">PayPal</h2>
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-                    status.paypal.ready
-                      ? "bg-primary/10 text-primary"
-                      : "bg-accent/15 text-accent"
-                  }`}
-                >
-                  <span
-                    className={`size-1.5 rounded-full ${
-                      status.paypal.ready ? "bg-primary" : "bg-accent"
-                    }`}
-                  />
-                  {status.paypal.ready
-                    ? t("admin.payments.ready")
-                    : t("admin.payments.incomplete")}
-                </span>
-              </div>
-              <ul className="space-y-1.5 rounded-xl bg-background-alt p-3">
-                {checkItem(
-                  status.paypal.clientId,
-                  t("admin.payments.paypalClient"),
-                )}
-                {checkItem(
-                  status.paypal.secret,
-                  t("admin.payments.paypalSecret"),
-                )}
-                {checkItem(
-                  status.paypal.liveApi,
-                  t("admin.payments.paypalLiveApi"),
-                )}
-              </ul>
-              <a
-                href={status.paypal.dashboardUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-light"
-              >
-                {t("admin.payments.openPaypalDashboard")} →
-              </a>
-            </section>
-          </div>
-        ) : null}
-      </section>
 
       <p className="rounded-xl bg-background-alt px-4 py-3 text-sm text-muted">
         {t("admin.payments.refundHint")}

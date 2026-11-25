@@ -117,7 +117,7 @@
         "orders": {
           "title": "Commandes",
           "body": [
-            "Le contrat est formé lorsque le paiement est confirmé (Stripe, PayPal) ou lorsque la commande test est acceptée. Un e-mail de confirmation et un reçu te sont adressés.",
+            "Le contrat est formé lorsque le paiement est confirmé (Stripe, PayPal). Un e-mail de confirmation et un reçu te sont adressés.",
             "Il t’appartient de vérifier l’adresse de livraison, le Point Relais ou le choix du retrait sur place avant de payer."
           ]
         },

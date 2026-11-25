@@ -22,8 +22,6 @@
     "loading": "Preparing…",
     "payStripe": "Pay with Stripe",
     "preparePaypal": "Continue with PayPal",
-    "payManual": "Place order without payment (test)",
-    "manualNotice": "Stripe and PayPal are not configured yet. You can place a test order: it will be confirmed and shipping (label) will follow the normal process.",
     "paymentError": "Payment could not be started. Check configuration.",
     "paypalNotConfigured": "PayPal is not configured (missing NEXT_PUBLIC_PAYPAL_CLIENT_ID).",
     "stripeNotConfigured": "Stripe is not configured (missing NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY).",
@@ -61,8 +59,8 @@
     "phoneRequiredPickup": "Phone is required for store pickup.",
     "methods": {
       "manual": {
-        "label": "Test order",
-        "hint": "Without Stripe / PayPal — to validate the flow"
+        "label": "Manual order",
+        "hint": "Recorded by the team"
       },
       "stripe": {
         "label": "Stripe",

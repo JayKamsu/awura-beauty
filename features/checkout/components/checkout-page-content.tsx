@@ -78,7 +78,7 @@ export function CheckoutPageContent() {
     return headers;
   };
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("manual");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("stripe");
   const [shippingCarrier, setShippingCarrier] =
     useState<ShippingCarrier>("laposte");
   const [enabledCarriers, setEnabledCarriers] =
@@ -276,27 +276,14 @@ export function CheckoutPageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- authHeaders via session token
   }, [shippingCarrier, quoteItemsKey, items.length, subtotal, pointsToRedeem, session?.access_token]);
 
-  const allowManualCheckout =
-    paymentConfigLoaded &&
-    !stripePublishableKey &&
-    !paypalClientId;
-
   useEffect(() => {
     if (!paymentConfigLoaded) return;
-    if (allowManualCheckout) {
-      setPaymentMethod("manual");
-      return;
-    }
     setPaymentMethod((current) => {
-      if (current === "manual") {
-        return stripePublishableKey ? "stripe" : "paypal";
-      }
       if (current === "stripe" && !stripePublishableKey) return "paypal";
       if (current === "paypal" && !paypalClientId) return "stripe";
       return current;
     });
   }, [
-    allowManualCheckout,
     stripePublishableKey,
     paypalClientId,
     paymentConfigLoaded,
@@ -443,36 +430,9 @@ export function CheckoutPageContent() {
     setAwuraOrderId(json.orderId);
   };
 
-  const startManualCheckout = async () => {
-    setError(null);
-    if (!validateShipping()) return;
-    await persistProfileAddress();
-    const response = await fetch("/api/checkout/manual", {
-      method: "POST",
-      headers: authHeaders(),
-      body: JSON.stringify(checkoutPayload()),
-    });
-    const json = (await response.json()) as {
-      orderId?: string;
-      error?: string;
-    };
-
-    if (!response.ok || !json.orderId) {
-      setError(json.error ?? t("checkout.paymentError"));
-      return;
-    }
-
-    clearCart();
-    router.push(`/commande/succes?orderId=${json.orderId}`);
-  };
-
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     void run(async () => {
-      if (paymentMethod === "manual") {
-        await startManualCheckout();
-        return;
-      }
       if (paymentMethod === "stripe") {
         await startStripe();
         return;
@@ -818,17 +778,8 @@ export function CheckoutPageContent() {
 
         <section className="space-y-4">
           <h2 className="font-serif text-2xl text-primary">{t("checkout.payment")}</h2>
-          {allowManualCheckout ? (
-            <p className="rounded-2xl bg-background-alt px-4 py-3 text-sm text-muted">
-              {t("checkout.manualNotice")}
-            </p>
-          ) : null}
           <div className="grid gap-3 sm:grid-cols-2">
-            {(
-              (allowManualCheckout
-                ? ["manual", "stripe", "paypal"]
-                : ["stripe", "paypal"]) as PaymentMethod[]
-            ).map((method) => {
+            {(["stripe", "paypal"] as const).map((method) => {
               const active = paymentMethod === method;
               return (
                 <button
@@ -846,12 +797,8 @@ export function CheckoutPageContent() {
                 >
                   {method === "stripe" ? (
                     <StripeMark className="mb-3 h-8 w-auto object-contain object-left" />
-                  ) : method === "paypal" ? (
-                    <PayPalMark className="mb-3 h-8 w-auto object-contain object-left" />
                   ) : (
-                    <span className="mb-3 block text-xs uppercase tracking-wide text-muted">
-                      {t("checkout.methods.manual.label")}
-                    </span>
+                    <PayPalMark className="mb-3 h-8 w-auto object-contain object-left" />
                   )}
                   <span className="block font-medium text-primary">
                     {t(`checkout.methods.${method}.label`)}
@@ -919,11 +866,7 @@ export function CheckoutPageContent() {
           </p>
         ) : null}
 
-        {paymentMethod === "manual" ? (
-          <Button type="submit" size="lg" pending={pending}>
-            {pending ? t("checkout.loading") : t("checkout.payManual")}
-          </Button>
-        ) : paymentMethod === "stripe" ? (
+        {paymentMethod === "stripe" ? (
           stripePublishableKey ? (
             <Button type="submit" size="lg" pending={pending}>
               {pending ? t("checkout.loading") : t("checkout.payStripe")}
