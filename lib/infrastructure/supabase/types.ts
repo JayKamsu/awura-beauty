@@ -1,4 +1,8 @@
-import type { ProductColorImageMap, ProductColorKey } from "@/lib/domain/product-color";
+import type {
+  ProductColorImageMap,
+  ProductColorKey,
+  ProductColorStockMap,
+} from "@/lib/domain/product-color";
 
 /**
  * Shape alignée sur la table Supabase `products`.
@@ -35,10 +39,12 @@ export type ProductRow = {
   qr_url: string;
   /** Univers charte : adult (défaut) | child (pastel). */
   universe: "adult" | "child";
-  /** Variantes couleur proposées à l'achat (vide = pas de choix). Stock partagé. */
+  /** Variantes couleur proposées à l'achat (vide = pas de choix). */
   color_variants: ProductColorKey[];
   /** Photo par couleur (clé du catalogue → URL). */
   color_images: ProductColorImageMap;
+  /** Stock par couleur. Vide = ancien stock partagé (`stock`). */
+  color_stock: ProductColorStockMap;
   created_at?: string;
 };
 

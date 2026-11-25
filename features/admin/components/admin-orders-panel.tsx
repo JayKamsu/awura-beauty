@@ -32,6 +32,8 @@ const PAGE_SIZE = 40;
 
 function shippingBadgeClass(status: ShippingStatus): string {
   switch (status) {
+    case "cancelled":
+      return "bg-background-alt text-muted line-through";
     case "delivered":
       return "bg-primary/10 text-primary";
     case "in_transit":

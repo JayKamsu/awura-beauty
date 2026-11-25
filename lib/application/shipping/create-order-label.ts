@@ -30,6 +30,9 @@ export async function createOrderShippingLabel(input: {
 }): Promise<CreateOrderLabelResult> {
   const order = await getOrderById(input.orderId);
   if (!order) return { ok: false, error: "Order not found" };
+  if (order.status === "cancelled" || order.payment_status === "cancelled") {
+    return { ok: false, error: "Order is cancelled" };
+  }
   if (input.carrier === "pickup") {
     return { ok: false, error: "Pickup orders do not need a shipping label" };
   }

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { markOrderPaid } from "@/lib/application/checkout/mark-order-paid";
+import { notifyAppointmentBooked } from "@/lib/application/notifications/appointment-notify";
 import { getStripeClient } from "@/lib/infrastructure/payments/stripe";
+import { claimAppointmentConfirmed } from "@/lib/infrastructure/supabase/diagnostic-admin";
 import { claimWebhookEvent } from "@/lib/infrastructure/supabase/webhook-events";
 
 export const runtime = "nodejs";
@@ -47,13 +49,13 @@ export async function POST(request: Request) {
       appointmentId &&
       (session.payment_status === "paid" || session.status === "complete")
     ) {
-      const { updateAppointment } = await import(
-        "@/lib/infrastructure/supabase/diagnostic-admin"
+      const claimed = await claimAppointmentConfirmed(
+        appointmentId,
+        session.id,
       );
-      await updateAppointment(appointmentId, {
-        status: "confirmed",
-        stripeSessionId: session.id,
-      });
+      if (claimed.claimed && claimed.appointment) {
+        await notifyAppointmentBooked(claimed.appointment);
+      }
       return NextResponse.json({ received: true });
     }
 

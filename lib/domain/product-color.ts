@@ -12,6 +12,9 @@ export type ProductColorKey = (typeof PRODUCT_COLOR_KEYS)[number];
 /** Photo associée à une variante couleur (clé → URL). */
 export type ProductColorImageMap = Partial<Record<ProductColorKey, string>>;
 
+/** Stock physique d'une variante couleur (clé → unités). */
+export type ProductColorStockMap = Partial<Record<ProductColorKey, number>>;
+
 const COLOR_KEY_SET = new Set<string>(PRODUCT_COLOR_KEYS);
 
 const LABELS: Record<ProductColorKey, Record<"fr" | "en" | "es", string>> = {
@@ -63,6 +66,80 @@ export function parseColorImages(raw: unknown): ProductColorImageMap {
     const url = String(value ?? "").trim();
     if (url) result[key] = url;
   }
+  return result;
+}
+
+/** Parse le stock par couleur (ignore les clés inconnues et les quantités invalides). */
+export function parseColorStock(raw: unknown): ProductColorStockMap {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const result: ProductColorStockMap = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (!isProductColorKey(key)) continue;
+    const quantity = Math.floor(Number(value));
+    if (!Number.isFinite(quantity)) continue;
+    result[key] = Math.max(0, quantity);
+  }
+  return result;
+}
+
+/** Ne conserve que le stock des variantes encore proposées. */
+export function pruneColorStock(
+  variants: ProductColorKey[],
+  stock: ProductColorStockMap,
+): ProductColorStockMap {
+  const allowed = new Set(variants);
+  const result: ProductColorStockMap = {};
+  for (const key of PRODUCT_COLOR_KEYS) {
+    const quantity = stock[key];
+    if (quantity !== undefined && allowed.has(key)) result[key] = quantity;
+  }
+  return result;
+}
+
+/** Somme des stocks couleur. Sert de stock produit quand des variantes sont vendues. */
+export function sumColorStock(
+  variants: ProductColorKey[],
+  stock: ProductColorStockMap,
+): number {
+  return variants.reduce((total, key) => total + (stock[key] ?? 0), 0);
+}
+
+/**
+ * Stock disponible pour la couleur choisie.
+ * Sans saisie par couleur, retombe sur le stock produit (ancien stock partagé).
+ */
+export function stockForColor(
+  product: {
+    stock: number;
+    color_variants?: ProductColorKey[];
+    color_stock?: ProductColorStockMap;
+  },
+  colorKey: ProductColorKey | null | undefined,
+): number {
+  if (!colorKey || !product.color_variants?.length) return product.stock;
+  const specific = product.color_stock?.[colorKey];
+  if (specific === undefined) return product.stock;
+  return specific;
+}
+
+/**
+ * Préremplit le formulaire admin. Si aucun stock couleur n'est encore saisi,
+ * le stock partagé reste sur la première couleur pour ne pas le multiplier.
+ */
+export function initialColorStock(
+  variants: ProductColorKey[],
+  stored: ProductColorStockMap,
+  sharedStock: number,
+): ProductColorStockMap {
+  const hasStored = variants.some((key) => stored[key] !== undefined);
+  const result: ProductColorStockMap = {};
+  variants.forEach((key, index) => {
+    if (stored[key] !== undefined) {
+      result[key] = stored[key] ?? 0;
+      return;
+    }
+    result[key] = hasStored ? 0 : index === 0 ? Math.max(0, sharedStock) : 0;
+  });
   return result;
 }
 

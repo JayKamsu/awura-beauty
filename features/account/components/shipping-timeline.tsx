@@ -33,6 +33,12 @@ type ShippingTimelineProps = {
 /** Frise visuelle des étapes de livraison, adaptée au retrait en magasin ou à l'expédition classique. */
 export function ShippingTimeline({ status, carrier }: ShippingTimelineProps) {
   const { t } = useTranslation();
+  if (status === "cancelled") {
+    return (
+      <p className="text-sm text-muted">{t("account.status.shipping.cancelled")}</p>
+    );
+  }
+
   const pickup = carrier === "pickup";
   const steps = pickup ? PICKUP_STEPS : STEPS;
   const current = stepIndex(status, pickup);

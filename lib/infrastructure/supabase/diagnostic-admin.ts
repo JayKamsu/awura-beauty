@@ -584,6 +584,43 @@ export async function createAppointment(input: {
   return mapAppointment(data as Record<string, unknown>);
 }
 
+/**
+ * Passe un RDV en confirmé seulement s'il est encore en attente de paiement.
+ * Retourne `claimed` uniquement sur la première transition (webhook + page succès).
+ */
+export async function claimAppointmentConfirmed(
+  id: string,
+  stripeSessionId?: string | null,
+): Promise<{ claimed: boolean; appointment: DiagnosticAppointment | null }> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) return { claimed: false, appointment: null };
+
+  const payload: Record<string, unknown> = {
+    status: "confirmed",
+    updated_at: new Date().toISOString(),
+  };
+  if (stripeSessionId !== undefined) {
+    payload.stripe_session_id = stripeSessionId;
+  }
+
+  const { data, error } = await supabase
+    .from("diagnostic_appointments")
+    .update(payload)
+    .eq("id", id)
+    .eq("status", "pending_payment")
+    .select("*")
+    .maybeSingle();
+
+  if (!error && data) {
+    return {
+      claimed: true,
+      appointment: mapAppointment(data as Record<string, unknown>),
+    };
+  }
+
+  return { claimed: false, appointment: await getAppointmentById(id) };
+}
+
 /** Met à jour partiellement un rendez-vous (statut, session Stripe, notes, brouillon de bilan, créneau, user lié) — admin, service_role requis. */
 export async function updateAppointment(
   id: string,

@@ -75,13 +75,22 @@ export {
   isProductColorKey,
   parseColorVariants,
   parseColorImages,
+  parseColorStock,
   parseProductColorKey,
   pruneColorImages,
+  pruneColorStock,
+  stockForColor,
+  sumColorStock,
+  initialColorStock,
   productColorLabel,
   resolveLineColor,
   resolveProductImageForColor,
 } from "@/lib/domain/product-color";
-export type { ProductColorKey, ProductColorImageMap } from "@/lib/domain/product-color";
+export type {
+  ProductColorKey,
+  ProductColorImageMap,
+  ProductColorStockMap,
+} from "@/lib/domain/product-color";
 
 export type {
   PublicTestimonial,

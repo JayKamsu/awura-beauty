@@ -1,9 +1,17 @@
-import { parseColorImages, parseColorVariants, pruneColorImages } from "@/lib/domain/product-color";
+import {
+  parseColorImages,
+  parseColorStock,
+  parseColorVariants,
+  pruneColorImages,
+  pruneColorStock,
+  sumColorStock,
+} from "@/lib/domain/product-color";
 import {
   formatIngredientList,
   formatProductLead,
   formatProductProse,
 } from "@/lib/format/product-copy";
+import { applyCatalogPhotoDefaults } from "@/lib/infrastructure/supabase/catalog-photo-defaults";
 import { createAdminSupabaseClient } from "@/lib/infrastructure/supabase/client";
 import {
   getDemoProducts,
@@ -12,7 +20,7 @@ import {
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
 function mapRow(row: Record<string, unknown>): ProductRow {
-  return {
+  const mapped: ProductRow = {
     id: String(row.id),
     slug: String(row.slug ?? row.id),
     name: String(row.name ?? ""),
@@ -41,8 +49,10 @@ function mapRow(row: Record<string, unknown>): ProductRow {
     universe: row.universe === "child" ? "child" : "adult",
     color_variants: parseColorVariants(row.color_variants),
     color_images: parseColorImages(row.color_images),
+    color_stock: parseColorStock(row.color_stock),
     created_at: row.created_at ? String(row.created_at) : undefined,
   };
+  return applyCatalogPhotoDefaults(mapped);
 }
 
 export type ProductInput = Omit<ProductRow, "id" | "created_at"> & {
@@ -69,6 +79,8 @@ export async function adminUpsertProduct(
   input: ProductInput,
 ): Promise<{ product: ProductRow | null; error: string | null }> {
   const supabase = createAdminSupabaseClient();
+  const colorVariants = parseColorVariants(input.color_variants);
+  const colorStock = pruneColorStock(colorVariants, parseColorStock(input.color_stock));
   const payload: Omit<ProductRow, "id" | "created_at"> = {
     slug: input.slug,
     name: input.name,
@@ -89,15 +101,15 @@ export async function adminUpsertProduct(
     is_bundle: Boolean(input.is_bundle),
     is_new: input.is_new,
     is_active: input.is_active !== false,
-    stock: input.stock,
     shipping_fee: Number(input.shipping_fee ?? 0),
     qr_url: String(input.qr_url ?? ""),
     universe: input.universe === "child" ? "child" : "adult",
-    color_variants: parseColorVariants(input.color_variants),
-    color_images: pruneColorImages(
-      parseColorVariants(input.color_variants),
-      parseColorImages(input.color_images),
-    ),
+    color_variants: colorVariants,
+    color_images: pruneColorImages(colorVariants, parseColorImages(input.color_images)),
+    color_stock: colorStock,
+    stock: colorVariants.length
+      ? sumColorStock(colorVariants, colorStock)
+      : Number(input.stock),
   };
 
   if (supabase) {

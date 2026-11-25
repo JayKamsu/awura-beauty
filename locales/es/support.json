@@ -19,6 +19,8 @@
       "enabled": "Notificaciones activadas",
       "enabling": "Activando…",
       "enableError": "No se pudieron activar las notificaciones. Inténtalo de nuevo o comprueba que el sitio use HTTPS y que las notificaciones no estén bloqueadas.",
+      "localHint": "Las alertas de pago, envío y reembolso aparecen mientras esta página está abierta. Para recibirlas con el sitio cerrado, abre Awura Beauty en Chrome o Safari.",
+      "localOk": "Entendido",
       "later": "Más tarde",
       "guestHint": "También puedes suscribirte sin cuenta.",
       "blocked": "Notificaciones bloqueadas",

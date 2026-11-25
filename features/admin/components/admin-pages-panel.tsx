@@ -30,6 +30,8 @@ function emptyFields(): PageSectionFields {
     subtitle: "",
     body: "",
     image_url: "",
+    image_url_2: "",
+    image_url_3: "",
     cta_label: "",
   };
 }
@@ -136,8 +138,12 @@ export function AdminPagesPanel() {
     index: number,
     file: File,
     mode: "field" | "append_block",
+    fieldKey: PageFieldKey = "image_url",
   ) => {
-    const key = `${index}-${editLocale}`;
+    const key =
+      mode === "append_block"
+        ? `${index}-${editLocale}-body`
+        : `${index}-${editLocale}-${fieldKey}`;
     setUploadingKey(key);
     setFeedback(null);
     const form = new FormData();
@@ -169,7 +175,7 @@ export function AdminPagesPanel() {
       return;
     }
 
-    updateField(index, "image_url", json.url);
+    updateField(index, fieldKey, json.url);
   };
 
   const save = () => {
@@ -259,7 +265,12 @@ export function AdminPagesPanel() {
             const usesBlocks = Boolean(
               SECTION_USES_BLOCKS[section.id as PageSectionId],
             );
-            const showImageField = editable.includes("image_url");
+            const imageFields = editable.filter(
+              (fieldKey) =>
+                fieldKey === "image_url" ||
+                fieldKey === "image_url_2" ||
+                fieldKey === "image_url_3",
+            );
 
             return (
               <li
@@ -328,7 +339,12 @@ export function AdminPagesPanel() {
                     ) : null}
 
                     {editable
-                      .filter((fieldKey) => fieldKey !== "image_url")
+                      .filter(
+                        (fieldKey) =>
+                          fieldKey !== "image_url" &&
+                          fieldKey !== "image_url_2" &&
+                          fieldKey !== "image_url_3",
+                      )
                       .map((fieldKey) => (
                         <label
                           key={fieldKey}
@@ -360,61 +376,73 @@ export function AdminPagesPanel() {
                         </label>
                       ))}
 
-                    {showImageField ? (
-                      <div className="space-y-3">
-                        <p className="text-sm text-muted">
-                          {t("admin.pages.fields.image_url")}
-                        </p>
-                        {fields.image_url &&
-                        isRemoteOrLocalImage(fields.image_url) ? (
-                          <div className="relative h-36 w-full max-w-sm overflow-hidden rounded-2xl bg-background-alt">
-                            <Image
-                              src={fields.image_url}
-                              alt=""
-                              fill
-                              className="object-cover"
-                              sizes="320px"
-                              unoptimized={fields.image_url.startsWith("http")}
-                            />
-                          </div>
-                        ) : null}
-                        <input
-                          className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-primary"
-                          value={fields.image_url ?? ""}
-                          onChange={(e) =>
-                            updateField(index, "image_url", e.target.value)
-                          }
-                          placeholder="https://… ou /images/…"
-                        />
-                        <div className="flex flex-wrap gap-2">
-                          <label className="inline-flex cursor-pointer items-center rounded-xl border border-accent px-3 py-2 text-sm text-accent">
-                            <input
-                              type="file"
-                              accept="image/jpeg,image/png,image/webp,image/gif"
-                              className="sr-only"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) void uploadImage(index, file, "field");
-                                e.target.value = "";
-                              }}
-                            />
-                            {uploadingKey === `${index}-${editLocale}`
-                              ? t("admin.uploading")
-                              : t("admin.pages.uploadImage")}
-                          </label>
-                          {fields.image_url ? (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="md"
-                              onClick={() => updateField(index, "image_url", "")}
+                    {imageFields.map((fieldKey) => {
+                      const src = fields[fieldKey] ?? "";
+                      const round = fieldKey !== "image_url";
+                      const uploadKey = `${index}-${editLocale}-${fieldKey}`;
+                      return (
+                        <div key={fieldKey} className="space-y-3">
+                          <p className="text-sm text-muted">
+                            {t(`admin.pages.fields.${fieldKey}`)}
+                          </p>
+                          {src && isRemoteOrLocalImage(src) ? (
+                            <div
+                              className={`relative overflow-hidden bg-background-alt ${
+                                round
+                                  ? "size-36 rounded-full"
+                                  : "h-36 w-full max-w-sm rounded-2xl"
+                              }`}
                             >
-                              {t("admin.pages.clearImage")}
-                            </Button>
+                              <Image
+                                src={src}
+                                alt=""
+                                fill
+                                className="object-cover"
+                                sizes="320px"
+                                unoptimized={src.startsWith("http")}
+                              />
+                            </div>
                           ) : null}
+                          <input
+                            className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-primary"
+                            value={src}
+                            onChange={(e) =>
+                              updateField(index, fieldKey, e.target.value)
+                            }
+                            placeholder="https://… ou /images/…"
+                          />
+                          <div className="flex flex-wrap gap-2">
+                            <label className="inline-flex cursor-pointer items-center rounded-xl border border-accent px-3 py-2 text-sm text-accent">
+                              <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                className="sr-only"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    void uploadImage(index, file, "field", fieldKey);
+                                  }
+                                  e.target.value = "";
+                                }}
+                              />
+                              {uploadingKey === uploadKey
+                                ? t("admin.uploading")
+                                : t("admin.pages.uploadImage")}
+                            </label>
+                            {src ? (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="md"
+                                onClick={() => updateField(index, fieldKey, "")}
+                              >
+                                {t("admin.pages.clearImage")}
+                              </Button>
+                            ) : null}
+                          </div>
                         </div>
-                      </div>
-                    ) : null}
+                      );
+                    })}
 
                     {usesBlocks ? (
                       <div className="flex flex-wrap gap-2">
@@ -431,7 +459,7 @@ export function AdminPagesPanel() {
                               e.target.value = "";
                             }}
                           />
-                          {uploadingKey === `${index}-${editLocale}`
+                          {uploadingKey === `${index}-${editLocale}-body`
                             ? t("admin.uploading")
                             : t("admin.pages.uploadImageToBlock")}
                         </label>

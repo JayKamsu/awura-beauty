@@ -34,10 +34,15 @@ export function isSmtpConfigured(): boolean {
 
 /** Envoie un e-mail via le SMTP configuré ; no-op silencieux si SMTP absent (dev/démo). */
 export async function sendEmail(input: {
-  to: string;
+  to: string | string[];
   subject: string;
   html: string;
   replyTo?: string;
+  /** Invitation iCalendar jointe, reconnue par Google Agenda. */
+  icalEvent?: {
+    method: "REQUEST" | "PUBLISH" | "CANCEL";
+    content: string;
+  };
 }): Promise<{ ok: boolean; error?: string }> {
   const transporter = getTransporter();
   if (!transporter) {
@@ -54,6 +59,13 @@ export async function sendEmail(input: {
       subject: input.subject,
       html: input.html,
       replyTo: input.replyTo,
+      icalEvent: input.icalEvent
+        ? {
+            filename: "invite.ics",
+            method: input.icalEvent.method,
+            content: input.icalEvent.content,
+          }
+        : undefined,
     });
     return { ok: true };
   } catch (error) {

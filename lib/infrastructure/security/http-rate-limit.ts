@@ -38,4 +38,5 @@ export const RATE_LIMITS = {
   shippingSync: { name: "shipping:sync", limit: 20, windowMs: 60_000 },
   retractationWrite: { name: "retractation:write", limit: 8, windowMs: 15 * 60_000 },
   analyticsVisit: { name: "analytics:visit", limit: 40, windowMs: 60_000 },
+  calendarFeed: { name: "calendar:feed", limit: 60, windowMs: 60 * 60_000 },
 } as const satisfies Record<string, RateLimitOptions>;

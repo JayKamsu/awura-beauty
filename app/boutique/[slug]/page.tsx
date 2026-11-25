@@ -79,8 +79,13 @@ export default async function ProductPage({
     product.lifestyle_image_url
       ? {
           src: product.lifestyle_image_url,
-          alt: `${product.name} — lifestyle`,
-          labelKey: "shop.galleryLifestyle" as const,
+          alt:
+            product.product_type === "accessory"
+              ? `${product.name} — détail`
+              : `${product.name} — lifestyle`,
+          labelKey: (product.product_type === "accessory"
+            ? "shop.galleryDetail"
+            : "shop.galleryLifestyle") as "shop.galleryDetail" | "shop.galleryLifestyle",
         }
       : null,
   ].filter(Boolean) as GalleryImage[];
@@ -116,11 +121,12 @@ export default async function ProductPage({
           tutorialSlug={tutorial?.slug ?? null}
           bundleComponents={bundleComponents}
         />
-        {reviewSummary.count > 0 ? (
-          <div className="mt-12 border-t border-border pt-12">
-            <ProductReviewsSection summary={reviewSummary} />
-          </div>
-        ) : null}
+        <div className="mt-12 border-t border-border pt-12">
+          <ProductReviewsSection
+            summary={reviewSummary}
+            productId={product.id}
+          />
+        </div>
       </div>
 
       <div className="border-t border-border bg-background">

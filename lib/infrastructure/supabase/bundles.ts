@@ -1,4 +1,4 @@
-import { parseColorImages, parseColorVariants } from "@/lib/domain/product-color";
+import { parseColorImages, parseColorStock, parseColorVariants } from "@/lib/domain/product-color";
 import {
   createAdminSupabaseClient,
   createSupabaseClient,
@@ -35,6 +35,7 @@ function mapProductRow(row: Record<string, unknown>): ProductRow {
     universe: row.universe === "child" ? "child" : "adult",
     color_variants: parseColorVariants(row.color_variants),
     color_images: parseColorImages(row.color_images),
+    color_stock: parseColorStock(row.color_stock),
     created_at: row.created_at ? String(row.created_at) : undefined,
   };
 }

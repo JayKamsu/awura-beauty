@@ -116,7 +116,7 @@ export function buildSecurityHeaders(): Array<{ key: string; value: string }> {
     {
       key: "Permissions-Policy",
       value:
-        'camera=(self "https://meet.jit.si"), microphone=(self "https://meet.jit.si"), geolocation=(), payment=(self)',
+        'camera=(self "https://meet.jit.si"), microphone=(self "https://meet.jit.si"), geolocation=(), payment=(self), notifications=(self)',
     },
     {
       key: "Strict-Transport-Security",

@@ -45,6 +45,11 @@ export function proxy(request: NextRequest) {
     if (limited) return limited;
   }
 
+  if (pathname.startsWith("/api/diagnostic/calendar")) {
+    const limited = rateLimitResponse(request, RATE_LIMITS.calendarFeed);
+    if (limited) return limited;
+  }
+
   if (pathname.startsWith("/api/shipping")) {
     const limited = rateLimitResponse(
       request,

@@ -110,17 +110,34 @@ export async function insertSiteVisit(
   }
 }
 
-/** Agrège les visites des 30 derniers jours pour le dashboard admin. */
-export async function getSiteVisitStats(): Promise<AdminVisitStats> {
+/** Bornes d'une période de fréquentation et de la période précédente de même durée. */
+export type VisitStatsBounds = {
+  from: Date;
+  toExclusive: Date;
+  previousFrom: Date;
+  previousToExclusive: Date;
+};
+
+function inBounds(iso: string, from: Date, toExclusive: Date) {
+  const at = new Date(iso);
+  return at >= from && at < toExclusive;
+}
+
+/** Agrège les visites : 30 jours par défaut, ou la période demandée par le dashboard. */
+export async function getSiteVisitStats(
+  bounds?: VisitStatsBounds,
+): Promise<AdminVisitStats> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return EMPTY_STATS;
 
-  const start30d = daysAgo(30).toISOString();
-  const { data, error } = await supabase
+  const since = (bounds?.previousFrom ?? daysAgo(30)).toISOString();
+  let query = supabase
     .from("site_visits")
     .select("visitor_id, session_id, source, country, visited_at")
-    .gte("visited_at", start30d)
-    .limit(20000);
+    .gte("visited_at", since);
+  if (bounds) query = query.lt("visited_at", bounds.toExclusive.toISOString());
+
+  const { data, error } = await query.limit(20000);
 
   if (error || !data) {
     if (error) console.error("[analytics] list visits", error.message);
@@ -131,25 +148,52 @@ export async function getSiteVisitStats(): Promise<AdminVisitStats> {
   const today = startOfToday();
   const yesterday = daysAgo(1);
   const start7d = daysAgo(7);
+  const periodFrom = bounds?.from ?? today;
+  const periodTo = bounds?.toExclusive ?? addDays(today, 1);
+  const previousFrom = bounds?.previousFrom ?? yesterday;
+  const previousTo = bounds?.previousToExclusive ?? today;
+  const sourceRows = bounds
+    ? rows.filter((row) => inBounds(row.visited_at, periodFrom, periodTo))
+    : rows;
 
-  const todays = rows.filter((row) => new Date(row.visited_at) >= today);
-  const sessionsToday = new Set(todays.map((row) => row.session_id));
+  const periodSessions = new Set(
+    rows
+      .filter((row) => inBounds(row.visited_at, periodFrom, periodTo))
+      .map((row) => row.session_id),
+  );
 
   return {
-    visitorsToday: distinctCount(rows, (row) => new Date(row.visited_at) >= today),
-    visitorsYesterday: distinctCount(rows, (row) => {
-      const at = new Date(row.visited_at);
-      return at >= yesterday && at < today;
-    }),
-    visitors7d: distinctCount(rows, (row) => new Date(row.visited_at) >= start7d),
-    visitsToday: sessionsToday.size,
-    sources30d: topByVisitor(rows, (row) => row.source || "direct", 8).map((item) => ({
-      key: item.key,
-      visitors: item.visitors,
-    })),
-    countries30d: topByVisitor(rows, (row) => row.country, 8).map((item) => ({
+    visitorsToday: distinctCount(rows, (row) =>
+      inBounds(row.visited_at, periodFrom, periodTo),
+    ),
+    visitorsYesterday: distinctCount(rows, (row) =>
+      inBounds(row.visited_at, previousFrom, previousTo),
+    ),
+    visitors7d: bounds
+      ? distinctCount(rows, (row) => inBounds(row.visited_at, periodFrom, periodTo))
+      : distinctCount(rows, (row) => new Date(row.visited_at) >= start7d),
+    visitsToday: bounds
+      ? periodSessions.size
+      : new Set(
+          rows
+            .filter((row) => new Date(row.visited_at) >= today)
+            .map((row) => row.session_id),
+        ).size,
+    sources30d: topByVisitor(sourceRows, (row) => row.source || "direct", 8).map(
+      (item) => ({
+        key: item.key,
+        visitors: item.visitors,
+      }),
+    ),
+    countries30d: topByVisitor(sourceRows, (row) => row.country, 8).map((item) => ({
       country: item.key,
       visitors: item.visitors,
     })),
   };
+}
+
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
 }

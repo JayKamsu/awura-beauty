@@ -67,8 +67,28 @@ export type AdminDashboardTopProduct = {
 
 export type { AdminVisitCountry, AdminVisitSource, AdminVisitStats };
 
-/** KPIs du dashboard admin : commandes/CA sur différentes fenêtres, hors paniers abandonnés jamais payés. */
+/** Fenêtre d'analyse du dashboard, bornes inclusives au format YYYY-MM-DD. */
+export type DashboardWindow = {
+  from: Date;
+  toExclusive: Date;
+  previousFrom: Date;
+  previousToExclusive: Date;
+  fromKey: string;
+  toKey: string;
+  previousFromKey: string;
+  previousToKey: string;
+};
+
+/**
+ * KPIs du dashboard admin sur la période choisie, comparés à la période
+ * précédente de même durée. Les paniers abandonnés jamais payés sont exclus.
+ * Les champs *Today / *30d portent les totaux de la période sélectionnée.
+ */
 export type AdminDashboardStats = {
+  rangeFrom: string;
+  rangeTo: string;
+  previousFrom: string;
+  previousTo: string;
   ordersToday: number;
   revenueToday: number;
   ordersYesterday: number;
@@ -93,20 +113,91 @@ export type AdminDashboardStats = {
   countries30d: AdminVisitCountry[];
 };
 
+const MAX_RANGE_DAYS = 366;
+
 function startOfToday() {
   const date = new Date();
   date.setHours(0, 0, 0, 0);
   return date;
 }
 
-function daysAgo(n: number) {
-  const date = startOfToday();
-  date.setDate(date.getDate() - n);
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function formatDay(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseDay(value: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+  date.setHours(0, 0, 0, 0);
   return date;
 }
 
-function dateKey(iso: string) {
-  return iso.slice(0, 10);
+function dayCount(from: Date, toExclusive: Date) {
+  let count = 0;
+  for (let cursor = new Date(from); cursor < toExclusive; cursor = addDays(cursor, 1)) {
+    count += 1;
+    if (count > MAX_RANGE_DAYS + 1) break;
+  }
+  return count;
+}
+
+/**
+ * Résout la période du dashboard. Sans dates : 30 derniers jours inclus.
+ * `from` et `to` sont inclusifs (YYYY-MM-DD).
+ */
+export function resolveDashboardWindow(
+  fromRaw?: string | null,
+  toRaw?: string | null,
+): { window: DashboardWindow } | { error: string } {
+  const today = startOfToday();
+  const hasFrom = Boolean(fromRaw);
+  const hasTo = Boolean(toRaw);
+  if (hasFrom !== hasTo) return { error: "invalid_range" };
+
+  const toInclusive = hasTo ? parseDay(toRaw!) : today;
+  const from = hasFrom ? parseDay(fromRaw!) : addDays(today, -29);
+  if (!from || !toInclusive) return { error: "invalid_range" };
+  if (from > toInclusive || toInclusive > today) return { error: "invalid_range" };
+
+  const toExclusive = addDays(toInclusive, 1);
+  const days = dayCount(from, toExclusive);
+  if (days < 1 || days > MAX_RANGE_DAYS) return { error: "invalid_range" };
+
+  const previousFrom = addDays(from, -days);
+  return {
+    window: {
+      from,
+      toExclusive,
+      previousFrom,
+      previousToExclusive: from,
+      fromKey: formatDay(from),
+      toKey: formatDay(toInclusive),
+      previousFromKey: formatDay(previousFrom),
+      previousToKey: formatDay(addDays(from, -1)),
+    },
+  };
+}
+
+function inWindow(iso: string, from: Date, toExclusive: Date) {
+  const created = new Date(iso);
+  return created >= from && created < toExclusive;
 }
 
 function sumTotal(orders: OrderRow[]) {
@@ -133,51 +224,42 @@ function mostFrequent<T extends string>(values: T[]): T | null {
 /** Calcule les statistiques du dashboard admin (CA, commandes, top produits...) en excluant les paniers jamais payés. */
 export async function getAdminDashboardStats(
   lowStockThreshold = 5,
+  window?: DashboardWindow,
 ): Promise<AdminDashboardStats> {
+  const fallback = resolveDashboardWindow();
+  if ("error" in fallback) {
+    throw new Error(fallback.error);
+  }
+  const resolved = window ?? fallback.window;
   const [allOrders, products, visitStats] = await Promise.all([
     listAllOrders(),
     adminListProducts(),
-    getSiteVisitStats(),
+    getSiteVisitStats(resolved),
   ]);
   // Paniers abandonnés (jamais payés) : hors KPI, ils ne sont pas des ventes ni de vraies commandes à traiter.
   const orders = allOrders.filter((order) => !isAbandonedPendingOrder(order));
 
-  const today = startOfToday();
-  const yesterday = daysAgo(1);
-  const startOfWeek = daysAgo(7);
-  const startOfPreviousWeek = daysAgo(14);
-  const start30d = daysAgo(30);
-  const start14d = daysAgo(14);
-
-  const todaysOrders = orders.filter(
-    (order) => new Date(order.created_at) >= today,
+  const periodOrders = orders.filter((order) =>
+    inWindow(order.created_at, resolved.from, resolved.toExclusive),
   );
-  const yesterdaysOrders = orders.filter((order) => {
-    const created = new Date(order.created_at);
-    return created >= yesterday && created < today;
-  });
-  const thisWeekOrders = orders.filter(
-    (order) => new Date(order.created_at) >= startOfWeek,
+  const previousOrders = orders.filter((order) =>
+    inWindow(order.created_at, resolved.previousFrom, resolved.previousToExclusive),
   );
-  const previousWeekOrders = orders.filter((order) => {
-    const created = new Date(order.created_at);
-    return created >= startOfPreviousWeek && created < startOfWeek;
-  });
-  const orders30d = orders.filter(
-    (order) => new Date(order.created_at) >= start30d,
-  );
-  const paid30d = orders30d.filter(
+  const paidPeriod = periodOrders.filter(
     (order) => paymentBadgeStatus(order) === "paid",
   );
 
   const dailyBuckets = new Map<string, AdminDashboardDailyPoint>();
-  for (let i = 13; i >= 0; i--) {
-    const key = dateKey(daysAgo(i).toISOString());
+  for (
+    let cursor = new Date(resolved.from);
+    cursor < resolved.toExclusive;
+    cursor = addDays(cursor, 1)
+  ) {
+    const key = formatDay(cursor);
     dailyBuckets.set(key, { date: key, revenue: 0, orders: 0 });
   }
-  for (const order of orders) {
-    if (new Date(order.created_at) < start14d) continue;
-    const key = dateKey(order.created_at);
+  for (const order of periodOrders) {
+    const key = formatDay(new Date(order.created_at));
     const bucket = dailyBuckets.get(key);
     if (!bucket) continue;
     bucket.orders += 1;
@@ -195,13 +277,13 @@ export async function getAdminDashboardStats(
     paypal: 0,
     manual: 0,
   };
-  for (const order of orders30d) {
+  for (const order of periodOrders) {
     statusBreakdown30d[paymentBadgeStatus(order)] += 1;
     methodBreakdown30d[order.payment_method] += 1;
   }
 
   const productTotals = new Map<string, AdminDashboardTopProduct>();
-  for (const order of paid30d) {
+  for (const order of paidPeriod) {
     for (const item of order.items) {
       const entry = productTotals.get(item.product_id) ?? {
         productId: item.product_id,
@@ -218,25 +300,32 @@ export async function getAdminDashboardStats(
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 5);
 
+  const periodRevenue = sumTotal(periodOrders);
+  const previousRevenue = sumTotal(previousOrders);
+
   return {
-    ordersToday: todaysOrders.length,
-    revenueToday: sumTotal(todaysOrders),
-    ordersYesterday: yesterdaysOrders.length,
-    revenueYesterday: sumTotal(yesterdaysOrders),
-    ordersThisWeek: thisWeekOrders.length,
-    revenueThisWeek: sumTotal(thisWeekOrders),
-    ordersPreviousWeek: previousWeekOrders.length,
-    revenuePreviousWeek: sumTotal(previousWeekOrders),
-    averageOrderValue30d: orders30d.length
-      ? sumTotal(orders30d) / orders30d.length
+    rangeFrom: resolved.fromKey,
+    rangeTo: resolved.toKey,
+    previousFrom: resolved.previousFromKey,
+    previousTo: resolved.previousToKey,
+    ordersToday: periodOrders.length,
+    revenueToday: periodRevenue,
+    ordersYesterday: previousOrders.length,
+    revenueYesterday: previousRevenue,
+    ordersThisWeek: periodOrders.length,
+    revenueThisWeek: periodRevenue,
+    ordersPreviousWeek: previousOrders.length,
+    revenuePreviousWeek: previousRevenue,
+    averageOrderValue30d: periodOrders.length
+      ? periodRevenue / periodOrders.length
       : 0,
-    paidConversionRate30d: orders30d.length
-      ? paid30d.length / orders30d.length
+    paidConversionRate30d: periodOrders.length
+      ? paidPeriod.length / periodOrders.length
       : 0,
     lowStockProducts: products.filter(
       (product) => product.stock <= lowStockThreshold,
     ),
-    recentOrders: orders.slice(0, 5),
+    recentOrders: periodOrders.slice(0, 5),
     dailySeries14d: [...dailyBuckets.values()],
     statusBreakdown30d,
     methodBreakdown30d,

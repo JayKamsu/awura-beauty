@@ -1,4 +1,8 @@
-import { formatProductNameWithColor, resolveLineColor } from "@/lib/domain/product-color";
+import {
+  formatProductNameWithColor,
+  resolveLineColor,
+  stockForColor,
+} from "@/lib/domain/product-color";
 import { getBundleComponents } from "@/lib/infrastructure/supabase/bundles";
 import { getProductsBySlugs } from "@/lib/infrastructure/supabase/products";
 import type { OrderItem } from "@/lib/infrastructure/supabase/order-types";
@@ -89,9 +93,17 @@ export async function resolveOrderItemsFromCatalog(
     componentsByBundleId.set(product.id, await getBundleComponents(product.id));
   }
 
-  const qtyBySlug = new Map<string, number>();
+  const neededByLine = new Map<string, number>();
   for (const line of normalized) {
-    qtyBySlug.set(line.slug, (qtyBySlug.get(line.slug) ?? 0) + line.quantity);
+    const product = bySlug.get(line.slug);
+    const color = product
+      ? resolveLineColor(product.color_variants, line.colorKey)
+      : null;
+    const colorKey = color?.ok ? color.colorKey : null;
+    const tracked =
+      Boolean(product && colorKey && product.color_stock?.[colorKey] !== undefined);
+    const key = tracked ? `${line.slug}::${colorKey}` : `${line.slug}::`;
+    neededByLine.set(key, (neededByLine.get(key) ?? 0) + line.quantity);
   }
 
   const items: OrderItem[] = [];
@@ -120,7 +132,13 @@ export async function resolveOrderItemsFromCatalog(
       };
     }
 
-    const needed = qtyBySlug.get(line.slug) ?? line.quantity;
+    const trackedColor =
+      color.colorKey !== null &&
+      product.color_stock?.[color.colorKey] !== undefined;
+    const needed =
+      neededByLine.get(
+        trackedColor ? `${line.slug}::${color.colorKey}` : `${line.slug}::`,
+      ) ?? line.quantity;
 
     if (product.is_bundle) {
       const components = componentsByBundleId.get(product.id) ?? [];
@@ -146,7 +164,7 @@ export async function resolveOrderItemsFromCatalog(
           };
         }
       }
-    } else if (product.stock < needed) {
+    } else if ((trackedColor ? stockForColor(product, color.colorKey) : product.stock) < needed) {
       return {
         items: [],
         subtotal: 0,

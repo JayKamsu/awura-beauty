@@ -19,6 +19,7 @@ import { GAMME_COMPLETE_SLUG } from "@/lib/domain/bundle";
 import {
   parseProductColorKey,
   resolveProductImageForColor,
+  stockForColor,
   type ProductColorKey,
 } from "@/lib/domain/product-color";
 import type { ProductReviewSummary } from "@/lib/infrastructure/supabase/order-reviews";
@@ -81,9 +82,12 @@ export function ProductShowcase({
         {
           src: featuredSrc,
           alt: `${product.name} — ${t(`shop.colors.${selectedColor}`)}`,
-          labelKey: featuredSrc !== product.image_url ? "shop.galleryColor" : "shop.galleryProduct",
+          labelKey:
+            featuredSrc !== product.image_url
+              ? "shop.galleryColor"
+              : "shop.galleryProduct",
         },
-        ...images,
+        ...images.filter((image, index) => index > 0 && image.src !== featuredSrc),
       ]
     : images;
 
@@ -115,8 +119,15 @@ export function ProductPurchasePanel({
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
-  const lowStock = product.stock > 0 && product.stock <= 5;
-  const outOfStock = product.stock <= 0;
+  const available = selectedColor
+    ? stockForColor(product, selectedColor)
+    : product.stock;
+  const lowStock = available > 0 && available <= 5;
+  const outOfStock = available <= 0;
+
+  useEffect(() => {
+    setQuantity((current) => Math.min(current, Math.max(available, 1)));
+  }, [available]);
   const categoryKey = `shop.categories.${product.category}`;
   const isBundle = product.is_bundle;
   const isFlagshipGamme = product.slug === GAMME_COMPLETE_SLUG;
@@ -149,7 +160,7 @@ export function ProductPurchasePanel({
 
   const decrease = () => setQuantity((q) => Math.max(1, q - 1));
   const increase = () =>
-    setQuantity((q) => Math.min(Math.max(product.stock, 1), q + 1));
+    setQuantity((q) => Math.min(Math.max(available, 1), q + 1));
 
   return (
     <div className="space-y-8 lg:sticky lg:top-28">
@@ -225,10 +236,22 @@ export function ProductPurchasePanel({
           }`}
         >
           {outOfStock
-            ? t("shop.outOfStock")
+            ? selectedColor
+              ? t("shop.colorOutOfStock", {
+                  color: t(`shop.colors.${selectedColor}`),
+                })
+              : t("shop.outOfStock")
             : lowStock
-              ? t("shop.lowStock", { count: product.stock })
-              : t("shop.inStock")}
+              ? t("shop.lowStock", {
+                  count: available,
+                  color: selectedColor ? t(`shop.colors.${selectedColor}`) : "",
+                })
+              : selectedColor
+                ? t("shop.colorInStock", {
+                    color: t(`shop.colors.${selectedColor}`),
+                    count: available,
+                  })
+                : t("shop.inStock")}
         </p>
 
         {colorKeys.length ? (
@@ -251,15 +274,23 @@ export function ProductPurchasePanel({
             >
               {colorKeys.map((key) => {
                 const selected = selectedColor === key;
+                const colorAvailable = stockForColor(product, key);
+                const colorLabel = t(`shop.colors.${key}`);
                 return (
                   <button
                     key={key}
                     type="button"
                     role="radio"
                     aria-checked={selected}
-                    aria-label={t(`shop.colors.${key}`)}
+                    aria-label={
+                      colorAvailable <= 0
+                        ? `${colorLabel} — ${t("shop.outOfStock")}`
+                        : colorLabel
+                    }
                     onClick={() => onSelectedColorChange(key)}
-                    className="rounded-full transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                    className={`rounded-full transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+                      colorAvailable <= 0 ? "opacity-40" : ""
+                    }`}
                   >
                     <ProductColorSwatch colorKey={key} selected={selected} />
                   </button>
@@ -292,7 +323,7 @@ export function ProductPurchasePanel({
             <button
               type="button"
               onClick={increase}
-              disabled={outOfStock || quantity >= product.stock}
+              disabled={outOfStock || quantity >= available}
               className="flex size-11 items-center justify-center text-primary transition hover:bg-background-alt disabled:opacity-40"
               aria-label={t("shop.quantityIncrease")}
             >
@@ -348,6 +379,12 @@ export function ProductPurchasePanel({
         {reviewSummary ? (
           <ProductReviewsCarousel summary={reviewSummary} />
         ) : null}
+        <a
+          href="#avis-produit"
+          className="inline-flex text-sm font-medium text-accent underline-offset-4 hover:underline"
+        >
+          {t("shop.reviewWrite")}
+        </a>
       </div>
 
       <ul className="space-y-3 border-t border-border pt-8 text-sm text-muted">

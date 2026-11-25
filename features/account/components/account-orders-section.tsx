@@ -279,7 +279,7 @@ export function AccountOrdersSection({
                         status={order.shipping_status}
                         carrier={order.shipping_carrier}
                       />
-                      {order.tracking_number ? (
+                      {order.shipping_status === "cancelled" ? null : order.tracking_number ? (
                         <p className="mt-4 text-sm text-muted">
                           {t("account.trackingNumber")} :{" "}
                           <span className="text-primary">
@@ -291,7 +291,8 @@ export function AccountOrdersSection({
                           {t("account.trackingPending")}
                         </p>
                       )}
-                      {order.shipping_carrier &&
+                      {order.shipping_status !== "cancelled" &&
+                      order.shipping_carrier &&
                       order.shipping_carrier !== "pickup" ? (
                         <div className="mt-3 flex flex-wrap gap-3">
                           <Button

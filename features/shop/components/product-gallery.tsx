@@ -12,6 +12,7 @@ export type GalleryImage = {
     | "shop.galleryProduct"
     | "shop.galleryIngredients"
     | "shop.galleryLifestyle"
+    | "shop.galleryDetail"
     | "shop.galleryColor";
 };
 

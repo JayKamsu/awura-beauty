@@ -76,7 +76,8 @@
         "preparing": "En préparation",
         "shipped": "Expédiée",
         "in_transit": "En transit",
-        "delivered": "Livrée"
+        "delivered": "Livrée",
+        "cancelled": "Annulée"
       }
     },
     "carrier": "Transporteur",

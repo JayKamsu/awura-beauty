@@ -1,9 +1,11 @@
-/* Service worker FCM — handlers push/notification au top-level (exigence Chrome). */
+/* Service worker FCM — handlers push/notification au top-level (exigence Chrome).
+   Version alignée sur le SDK client (package.json : firebase 12.17.1). */
+const SW_VERSION = "2026-11-25-2";
 importScripts(
-  "https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js",
+  "https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js",
 );
 importScripts(
-  "https://www.gstatic.com/firebasejs/11.10.0/firebase-messaging-compat.js",
+  "https://www.gstatic.com/firebasejs/12.17.1/firebase-messaging-compat.js",
 );
 
 self.addEventListener("install", () => self.skipWaiting());
@@ -11,21 +13,33 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
+let messagingReady = false;
+
+function notificationLink(notification) {
+  const data = notification.data || {};
+  if (typeof data.link === "string" && data.link) return data.link;
+  const fcmData = data.FCM_MSG && data.FCM_MSG.data;
+  if (fcmData && typeof fcmData.link === "string" && fcmData.link) {
+    return fcmData.link;
+  }
+  return "/";
+}
+
 function showPushNotification(payload) {
   const notification = payload.notification || {};
   const data = payload.data || {};
   const title = notification.title || data.title || "Awura Beauty";
   const link = data.link || "/";
-  const options = {
+  return self.registration.showNotification(title, {
     body: notification.body || data.body || "",
-    icon: "/favicon.png",
+    icon: "/icon",
     data: { ...data, link },
-  };
-  return self.registration.showNotification(title, options);
+  });
 }
 
-/** Doit être enregistré dès l’évaluation initiale du script. */
+/** Filet de sécurité tant que Firebase Messaging n'est pas initialisé. */
 self.addEventListener("push", (event) => {
+  if (messagingReady) return;
   let payload = {};
   try {
     payload = event.data ? event.data.json() : {};
@@ -37,14 +51,15 @@ self.addEventListener("push", (event) => {
   event.waitUntil(showPushNotification(payload));
 });
 
-self.addEventListener("pushsubscriptionchange", () => {
-  // Renouvellement géré côté client (use-push-subscription).
-});
-
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const raw = event.notification.data?.link || "/";
-  const targetUrl = new URL(raw, self.location.origin).href;
+  if (typeof event.stopImmediatePropagation === "function") {
+    event.stopImmediatePropagation();
+  }
+  const targetUrl = new URL(
+    notificationLink(event.notification),
+    self.location.origin,
+  ).href;
 
   event.waitUntil(
     self.clients
@@ -74,15 +89,20 @@ self.addEventListener("notificationclick", (event) => {
 });
 
 function initMessaging(config) {
-  if (!config?.apiKey) return;
+  if (!config?.apiKey || typeof firebase === "undefined") return false;
   if (!firebase.apps.length) {
     firebase.initializeApp(config);
   }
-  // Initialise FCM sans onBackgroundMessage (push déjà géré au top-level).
   try {
-    firebase.messaging();
+    const messaging = firebase.messaging();
+    if (!self.__awuraBgBound) {
+      self.__awuraBgBound = true;
+      messaging.onBackgroundMessage((payload) => showPushNotification(payload));
+    }
+    messagingReady = true;
+    return true;
   } catch {
-    // ignore
+    return false;
   }
 }
 
@@ -92,10 +112,20 @@ fetch(self.location.origin + "/api/push/firebase-config")
   .catch(() => undefined);
 
 self.addEventListener("message", (event) => {
+  if (event.data?.type === "SW_VERSION") {
+    event.source?.postMessage({ type: "SW_VERSION", version: SW_VERSION });
+    return;
+  }
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+    return;
+  }
   if (event.data?.type === "FIREBASE_CONFIG" && event.data.config) {
-    initMessaging(event.data.config);
+    const ready = initMessaging(event.data.config);
     if (event.ports && event.ports[0]) {
-      event.ports[0].postMessage({ type: "FIREBASE_READY" });
+      event.ports[0].postMessage({
+        type: ready ? "FIREBASE_READY" : "FIREBASE_FAILED",
+      });
     }
   }
 });

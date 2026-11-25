@@ -56,9 +56,7 @@ export function ProductColorSwatch({
       aria-hidden
     >
       <span
-        className={`size-full rounded-full ${PRODUCT_COLOR_SWATCH_CLASS[colorKey]} ${
-          colorKey === "noir" ? "ring-1 ring-inset ring-border" : ""
-        }`}
+        className={`size-full rounded-full border border-border ${PRODUCT_COLOR_SWATCH_CLASS[colorKey]}`}
       />
     </span>
   );

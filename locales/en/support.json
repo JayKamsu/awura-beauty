@@ -19,6 +19,8 @@
       "enabled": "Notifications enabled",
       "enabling": "Enabling…",
       "enableError": "Could not enable notifications. Try again, or check that the site uses HTTPS and notifications are not blocked.",
+      "localHint": "Payment, shipping, and refund alerts appear while this page is open. To receive them when the site is closed, open Awura Beauty in Chrome or Safari.",
+      "localOk": "Got it",
       "later": "Later",
       "guestHint": "You can subscribe without an account.",
       "blocked": "Notifications blocked",

@@ -16,13 +16,17 @@ const METHODS = ["stripe", "paypal"] as const;
 export function AccountPaymentsSection() {
   const { t } = useTranslation();
   const { locked: pending, run } = useActionLock();
-  const { permission, enabled, configured, enable } = usePushSubscription();
+  const { permission, enabled, mode, configured, enable } = usePushSubscription();
   const [errorKey, setErrorKey] = useState<"blocked" | "failed" | null>(null);
 
   const onEnablePush = () => {
+    const permissionPromise =
+      typeof Notification === "undefined"
+        ? Promise.resolve("denied" as NotificationPermission)
+        : Notification.requestPermission();
     void run(async () => {
       setErrorKey(null);
-      const result = await enable();
+      const result = await enable(permissionPromise);
       if (result.ok) return;
       if (result.reason === "blocked") setErrorKey("blocked");
       else if (result.reason !== "unsupported") setErrorKey("failed");
@@ -66,9 +70,12 @@ export function AccountPaymentsSection() {
             {t("account.payments.pushUnavailable")}
           </p>
         ) : enabled || permission === "granted" ? (
-          <p className="text-sm text-primary" role="status">
-            {t("support.push.enabled")}
-          </p>
+          <div className="space-y-1" role="status">
+            <p className="text-sm text-primary">{t("support.push.enabled")}</p>
+            {mode === "local" ? (
+              <p className="text-sm text-muted">{t("support.push.localHint")}</p>
+            ) : null}
+          </div>
         ) : permission === "denied" ? (
           <div className="space-y-1 text-sm">
             <p className="text-accent">{t("support.push.blockedTitle")}</p>

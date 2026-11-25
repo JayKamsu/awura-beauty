@@ -45,6 +45,53 @@ function countryLabel(code: string, locale: string, unknown: string) {
   }
 }
 
+type DashboardPreset = "today" | "7d" | "30d" | "90d" | "month" | "custom";
+
+const PRESETS: DashboardPreset[] = ["today", "7d", "30d", "90d", "month", "custom"];
+
+function formatDay(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function shiftDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function todayKey() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
+function rangeForPreset(preset: Exclude<DashboardPreset, "custom">) {
+  const today = todayKey();
+  const to = formatDay(today);
+  if (preset === "today") return { from: to, to };
+  if (preset === "7d") return { from: formatDay(shiftDays(today, -6)), to };
+  if (preset === "90d") return { from: formatDay(shiftDays(today, -89)), to };
+  if (preset === "month") {
+    return {
+      from: formatDay(new Date(today.getFullYear(), today.getMonth(), 1)),
+      to,
+    };
+  }
+  return { from: formatDay(shiftDays(today, -29)), to };
+}
+
+function formatRangeDay(iso: string, locale: string) {
+  const [year, month, day] = iso.split("-").map(Number);
+  return new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(year, month - 1, day));
+}
+
 function deltaFrom(current: number, previous: number) {
   if (previous === 0) return current === 0 ? 0 : null;
   return (current - previous) / previous;
@@ -94,20 +141,34 @@ export function AdminDashboardPanel() {
   const { t, i18n } = useTranslation();
   const { currency } = usePreferences();
   const adminFetch = useAdminFetch();
+  const initialRange = rangeForPreset("30d");
+  const [preset, setPreset] = useState<DashboardPreset>("30d");
+  const [from, setFrom] = useState(initialRange.from);
+  const [to, setTo] = useState(initialRange.to);
   const [stats, setStats] = useState<AdminDashboardStats | null>(null);
   const [error, setError] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const rangeValid = Boolean(from && to && from <= to);
+  const today = formatDay(todayKey());
 
   const load = useCallback(async () => {
+    if (!from || !to || from > to) return;
+    setRefreshing(true);
     try {
-      const res = await adminFetch("/api/admin/dashboard");
+      const params = new URLSearchParams({ from, to });
+      const res = await adminFetch(`/api/admin/dashboard?${params}`, {
+        cache: "no-store",
+      });
       if (!res.ok) throw new Error("Forbidden");
       const json = (await res.json()) as AdminDashboardStats;
       setStats(json);
       setError(false);
     } catch {
       setError(true);
+    } finally {
+      setRefreshing(false);
     }
-  }, [adminFetch]);
+  }, [adminFetch, from, to]);
 
   useEffect(() => {
     void load();
@@ -115,7 +176,7 @@ export function AdminDashboardPanel() {
 
   useLiveRefresh(load, { intervalMs: 20_000 });
 
-  if (error) {
+  if (error && !stats) {
     return (
       <main className="mx-auto w-full max-w-6xl px-4 py-10 md:px-8">
         <AdminFeedback tone="error" message={t("admin.saveError")} />
@@ -132,8 +193,15 @@ export function AdminDashboardPanel() {
   }
 
   const revenueDelta = deltaFrom(stats.revenueToday, stats.revenueYesterday);
-  const ordersDelta = deltaFrom(stats.ordersThisWeek, stats.ordersPreviousWeek);
+  const ordersDelta = deltaFrom(stats.ordersToday, stats.ordersYesterday);
   const visitorsDelta = deltaFrom(stats.visitorsToday, stats.visitorsYesterday);
+  const comparison =
+    stats.previousFrom && stats.previousTo
+      ? t("admin.dashboard.comparedTo", {
+          from: formatRangeDay(stats.previousFrom, i18n.language),
+          to: formatRangeDay(stats.previousTo, i18n.language),
+        })
+      : null;
   const sourceEntries = (stats.sources30d ?? []).map((item) => ({
     key: item.key,
     label: sourceLabel(item.key, t),
@@ -156,24 +224,100 @@ export function AdminDashboardPanel() {
         subtitle={t("admin.dashboardSubtitle")}
       />
 
-      <section className="space-y-4">
+      <section className="space-y-3 rounded-2xl border border-border p-4 sm:p-5">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="font-serif text-xl text-primary">
+              {t("admin.dashboard.periodFilter")}
+            </h2>
+            {comparison ? (
+              <p className="mt-1 text-xs text-muted">{comparison}</p>
+            ) : null}
+          </div>
+          {refreshing ? (
+            <p className="text-xs text-muted">{t("admin.loading")}</p>
+          ) : null}
+        </div>
+        <div className="flex flex-wrap gap-2" role="group" aria-label={t("admin.dashboard.periodFilter")}>
+          {PRESETS.map((item) => (
+            <button
+              key={item}
+              type="button"
+              aria-pressed={preset === item}
+              onClick={() => {
+                if (item === "custom") {
+                  setPreset("custom");
+                  return;
+                }
+                const next = rangeForPreset(item);
+                setPreset(item);
+                setFrom(next.from);
+                setTo(next.to);
+              }}
+              className={`min-h-11 rounded-xl border px-3 text-sm transition ${
+                preset === item
+                  ? "border-accent bg-background-alt text-primary"
+                  : "border-border text-muted hover:border-accent hover:text-primary"
+              }`}
+            >
+              {t(`admin.dashboard.preset.${item}`)}
+            </button>
+          ))}
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 sm:max-w-xl">
+          <label className="space-y-1 text-sm">
+            <span className="text-muted">{t("admin.dashboard.from")}</span>
+            <input
+              type="date"
+              value={from}
+              max={to || today}
+              onChange={(event) => {
+                setPreset("custom");
+                setFrom(event.target.value);
+              }}
+              className="min-h-11 w-full rounded-xl border border-border bg-background px-3 text-sm text-primary"
+            />
+          </label>
+          <label className="space-y-1 text-sm">
+            <span className="text-muted">{t("admin.dashboard.to")}</span>
+            <input
+              type="date"
+              value={to}
+              min={from}
+              max={today}
+              onChange={(event) => {
+                setPreset("custom");
+                setTo(event.target.value);
+              }}
+              className="min-h-11 w-full rounded-xl border border-border bg-background px-3 text-sm text-primary"
+            />
+          </label>
+        </div>
+        {!rangeValid ? (
+          <p className="text-sm text-accent" role="alert">
+            {t("admin.dashboard.rangeInvalid")}
+          </p>
+        ) : null}
+      </section>
+
+      <section className={`space-y-4 ${refreshing ? "opacity-70" : ""}`}>
         <h2 className="font-serif text-2xl text-primary">
           {t("admin.dashboard.trafficTitle")}
         </h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <StatTile
-            label={t("admin.dashboard.visitorsToday")}
+            label={t("admin.dashboard.visitorsPeriod")}
             value={stats.visitorsToday ?? 0}
             delta={visitorsDelta}
-            deltaLabel={t("admin.dashboard.vsYesterday")}
+            deltaLabel={t("admin.dashboard.vsPreviousPeriod")}
           />
           <StatTile
-            label={t("admin.dashboard.visitsToday")}
+            label={t("admin.dashboard.visitsPeriod")}
             value={stats.visitsToday ?? 0}
           />
           <StatTile
-            label={t("admin.dashboard.visitors7d")}
-            value={stats.visitors7d ?? 0}
+            label={t("admin.dashboard.visitorsPrevious")}
+            value={stats.visitorsYesterday ?? 0}
           />
         </div>
         <div className="grid gap-6 lg:grid-cols-2">
@@ -202,19 +346,19 @@ export function AdminDashboardPanel() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile
-          label={t("admin.dashboard.revenueToday")}
+          label={t("admin.dashboard.revenuePeriod")}
           value={formatPrice(stats.revenueToday, currency, i18n.language)}
           delta={revenueDelta}
-          deltaLabel={t("admin.dashboard.vsYesterday")}
+          deltaLabel={t("admin.dashboard.vsPreviousPeriod")}
         />
         <StatTile
-          label={t("admin.dashboard.ordersToday")}
+          label={t("admin.dashboard.ordersPeriod")}
           value={stats.ordersToday}
           delta={ordersDelta}
-          deltaLabel={t("admin.dashboard.vsPreviousWeek")}
+          deltaLabel={t("admin.dashboard.vsPreviousPeriod")}
         />
         <StatTile
-          label={t("admin.dashboard.averageOrder30d")}
+          label={t("admin.dashboard.averageOrder")}
           value={formatPrice(stats.averageOrderValue30d, currency, i18n.language)}
         />
         <StatTile

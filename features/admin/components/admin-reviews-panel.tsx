@@ -34,6 +34,11 @@ export function AdminReviewsPanel() {
   const [draftRating, setDraftRating] = useState(5);
   const [draftImage, setDraftImage] = useState("");
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [reviewProductId, setReviewProductId] = useState("");
+  const [reviewAuthor, setReviewAuthor] = useState("");
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewError, setReviewError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const [reviewsRes, productsRes, testimonialsRes, siteRes, invitesRes] =
@@ -76,11 +81,23 @@ export function AdminReviewsPanel() {
       const name = (review.productId && productNameById.get(review.productId)) ?? "";
       return (
         name.toLowerCase().includes(q) ||
+        review.authorName.toLowerCase().includes(q) ||
         review.comment.toLowerCase().includes(q) ||
         (review.orderId ?? "").toLowerCase().includes(q)
       );
     });
   }, [reviews, query, productNameById]);
+
+  const groupedReviews = useMemo(() => {
+    const groups = new Map<string, OrderReviewRow[]>();
+    for (const review of filtered) {
+      const key = review.productId ?? "";
+      const list = groups.get(key) ?? [];
+      list.push(review);
+      groups.set(key, list);
+    }
+    return [...groups.entries()];
+  }, [filtered]);
 
   const uploadImage = async (file: File, targetId?: string) => {
     setUploadingId(targetId ?? "new");
@@ -142,6 +159,35 @@ export function AdminReviewsPanel() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch),
+    });
+    void load();
+  };
+
+  const saveProductReview = async () => {
+    setReviewError(null);
+    const res = await adminFetch("/api/admin/reviews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        productId: reviewProductId,
+        authorName: reviewAuthor,
+        comment: reviewComment,
+        rating: reviewRating,
+      }),
+    });
+    if (!res.ok) {
+      setReviewError(t("admin.saveError"));
+      return;
+    }
+    setReviewAuthor("");
+    setReviewComment("");
+    setReviewRating(5);
+    void load();
+  };
+
+  const removeReview = async (id: string) => {
+    await adminFetch(`/api/admin/reviews?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
     });
     void load();
   };
@@ -339,47 +385,115 @@ export function AdminReviewsPanel() {
         )}
       </section>
 
-      <AdminSearchField value={query} onChange={setQuery} />
-
-      {loading ? (
-        <p className="text-muted">{t("admin.loading")}</p>
-      ) : filtered.length === 0 ? (
-        <AdminEmptyState
-          message={
-            reviews.length === 0
-              ? t("admin.reviews.empty")
-              : t("admin.noSearchResults")
-          }
-        />
-      ) : (
-        <ul className="space-y-3">
-          {filtered.map((review) => (
-            <li
-              key={review.id}
-              className="flex flex-col gap-2 rounded-2xl border border-border p-4 text-sm sm:flex-row sm:items-start sm:justify-between"
+      <section className="space-y-4">
+        <h2 className="font-serif text-xl text-primary">
+          {t("admin.reviews.productReviewsTitle")}
+        </h2>
+        <div className="space-y-3 rounded-2xl border border-border p-4">
+          <p className="text-sm font-medium text-primary">
+            {t("admin.reviews.addProduct")}
+          </p>
+          <p className="text-sm text-muted">{t("admin.reviews.addProductHint")}</p>
+          <label className="block space-y-1 text-sm">
+            <span className="text-muted">{t("admin.reviews.chooseProduct")}</span>
+            <select
+              className={fieldClass}
+              value={reviewProductId}
+              onChange={(e) => setReviewProductId(e.target.value)}
             >
-              <div className="min-w-0 space-y-1">
-                <p className="font-medium text-primary">
-                  {(review.productId && productNameById.get(review.productId)) ??
-                    review.productId}
-                </p>
-                <RatingInput value={review.rating} onChange={() => {}} disabled />
-                <p className="text-muted">{review.comment || t("admin.reviews.noComment")}</p>
+              <option value="">{t("admin.reviews.chooseProduct")}</option>
+              {[...products]
+                .sort((a, b) => a.name.localeCompare(b.name, "fr"))
+                .map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.name}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <input
+            className={fieldClass}
+            placeholder={t("admin.reviews.authorName")}
+            value={reviewAuthor}
+            onChange={(e) => setReviewAuthor(e.target.value)}
+          />
+          <RatingInput value={reviewRating} onChange={setReviewRating} />
+          <textarea
+            className={fieldClass}
+            rows={3}
+            placeholder={t("admin.reviews.comment")}
+            value={reviewComment}
+            onChange={(e) => setReviewComment(e.target.value)}
+          />
+          {reviewError ? <p className="text-sm text-accent">{reviewError}</p> : null}
+          <Button type="button" onClick={() => void saveProductReview()}>
+            {t("admin.save")}
+          </Button>
+        </div>
+
+        <AdminSearchField value={query} onChange={setQuery} />
+
+        {loading ? (
+          <p className="text-muted">{t("admin.loading")}</p>
+        ) : filtered.length === 0 ? (
+          <AdminEmptyState
+            message={
+              reviews.length === 0
+                ? t("admin.reviews.empty")
+                : t("admin.noSearchResults")
+            }
+          />
+        ) : (
+          <div className="space-y-6">
+            {groupedReviews.map(([productId, items]) => (
+              <div key={productId || "unknown"} className="space-y-3">
+                <h3 className="font-medium text-primary">
+                  {(productId && productNameById.get(productId)) || productId}
+                </h3>
+                <ul className="space-y-3">
+                  {items.map((review) => (
+                    <li
+                      key={review.id}
+                      className="flex flex-col gap-3 rounded-2xl border border-border p-4 text-sm sm:flex-row sm:items-start sm:justify-between"
+                    >
+                      <div className="min-w-0 space-y-1">
+                        <p className="font-medium text-primary">
+                          {review.authorName || t("admin.reviews.editorial")}
+                        </p>
+                        <RatingInput value={review.rating} onChange={() => {}} disabled />
+                        <p className="text-muted">
+                          {review.comment || t("admin.reviews.noComment")}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
+                        <div className="text-right text-xs text-muted">
+                          {review.orderId ? (
+                            <p>
+                              {t("admin.reviews.colOrder")}: #{review.orderId.slice(0, 8)}
+                            </p>
+                          ) : (
+                            <p>{t("admin.reviews.editorial")}</p>
+                          )}
+                          <p>
+                            {new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
+                              dateStyle: "medium",
+                            }).format(new Date(review.createdAt))}
+                          </p>
+                        </div>
+                        <ConfirmDeleteButton
+                          label={t("admin.delete")}
+                          confirmMessage={t("admin.confirmDeleteAction")}
+                          onConfirm={() => removeReview(review.id)}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div className="shrink-0 text-right text-xs text-muted">
-                <p>
-                  {t("admin.reviews.colOrder")}: #{(review.orderId ?? "").slice(0, 8)}
-                </p>
-                <p>
-                  {new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
-                    dateStyle: "medium",
-                  }).format(new Date(review.createdAt))}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+            ))}
+          </div>
+        )}
+      </section>
 
       <section className="space-y-3 border-t border-border pt-6">
         <h2 className="font-serif text-xl text-primary">
@@ -402,12 +516,17 @@ export function AdminReviewsPanel() {
                     {testimonial.comment || t("admin.reviews.noComment")}
                   </p>
                 </div>
-                <div className="shrink-0 text-right text-xs text-muted">
-                  <p>
+                <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
+                  <p className="text-right text-xs text-muted">
                     {new Intl.DateTimeFormat(toIntlLocale(i18n.language), {
                       dateStyle: "medium",
                     }).format(new Date(testimonial.createdAt))}
                   </p>
+                  <ConfirmDeleteButton
+                    label={t("admin.delete")}
+                    confirmMessage={t("admin.confirmDeleteAction")}
+                    onConfirm={() => removeReview(testimonial.id)}
+                  />
                 </div>
               </li>
             ))}

@@ -21,6 +21,8 @@ export type PageFieldKey =
   | "subtitle"
   | "body"
   | "image_url"
+  | "image_url_2"
+  | "image_url_3"
   | "cta_label";
 
 /** Champs CMS pour une locale (valeurs vides = fallback i18n front). */
@@ -53,6 +55,8 @@ export const PAGE_FIELD_KEYS: PageFieldKey[] = [
   "subtitle",
   "body",
   "image_url",
+  "image_url_2",
+  "image_url_3",
   "cta_label",
 ];
 

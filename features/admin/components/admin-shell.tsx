@@ -1,13 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/context/auth-provider";
 import { useAdminFetch } from "@/features/admin/lib/admin-fetch";
+import {
+  markLastArea,
+  readAdminPlace,
+  saveAdminPlace,
+} from "@/features/admin/lib/admin-place";
 import { PushForegroundListener } from "@/features/notifications/components/push-foreground-listener";
 import { PushNavigateListener } from "@/features/notifications/components/push-navigate-listener";
 import { PushNotificationButton } from "@/features/notifications/components/push-notification-button";
@@ -93,11 +98,13 @@ function navTitleKey(pathname: string): string {
 export function AdminShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const pathname = usePathname();
+  const router = useRouter();
   const { user, loading, logout } = useAuth();
   const adminFetch = useAdminFetch();
   const [gate, setGate] = useState<Gate>("loading");
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const resumed = useRef(false);
   const isLoginPage = pathname === "/admin/connexion";
 
   useEffect(() => {
@@ -106,12 +113,84 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!menuOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const y = window.scrollY;
+    const body = document.body;
+    body.style.position = "fixed";
+    body.style.top = `-${y}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
     return () => {
-      document.body.style.overflow = prev;
+      body.style.position = "";
+      body.style.top = "";
+      body.style.left = "";
+      body.style.right = "";
+      body.style.width = "";
+      window.scrollTo(0, y);
     };
   }, [menuOpen]);
+
+  useEffect(() => {
+    if (isLoginPage || gate !== "ok") return;
+    markLastArea("admin");
+
+    const here = `${pathname}${window.location.search}`;
+    const place = readAdminPlace();
+    const nav = performance.getEntriesByType("navigation")[0] as
+      | PerformanceNavigationTiming
+      | undefined;
+    const coldOpen = !document.referrer || nav?.type === "reload";
+
+    if (!resumed.current) {
+      resumed.current = true;
+      if (place && place.href !== here && pathname === "/admin" && coldOpen) {
+        router.replace(place.href);
+        return;
+      }
+    }
+
+    let ignoreScroll = false;
+    let userMoved = false;
+    if (place && place.href === here && place.scrollY > 0) {
+      ignoreScroll = true;
+      window.scrollTo(0, place.scrollY);
+      window.setTimeout(() => {
+        ignoreScroll = false;
+      }, 400);
+      window.setTimeout(() => {
+        if (!userMoved) window.scrollTo(0, place.scrollY);
+      }, 250);
+    }
+
+    const save = () => {
+      if (document.body.style.position === "fixed") return;
+      saveAdminPlace(
+        `${window.location.pathname}${window.location.search}`,
+        window.scrollY,
+      );
+    };
+    save();
+
+    let timer = 0;
+    const onScroll = () => {
+      if (ignoreScroll) return;
+      userMoved = true;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(save, 150);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("pagehide", save);
+    const onHide = () => {
+      if (document.visibilityState === "hidden") save();
+    };
+    document.addEventListener("visibilitychange", onHide);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("pagehide", save);
+      document.removeEventListener("visibilitychange", onHide);
+    };
+  }, [gate, isLoginPage, pathname, router]);
 
   useEffect(() => {
     let cancelled = false;

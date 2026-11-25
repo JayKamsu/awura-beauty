@@ -36,6 +36,9 @@ export async function POST(request: Request) {
   if (!order) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
+  if (order.status === "cancelled" || order.payment_status === "cancelled") {
+    return NextResponse.json({ error: "Order is cancelled" }, { status: 409 });
+  }
 
   const shippingStatus = body.shippingStatus as ShippingStatus;
   if (shippingStatus === order.shipping_status) {

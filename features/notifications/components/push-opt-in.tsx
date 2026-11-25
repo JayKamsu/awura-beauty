@@ -16,6 +16,7 @@ export function PushOptIn() {
   const { locked: pending, run } = useActionLock();
   const { permission, configured, enable } = usePushSubscription();
   const [visible, setVisible] = useState(false);
+  const [localOnly, setLocalOnly] = useState(false);
   const [errorKey, setErrorKey] = useState<"blocked" | "failed" | null>(null);
 
   useEffect(() => {
@@ -29,10 +30,18 @@ export function PushOptIn() {
   if (!visible) return null;
 
   const onEnable = () => {
+    const permissionPromise =
+      typeof Notification === "undefined"
+        ? Promise.resolve("denied" as NotificationPermission)
+        : Notification.requestPermission();
     void run(async () => {
       setErrorKey(null);
-      const result = await enable();
+      const result = await enable(permissionPromise);
       if (result.ok) {
+        if (result.mode === "local") {
+          setLocalOnly(true);
+          return;
+        }
         setVisible(false);
         return;
       }
@@ -46,7 +55,9 @@ export function PushOptIn() {
       <p className="font-serif text-lg text-primary">
         {t("support.push.title")}
       </p>
-      <p className="mt-1 text-sm text-muted">{t("support.push.body")}</p>
+      <p className="mt-1 text-sm text-muted">
+        {localOnly ? t("support.push.localHint") : t("support.push.body")}
+      </p>
       {errorKey === "blocked" ? (
         <p className="mt-2 text-sm text-accent" role="alert">
           {t("support.push.blockedBody")}
@@ -58,20 +69,35 @@ export function PushOptIn() {
         </p>
       ) : null}
       <div className="mt-3 flex flex-wrap gap-2">
-        <Button type="button" size="md" pending={pending} onClick={onEnable}>
-          {pending ? t("support.push.enabling") : t("support.push.enable")}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="md"
-          onClick={() => {
-            localStorage.setItem(DISMISS_KEY, "1");
-            setVisible(false);
-          }}
-        >
-          {t("support.push.later")}
-        </Button>
+        {localOnly ? (
+          <Button
+            type="button"
+            size="md"
+            onClick={() => {
+              localStorage.setItem(DISMISS_KEY, "1");
+              setVisible(false);
+            }}
+          >
+            {t("support.push.localOk")}
+          </Button>
+        ) : (
+          <Button type="button" size="md" pending={pending} onClick={onEnable}>
+            {pending ? t("support.push.enabling") : t("support.push.enable")}
+          </Button>
+        )}
+        {localOnly ? null : (
+          <Button
+            type="button"
+            variant="ghost"
+            size="md"
+            onClick={() => {
+              localStorage.setItem(DISMISS_KEY, "1");
+              setVisible(false);
+            }}
+          >
+            {t("support.push.later")}
+          </Button>
+        )}
       </div>
       {user ? null : (
         <p className="mt-2 text-xs text-muted">{t("support.push.guestHint")}</p>

@@ -10,6 +10,8 @@ export type OrderReviewRow = {
   productId: string | null;
   diagnosticId: string | null;
   userId: string | null;
+  /** Prénom affiché. Vide pour un avis d'achat sans nom saisi. */
+  authorName: string;
   rating: number;
   comment: string;
   createdAt: string;
@@ -22,6 +24,7 @@ function mapReview(row: Record<string, unknown>): OrderReviewRow {
     productId: row.product_id ? String(row.product_id) : null,
     diagnosticId: row.diagnostic_id ? String(row.diagnostic_id) : null,
     userId: row.user_id ? String(row.user_id) : null,
+    authorName: String(row.author_name ?? "").trim(),
     rating: Number(row.rating ?? 0),
     comment: String(row.comment ?? ""),
     createdAt: String(row.created_at ?? new Date().toISOString()),
@@ -67,6 +70,10 @@ export type ProductReviewItem = {
   rating: number;
   comment: string;
   createdAt: string;
+  /** Prénom affiché, ou chaîne vide si l'avis d'achat n'en a pas. */
+  authorName: string;
+  /** Vrai uniquement pour un avis rattaché à une commande reçue. */
+  verified: boolean;
 };
 
 /** Note moyenne, volume d'avis et liste pour une fiche produit. */
@@ -97,6 +104,8 @@ export async function getProductReviewSummary(
       rating: row.rating,
       comment: row.comment.trim(),
       createdAt: row.createdAt,
+      authorName: row.authorName,
+      verified: Boolean(row.orderId),
     })),
   };
 }
@@ -276,4 +285,48 @@ export async function upsertOrderReview(input: {
 
   if (error || !data) return null;
   return mapReview(data as Record<string, unknown>);
+}
+
+/** Avis saisi par l'admin et publié sur la fiche d'un produit, sans commande associée. */
+export async function createAdminProductReview(input: {
+  productId: string;
+  authorName: string;
+  rating: number;
+  comment: string;
+}): Promise<OrderReviewRow | null> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("order_reviews")
+    .insert({
+      product_id: input.productId,
+      author_name: input.authorName,
+      rating: input.rating,
+      comment: input.comment,
+    })
+    .select("*")
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapReview(data as Record<string, unknown>);
+}
+
+/** Supprime un avis produit ou un témoignage diagnostic. Réservé à l'admin. */
+export async function deleteOrderReview(
+  id: string,
+): Promise<{ ok: boolean; productId: string | null }> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) return { ok: false, productId: null };
+
+  const { data, error } = await supabase
+    .from("order_reviews")
+    .delete()
+    .eq("id", id)
+    .select("product_id")
+    .maybeSingle();
+
+  if (error || !data) return { ok: false, productId: null };
+  const productId = (data as { product_id?: string | null }).product_id;
+  return { ok: true, productId: productId ? String(productId) : null };
 }

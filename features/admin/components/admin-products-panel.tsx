@@ -20,7 +20,14 @@ import {
 import { formatPrice } from "@/lib/format/price";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 import { notifyCatalogChanged } from "@/lib/application/catalog-sync";
-import { PRODUCT_COLOR_KEYS, type ProductColorImageMap, type ProductColorKey } from "@/lib/domain/product-color";
+import {
+  initialColorStock,
+  PRODUCT_COLOR_KEYS,
+  sumColorStock,
+  type ProductColorImageMap,
+  type ProductColorKey,
+  type ProductColorStockMap,
+} from "@/lib/domain/product-color";
 import type { ProductCategory } from "@/lib/infrastructure/supabase/product-categories";
 import type { ProductRow } from "@/lib/infrastructure/supabase/types";
 
@@ -50,6 +57,7 @@ const emptyForm = {
   universe: "adult" as "adult" | "child",
   color_variants: [] as ProductColorKey[],
   color_images: {} as ProductColorImageMap,
+  color_stock: {} as ProductColorStockMap,
   bundleComponents: [] as BundleComponentDraft[],
 };
 
@@ -245,6 +253,11 @@ export function AdminProductsPanel() {
       universe: product.universe === "child" ? "child" : "adult",
       color_variants: product.color_variants ?? [],
       color_images: product.color_images ?? {},
+      color_stock: initialColorStock(
+        product.color_variants ?? [],
+        product.color_stock ?? {},
+        product.stock,
+      ),
       bundleComponents,
     });
     setSlugTouched(true);
@@ -340,12 +353,15 @@ export function AdminProductsPanel() {
         is_bundle: isBundle,
         is_new: form.is_new,
         is_active: form.is_active,
-        stock: Number(form.stock),
+        stock: form.color_variants.length
+          ? sumColorStock(form.color_variants, form.color_stock)
+          : Number(form.stock),
         shipping_fee: Number(form.shipping_fee) || 0,
         qr_url: form.qr_url.trim(),
         universe: form.universe,
         color_variants: form.color_variants,
         color_images: form.color_images,
+        color_stock: form.color_stock,
       };
 
       const response = await adminFetch("/api/admin/products", {
@@ -912,7 +928,12 @@ export function AdminProductsPanel() {
                     type="number"
                     inputMode="numeric"
                     className={fieldClass}
-                    value={String(form.stock)}
+                    readOnly={form.color_variants.length > 0}
+                    value={String(
+                      form.color_variants.length
+                        ? sumColorStock(form.color_variants, form.color_stock)
+                        : form.stock,
+                    )}
                     onChange={(e) =>
                       setForm((prev) => ({
                         ...prev,
@@ -920,6 +941,11 @@ export function AdminProductsPanel() {
                       }))
                     }
                   />
+                  {form.color_variants.length > 0 ? (
+                    <span className="block text-xs text-muted">
+                      {t("admin.fields.colorStockTotalHint")}
+                    </span>
+                  ) : null}
                 </label>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -1036,7 +1062,7 @@ export function AdminProductsPanel() {
                         <label className="flex min-h-11 items-center gap-2 text-sm">
                           <input
                             type="checkbox"
-                            className="size-5"
+                            className="size-5 shrink-0"
                             checked={checked}
                             onChange={(e) =>
                               setForm((prev) => {
@@ -1050,8 +1076,30 @@ export function AdminProductsPanel() {
                                       (item) => item !== key,
                                     );
                                 const color_images = { ...prev.color_images };
-                                if (!e.target.checked) delete color_images[key];
-                                return { ...prev, color_variants, color_images };
+                                const color_stock = { ...prev.color_stock };
+                                if (e.target.checked) {
+                                  if (color_stock[key] === undefined) {
+                                    const alreadyTracked = prev.color_variants.some(
+                                      (item) => prev.color_stock[item] !== undefined,
+                                    );
+                                    color_stock[key] = alreadyTracked
+                                      ? 0
+                                      : Math.max(0, Math.floor(Number(prev.stock) || 0));
+                                  }
+                                } else {
+                                  delete color_images[key];
+                                  delete color_stock[key];
+                                }
+                                const stock = color_variants.length
+                                  ? sumColorStock(color_variants, color_stock)
+                                  : prev.stock;
+                                return {
+                                  ...prev,
+                                  color_variants,
+                                  color_images,
+                                  color_stock,
+                                  stock,
+                                };
                               })
                             }
                           />
@@ -1061,6 +1109,37 @@ export function AdminProductsPanel() {
                         </label>
                         {checked ? (
                           <div className="space-y-2 pl-7">
+                            <label className="block max-w-xs space-y-1 text-sm">
+                              <span className="text-muted">
+                                {t("admin.fields.colorStock", {
+                                  color: t(`shop.colors.${key}`),
+                                })}
+                              </span>
+                              <input
+                                type="number"
+                                inputMode="numeric"
+                                min={0}
+                                className={fieldClass}
+                                value={String(form.color_stock[key] ?? 0)}
+                                onChange={(e) => {
+                                  const quantity = Math.max(
+                                    0,
+                                    Math.floor(Number(e.target.value) || 0),
+                                  );
+                                  setForm((prev) => {
+                                    const color_stock = {
+                                      ...prev.color_stock,
+                                      [key]: quantity,
+                                    };
+                                    return {
+                                      ...prev,
+                                      color_stock,
+                                      stock: sumColorStock(prev.color_variants, color_stock),
+                                    };
+                                  });
+                                }}
+                              />
+                            </label>
                             <span className="block text-xs text-muted">
                               {t("admin.uploadColorImage", {
                                 color: t(`shop.colors.${key}`),
@@ -1221,7 +1300,10 @@ export function AdminProductsPanel() {
                   <span className="text-muted">
                     {form[field]
                       ? t("admin.replaceImage")
-                      : t(`admin.${labelKey}`)}
+                      : field === "lifestyle_image_url" &&
+                          form.product_type === "accessory"
+                        ? t("admin.uploadDetailImage")
+                        : t(`admin.${labelKey}`)}
                   </span>
                   {form[field] ? (
                     <div className="space-y-2">

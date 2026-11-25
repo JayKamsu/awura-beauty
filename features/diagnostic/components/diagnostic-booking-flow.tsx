@@ -9,6 +9,7 @@ import { DiagnosticPhotoUpload } from "@/features/diagnostic/components/diagnost
 import { DiagnosticProgress } from "@/features/diagnostic/components/diagnostic-progress";
 import {
   clearDiagnosticLead,
+  emailFromClipboard,
   leadFullName,
   readDiagnosticLead,
 } from "@/features/diagnostic/lib/lead-storage";
@@ -69,8 +70,6 @@ export function DiagnosticBookingFlow({
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [contactReady, setContactReady] = useState(false);
-  const [editingContact, setEditingContact] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingQuiz, setLoadingQuiz] = useState(true);
   const [freeEntitlements, setFreeEntitlements] = useState(0);
@@ -105,11 +104,6 @@ export function DiagnosticBookingFlow({
       setFullName(nextName);
       setEmail(nextEmail);
       setPhone(nextPhone);
-      const complete = Boolean(
-        nextName.trim() && nextEmail.trim() && nextPhone.trim(),
-      );
-      setContactReady(complete);
-      setEditingContact(!complete);
 
       const entitlementUrl = nextEmail
         ? `/api/diagnostic/entitlement?email=${encodeURIComponent(nextEmail)}`
@@ -224,7 +218,6 @@ export function DiagnosticBookingFlow({
   const goToContactOrPay = () => {
     if (!selectedSlot) return;
     setPhase("contact");
-    if (!contactReady) setEditingContact(true);
   };
 
   const persistProfileIfNeeded = async () => {
@@ -550,69 +543,55 @@ export function DiagnosticBookingFlow({
     );
   }
 
-  const showSummary = contactReady && !editingContact;
-
   return (
     <form onSubmit={onBook} className="space-y-5">
       <div className="space-y-2">
         <h2 className="font-serif text-3xl text-primary">
           {t("diagnostic.physical.contactTitle")}
         </h2>
-        {user && showSummary ? (
+        {user ? (
           <p className="text-sm text-muted">
             {t("diagnostic.physical.contactFromAccount")}
           </p>
         ) : null}
       </div>
 
-      {showSummary ? (
-        <div className="rounded-2xl border border-border/70 bg-background-alt px-4 py-4 text-sm">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="space-y-1 text-muted">
-              <p className="font-medium text-primary">{fullName}</p>
-              <p>{email}</p>
-              <p>{phone}</p>
-            </div>
-            <button
-              type="button"
-              className="text-sm text-accent hover:text-accent-light"
-              onClick={() => setEditingContact(true)}
-            >
-              {t("diagnostic.physical.editContact")}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <>
-          <TextField
-            id="diagnostic-full-name"
-            label={t("checkout.fullName")}
-            required
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            autoComplete="name"
-          />
-          <TextField
-            id="diagnostic-email"
-            label={t("checkout.email")}
-            required
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            readOnly={Boolean(user?.email)}
-          />
-          <TextField
-            id="diagnostic-phone"
-            label={t("checkout.phone")}
-            required
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            autoComplete="tel"
-          />
-        </>
-      )}
+      <TextField
+        id="diagnostic-full-name"
+        label={t("checkout.fullName")}
+        required
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+        autoComplete="name"
+      />
+      <TextField
+        id="diagnostic-email"
+        label={t("checkout.email")}
+        required
+        type="email"
+        inputMode="email"
+        autoCapitalize="off"
+        autoCorrect="off"
+        spellCheck={false}
+        value={email}
+        onChange={(e) => setEmail(emailFromClipboard(e.target.value))}
+        onPaste={(event) => {
+          const text = event.clipboardData.getData("text");
+          if (!text.trim()) return;
+          event.preventDefault();
+          setEmail(emailFromClipboard(text));
+        }}
+        autoComplete="email"
+      />
+      <TextField
+        id="diagnostic-phone"
+        label={t("checkout.phone")}
+        required
+        type="tel"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        autoComplete="tel"
+      />
 
       {!isOnline && settings.physicalLocationText ? (
         <p className="text-sm text-muted">{settings.physicalLocationText}</p>

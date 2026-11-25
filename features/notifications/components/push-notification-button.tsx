@@ -41,9 +41,12 @@ export function PushNotificationButton({
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const { session, user } = useAuth();
-  const { permission, enabled, busy, enable, configured } =
+  const { permission, enabled, mode, busy, enable, configured } =
     usePushSubscription();
   const [open, setOpen] = useState(false);
+  const [errorKey, setErrorKey] = useState<"blocked" | "failed" | null>(null);
+  const seenRef = useRef<Set<string> | null>(null);
+  const baselineReady = useRef(false);
   const [items, setItems] = useState<InboxNotification[]>([]);
   const [unread, setUnread] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -82,6 +85,42 @@ export function PushNotificationButton({
     void load();
   }, [load]);
 
+  useEffect(() => {
+    seenRef.current = null;
+    baselineReady.current = false;
+  }, [session?.access_token]);
+
+  useEffect(() => {
+    if (mode !== "local" || permission !== "granted") return;
+    if (!session?.access_token) return;
+    if (loading && items.length === 0) return;
+    if (!baselineReady.current) {
+      seenRef.current = new Set(items.map((item) => item.id));
+      baselineReady.current = true;
+      return;
+    }
+    const seen = seenRef.current ?? new Set<string>();
+    seenRef.current = seen;
+    for (const item of items) {
+      if (seen.has(item.id) || item.readAt) continue;
+      seen.add(item.id);
+      try {
+        const notification = new Notification(item.title, {
+          body: item.body,
+          icon: "/icon",
+          data: { link: item.link },
+        });
+        notification.onclick = () => {
+          notification.close();
+          window.focus();
+          if (item.link) router.push(toPath(item.link));
+        };
+      } catch {
+        /* API Notification indisponible */
+      }
+    }
+  }, [items, loading, mode, permission, router, session?.access_token]);
+
   useLiveRefresh(() => load({ silent: true }), {
     enabled: Boolean(session?.access_token),
     intervalMs: 25_000,
@@ -112,17 +151,27 @@ export function PushNotificationButton({
 
   if (!configured || permission === "unsupported") return null;
 
-  const onBellClick = async () => {
+  const onBellClick = () => {
     if (permission === "denied") {
       setOpen((value) => !value);
       return;
     }
     if (!enabled) {
-      const result = await enable();
-      if (!result.ok) {
-        setOpen(true);
-        return;
-      }
+      const permissionPromise =
+        permission === "granted" || typeof Notification === "undefined"
+          ? undefined
+          : Notification.requestPermission();
+      void (async () => {
+        setErrorKey(null);
+        const result = await enable(permissionPromise);
+        if (!result.ok) {
+          setErrorKey(result.reason === "blocked" ? "blocked" : "failed");
+          setOpen(true);
+          return;
+        }
+        setOpen((value) => !value);
+      })();
+      return;
     }
     setOpen((value) => !value);
   };
@@ -342,13 +391,34 @@ export function PushNotificationButton({
             )}
           </div>
 
+          {errorKey === "blocked" ? (
+            <p className="border-t border-border px-3 py-2 text-sm text-accent" role="alert">
+              {t("support.push.blockedBody")}
+            </p>
+          ) : null}
+          {errorKey === "failed" ? (
+            <p className="border-t border-border px-3 py-2 text-sm text-accent" role="alert">
+              {t("support.push.enableError")}
+            </p>
+          ) : null}
+          {mode === "local" ? (
+            <p className="border-t border-border px-3 py-2 text-xs text-muted">
+              {t("support.push.localHint")}
+            </p>
+          ) : null}
           {!enabled && permission === "default" ? (
             <div className="border-t border-border px-3 py-2">
               <button
                 type="button"
                 className="w-full rounded-xl bg-primary px-3 py-2 text-sm text-background"
                 disabled={busy}
-                onClick={() => void enable()}
+                onClick={() => {
+                  const permissionPromise =
+                    typeof Notification === "undefined"
+                      ? Promise.resolve("denied" as NotificationPermission)
+                      : Notification.requestPermission();
+                  void enable(permissionPromise);
+                }}
               >
                 {busy ? t("support.push.enabling") : t("support.push.enable")}
               </button>

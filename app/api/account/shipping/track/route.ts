@@ -3,7 +3,10 @@ import { notifyShippingStatusChange } from "@/lib/application/notifications/orde
 import { container } from "@/lib/application/container";
 import { getUserFromAccessToken } from "@/lib/infrastructure/supabase/admin-auth";
 import { createAdminSupabaseClient } from "@/lib/infrastructure/supabase/client";
-import type { OrderRow } from "@/lib/infrastructure/supabase/order-types";
+import {
+  resolveShippingStatus,
+  type OrderRow,
+} from "@/lib/infrastructure/supabase/order-types";
 import { getSignedLabelUrl } from "@/lib/infrastructure/supabase/storage";
 
 async function resolveLabelPreviewUrl(order: OrderRow): Promise<string | null> {
@@ -30,8 +33,12 @@ async function getOrderForAccount(orderId: string): Promise<OrderRow | null> {
       status: data.status as OrderRow["status"],
       payment_method: data.payment_method as OrderRow["payment_method"],
       payment_status: String(data.payment_status ?? "pending"),
-      shipping_status:
-        (data.shipping_status as OrderRow["shipping_status"]) ?? "preparing",
+      shipping_status: resolveShippingStatus({
+        status: data.status as OrderRow["status"],
+        payment_status: String(data.payment_status ?? "pending"),
+        shipping_status:
+          (data.shipping_status as OrderRow["shipping_status"]) ?? "preparing",
+      }),
       shipping_carrier:
         (data.shipping_carrier as OrderRow["shipping_carrier"]) ?? null,
       tracking_number: data.tracking_number
@@ -92,6 +99,21 @@ export async function GET(request: Request) {
 
   if (!ownsOrder) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  if (
+    order.status === "cancelled" ||
+    order.payment_status === "cancelled" ||
+    order.shipping_status === "cancelled"
+  ) {
+    return NextResponse.json({
+      orderId: order.id,
+      shippingStatus: "cancelled",
+      statusLabel: "Annulée",
+      trackingNumber: order.tracking_number,
+      carrier: order.shipping_carrier,
+      events: [],
+    });
   }
 
   if (!order.tracking_number || !order.shipping_carrier) {

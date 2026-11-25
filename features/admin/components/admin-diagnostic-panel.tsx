@@ -431,6 +431,87 @@ function formatDateTime(locale: string, iso: string) {
   }).format(new Date(iso));
 }
 
+/** Lien d'abonnement Google Agenda (organisateur + agenda Gmail fusionné). */
+function GoogleAgendaCard() {
+  const { t } = useTranslation();
+  const adminFetch = useAdminFetch();
+  const [info, setInfo] = useState<{
+    organizerEmail: string;
+    syncEmail: string;
+    subscribeUrl: string | null;
+  } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      const res = await adminFetch("/api/admin/diagnostic/calendar");
+      if (!res.ok || !active) return;
+      const json = (await res.json()) as {
+        organizerEmail?: string;
+        syncEmail?: string;
+        subscribeUrl?: string | null;
+      };
+      if (!active) return;
+      setInfo({
+        organizerEmail: json.organizerEmail ?? "",
+        syncEmail: json.syncEmail ?? "",
+        subscribeUrl: json.subscribeUrl ?? null,
+      });
+    })();
+    return () => {
+      active = false;
+    };
+  }, [adminFetch]);
+
+  if (!info) return null;
+
+  return (
+    <section className="rounded-2xl border border-border bg-background-alt p-4 text-sm">
+      <p className="font-serif text-lg text-primary">
+        {t("admin.diagnostic.googleAgendaTitle")}
+      </p>
+      <p className="mt-1 text-muted">
+        {t("admin.diagnostic.googleAgendaBody", {
+          organizer: info.organizerEmail,
+          sync: info.syncEmail,
+        })}
+      </p>
+      {info.subscribeUrl ? (
+        <>
+          <p className="mt-2 text-muted">{t("admin.diagnostic.googleAgendaHint")}</p>
+          <p className="mt-2 break-all rounded-xl bg-background px-3 py-2 text-xs text-primary">
+            {info.subscribeUrl}
+          </p>
+          <Button
+            type="button"
+            size="md"
+            variant="primary-outline"
+            className="mt-3"
+            onClick={() => {
+              const url = info.subscribeUrl;
+              if (!url) return;
+              void navigator.clipboard.writeText(url).then(
+                () => {
+                  setCopied(true);
+                  window.setTimeout(() => setCopied(false), 2000);
+                },
+                () => undefined,
+              );
+            }}
+          >
+            {copied
+              ? t("admin.diagnostic.googleAgendaCopied")
+              : t("admin.diagnostic.googleAgendaCopy")}
+          </Button>
+        </>
+      ) : (
+        <p className="mt-2 text-muted">{t("admin.diagnostic.googleAgendaUnavailable")}</p>
+      )}
+    </section>
+  );
+}
+
 /** Panneau admin du diagnostic capillaire : résultats, rendez-vous, envoi de résultat et réglages. */
 export function AdminDiagnosticPanel() {
   const { t, i18n } = useTranslation();
@@ -1055,6 +1136,7 @@ export function AdminDiagnosticPanel() {
 
       {!loading && tab === "appointments" ? (
         <div className="space-y-3">
+          <GoogleAgendaCard />
           {appointments.length === 0 ? (
             <AdminEmptyState message={t("admin.diagnostic.appointmentsEmpty")} />
           ) : (

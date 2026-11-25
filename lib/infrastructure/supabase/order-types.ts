@@ -22,7 +22,8 @@ export type ShippingStatus =
   | "preparing"
   | "shipped"
   | "in_transit"
-  | "delivered";
+  | "delivered"
+  | "cancelled";
 
 export type ShippingCarrier = "laposte" | "mondial_relay" | "pickup";
 
@@ -63,6 +64,24 @@ export type OrderRow = {
 };
 
 export type PaymentBadgeStatus = "paid" | "refunded" | "cancelled" | "pending";
+
+/**
+ * Statut livraison à afficher. Une commande annulée qui n'a jamais quitté
+ * la préparation n'est plus présentée comme un colis en cours.
+ */
+export function resolveShippingStatus(
+  order: Pick<OrderRow, "status" | "payment_status" | "shipping_status">,
+): ShippingStatus {
+  const cancelled =
+    order.status === "cancelled" || order.payment_status === "cancelled";
+  if (
+    cancelled &&
+    (order.shipping_status === "preparing" || order.shipping_status === "cancelled")
+  ) {
+    return "cancelled";
+  }
+  return order.shipping_status;
+}
 
 /**
  * Statut paiement affiché (paid/refunded/cancelled/pending), dérivé de

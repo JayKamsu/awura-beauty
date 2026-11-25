@@ -4,9 +4,10 @@ import {
   isVideoEligibleStatus,
 } from "@/lib/application/diagnostic/video";
 import { getStripeClient } from "@/lib/infrastructure/payments/stripe";
+import { notifyAppointmentBooked } from "@/lib/application/notifications/appointment-notify";
 import {
+  claimAppointmentConfirmed,
   getAppointmentById,
-  updateAppointment,
 } from "@/lib/infrastructure/supabase/diagnostic-admin";
 
 function withVideo(appointment: NonNullable<
@@ -52,14 +53,18 @@ export async function POST(request: Request) {
         metaId === appointmentId &&
         (session.payment_status === "paid" || session.status === "complete")
       ) {
-        const updated = await updateAppointment(appointmentId, {
-          status: "confirmed",
-          stripeSessionId: sessionId,
-        });
-        if (!updated) {
+        const claimed = await claimAppointmentConfirmed(
+          appointmentId,
+          sessionId,
+        );
+        const confirmed = claimed.appointment ?? appointment;
+        if (claimed.claimed && claimed.appointment) {
+          await notifyAppointmentBooked(claimed.appointment);
+        }
+        if (!claimed.appointment) {
           return NextResponse.json({ ok: false, appointment });
         }
-        return NextResponse.json({ ok: true, ...withVideo(updated) });
+        return NextResponse.json({ ok: true, ...withVideo(confirmed) });
       }
     }
   }

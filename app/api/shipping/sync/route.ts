@@ -43,9 +43,12 @@ async function handleSync(request: Request) {
   const orders = await listAllOrders();
   const trackable = orders.filter(
     (order) =>
+      order.status !== "cancelled" &&
+      order.payment_status !== "cancelled" &&
       order.tracking_number &&
       order.shipping_carrier &&
-      order.shipping_status !== "delivered",
+      order.shipping_status !== "delivered" &&
+      order.shipping_status !== "cancelled",
   );
 
   let updated = 0;

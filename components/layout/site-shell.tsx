@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  lastAreaWasAdmin,
+  markLastArea,
+  readAdminPlace,
+} from "@/features/admin/lib/admin-place";
+import { PwaUpdateListener } from "@/features/pwa/components/pwa-update-listener";
 import { SkipLink } from "@/components/a11y/skip-link";
 import { BrandSettingsProvider, useBrandSettings } from "@/components/brand/brand-settings-provider";
 import { DuafePattern } from "@/components/brand/duafe-pattern";
@@ -14,6 +20,7 @@ import { PushForegroundListener } from "@/features/notifications/components/push
 import { PushNavigateListener } from "@/features/notifications/components/push-navigate-listener";
 import { PushOptIn } from "@/features/notifications/components/push-opt-in";
 import { PwaInstallControls } from "@/features/pwa/components/pwa-install-controls";
+import { CorrelatedProductsPopup } from "@/components/layout/correlated-products-popup";
 import { CatalogLiveSync } from "@/features/shop/components/catalog-live-sync";
 import { SupportChatWidget } from "@/features/support-chat/components/support-chat-widget";
 
@@ -46,8 +53,37 @@ function ChromeTop({ children }: { children: ReactNode }) {
   return <div ref={ref}>{children}</div>;
 }
 
+function isStandaloneApp(): boolean {
+  const mq = window.matchMedia("(display-mode: standalone)").matches;
+  const ios =
+    "standalone" in navigator &&
+    Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
+  return mq || ios;
+}
+
 function PublicShell({ children }: { children: ReactNode }) {
   const { settings } = useBrandSettings();
+  const pathname = usePathname();
+  const router = useRouter();
+  const resumed = useRef(false);
+
+  useEffect(() => {
+    if (
+      !resumed.current &&
+      pathname === "/" &&
+      isStandaloneApp() &&
+      !document.referrer &&
+      lastAreaWasAdmin()
+    ) {
+      const place = readAdminPlace();
+      if (place) {
+        resumed.current = true;
+        router.replace(place.href);
+        return;
+      }
+    }
+    markLastArea("site");
+  }, [pathname, router]);
 
   return (
     <>
@@ -70,10 +106,12 @@ function PublicShell({ children }: { children: ReactNode }) {
           <MobileBottomNav />
         </div>
       </div>
+      <PwaUpdateListener />
       <PushForegroundListener />
       <PushNavigateListener />
       <PushOptIn />
       <PwaInstallControls variant="banner" />
+      <CorrelatedProductsPopup />
       <SupportChatWidget />
       <CatalogLiveSync />
       <VisitTracker />
@@ -89,6 +127,7 @@ export function SiteShell({ children }: SiteShellProps) {
   if (isAdmin) {
     return (
       <BrandSettingsProvider>
+        <PwaUpdateListener />
         <div className="flex min-h-full flex-1 flex-col">{children}</div>
       </BrandSettingsProvider>
     );

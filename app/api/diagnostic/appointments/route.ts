@@ -13,6 +13,7 @@ import {
   updateAppointment,
 } from "@/lib/infrastructure/supabase/diagnostic-admin";
 import type { DiagnosticChannel, DiagnosticPhoto } from "@/lib/domain/diagnostic";
+import { notifyAppointmentBooked } from "@/lib/application/notifications/appointment-notify";
 
 /**
  * Réserve un créneau de diagnostic capillaire (présentiel ou visio en ligne).
@@ -124,6 +125,7 @@ export async function POST(request: Request) {
         { status: 409 },
       );
     }
+    await notifyAppointmentBooked(appointment);
     return NextResponse.json({
       appointmentId: appointment.id,
       url: successPath,

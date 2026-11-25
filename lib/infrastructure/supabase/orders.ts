@@ -3,23 +3,32 @@ import {
   createSupabaseClient,
 } from "@/lib/infrastructure/supabase/client";
 import { getCurrentUserId } from "@/lib/infrastructure/supabase/auth";
-import type {
-  OrderItem,
-  OrderRow,
-  PaymentMethod,
-  ShippingCarrier,
-  ShippingStatus,
+import {
+  isAbandonedPendingOrder,
+  resolveShippingStatus,
+  type OrderItem,
+  type OrderRow,
+  type PaymentMethod,
+  type ShippingCarrier,
+  type ShippingStatus,
 } from "@/lib/infrastructure/supabase/order-types";
 
 function mapOrder(row: Record<string, unknown>): OrderRow {
+  const status = row.status as OrderRow["status"];
+  const payment_status = String(row.payment_status ?? "pending");
+  const shipping_status = resolveShippingStatus({
+    status,
+    payment_status,
+    shipping_status: (row.shipping_status as ShippingStatus) ?? "preparing",
+  });
   return {
     id: String(row.id),
     user_id: row.user_id ? String(row.user_id) : null,
     email: String(row.email ?? ""),
-    status: row.status as OrderRow["status"],
+    status,
     payment_method: row.payment_method as PaymentMethod,
-    payment_status: String(row.payment_status ?? "pending"),
-    shipping_status: (row.shipping_status as ShippingStatus) ?? "preparing",
+    payment_status,
+    shipping_status,
     shipping_carrier: (row.shipping_carrier as ShippingCarrier) ?? null,
     tracking_number: row.tracking_number ? String(row.tracking_number) : null,
     label_url: row.label_url ? String(row.label_url) : null,
@@ -136,7 +145,17 @@ export async function updateOrderPayment(
     })
     .eq("id", orderId);
 
-  return !error;
+  if (error) return false;
+
+  if (payload.status === "cancelled") {
+    await supabase
+      .from("orders")
+      .update({ shipping_status: "cancelled" })
+      .eq("id", orderId)
+      .eq("shipping_status", "preparing");
+  }
+
+  return true;
 }
 
 /**
@@ -195,6 +214,14 @@ export async function updateOrderShipping(
   const supabase = createAdminSupabaseClient();
   if (!supabase) return false;
 
+  const current = await getOrderById(orderId);
+  if (
+    current &&
+    (current.status === "cancelled" || current.payment_status === "cancelled")
+  ) {
+    return false;
+  }
+
   const { error } = await supabase
     .from("orders")
     .update({
@@ -212,7 +239,8 @@ export async function updateOrderShipping(
       ...(payload.relayPointId !== undefined
         ? { relay_point_id: payload.relayPointId }
         : {}),
-      ...(payload.shippingStatus !== "preparing"
+      ...(payload.shippingStatus !== "preparing" &&
+      payload.shippingStatus !== "cancelled"
         ? { status: "processing" }
         : {}),
     })
@@ -270,6 +298,49 @@ export async function listMyOrders(): Promise<OrderRow[]> {
 
   if (error || !data) return [];
   return data.map((row) => mapOrder(row as Record<string, unknown>));
+}
+
+/** Droit de commenter un produit : achat reçu, en attente de réception, ou aucun achat. */
+export type ProductReviewEligibility =
+  | { state: "eligible"; orderId: string }
+  | { state: "awaiting_receipt"; orderId: string }
+  | { state: "not_purchased" };
+
+/**
+ * Cherche la commande du client qui autorise un commentaire sur ce produit.
+ * Priorité à une commande déjà reçue ; sinon une commande payée en attente de confirmation.
+ */
+export async function findProductReviewEligibility(
+  userId: string,
+  productId: string,
+): Promise<ProductReviewEligibility> {
+  const supabase = createAdminSupabaseClient();
+  if (!supabase) return { state: "not_purchased" };
+
+  const { data, error } = await supabase
+    .from("orders")
+    .select("id, items, received_at, status, payment_status, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error || !data) return { state: "not_purchased" };
+
+  let awaiting: string | null = null;
+  for (const row of data) {
+    const order = mapOrder(row as Record<string, unknown>);
+    if (isAbandonedPendingOrder(order)) continue;
+    if (order.status === "cancelled" || order.status === "refunded") continue;
+    if (!order.items.some((item) => item.product_id === productId)) continue;
+    if (order.received_at) return { state: "eligible", orderId: order.id };
+    const paid =
+      order.status === "paid" ||
+      order.status === "processing" ||
+      order.payment_status === "paid";
+    if (!awaiting && paid) awaiting = order.id;
+  }
+
+  if (awaiting) return { state: "awaiting_receipt", orderId: awaiting };
+  return { state: "not_purchased" };
 }
 
 /** Liste admin — service_role obligatoire en production. */

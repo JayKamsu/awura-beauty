@@ -80,6 +80,7 @@ export async function notifyShippingStatusChange(input: OrderNotifyBase & {
   previousStatus?: ShippingStatus | null;
   pickup?: boolean;
 }): Promise<void> {
+  if (input.status === "cancelled") return;
   if (input.previousStatus && input.previousStatus === input.status) return;
 
   const pickup = Boolean(input.pickup);

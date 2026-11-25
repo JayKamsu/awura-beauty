@@ -10,7 +10,10 @@ import {
   cmsOr,
   usePageCmsFields,
 } from "@/features/cms/context/page-cms-context";
-import { writeDiagnosticLead } from "@/features/diagnostic/lib/lead-storage";
+import {
+  emailFromClipboard,
+  writeDiagnosticLead,
+} from "@/features/diagnostic/lib/lead-storage";
 import { HOME_IMAGES } from "@/features/home/data/content";
 import { useActionLock } from "@/lib/hooks/use-action-lock";
 import type { DiagnosticChannel } from "@/lib/domain/diagnostic";
@@ -30,6 +33,8 @@ export function FeatureDiagnosticSection() {
   const cms = usePageCmsFields("feature");
   const { locked: pending, run } = useActionLock();
   const leafImage = cmsOr(cms, "image_url", HOME_IMAGES.feature);
+  const circlePrimary = cmsOr(cms, "image_url_2", "/images/ingredients/ingredient-1.jpg");
+  const circleSecondary = cmsOr(cms, "image_url_3", "/images/ingredients/ingredient-3.jpg");
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -155,9 +160,19 @@ export function FeatureDiagnosticSection() {
                   <input
                     required
                     type="email"
+                    inputMode="email"
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck={false}
                     className={fieldClass}
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => setEmail(emailFromClipboard(e.target.value))}
+                    onPaste={(event) => {
+                      const text = event.clipboardData.getData("text");
+                      if (!text.trim()) return;
+                      event.preventDefault();
+                      setEmail(emailFromClipboard(text));
+                    }}
                     placeholder={t("home.diagnostic.fields.email")}
                     autoComplete="email"
                   />
@@ -277,6 +292,7 @@ export function FeatureDiagnosticSection() {
               fill
               className="object-cover object-center opacity-90"
               sizes="40vw"
+              unoptimized={leafImage.startsWith("http")}
             />
             <div className="absolute inset-0 bg-gradient-to-tr from-primary/50 via-transparent to-accent-light/20" />
           </div>
@@ -285,11 +301,12 @@ export function FeatureDiagnosticSection() {
             aria-hidden
           >
             <Image
-              src="/images/ingredients/ingredient-1.jpg"
+              src={circlePrimary}
               alt=""
               fill
               className="object-cover scale-110"
               sizes="30vw"
+              unoptimized={circlePrimary.startsWith("http")}
             />
           </div>
           <div
@@ -297,11 +314,12 @@ export function FeatureDiagnosticSection() {
             aria-hidden
           >
             <Image
-              src="/images/ingredients/ingredient-3.jpg"
+              src={circleSecondary}
               alt=""
               fill
               className="object-cover"
               sizes="25vw"
+              unoptimized={circleSecondary.startsWith("http")}
             />
           </div>
         </div>
@@ -312,11 +330,12 @@ export function FeatureDiagnosticSection() {
         aria-hidden
       >
         <Image
-          src="/images/ingredients/ingredient-1.jpg"
+          src={circlePrimary}
           alt=""
           fill
           className="rounded-full object-cover"
           sizes="160px"
+          unoptimized={circlePrimary.startsWith("http")}
         />
       </div>
     </section>

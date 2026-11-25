@@ -59,7 +59,8 @@
         "preparing": "Preparing",
         "shipped": "Shipped",
         "in_transit": "In transit",
-        "delivered": "Delivered"
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
       }
     },
     "carrier": "Carrier",

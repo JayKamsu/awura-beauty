@@ -1,6 +1,7 @@
 import { GAMME_COMPLETE_SLUG } from "@/lib/domain/bundle";
-import { parseColorImages, parseColorVariants } from "@/lib/domain/product-color";
+import { parseColorImages, parseColorStock, parseColorVariants } from "@/lib/domain/product-color";
 import { createSupabaseClient } from "@/lib/infrastructure/supabase/client";
+import { applyCatalogPhotoDefaults } from "@/lib/infrastructure/supabase/catalog-photo-defaults";
 import { FALLBACK_PRODUCTS } from "@/lib/infrastructure/supabase/fallback-products";
 import { getBundleComponents } from "@/lib/infrastructure/supabase/bundles";
 import type {
@@ -147,7 +148,7 @@ function filterFallback(params: ListProductsParams) {
 }
 
 function mapRow(row: Record<string, unknown>): ProductRow {
-  return {
+  const mapped: ProductRow = {
     id: String(row.id),
     slug: String(row.slug ?? row.id),
     name: String(row.name ?? ""),
@@ -176,8 +177,10 @@ function mapRow(row: Record<string, unknown>): ProductRow {
     universe: row.universe === "child" ? "child" : "adult",
     color_variants: parseColorVariants(row.color_variants),
     color_images: parseColorImages(row.color_images),
+    color_stock: parseColorStock(row.color_stock),
     created_at: row.created_at ? String(row.created_at) : undefined,
   };
+  return applyCatalogPhotoDefaults(mapped);
 }
 
 /** Liste paginée des produits avec filtres catégorie/univers/recherche/prix/stock/tri.

@@ -15,6 +15,18 @@ export type DiagnosticLead = {
   channel?: "online" | "physical";
 };
 
+/**
+ * Nettoie une adresse collée (espaces, saut de ligne, `mailto:`, « Nom &lt;mail&gt; »).
+ * Les champs `type="email"` refusent souvent ce collage sur téléphone.
+ */
+export function emailFromClipboard(raw: string): string {
+  const text = raw.replace(/[\u00a0\u200b\r\n]/g, " ").trim();
+  const mailto = text.match(/mailto:([^?\s]+)/i);
+  const source = (mailto?.[1] ?? text).trim();
+  const angle = source.match(/<([^<>]+)>/);
+  return (angle?.[1] ?? source).replace(/\s+/g, "");
+}
+
 /** Lit le lead diagnostic stocké en session, ou `null` si absent/corrompu. */
 export function readDiagnosticLead(): DiagnosticLead | null {
   if (typeof window === "undefined") return null;

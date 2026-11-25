@@ -5,17 +5,6 @@ import {
 } from "@/lib/infrastructure/supabase/client";
 import { createClient } from "@supabase/supabase-js";
 
-/** Conversation de support client, avec dernier message et email pour l'affichage admin. */
-export type SupportConversation = {
-  id: string;
-  user_id: string;
-  status: "open" | "closed";
-  created_at: string;
-  updated_at: string;
-  last_message?: string | null;
-  customer_email?: string | null;
-};
-
 /** Message individuel d'une conversation de support (client ou admin). */
 export type SupportMessage = {
   id: string;
@@ -24,6 +13,18 @@ export type SupportMessage = {
   sender_role: "customer" | "admin";
   body: string;
   created_at: string;
+};
+
+/** Conversation de support client, avec le fil, le dernier message et l'email pour l'admin. */
+export type SupportConversation = {
+  id: string;
+  user_id: string;
+  status: "open" | "closed";
+  created_at: string;
+  updated_at: string;
+  last_message?: string | null;
+  customer_email?: string | null;
+  messages?: SupportMessage[];
 };
 
 function mapConversation(row: Record<string, unknown>): SupportConversation {
@@ -192,7 +193,7 @@ export async function sendCustomerMessage(input: {
   return { message: mapMessage(data as Record<string, unknown>), error: null };
 }
 
-/** Liste toutes les conversations (admin), enrichies du dernier message et de l'email client. */
+/** Liste toutes les conversations (admin), avec le fil complet, le dernier message et l'email client. */
 export async function adminListConversations(): Promise<SupportConversation[]> {
   const supabase = createAdminSupabaseClient();
   if (!supabase) return [];
@@ -208,23 +209,52 @@ export async function adminListConversations(): Promise<SupportConversation[]> {
     mapConversation(row as Record<string, unknown>),
   );
 
+  const messagesByConversation = new Map<string, SupportMessage[]>();
+  const ids = conversations.map((conversation) => conversation.id);
+  if (ids.length > 0) {
+    const { data: rows, error: messagesError } = await supabase
+      .from("support_messages")
+      .select("id, conversation_id, sender_id, sender_role, body, created_at")
+      .in("conversation_id", ids)
+      .order("created_at", { ascending: true });
+
+    if (!messagesError && rows) {
+      for (const row of rows) {
+        const message = mapMessage(row as Record<string, unknown>);
+        const bucket = messagesByConversation.get(message.conversation_id) ?? [];
+        bucket.push(message);
+        messagesByConversation.set(message.conversation_id, bucket);
+      }
+    } else {
+      await Promise.all(
+        conversations.map(async (conversation) => {
+          const { data: last } = await supabase
+            .from("support_messages")
+            .select("id, conversation_id, sender_id, sender_role, body, created_at")
+            .eq("conversation_id", conversation.id)
+            .order("created_at", { ascending: true });
+          if (!last?.length) return;
+          messagesByConversation.set(
+            conversation.id,
+            last.map((row) => mapMessage(row as Record<string, unknown>)),
+          );
+        }),
+      );
+    }
+  }
+
   const enriched = await Promise.all(
     conversations.map(async (conversation) => {
-      const { data: last } = await supabase
-        .from("support_messages")
-        .select("body")
-        .eq("conversation_id", conversation.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
+      const messages = messagesByConversation.get(conversation.id) ?? [];
+      const last = messages.at(-1);
       const { data: user } = await supabase.auth.admin.getUserById(
         conversation.user_id,
       );
 
       return {
         ...conversation,
-        last_message: last ? String((last as { body: string }).body) : null,
+        messages,
+        last_message: last?.body?.trim() ? last.body : null,
         customer_email: user.user?.email ?? null,
       };
     }),

@@ -81,8 +81,14 @@ function getSnapshot() {
   return state;
 }
 
+const SERVER_SNAPSHOT: PwaInstallState = {
+  deferred: null,
+  installed: false,
+  ready: false,
+};
+
 function getServerSnapshot(): PwaInstallState {
-  return { deferred: null, installed: false, ready: false };
+  return SERVER_SNAPSHOT;
 }
 
 /**
