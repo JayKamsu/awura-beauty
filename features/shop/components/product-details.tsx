@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ProductQr } from "@/components/brand/product-qr";
 import { useBrandSettings } from "@/components/brand/brand-settings-provider";
@@ -13,6 +14,9 @@ import {
   splitParagraphs,
 } from "@/lib/format/product-copy";
 import { resolveIngredientsImageUrl } from "@/features/shop/utils/map-product";
+import { CASQUE_ROSE_DETAIL_IMAGE } from "@/lib/infrastructure/supabase/catalog-photo-defaults";
+import { firstValidColor } from "@/features/shop/components/product-purchase-panel";
+import type { ProductColorKey } from "@/lib/domain/product-color";
 import { absoluteUrl } from "@/lib/site";
 import type { BundleComponent, ProductRow } from "@/lib/infrastructure/supabase/types";
 
@@ -23,6 +27,8 @@ type ProductDetailsProps = {
   tutorialSlug: string | null;
   /** Composants inclus si ce produit est une offre promo multi-produits. */
   bundleComponents?: BundleComponent[];
+  /** Couleur ouverte avec la page (`?couleur=`). */
+  initialColor?: string | null;
 };
 
 function splitIngredients(value: string) {
@@ -69,14 +75,33 @@ export function ProductDetails({
   product,
   tutorialSlug,
   bundleComponents = [],
+  initialColor,
 }: ProductDetailsProps) {
   const { t } = useTranslation();
   const { settings } = useBrandSettings();
+  const [selectedColor, setSelectedColor] = useState<ProductColorKey | null>(
+    () => firstValidColor(product.color_variants, initialColor),
+  );
+  useEffect(() => {
+    const onColor = (event: Event) => {
+      const key = (event as CustomEvent<ProductColorKey | null>).detail ?? null;
+      setSelectedColor(key);
+    };
+    window.addEventListener("awura-product-color", onColor);
+    return () => window.removeEventListener("awura-product-color", onColor);
+  }, []);
   const ingredients = splitIngredients(product.ingredients);
   const usageSteps = splitUsageSteps(product.usage);
   const benefits = splitBenefits(product);
   const descriptionParagraphs = formatProductParagraphs(product.description);
-  const ingredientsImage = resolveIngredientsImageUrl(product);
+  const storedIngredientsImage = resolveIngredientsImageUrl(product);
+  const colorPhoto = selectedColor
+    ? product.color_images?.[selectedColor]?.trim()
+    : "";
+  const ingredientsImage =
+    product.slug === "casque-chauffant" && selectedColor === "rose-clair"
+      ? CASQUE_ROSE_DETAIL_IMAGE
+      : colorPhoto || storedIngredientsImage;
   const showComposition = ingredients.length > 0 || Boolean(ingredientsImage);
   const isAccessory = product.product_type === "accessory";
   const hasManualQrOverride = Boolean(product.qr_url?.trim());

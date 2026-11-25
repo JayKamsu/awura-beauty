@@ -120,6 +120,9 @@ export default async function ProductPage({
           product={product}
           tutorialSlug={tutorial?.slug ?? null}
           bundleComponents={bundleComponents}
+          initialColor={
+            Array.isArray(query.couleur) ? query.couleur[0] : query.couleur
+          }
         />
         <div className="mt-12 border-t border-border pt-12">
           <ProductReviewsSection

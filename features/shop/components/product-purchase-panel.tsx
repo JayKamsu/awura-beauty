@@ -6,6 +6,10 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ProductColorSwatch } from "@/components/ui/product-card";
 import { ProductGallery, type GalleryImage } from "@/features/shop/components/product-gallery";
+import {
+  CASQUE_ROSE_DETAIL_IMAGE,
+  CASQUE_ROSE_IMAGE,
+} from "@/lib/infrastructure/supabase/catalog-photo-defaults";
 import { usePreferences } from "@/components/providers/preferences-provider";
 import { useCart } from "@/features/cart/context/cart-provider";
 import { useFavorites } from "@/features/favorites/context/favorites-provider";
@@ -45,7 +49,7 @@ type ProductShowcaseProps = {
 };
 
 /** Première couleur valide : query `couleur` si elle existe, sinon la première variante. */
-function firstValidColor(
+export function firstValidColor(
   variants: ProductColorKey[],
   raw?: string | null,
 ): ProductColorKey | null {
@@ -74,22 +78,41 @@ export function ProductShowcase({
     const url = new URL(window.location.href);
     url.searchParams.set("couleur", selectedColor);
     window.history.replaceState(null, "", `${url.pathname}${url.search}`);
+    window.dispatchEvent(
+      new CustomEvent("awura-product-color", { detail: selectedColor }),
+    );
   }, [selectedColor, colorKeys.length]);
 
   const featuredSrc = resolveProductImageForColor(product, selectedColor);
-  const galleryImages: GalleryImage[] = selectedColor
-    ? [
-        {
-          src: featuredSrc,
-          alt: `${product.name} — ${t(`shop.colors.${selectedColor}`)}`,
-          labelKey:
-            featuredSrc !== product.image_url
-              ? "shop.galleryColor"
-              : "shop.galleryProduct",
-        },
-        ...images.filter((image, index) => index > 0 && image.src !== featuredSrc),
-      ]
-    : images;
+  const colorPhoto = selectedColor
+    ? product.color_images?.[selectedColor]?.trim()
+    : "";
+  const roseGallery: GalleryImage[] | null =
+    product.slug === "casque-chauffant" && selectedColor === "rose-clair"
+      ? [
+          {
+            src: CASQUE_ROSE_IMAGE,
+            alt: `${product.name} — ${t("shop.colors.rose-clair")}`,
+            labelKey: "shop.galleryColor",
+          },
+          {
+            src: CASQUE_ROSE_DETAIL_IMAGE,
+            alt: `${product.name} — ${t("shop.galleryDetail")}`,
+            labelKey: "shop.galleryDetail",
+          },
+        ]
+      : null;
+  const galleryImages: GalleryImage[] = roseGallery
+    ? roseGallery
+    : colorPhoto
+      ? [
+          {
+            src: colorPhoto,
+            alt: `${product.name} — ${t(`shop.colors.${selectedColor}`)}`,
+            labelKey: "shop.galleryColor",
+          },
+        ]
+      : images;
 
   return (
     <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
