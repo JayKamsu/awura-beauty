@@ -313,8 +313,15 @@
       "customers": "Clients",
       "reviews": "Avis",
       "notifications": "Notifications",
-      "messages": "Messages"
+      "messages": "Messages",
+      "site": "Site"
     },
+    "navGroups": {
+      "daily": "Quotidien",
+      "catalog": "Catalogue & clients",
+      "site": "Site"
+    },
+    "navTabsLabel": "Sections",
     "shippingTitle": "Tarifs de livraison",
     "shippingSubtitle": "Base Colissimo / Mondial Relay, seuil de gratuité, et retrait sur place.",
     "shippingHint": "Total livraison = frais de base + somme des frais produit (sauf retrait = 0). Si le panier atteint le seuil « Livraison offerte dès », la livraison est offerte. Ce seuil s’affiche aussi dans le bandeau en haut du site.",

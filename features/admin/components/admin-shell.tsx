@@ -17,22 +17,92 @@ import { PushForegroundListener } from "@/features/notifications/components/push
 import { PushNavigateListener } from "@/features/notifications/components/push-navigate-listener";
 import { PushNotificationButton } from "@/features/notifications/components/push-notification-button";
 
-/** Nav latérale : du plus critique (ops quotidiennes) au moins fréquent (réglages). */
-const NAV = [
-  { href: "/admin", key: "dashboard" },
-  { href: "/admin/commandes", key: "orders" },
-  { href: "/admin/messages", key: "messages" },
-  { href: "/admin/paiements", key: "payments" },
-  { href: "/admin/produits", key: "products" },
-  { href: "/admin/clients", key: "customers" },
-  { href: "/admin/avis", key: "reviews" },
-  { href: "/admin/livraison", key: "shipping" },
-  { href: "/admin/diagnostic", key: "diagnostic" },
-  { href: "/admin/pages", key: "pages" },
-  { href: "/admin/contenu", key: "content" },
-  { href: "/admin/notifications", key: "notifications" },
-  { href: "/admin/marque", key: "brand" },
-] as const;
+type NavKey =
+  | "dashboard"
+  | "orders"
+  | "payments"
+  | "shipping"
+  | "messages"
+  | "diagnostic"
+  | "products"
+  | "reviews"
+  | "customers"
+  | "notifications"
+  | "site"
+  | "pages"
+  | "content"
+  | "brand";
+
+type NavTab = { href: string; key: NavKey };
+type NavSection = { key: NavKey; tabs: readonly NavTab[] };
+type NavGroup = { key: "daily" | "catalog" | "site"; sections: readonly NavSection[] };
+
+/**
+ * Nav latérale groupée : chaque section regroupe des pages sœurs (affichées en onglets
+ * sous l'en-tête). Le lien de la section pointe vers son premier onglet.
+ */
+const NAV_GROUPS: readonly NavGroup[] = [
+  {
+    key: "daily",
+    sections: [
+      { key: "dashboard", tabs: [{ href: "/admin", key: "dashboard" }] },
+      {
+        key: "orders",
+        tabs: [
+          { href: "/admin/commandes", key: "orders" },
+          { href: "/admin/paiements", key: "payments" },
+          { href: "/admin/livraison", key: "shipping" },
+        ],
+      },
+      { key: "messages", tabs: [{ href: "/admin/messages", key: "messages" }] },
+      { key: "diagnostic", tabs: [{ href: "/admin/diagnostic", key: "diagnostic" }] },
+    ],
+  },
+  {
+    key: "catalog",
+    sections: [
+      {
+        key: "products",
+        tabs: [
+          { href: "/admin/produits", key: "products" },
+          { href: "/admin/avis", key: "reviews" },
+        ],
+      },
+      {
+        key: "customers",
+        tabs: [
+          { href: "/admin/clients", key: "customers" },
+          { href: "/admin/notifications", key: "notifications" },
+        ],
+      },
+    ],
+  },
+  {
+    key: "site",
+    sections: [
+      {
+        key: "site",
+        tabs: [
+          { href: "/admin/pages", key: "pages" },
+          { href: "/admin/contenu", key: "content" },
+          { href: "/admin/marque", key: "brand" },
+        ],
+      },
+    ],
+  },
+];
+
+const NAV_SECTIONS = NAV_GROUPS.flatMap((group) => group.sections);
+
+function tabMatches(tab: NavTab, pathname: string): boolean {
+  return tab.href === "/admin" ? pathname === "/admin" : pathname.startsWith(tab.href);
+}
+
+function findSection(pathname: string): NavSection | undefined {
+  return NAV_SECTIONS.find((section) =>
+    section.tabs.some((tab) => tabMatches(tab, pathname)),
+  );
+}
 
 /** Raccourcis barre basse mobile (le reste via le menu). */
 const MOBILE_QUICK_NAV = [
@@ -42,7 +112,7 @@ const MOBILE_QUICK_NAV = [
   { href: "/admin/diagnostic", key: "diagnostic" },
 ] as const;
 
-function NavIcon({ name }: { name: (typeof MOBILE_QUICK_NAV)[number]["key"] | "more" }) {
+function NavIcon({ name }: { name: NavKey | "more" }) {
   const common = {
     viewBox: "0 0 24 24",
     className: "size-5",
@@ -76,6 +146,26 @@ function NavIcon({ name }: { name: (typeof MOBILE_QUICK_NAV)[number]["key"] | "m
           <path d="M5 6h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-4 3v-3H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z" />
         </svg>
       );
+    case "products":
+      return (
+        <svg {...common}>
+          <path d="M9 3h6v3l2 2v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V8l2-2V3zM7 12h10" />
+        </svg>
+      );
+    case "customers":
+      return (
+        <svg {...common}>
+          <circle cx="9" cy="8.5" r="3.25" />
+          <path d="M3.5 19.5a5.5 5.5 0 0 1 11 0M16 5.5a3 3 0 0 1 0 6M17.5 14.5a5 5 0 0 1 3 5" />
+        </svg>
+      );
+    case "site":
+      return (
+        <svg {...common}>
+          <rect x="3.5" y="4.5" width="17" height="15" rx="1.5" />
+          <path d="M3.5 9h17M7 6.75h.01M9.5 6.75h.01" />
+        </svg>
+      );
     default:
       return (
         <svg {...common}>
@@ -88,10 +178,8 @@ function NavIcon({ name }: { name: (typeof MOBILE_QUICK_NAV)[number]["key"] | "m
 type Gate = "loading" | "login" | "forbidden" | "ok";
 
 function navTitleKey(pathname: string): string {
-  const match = NAV.find((item) =>
-    item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href),
-  );
-  return match ? `admin.nav.${match.key}` : "admin.navBrand";
+  const section = findSection(pathname);
+  return section ? `admin.nav.${section.key}` : "admin.navBrand";
 }
 
 /** Coquille des pages admin : vérifie les droits admin puis affiche la navigation (desktop et mobile). */
@@ -286,28 +374,38 @@ export function AdminShell({ children }: { children: ReactNode }) {
     );
   }
 
+  const currentSection = findSection(pathname);
+  const sectionTabs =
+    currentSection && currentSection.tabs.length > 1 ? currentSection.tabs : null;
+
   const navLinks = (
-    <nav className="flex flex-col gap-1" aria-label={t("admin.navLabel")}>
-      {NAV.map((item) => {
-        const active =
-          item.href === "/admin"
-            ? pathname === "/admin"
-            : pathname.startsWith(item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`rounded-xl px-3 py-2.5 text-sm transition ${
-              active
-                ? "bg-primary text-background"
-                : "text-muted hover:bg-background hover:text-primary"
-            }`}
-            onClick={() => setMenuOpen(false)}
-          >
-            {t(`admin.nav.${item.key}`)}
-          </Link>
-        );
-      })}
+    <nav className="flex flex-col gap-5" aria-label={t("admin.navLabel")}>
+      {NAV_GROUPS.map((group) => (
+        <div key={group.key} className="flex flex-col gap-1">
+          <p className="px-3 pb-1 text-[10px] uppercase tracking-[0.18em] text-muted/80">
+            {t(`admin.navGroups.${group.key}`)}
+          </p>
+          {group.sections.map((section) => {
+            const active = section === currentSection;
+            return (
+              <Link
+                key={section.key}
+                href={section.tabs[0].href}
+                aria-current={active ? "page" : undefined}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
+                  active
+                    ? "bg-primary text-background"
+                    : "text-muted hover:bg-background hover:text-primary"
+                }`}
+                onClick={() => setMenuOpen(false)}
+              >
+                <NavIcon name={section.key} />
+                {t(`admin.nav.${section.key}`)}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
     </nav>
   );
 
@@ -388,6 +486,30 @@ export function AdminShell({ children }: { children: ReactNode }) {
               </Link>
             </div>
           </div>
+          {sectionTabs ? (
+            <nav
+              aria-label={t("admin.navTabsLabel")}
+              className="-mb-px flex gap-1 overflow-x-auto px-4 lg:px-6"
+            >
+              {sectionTabs.map((tab) => {
+                const active = tabMatches(tab, pathname);
+                return (
+                  <Link
+                    key={tab.href}
+                    href={tab.href}
+                    aria-current={active ? "page" : undefined}
+                    className={`shrink-0 border-b-2 px-3 py-2.5 text-sm transition ${
+                      active
+                        ? "border-primary font-medium text-primary"
+                        : "border-transparent text-muted hover:text-primary"
+                    }`}
+                  >
+                    {t(`admin.nav.${tab.key}`)}
+                  </Link>
+                );
+              })}
+            </nav>
+          ) : null}
         </header>
 
         {menuOpen ? (
@@ -435,10 +557,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         >
           <ul className="grid grid-cols-5 gap-0.5 px-1 pt-1">
             {MOBILE_QUICK_NAV.map((item) => {
-              const active =
-                item.href === "/admin"
-                  ? pathname === "/admin"
-                  : pathname.startsWith(item.href);
+              const active = currentSection?.tabs[0].href === item.href;
               return (
                 <li key={item.href}>
                   <Link

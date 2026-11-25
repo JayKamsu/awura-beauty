@@ -305,8 +305,15 @@
       "customers": "Clientes",
       "reviews": "Opiniones",
       "notifications": "Notificaciones",
-      "messages": "Mensajes"
+      "messages": "Mensajes",
+      "site": "Sitio"
     },
+    "navGroups": {
+      "daily": "Diario",
+      "catalog": "Catálogo y clientes",
+      "site": "Sitio"
+    },
+    "navTabsLabel": "Secciones",
     "shippingTitle": "Tarifas de envío",
     "shippingSubtitle": "Base Colissimo / Mondial Relay, umbral gratis y recogida en tienda.",
     "shippingHint": "Total envío = tarifa base + suma de suplementos producto (recogida = 0). Si el carrito alcanza el umbral « Envío gratis desde », el envío es gratis. Ese umbral también aparece en la franja superior del sitio.",

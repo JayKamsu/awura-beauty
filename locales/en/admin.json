@@ -305,8 +305,15 @@
       "customers": "Customers",
       "reviews": "Reviews",
       "notifications": "Notifications",
-      "messages": "Messages"
+      "messages": "Messages",
+      "site": "Site"
     },
+    "navGroups": {
+      "daily": "Daily",
+      "catalog": "Catalog & customers",
+      "site": "Website"
+    },
+    "navTabsLabel": "Sections",
     "shippingTitle": "Shipping rates",
     "shippingSubtitle": "Colissimo / Mondial Relay base fees, free threshold, and store pickup.",
     "shippingHint": "Shipping total = base fee + sum of product fees (pickup = 0). When the cart reaches the free-shipping threshold, shipping is free. That threshold also appears in the top site banner.",
